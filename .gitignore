@@ -79,3 +79,6 @@ reports/
 .parcel-cache/
 .turbo/
 .cache/
+
+# ===== CLAUDE CONFIG =====
+.audit_session.json
