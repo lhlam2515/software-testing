@@ -1,0 +1,81 @@
+# ===== DEPENDENCIES =====
+node_modules/
+**/node_modules/
+
+# ===== BUILD OUTPUTS =====
+dist/
+build/
+**/dist/
+**/build/
+out/
+
+# ===== DATABASE =====
+*.sqlite
+*.sqlite3
+*.db
+
+# ===== ENVIRONMENT =====
+.env
+.env.local
+.env.*.local
+*.env
+
+# ===== LOGS =====
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ===== OS FILES =====
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# ===== EDITOR =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.iml
+
+# ===== EXPO / REACT NATIVE =====
+.expo/
+.expo-shared/
+*.apk
+*.ipa
+*.aab
+android/
+ios/
+
+# ===== VITE =====
+*.local
+.vite/
+
+# ===== COVERAGE & TEST ARTIFACTS =====
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+playwright/.cache/
+k6-results/
+stryker-tmp/
+reports/
+
+# ===== CACHE =====
+.npm/
+.eslintcache
+.stylelintcache
+.parcel-cache/
+.turbo/
+.cache/
