@@ -81,4 +81,4 @@ reports/
 .cache/
 
 # ===== CLAUDE CONFIG =====
-.audit_session.json
+audit_config.json

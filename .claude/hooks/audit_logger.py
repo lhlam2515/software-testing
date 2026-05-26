@@ -2,13 +2,13 @@
 """
 audit_logger.py — Claude Code Hook cho CS423/CSC13003
 =====================================================
-Xử lý 2 event: UserPromptSubmit và Stop
+Xử lý 3 event: UserPromptSubmit, PostToolUse, Stop
 
-Logic xác định log path (theo thứ tự ưu tiên):
-  1. Nếu cwd nằm trong homeworks/HW{id}/ → ghi vào cwd/prompt_log.md
-  2. Nếu cwd là project root nhưng có subfolder homeworks/HW{id} khớp
-     với requirement tag trong prompt → ghi vào đó
-  3. Fallback → ghi vào cwd/prompt_log.md
+Log path được cấu hình tại .claude/audit_config.json:
+  {"log_path": "homeworks/HW01/prompt_log.md"}
+
+Path relative to $CLAUDE_PROJECT_DIR, hoặc absolute.
+Sửa file config khi chuyển HW — không cần keyword hay cwd đúng.
 
 Yêu cầu: python3 >= 3.8, không cần thư viện ngoài
 """
@@ -22,6 +22,7 @@ from datetime import datetime
 # ── Constants ─────────────────────────────────────────────────────────────────
 
 RESPONSE_PLACEHOLDER = "> _(pending)_"
+FILE_MARKER = "<!-- auto-tracked -->"
 
 TEMPLATE_HEADER = """\
 # Prompt Log & AI Audit Report
@@ -41,85 +42,45 @@ TEMPLATE_HEADER = """\
 ---
 """
 
-# ── Path Resolution ───────────────────────────────────────────────────────────
+# ── Config ────────────────────────────────────────────────────────────────────
 
-def detect_hw_id(cwd: str) -> str:
+def get_log_path() -> str:
     """
-    Trích HW ID từ cwd.
-    Ví dụ: .../homeworks/HW01/src → 'HW01'
-            .../homeworks/HW02     → 'HW02'
+    Đọc log_path từ .claude/audit_config.json.
+    Trả về absolute path, hoặc '' nếu config không tồn tại / thiếu key.
     """
-    parts = cwd.replace("\\", "/").split("/")
-    for i, part in enumerate(parts):
-        if re.fullmatch(r"HW\d{2}", part, re.IGNORECASE):
-            return part.upper()
-    return ""
+    project_dir = os.environ.get("CLAUDE_PROJECT_DIR", ".")
+    config_path = os.path.join(project_dir, ".claude", "audit_config.json")
+
+    if not os.path.exists(config_path):
+        print("[audit_logger] .claude/audit_config.json không tồn tại — bỏ qua", file=sys.stderr)
+        return ""
+
+    with open(config_path, "r", encoding="utf-8") as f:
+        cfg = json.load(f)
+
+    log_path = cfg.get("log_path", "")
+    if not log_path:
+        print("[audit_logger] audit_config.json thiếu key 'log_path' — bỏ qua", file=sys.stderr)
+        return ""
+
+    if not os.path.isabs(log_path):
+        log_path = os.path.join(project_dir, log_path)
+
+    return log_path
 
 
-def resolve_log_path(cwd: str, prompt: str = "") -> str:
-    """
-    Xác định đường dẫn tới prompt_log.md.
-
-    Ưu tiên 1: cwd đang nằm trong homeworks/HW{id}
-    Ưu tiên 2: project root + subfolder homeworks/HW{id} tồn tại
-               + prompt chứa tag HW{id}
-    Fallback:  cwd/prompt_log.md
-    """
-    # Ưu tiên 1 — cwd đã trong đúng thư mục HW
-    hw_id = detect_hw_id(cwd)
-    if hw_id:
-        return os.path.join(cwd, "prompt_log.md")
-
-    # Ưu tiên 2 — detect từ prompt tag, tìm subfolder tương ứng
-    if prompt:
-        tag_match = re.search(r'\bHW(\d{2})\b', prompt, re.IGNORECASE)
-        if tag_match:
-            candidate = os.path.join(cwd, "homeworks", f"HW{tag_match.group(1)}", "prompt_log.md")
-            hw_dir = os.path.dirname(candidate)
-            if os.path.isdir(hw_dir):
-                return candidate
-
-    # Fallback
-    return os.path.join(cwd, "prompt_log.md")
-
+# ── File Helpers ──────────────────────────────────────────────────────────────
 
 def ensure_log_exists(path: str) -> None:
     """Tạo file với header nếu chưa tồn tại."""
     os.makedirs(os.path.dirname(path), exist_ok=True)
     if not os.path.exists(path):
-        hw_id = detect_hw_id(os.path.dirname(path)) or "HW__"
+        m = re.search(r"HW\d{2}", path, re.IGNORECASE)
+        hw_id = m.group(0).upper() if m else "HW__"
         with open(path, "w", encoding="utf-8") as f:
             f.write(TEMPLATE_HEADER.format(hw_id=hw_id))
 
-
-# ── Session State ────────────────────────────────────────────────────────────
-
-def _session_file() -> str:
-    """Path tới file lưu trạng thái session (.claude/.audit_session.json)."""
-    project_dir = os.environ.get("CLAUDE_PROJECT_DIR", ".")
-    return os.path.join(project_dir, ".claude", ".audit_session.json")
-
-
-def save_session(log_path: str) -> None:
-    sf = _session_file()
-    os.makedirs(os.path.dirname(sf), exist_ok=True)
-    with open(sf, "w", encoding="utf-8") as f:
-        json.dump({"log_path": log_path}, f)
-
-
-def load_session() -> str:
-    """Trả về log_path đã lưu, hoặc '' nếu không có."""
-    sf = _session_file()
-    if not os.path.exists(sf):
-        return ""
-    try:
-        with open(sf, "r", encoding="utf-8") as f:
-            return json.load(f).get("log_path", "")
-    except Exception:
-        return ""
-
-
-# ── File Helpers ──────────────────────────────────────────────────────────────
 
 def append(path: str, text: str) -> None:
     with open(path, "a", encoding="utf-8") as f:
@@ -140,48 +101,74 @@ def replace_last(path: str, old: str, new: str) -> None:
 # ── Event Handlers ────────────────────────────────────────────────────────────
 
 def on_prompt_submit(data: dict) -> None:
-    cwd    = data.get("cwd", ".")
+    log_path = get_log_path()
+    if not log_path:
+        return
+
     prompt = data.get("prompt", "").strip()
     ts     = datetime.now().strftime("%H:%M %d/%m/%Y")
-    path   = resolve_log_path(cwd, prompt)
 
-    ensure_log_exists(path)
-    save_session(path)
+    ensure_log_exists(log_path)
 
     entry = (
         f"\n## [{ts}]\n\n"
         f"### (1) Prompt\n"
         f"```text\n{prompt}\n```\n\n"
         f"### (2) AI Output\n"
-        f"> _(pending)_\n\n"
-        f"### (3) Verdict\n"
-        f"<!-- VALID · INVALID · INCOMPLETE -->\n"
-        f"**Verdict:** ___\n\n"
-        f"### (4) Reasoning\n"
-        f"<!-- 2–5 câu, trích dẫn ISTQB section hoặc slide tuần tương ứng -->\n"
-        f"> ___\n\n"
-        f"### (5) Student Fix\n"
-        f"<!-- Phiên bản đã sửa/bổ sung. Nếu VALID → ghi 'Accepted as-is' -->\n"
-        f"> ___\n\n"
+        f"{RESPONSE_PLACEHOLDER}\n\n"
+        f"**Artifacts:**\n"
+        f"{FILE_MARKER}\n\n"
         f"---\n"
     )
-    append(path, entry)
+    append(log_path, entry)
+
+
+def on_post_tool_use(data: dict) -> None:
+    tool = data.get("tool_name", "")
+    if tool not in ("Write", "Edit"):
+        return
+
+    file_path = data.get("tool_input", {}).get("file_path", "")
+    if not file_path:
+        return
+
+    log_path = get_log_path()
+    if not log_path or not os.path.exists(log_path):
+        return
+
+    with open(log_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # Chỉ inject khi entry đang mở
+    if RESPONSE_PLACEHOLDER not in content:
+        return
+    # Không tự log chính prompt_log.md
+    if os.path.abspath(file_path) == os.path.abspath(log_path):
+        return
+    # Tránh duplicate
+    if f"`{file_path}`" in content:
+        return
+
+    new_line = f"\n- `{file_path}` ({tool})"
+    # Inject sau lần xuất hiện CUỐI CÙNG của marker (entry đang mở)
+    idx = content.rfind(FILES_MARKER)
+    if idx == -1:
+        return
+    insert_at = idx + len(FILES_MARKER)
+    content = content[:insert_at] + new_line + content[insert_at:]
+
+    with open(log_path, "w", encoding="utf-8") as f:
+        f.write(content)
 
 
 def on_stop(data: dict) -> None:
-    cwd      = data.get("cwd", ".")
+    log_path = get_log_path()
+    if not log_path or not os.path.exists(log_path):
+        return
+
     response = data.get("last_assistant_message", "").strip()
-
-    # Ưu tiên path đã được lưu khi prompt submit
-    path = load_session() or resolve_log_path(cwd)
-
-    if not os.path.exists(path):
-        return  # Không có session nào đang mở, bỏ qua
-
-    # Indent toàn bộ response thành blockquote, KHÔNG truncate
-    quoted = "\n".join(f"> {line}" for line in response.splitlines())
-
-    replace_last(path, RESPONSE_PLACEHOLDER, quoted)
+    quoted   = "\n".join(f"> {line}" for line in response.splitlines())
+    replace_last(log_path, RESPONSE_PLACEHOLDER, quoted)
 
 
 # ── Entry Point ───────────────────────────────────────────────────────────────
@@ -193,12 +180,12 @@ def main() -> None:
 
         if event == "UserPromptSubmit":
             on_prompt_submit(data)
+        elif event == "PostToolUse":
+            on_post_tool_use(data)
         elif event == "Stop":
             on_stop(data)
 
     except Exception as e:
-        # Non-blocking: ghi lỗi vào stderr để Claude Code log,
-        # không làm gián đoạn session
         print(f"[audit_logger] error: {e}", file=sys.stderr)
 
     sys.exit(0)

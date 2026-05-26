@@ -10,6 +10,16 @@
         ]
       }
     ],
+    "PostToolUse": [
+           {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/audit_logger.py"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
