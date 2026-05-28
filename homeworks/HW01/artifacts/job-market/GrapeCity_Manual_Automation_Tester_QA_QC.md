@@ -38,3 +38,5 @@
 ---
 
 ## AI Impact Analysis
+
+AI tools (e.g., GitHub Copilot, AI-assisted test generation platforms) are beginning to automate the creation of test cases and regression scripts from requirements — directly overlapping with this role's core tasks of writing test designs and automation scripts. However, the cross-platform exploratory testing judgment, log analysis, and precise bug reporting that GrapeCity requires still depend on human analytical skills that current AI cannot reliably replicate.

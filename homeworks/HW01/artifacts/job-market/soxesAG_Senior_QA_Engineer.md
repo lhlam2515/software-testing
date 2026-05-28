@@ -64,3 +64,5 @@ The ideal candidate should have strong expertise in manual testing and requireme
 ---
 
 ## AI Impact Analysis
+
+AI tools are taking over the repetitive, template-driven portions of this hybrid QA/BA role — test case generation, defect pattern analysis, test data preparation, and documentation drafting — which directly aligns with the job's explicit list of AI-assisted tasks. The irreplaceable human contribution remains in requirements analysis and stakeholder clarification: interpreting ambiguous business needs from overseas partners and translating them into testable, complete specifications requires the cross-cultural communication and contextual judgment that AI tools currently cannot replicate.

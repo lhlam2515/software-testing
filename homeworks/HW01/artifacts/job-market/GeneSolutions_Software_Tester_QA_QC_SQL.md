@@ -40,3 +40,5 @@
 ---
 
 ## AI Impact Analysis
+
+The most automatable parts of this role — SQL data validation queries, regression test execution, and structured bug logging — are precisely the areas where AI-assisted testing tools (e.g., AI-generated SQL assertions, self-healing test scripts) are advancing fastest, putting the manual-only, no-automation nature of this position at measurable risk. What remains hard to automate is the domain-specific business logic analysis for Gene Solutions's internal operational workflows and the UAT facilitation that requires communicating nuanced defect feedback between non-technical users and developers.

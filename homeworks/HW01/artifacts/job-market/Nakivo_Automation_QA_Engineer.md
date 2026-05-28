@@ -49,3 +49,5 @@
 ---
 
 ## AI Impact Analysis
+
+AI tools like Copilot and Cursor — explicitly listed as required experience — are already augmenting script generation and test case design in this role, reducing the manual effort needed to build and maintain automation frameworks for Nakivo's backup/storage product. However, the role's core value shifts toward cross-functional defect analysis and troubleshooting complex infrastructure issues (VMware, Hyper-V, AWS), where understanding system context and failure causality still requires human analytical judgment that AI-assisted code generation cannot replace.

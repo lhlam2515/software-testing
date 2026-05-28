@@ -52,3 +52,5 @@ This role requires deep technical expertise in modern testing frameworks, strong
 ---
 
 ## AI Impact Analysis
+
+AI is increasingly capable of augmenting lower-level tasks in this role — such as automated defect triage, test framework recommendations, and CI/CD pipeline health monitoring — but the defining responsibilities here (defining org-wide quality strategy, mentoring globally distributed teams, and embedding quality culture across engineering and product) require cross-functional leadership and contextual judgment that AI cannot replace. This role's value shifts further toward strategic decision-making and human coordination as AI absorbs more of the routine automation and reporting work.

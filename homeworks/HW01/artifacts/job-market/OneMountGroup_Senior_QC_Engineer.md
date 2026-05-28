@@ -50,3 +50,5 @@
 ---
 
 ## AI Impact Analysis
+
+AI tools like GitHub Copilot and ChatGPT are already embedded in this role to accelerate routine test case generation, script authoring, and test data creation — effectively offloading the mechanical parts of a QC Engineer's workload. However, the core human value lies in architecting automation frameworks across diverse stacks (web, mobile, API, performance), integrating them into CI/CD pipelines, and applying domain-specific judgment in Fintech/Banking contexts where data accuracy and risk-based testing decisions cannot be delegated to a model.

@@ -76,3 +76,5 @@
 ---
 
 ## AI Impact Analysis
+
+KMS explicitly treats AI tool proficiency as a differentiator — listing ChatGPT, GitHub Copilot, prompt engineering, and responsible AI use as nice-to-have skills — signaling that AI is already accelerating test code generation, debugging, and documentation across its broad testing tracks (manual, automation, performance). Yet the role's core demands of client-facing communication, cross-functional collaboration within Scrum teams, and exercising judgment across multiple testing disciplines simultaneously are human skills that AI tools currently augment rather than replace.
