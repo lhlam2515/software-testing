@@ -6,7 +6,7 @@
 **Execution required:** ≥ 5 TCs must be executed on the real device with video recording (≤ 60 s each).
 
 > **Execution plan — TCs selected for video recording:**
-> `TC-S01`, `TC-S03`, `TC-W01`, `TC-T01`, `EC-01`
+> `TC-S02`, `TC-S03`, `TC-W01`, `TC-T01`, `EC-01`
 >
 > **Columns:** *Actual* and *Verdict* are intentionally left blank — to be filled during live execution.
 
