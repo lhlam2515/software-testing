@@ -180,6 +180,71 @@ Verdicts were assigned by degree of JD deviation: VALID when every claim mapped 
 
 ---
 
+### Artifact #4 — AI/LLM Defect Descriptions *(Req 2 · Part 1 — 8 defects)*
+
+> **Requirement mapping:** Req 2 — Document 20 real-world software defects; Part 1 covers the 8 AI/LLM defects in `artifacts/defects/ai_defects.md`.
+
+#### (1) Prompt + Tool
+
+**Tool:** Gemini
+**Time:** 09:21 30/05/2026
+**Prompt:** See [Prompt Log](prompt_log.md) — entry **09:21 30/05/2026** for the verbatim prompt (structured entry for 8 AI/LLM defects).
+
+#### (2) AI Output
+
+> See in [AI Defects — Google Docs](https://docs.google.com/document/d/1vT8C7ob3IxrjK1jzGeybkERaL6ICFp5ssbk7tmPHecs/edit?usp=sharing) for the full structured output.
+
+#### (3) Verdict
+
+**[ ] VALID** — correct and accepted as-is  
+**[ ] INVALID** — wrong; rejected  
+**[X] INCOMPLETE** — acceptable after edits
+
+#### (4) Reasoning
+
+These defect descriptions are factual/security claims, not course-knowledge artifacts — so each was verified against primary sources rather than ISTQB material. All 8 entries contained at least one hallucination or bias and were therefore not accepted as-is, but each is correctable rather than wholly wrong (→ INCOMPLETE). The full per-defect analysis (Inaccuracy / Evidence / Bias Pattern / Corrected Claim) lives in [`artifacts/defects/hallucination_report.md`](artifacts/defects/hallucination_report.md) — **Part 1** — and is not duplicated here.
+
+#### (5) Student Fix
+
+> See in [`artifacts/defects/hallucination_report.md`](artifacts/defects/hallucination_report.md) **Part 1 (Defect 1–8)** for the verbatim Corrected Claim of each entry.
+
+---
+
+### Artifact #5 — Software Security Defect Descriptions *(Req 2 · Part 2 — 12 defects)*
+
+> **Requirement mapping:** Req 2 — Part 2 covers the 12 security defects in `artifacts/defects/software_defects.md`.
+
+**Note:** The final set was curated across three Gemini prompts (the 30/05 batch was filtered — Log4Shell, MOVEit ×2, OpenSSL, ProxyNotShell, MonikerLink dropped; XZ Utils was re-generated via the dedicated 02/06 deep-dive prompt).
+
+#### (1) Prompt + Tool
+
+**Tool:** Gemini
+**Prompt:** Three verbatim prompts in [Prompt Log](prompt_log.md):
+
+- Prompt 1 — entry **09:31 30/05/2026** (initial 12-defect batch; later filtered)
+- Prompt 2 — entry **02:08 02/06/2026** (6 recent defects)
+- Prompt 3 — entry **09:15 02/06/2026** (XZ Utils deep-dive)
+
+#### (2) AI Output
+
+> See in [Prompt Log](prompt_log.md) for the full AI output of all three prompts. The final 12-defect set is in [`artifacts/defects/software_defects.md`](artifacts/defects/software_defects.md).
+
+#### (3) Verdict
+
+**[ ] VALID** — correct and accepted as-is  
+**[ ] INVALID** — wrong; rejected  
+**[X] INCOMPLETE** — acceptable after edits *(mixed batch: 4 VALID · 5 INCOMPLETE · 3 INVALID)*
+
+#### (4) Reasoning
+
+Each entry is a security/CVE claim verified against primary sources (NVD, vendor advisories, post-mortems), not against course material — hence no ISTQB citation applies. Of the 12 entries, 4 were verified clean (accepted as-is) and 8 contained a single hallucination/bias. The full per-defect analysis (Inaccuracy / Evidence / Bias Pattern / Corrected Claim, or the "No Hallucination Detected" assessment) is in [`artifacts/defects/hallucination_report.md`](artifacts/defects/hallucination_report.md) — **Part 2** — and is not duplicated here.
+
+#### (5) Student Fix
+
+> See in [`artifacts/defects/hallucination_report.md`](artifacts/defects/hallucination_report.md) **Part 2 (Defect 1–12)** for the verbatim Corrected Claim or "No Hallucination Detected" assessment of each entry. The 4 VALID entries are accepted as-is.
+
+---
+
 ## 4. Summary of AI Accuracy
 
 > Aggregate the verdicts from Section 3.
