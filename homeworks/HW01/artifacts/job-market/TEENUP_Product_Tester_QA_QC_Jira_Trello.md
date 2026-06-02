@@ -119,4 +119,4 @@ Within the first 3 months, you will:
 
 ## AI Impact Analysis
 
-AI tools can increasingly generate test cases from user stories and detect regression failures automatically, directly reducing the manual workload of writing test plans and executing repetitive regression cycles that dominate this role. However, the exploratory testing, edge-case intuition for a family-facing AI product (TeenCare AI), and cross-functional collaboration with PMs and engineers to interpret ambiguous behavioral requirements remain distinctly human responsibilities that AI cannot yet replace.
+AI tools can increasingly generate test cases from user stories and detect regression failures automatically. This reduces the manual workload of writing test plans and executing repetitive regression cycles. The exploratory testing, edge-case intuition for a family-facing AI product (TeenCare AI), and cross-functional collaboration with PMs and engineers to interpret ambiguous behavioral requirements are areas where human judgment still matters.

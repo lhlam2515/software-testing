@@ -53,4 +53,4 @@ We're seeking a Senior Automation Tester (Playwright/Python) who combines deep t
 
 ## AI Impact Analysis
 
-AI is augmenting this role by accelerating test case generation and result analysis — directly addressing the responsibility to "explore AI-driven approaches to improve testing efficiency" listed in the job description. However, the core human skill of designing scalable test architectures for 500,000+ users, integrating them into CI/CD pipelines, and mentoring team members in automation practices remains irreplaceable by AI tools alone.
+AI is augmenting this role by accelerating test case generation and result analysis, which directly addresses the "explore AI-driven approaches to improve testing efficiency" responsibility listed in the job description. The core human skill of designing scalable test architectures for 500,000+ users, integrating them into CI/CD pipelines, and mentoring team members in automation practices is where domain experience matters most.

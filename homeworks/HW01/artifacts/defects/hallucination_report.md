@@ -1,10 +1,10 @@
 # Defect Description — Hallucination & Bias Analysis Report
 
-**Scope:** `ai_defects.md` (8 AI/LLM defect descriptions) and `software_defects.md` (12 security defect descriptions) — 20 real-world software defects (2021–2026) documented for HW01 Requirement 2
+**Scope:** `ai_defects.md` (8 AI/LLM defect descriptions) and `software_defects.md` (12 security defect descriptions): 20 real-world software defects (2021–2026) documented for HW01 Requirement 2
 **Method:** Primary-source fact-checking of each defect description against verified journalistic, legal, technical, and vendor sources (vendor advisories, NVD/CISA/CERT records, court records, post-mortems)
 **Date:** June 2, 2026
 
-> **Methodology note:** Every finding is grounded in at least one primary or authoritative source fetched or independently searched during the audit. Each entry isolates the **single most defensible inaccuracy** introduced by the AI when describing or explaining the defect. Entries where no hallucination was found are retained and explicitly marked **"No Hallucination Detected,"** accompanied by a summary of which sub-claims were verified to source level — a Valid verdict reflects affirmative confirmation, not merely the absence of an obvious error.
+> **Methodology note:** Every finding is backed by at least one primary or authoritative source fetched or independently searched during the audit. Each entry isolates the **single most defensible inaccuracy** introduced by the AI when describing or explaining the defect. Entries where no hallucination was found are retained and explicitly marked **"No Hallucination Detected,"** accompanied by a summary of which sub-claims were verified to source level. A Valid verdict reflects affirmative confirmation; it is not simply the absence of an obvious error.
 
 The report is organized in two parts, mirroring the two source artifacts. Entry numbers within each part match the defect numbering of the corresponding source file so each finding can be traced directly back to its description.
 
@@ -38,7 +38,7 @@ The dismissal and the fine are presented as two consequences of the same cause (
 
 ### Evidence
 
-Avianca moved to dismiss on statute-of-limitations grounds under the Montreal Convention (Article 35), which sets a strict two-year filing window for international aviation claims. Roberto Mata was injured in August 2019 and filed in February 2022 — outside the window, independent of the ChatGPT incident. The $5,000 sanction was issued separately for the fabricated citations.
+Avianca moved to dismiss on statute-of-limitations grounds under the Montreal Convention (Article 35), which sets a strict two-year filing window for international aviation claims. Roberto Mata was injured in August 2019 and filed in February 2022. This was outside the window, independent of the ChatGPT incident. The $5,000 sanction was issued separately for the fabricated citations.
 
 > *"The fabricated citations didn't cause the dismissal — his claim was likely time-barred regardless."*
 > — LegalClarity.org, analysis of *Mata v. Avianca*, 678 F.Supp.3d 443 (S.D.N.Y. 2023).
@@ -50,7 +50,7 @@ Source: [Mata v. Avianca: Fake Cases, ChatGPT, and Sanctions](https://legalclari
 
 ### Bias Pattern
 
-**Causal Narrative Bias.** LLMs absorb a recurring "AI-in-court" narrative arc — *AI misconduct → catastrophic legal outcome.* The model fuses two independent judicial orders into a single causal chain because the merged structure matches the dominant template in training data. The procedural reality (two orders, two legal theories) is flattened into a simpler, more dramatic story.
+**Causal Narrative Bias.** LLMs absorb a recurring "AI-in-court" narrative arc that goes *AI misconduct → catastrophic legal outcome.* The model fuses two independent judicial orders into a single causal chain because the merged structure matches the dominant template in training data. The procedural reality (two orders, two legal theories) is flattened into a simpler, more dramatic story.
 
 ### Corrected Claim
 
@@ -69,9 +69,9 @@ The incident is framed as LLM probabilistic hallucination corrected by a RAG upg
 
 ### Evidence
 
-Jake Moffatt's interaction with the Air Canada chatbot occurred in **November 2022** — the same month ChatGPT launched publicly, and approximately 12–18 months before enterprise LLM-based customer service deployments became commercially widespread. The legal proceedings (*Moffatt v. Air Canada*, 2024 BCCRT 149) contain **no technical disclosure** about the chatbot's architecture. Air Canada did not contest liability on the basis of LLM behaviour; it argued (unsuccessfully) that the chatbot was a separate entity for which it bore no responsibility.
+Jake Moffatt's interaction with the Air Canada chatbot occurred in **November 2022**, the same month ChatGPT launched publicly and approximately 12–18 months before enterprise LLM-based customer service deployments became commercially widespread. The legal proceedings (*Moffatt v. Air Canada*, 2024 BCCRT 149) contain **no technical disclosure** about the chatbot's architecture. Air Canada did not contest liability on the basis of LLM behaviour; it argued (unsuccessfully) that the chatbot was a separate entity for which it bore no responsibility.
 
-The chatbot's output — a specific, structured policy with a concrete 90-day window and a defined application mechanism — is characteristic of a **deterministic, rule-based or intent-classification system** reading from a stale internal policy database, not of probabilistic text generation. The enterprise-LLM industry timeline makes deployment of a generative chatbot at this date implausible:
+The chatbot's output was a specific, structured policy with a concrete 90-day window and a defined application mechanism. This is characteristic of a **deterministic, rule-based or intent-classification system** reading from a stale internal policy database, not of probabilistic text generation. The enterprise-LLM industry timeline makes deployment of a generative chatbot at this date implausible:
 
 | Period | Dominant chatbot architecture |
 |---|---|
@@ -113,13 +113,13 @@ The ban was **not immediate**. It arrived approximately one month after the leak
 > *"Samsung Electronics is banning employees from using programs like ChatGPT in their work, **just over a month** after an engineer reportedly uploaded sensitive information to the A.I. chatbot."*
 > — Fortune, May 2, 2023
 
-The actual remediation sequence is: `emergency byte-cap on ChatGPT (~Apr 6) → company-wide ban (May 1)` — not an immediate ban.
+The actual remediation sequence was `emergency byte-cap on ChatGPT (~Apr 6) → company-wide ban (May 1)`, not an immediate ban.
 
 ### Inaccuracy 2 — Survey Content Mischaracterization
 
 Some accounts of this incident describe the internal April survey as evidence that employees were *still using ChatGPT despite the byte-cap*, which then prompted the full ban. Primary sources do not support this characterization.
 
-Every contemporaneous primary source — Bloomberg, CNBC, Japan Times, Carrier Management — reports the survey's finding identically:
+Every contemporaneous primary source, including Bloomberg, CNBC, Japan Times, and Carrier Management, reports the survey's finding identically:
 
 > *"In a Samsung company-wide survey conducted last month, **65% of those who responded said there was concern about security risks** when using generative AI services."*
 > — CNBC, May 2, 2023
@@ -127,12 +127,12 @@ Every contemporaneous primary source — Bloomberg, CNBC, Japan Times, Carrier M
 > *"Samsung conducted a survey last month about the use of AI tools internally and said that **65% of respondents believe that such services pose a security risk**."*
 > — Japan Times, May 2, 2023 (citing Bloomberg)
 
-The survey measured **security risk perception** among employees — not ongoing ChatGPT usage rates or non-compliance with the byte-cap. Recasting it as a compliance-failure metric is a content substitution on a verified fact: the event (survey) is real; the reported finding is wrong.
+The survey measured **security risk perception** among employees. It was not a measure of ongoing ChatGPT usage rates or non-compliance with the byte-cap. Recasting it as a compliance-failure metric is a content substitution on a verified fact: the event (survey) is real; the reported finding is wrong.
 
 ### Bias Pattern
 
 - **Timeline Compression** (`ai_defects.md`): The word "immediate" erases a documented month-long gap containing an intermediate remediation step.
-- **Fact-Anchored Hallucination** (secondary accounts): A real event — the internal survey — is retained as a narrative anchor, but its specific content is replaced with a more causally useful claim (non-compliance evidence) that is absent from every primary source.
+- **Fact-Anchored Hallucination** (secondary accounts): A real event, the internal survey, is retained as a narrative anchor, but its specific content is replaced with a more causally useful claim (non-compliance evidence) that is absent from every primary source.
 
 ### Corrected Claim
 
@@ -151,7 +151,7 @@ The survey measured **security risk perception** among employees — not ongoing
 
 "Training dataset poisoning" is a defined term in AI security: a **deliberate adversarial attack** in which an external actor injects malicious or corrupted data into a training set to manipulate model behavior (e.g., backdoor attacks, label-flipping). No such attack is documented or alleged for GitHub Copilot.
 
-The model was trained on millions of public open-source repositories that naturally contain accidental bugs, legacy patterns, and security anti-patterns — a data **quality** issue, not a data **security** issue. Academic research (NYU, Stanford) establishing the ~40% insecure-code rate in safety-critical scenarios consistently attributes this to **uncurated training data**, not adversarial injection.
+The model was trained on millions of public open-source repositories that naturally contain accidental bugs, legacy patterns, and security anti-patterns. It is a data **quality** issue, not a data **security** issue. Academic research (NYU, Stanford) establishing the ~40% insecure-code rate in safety-critical scenarios consistently attributes this to **uncurated training data**, not adversarial injection.
 
 ### Bias Pattern
 
@@ -174,7 +174,7 @@ The practical consequence is significant: misclassifying this as a poisoning att
 
 ### Evidence
 
-Google suspended people-image generation on **February 22, 2024** — correct. But initial repair attempts within days caused regressions: the model became over-conservative, refusing comparative historical prompts and producing responses described publicly as refusing to definitively assess historical figures. Due to these compounding failures, the feature remained **fully offline for approximately six months**.
+Google suspended people-image generation on **February 22, 2024** (correct). But initial repair attempts within days caused regressions: the model became over-conservative, refusing comparative historical prompts and producing responses described publicly as refusing to definitively assess historical figures. Due to these compounding failures, the feature remained **fully offline for approximately six months**.
 
 The resolution was not a modification of the existing fine-tuning pipeline. Google's actual fix was replacing the entire image generation engine with **Imagen 3**, a new model:
 
@@ -193,7 +193,7 @@ Verified timeline:
 
 ### Bias Pattern
 
-**Remediation Compression Bias.** A six-month outage involving a failed patch cycle and a full engine rebuild is collapsed into a single-step "immediate modification." Post-incident PR narratives — which frame resolution as swift and decisive — are over-represented in training data relative to honest engineering post-mortems describing prolonged failures.
+**Remediation Compression Bias.** A six-month outage involving a failed patch cycle and a full engine rebuild is collapsed into a single-step "immediate modification." Post-incident PR narratives, which frame resolution as swift and decisive, are over-represented in training data relative to honest engineering post-mortems describing prolonged failures.
 
 ### Corrected Claim
 
@@ -224,7 +224,7 @@ Apple did not publicly disclose this technical mechanism. After the incident, Ap
 
 ### Bias Pattern
 
-- **Output-to-Mechanism Inference:** The model observed a multi-story summary containing an error and inferred "cross-contamination" as the cause — reasoning backward from output to mechanism rather than examining actual system architecture. The three correctly separated clauses directly contradict this inference.
+- **Output-to-Mechanism Inference:** The model observed a multi-story summary containing an error and inferred "cross-contamination" as the cause, reasoning backward from output to mechanism rather than examining actual system architecture. The three correctly separated clauses directly contradict this inference.
 - **Plausible Fix Fabrication:** Once the mechanism is wrong, the model generates a technically consistent but entirely unsourced fix for that wrong mechanism.
 
 ### Corrected Claim
@@ -241,7 +241,7 @@ Apple did not publicly disclose this technical mechanism. After the incident, Ap
 > *"...DeepSeek immediately restricted network access to the ClickHouse instance, enforced default authentication policies, and **implemented automated configuration auditing tools**."*
 > — `ai_defects.md`
 
-No primary source confirms "automated configuration auditing tools" as part of DeepSeek's remediation. The Wiz Research Blog (primary source), BleepingComputer, CyberScoop, and SecureWorld describe the response only as securing the exposure. AccuKnox — the most detailed secondary source available — lists three specific steps with no mention of auditing tools.
+No primary source confirms "automated configuration auditing tools" as part of DeepSeek's remediation. The Wiz Research Blog (primary source), BleepingComputer, CyberScoop, and SecureWorld describe the response only as securing the exposure. AccuKnox, the most detailed secondary source available, lists three specific steps with no mention of auditing tools.
 
 The sole reference to "automated configuration management" in related coverage appears in a *Communications of the ACM* article where a third-party security expert describes **industry best practices in general**, not DeepSeek's specific actions. This context-free fact appears to have been absorbed and re-attributed to DeepSeek's response.
 
@@ -264,7 +264,7 @@ Hosts: `oauth2callback.deepseek.com:9000` and `dev.deepseek.com:9000`.
 
 ### Bias Pattern
 
-**Remediation Template Completion.** Security post-mortems in training data follow a standard three-part remediation structure: *patch the vulnerability → enforce policy → implement monitoring/auditing.* The model auto-completes the third step with "automated configuration auditing tools" — technically plausible language that fits the template but has no evidentiary basis for this specific incident.
+**Remediation Template Completion.** Security post-mortems in training data follow a standard three-part remediation structure: *patch the vulnerability → enforce policy → implement monitoring/auditing.* The model auto-completes the third step with "automated configuration auditing tools," technically plausible language that fits the template but has no evidentiary basis for this specific incident.
 
 ### Corrected Claim
 
@@ -306,11 +306,11 @@ You cannot "bypass" a control that does not yet exist. The correct vulnerability
 > *"Security **researchers** quickly built proof-of-concept malware ('TotalRecall')..."*
 > — `ai_defects.md`
 
-TotalRecall was built by a single individual — **Alexander Hagenah** (alias "xaitax"), an ethical hacker — and published as an open-source security research tool. It is not malware.
+TotalRecall was built by a single individual, **Alexander Hagenah** (alias "xaitax"), an ethical hacker, and published as an open-source security research tool. It is not malware.
 
 ### Bias Pattern
 
-**Retroactive Architecture Projection.** Post-backlash coverage of Recall (late 2024–2025) prominently features VBS Enclaves as the security solution. The model, trained predominantly on this later material, maps the present-state architecture back onto the original failure — implying VBS was present and bypassed, when it had not yet been designed. This inverts the temporal relationship between the vulnerability and the control.
+**Retroactive Architecture Projection.** Post-backlash coverage of Recall (late 2024–2025) prominently features VBS Enclaves as the security solution. The model, trained predominantly on this later material, maps the present-state architecture back onto the original failure, implying VBS was present and bypassed when it had not yet been designed. This inverts the temporal relationship between the vulnerability and the control.
 
 ### Corrected Claim
 
@@ -347,26 +347,26 @@ TotalRecall was built by a single individual — **Alexander Hagenah** (alias "x
 > *"Microsoft engineer Andres Freund discovered the backdoor entirely by accident after **noticing that `sshd` processes were consuming unexpected CPU cycles and suffering a minor 500ms login latency** during routine database performance micro-benchmarks."*
 > — `software_defects.md`
 
-Every individual fact here is real — the CPU anomaly, the ~500ms latency, the PostgreSQL micro-benchmarking context, the `sshd` involvement. The defect is the **causal ordering**. The description presents the 500ms latency as part of the *initiating* observation, fused co-equally with the CPU anomaly ("noticing that... CPU cycles **and** suffering a minor 500ms login latency"). Freund's own public account inverts this: he did **not** begin investigating because of the 500ms delay.
+Every individual fact here is real: the CPU anomaly, the ~500ms latency, the PostgreSQL micro-benchmarking context, the `sshd` involvement. The defect is the **causal ordering**. The description presents the 500ms latency as part of the *initiating* observation, fused co-equally with the CPU anomaly ("noticing that... CPU cycles **and** suffering a minor 500ms login latency"). Freund's own public account inverts this: he did **not** begin investigating because of the 500ms delay.
 
-The true trigger chain is: **CPU spike on failing SSH logins → profiling `sshd` → time spent in `liblzma` → recalled earlier Valgrind errors → backdoor.** The 500ms latency was a *secondary, confirming* observation he noticed only *after* profiling the CPU anomaly — not part of the initiating clue.
+The true trigger chain is: **CPU spike on failing SSH logins → profiling `sshd` → time spent in `liblzma` → recalled earlier Valgrind errors → backdoor.** The 500ms latency was a *secondary, confirming* observation he noticed only *after* profiling the CPU anomaly, not part of the initiating clue.
 
 ### Evidence
 
-**Primary source — Freund's oss-security disclosure email (March 29, 2024, 08:51 PT).** The official technical report frames the initiating clue as the CPU/Valgrind anomaly, *not* the latency figure. He opens by citing the symptoms that prompted the work — under 15 words quoted for precision: *"logins with ssh taking a lot of CPU, valgrind errors."* He then names the specific step that triggered the investigation: the backdoor's in-memory symbol-table parsing, which he describes as the slow step that made him look into the issue. Notably, the email never presents "500ms" as the initiating clue at all — the ~0.5s figure appears only later, in the "Observing Impact on openssh server" section, as a *demonstration of impact* (a before/after timing of `~0.299s` vs `~0.807s`), well after the discovery was already made.
+**Primary source: Freund's oss-security disclosure email (March 29, 2024, 08:51 PT).** The official technical report frames the initiating clue as the CPU/Valgrind anomaly, *not* the latency figure. He opens by citing the symptoms that prompted the work, using under 15 words: *"logins with ssh taking a lot of CPU, valgrind errors."* He then names the specific step that triggered the investigation: the backdoor's in-memory symbol-table parsing, which he describes as the slow step that made him look into the issue. Notably, the email never presents "500ms" as the initiating clue at all. The ~0.5s figure appears only later, in the "Observing Impact on openssh server" section, as a *demonstration of impact* (a before/after timing of `~0.299s` vs `~0.807s`), well after the discovery was already made.
 
-**Confirming source — Freund's own public correction (X/@AndresFreundTec, March 30, 2024).** In plain language: he stated he did not start looking because of the 500ms; he started when he saw failing SSH logins (automated credential-stuffing attempts) using a substantial amount of CPU, and only afterward noticed the slower logins.
+**Confirming source: Freund's own public correction (X/@AndresFreundTec, March 30, 2024).** In plain language: he stated he did not start looking because of the 500ms; he started when he saw failing SSH logins (automated credential-stuffing attempts) using a substantial amount of CPU, and only afterward noticed the slower logins.
 
-Source: Andres Freund / oss-security mailing list, March 29, 2024 (message-id `20240329155126.kjjfduxw2yrlxgzm@awork3.anarazel.de`), [archived at openwall.com](https://www.openwall.com/lists/oss-security/2024/03/29/4); [Andres Freund, X/@AndresFreundTec, March 30, 2024](https://x.com/AndresFreundTec/status/1774190743776866374). Both primary sources independently place the CPU-on-failed-logins anomaly first and the 500ms latency second — directly contradicting the "500ms → discovery" framing that secondary coverage popularized.
+Source: Andres Freund / oss-security mailing list, March 29, 2024 (message-id `20240329155126.kjjfduxw2yrlxgzm@awork3.anarazel.de`), [archived at openwall.com](https://www.openwall.com/lists/oss-security/2024/03/29/4); [Andres Freund, X/@AndresFreundTec, March 30, 2024](https://x.com/AndresFreundTec/status/1774190743776866374). Both primary sources independently place the CPU-on-failed-logins anomaly first and the 500ms latency second, directly contradicting the "500ms → discovery" framing that secondary coverage popularized.
 
 ### Secondary precision notes (not the scored defect)
 
 - **Valgrind errors omitted.** The description drops the Valgrind clue, which Freund repeatedly cited as the second pillar of the discovery (CPU anomaly + Valgrind). Its absence isn't false, but it leaves only the more dramatic, journalism-amplified "500ms" detail.
-- **Distribution naming.** The entry lists "Fedora 41/Rawhide." At discovery (March 2024) the affected Fedora products were two distinct entries — **Fedora 40 (prerelease/Beta)** and **Fedora Rawhide** (the rolling dev branch internally labeled `fc41`). Fedora 41 as a *stable* release did not exist until **October 29, 2024** (Red Hat / Fedora Project), seven months after discovery. Defensible as a secondary note, but not the primary scored defect.
+- **Distribution naming.** The entry lists "Fedora 41/Rawhide." At discovery (March 2024) the affected Fedora products were two distinct entries: **Fedora 40 (prerelease/Beta)** and **Fedora Rawhide** (the rolling dev branch internally labeled `fc41`). Fedora 41 as a *stable* release did not exist until **October 29, 2024** (Red Hat / Fedora Project), seven months after discovery. Defensible as a secondary note, but not the primary scored defect.
 
 ### Bias Pattern
 
-**Causal-Ordering Inversion driven by Narrative-Salience Bias.** The "500ms delay that saved the internet" became the *headline* of XZ coverage — catchy, quantified, and endlessly repeated. Because an LLM predicts the next token from the statistically dominant framing in its training data, it reaches for the **most-repeated version** ("noticed 500ms → found backdoor") over the **author's own, less-viral correction** that the CPU-on-failed-logins anomaly came first. Causal/temporal ordering is exactly the relationship LLMs handle poorly: co-occurring tokens ("CPU," "500ms," "latency," "discovered") get stitched into a fluent sentence whose internal *ordering* is asserted with confidence the source doesn't support. Every noun is verifiable — which is precisely why a reviewer glides past the inverted causality.
+**Causal-Ordering Inversion driven by Narrative-Salience Bias.** The "500ms delay that saved the internet" became the *headline* of XZ coverage: catchy and endlessly quantified. Because an LLM predicts the next token from the statistically dominant framing in its training data, it reaches for the **most-repeated version** ("noticed 500ms → found backdoor") over the **author's own, less-viral correction** that the CPU-on-failed-logins anomaly came first. Causal/temporal ordering is exactly the relationship LLMs handle poorly: co-occurring tokens ("CPU," "500ms," "latency," "discovered") get stitched into a fluent sentence whose internal *ordering* is asserted with confidence the source doesn't support. Every noun is verifiable. This is precisely why a reviewer glides past the inverted causality.
 
 ### Corrected Claim
 
@@ -389,7 +389,7 @@ This entry is **substantively accurate and well-sourced**; no fabrication or bia
 
 ### Why No Hallucination Was Found
 
-The description rests on exact-match, checkable identifiers — patch-version strings, a specific filename (`ldap.pl`), named malware families, and a precise CVSS score — all of which were cross-verified against Wiz, Unit 42, The Hacker News, Fidelis, and CISA KEV. Exact-match technical detail of this kind is the strongest marker of grounded, non-hallucinated content: a model that was confabulating would typically drift on precisely these high-specificity tokens. None drifted.
+The description rests on exact-match, checkable identifiers: patch-version strings, a specific filename (`ldap.pl`), named malware families, and a precise CVSS score, all of which were cross-verified against Wiz, Unit 42, The Hacker News, Fidelis, and CISA KEV. Exact-match technical detail of this kind is the strongest marker of grounded, non-hallucinated content: a model that was confabulating would typically drift on precisely these high-specificity tokens. None drifted.
 
 ---
 
@@ -413,7 +413,7 @@ The attacker did **not bypass MFA**. The keylogger captured the master password 
 
 ### Corrected Claim
 
-> *"The keylogger captured the master password after successful MFA; the attacker reused these legitimate credentials. MFA was not bypassed — it was rendered moot by post-auth credential capture on a compromised personal endpoint."*
+> *"The keylogger captured the master password after successful MFA; the attacker reused these legitimate credentials. MFA was not bypassed. It was rendered moot by post-auth credential capture on a compromised personal endpoint."*
 
 ---
 
@@ -432,7 +432,7 @@ Disclosed April 29–30, 2026. Despite postdating common model knowledge cutoffs
 
 ### Why No Hallucination Was Found
 
-This is the kind of entry where an auditor could wrongly cry "hallucination" purely because the CVE postdates their training — but a post-cutoff CVE ID is a prompt to verify, never itself a verdict. Each individual claim was re-checked at source level (the Aug 2017 commit hash, the `authencesn` Extended-Sequence-Number scratch write, the full CVSS vector, and the validated container→host page-cache escape PoCs) against the Microsoft Security Blog, Tenable, Sysdig, Help Net Security, CERT-EU 2026-005, and the Theori discoverer advisory. Nothing drifted; this is one of the most technically precise descriptions in the document.
+This is the kind of entry where an auditor could wrongly cry "hallucination" purely because the CVE postdates their training. But a post-cutoff CVE ID is a prompt to verify, never itself a verdict. Each individual claim was re-checked at source level (the Aug 2017 commit hash, the `authencesn` Extended-Sequence-Number scratch write, the full CVSS vector, and the validated container→host page-cache escape PoCs) against the Microsoft Security Blog, Tenable, Sysdig, Help Net Security, CERT-EU 2026-005, and the Theori discoverer advisory. Nothing drifted; this is one of the most technically precise descriptions in the document.
 
 ---
 
@@ -440,12 +440,12 @@ This is the kind of entry where an auditor could wrongly cry "hallucination" pur
 
 ### Inaccuracy
 
-The technical core is accurate — missing authorization on `/developmentserver/metadatauploader`, unauthenticated multipart file upload, CVSS 10.0, JSP webshells, `<sid>adm`-level execution, reverse SOCKS proxy — but one named claim is fabricated:
+The technical core is accurate: missing authorization on `/developmentserver/metadatauploader`, unauthenticated multipart file upload, CVSS 10.0, JSP webshells, `<sid>adm`-level execution, reverse SOCKS proxy. But one named claim is fabricated:
 
 > *"The flaw was heavily weaponized following exploit publicization by groups like **ShinyHunters**."*
 > — `software_defects.md`
 
-**ShinyHunters is not among the documented threat actors for CVE-2025-31324.** Verified exploitation is attributed to the ransomware groups **BianLian** and **RansomEXX** (Microsoft "Storm-2460"), **Qilin**, and multiple **Chinese-nexus APTs** — Chaya_004, UNC5221, UNC5174, and CL-STA-0048. ShinyHunters is associated with *separate* 2025 SAP/Salesforce data-extortion campaigns, not this specific vulnerability.
+**ShinyHunters is not among the documented threat actors for CVE-2025-31324.** Verified exploitation is attributed to the ransomware groups **BianLian** and **RansomEXX** (Microsoft "Storm-2460"), **Qilin**, and multiple **Chinese-nexus APTs** including Chaya_004, UNC5221, UNC5174, and CL-STA-0048. ShinyHunters is associated with *separate* 2025 SAP/Salesforce data-extortion campaigns, not this specific vulnerability.
 
 ### Evidence
 
@@ -496,7 +496,7 @@ The vulnerability identity is accurate (UAF in `clfs.sys`, locally-authenticated
 > *"Microsoft resolved this logic bug... by **correcting memory object serialization** inside the driver."*
 > — `software_defects.md`
 
-No primary or technical source describes the fix as involving "serialization." A use-after-free is remediated by correcting **reference-counting / object-lifecycle management** (validating or nulling the pointer before reuse) — which the description itself correctly states in its own *root-cause* sentence. "Serialization" is an unrelated concept (converting objects to a storable/transmittable form) and does not apply to a UAF fix. This is a plausible-sounding but unsupported technical term substituted for the actual fix — the same error class as Defect 11, located in the remediation field.
+No primary or technical source describes the fix as involving "serialization." A use-after-free is remediated by correcting **reference-counting / object-lifecycle management** (validating or nulling the pointer before reuse), which the description itself correctly states in its own *root-cause* sentence. "Serialization" is an unrelated concept (converting objects to a storable/transmittable form) and does not apply to a UAF fix. This is a plausible-sounding but unsupported technical term substituted for the actual fix, the same error class as Defect 11, located in the remediation field.
 
 ### Evidence
 
@@ -505,7 +505,7 @@ No primary or technical source describes the fix as involving "serialization." A
 
 ### Bias Pattern
 
-**Root-Cause Substitution (remediation variant).** Faced with describing *how* a kernel UAF was fixed — detail rarely disclosed by MSRC — the model emits a confident, technical-sounding mechanism ("memory object serialization") drawn from the general vocabulary of kernel-memory bugs, rather than leaving the fix described in the accurate reference-counting terms it had already used. The surrounding paragraph's correctness lowers scrutiny on the single drifted noun.
+**Root-Cause Substitution (remediation variant).** Faced with describing *how* a kernel UAF was fixed, detail rarely disclosed by MSRC, the model emits a confident, technical-sounding mechanism ("memory object serialization") drawn from the general vocabulary of kernel-memory bugs, rather than leaving the fix described in the accurate reference-counting terms it had already used. The surrounding paragraph's correctness lowers scrutiny on the single drifted noun.
 
 ### Corrected Claim
 
@@ -540,7 +540,7 @@ Assetnote root-cause analysis (`snprintf` / `ns_vpn_send_response`); CYFIRMA/Cyb
 
 ### Inaccuracy
 
-BLASTPASS was a **two-CVE chain** — **CVE-2023-41064** (ImageIO buffer overflow) **+ CVE-2023-41061** (Apple Wallet/PassKit validation flaw) — and the malicious images were delivered inside **PassKit (Wallet) attachments**, the vector that bypassed BlastDoor. Listing only the ImageIO CVE and "image via iMessage" omits the defining half.
+BLASTPASS was a **two-CVE chain** pairing **CVE-2023-41064** (ImageIO buffer overflow) with **CVE-2023-41061** (Apple Wallet/PassKit validation flaw), and the malicious images were delivered inside **PassKit (Wallet) attachments**, the vector that bypassed BlastDoor. Listing only the ImageIO CVE and "image via iMessage" omits the defining half.
 
 ### Evidence
 
@@ -581,7 +581,7 @@ The exact-match patch-version strings are a strong marker of grounded, non-hallu
 > *"The Falcon engine's interpreter attempted to parse **uninitialized data fields** within the update file, causing an out-of-bounds memory read..."*
 > — `software_defects.md`
 
-Wrong root cause. CrowdStrike's RCA: a **parameter-count mismatch** — the IPC Template Type defined **21 input fields**, but Channel File 291's instances supplied only **20**; reading the non-existent 21st value caused the out-of-bounds read, compounded by a **missing array-bounds check**. The data was not "uninitialized" — the field did not exist.
+Wrong root cause. CrowdStrike's RCA identified a **parameter-count mismatch**: the IPC Template Type defined **21 input fields**, but Channel File 291's instances supplied only **20**; reading the non-existent 21st value caused the out-of-bounds read, compounded by a **missing array-bounds check**. The data was not "uninitialized". The field did not exist.
 
 ### Evidence
 
@@ -611,7 +611,7 @@ Disclosed late Jan / early Feb 2026. Despite postdating common model knowledge c
 
 ### Why No Hallucination Was Found
 
-The finer claims were closed at source level: **CWE-669** and the **CVSS vector `AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H`** were confirmed (UI:R matching the "brief user interaction" the description correctly flags). The three-item connect-frame payload (auth token + public key + device ID) initially looks like over-specification versus the terse NVD/OSV summary ("a token value"), but the **cited SonicWall analysis itself lists all three items** — so the extra detail is grounded in the description's own cited source, not invented. Verified against SonicWall, SOCRadar, Hive Pro, Netizen, TheHackerWire, and Foresiet.
+The finer claims were closed at source level: **CWE-669** and the **CVSS vector `AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H`** were confirmed (UI:R matching the "brief user interaction" the description correctly flags). The three-item connect-frame payload (auth token + public key + device ID) initially looks like over-specification versus the terse NVD/OSV summary ("a token value"), but the **cited SonicWall analysis itself lists all three items**. The extra detail is therefore sourced, not invented. Verified against SonicWall, SOCRadar, Hive Pro, Netizen, TheHackerWire, and Foresiet.
 
 ---
 
