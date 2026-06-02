@@ -4,7 +4,7 @@
 - **Description:** The defect involves large language model (LLM) "hallucination," wherein the autoregressive model generates highly plausible but entirely fabricated information due to probabilistic token prediction rather than factual lookup. In this instance, OpenAI's ChatGPT generated non-existent legal precedents, fictitious case citations, and bogus judicial quotes when prompted for legal research.
 - **Severity:** High
   - *Justification:* While it does not cause catastrophic infrastructure failure or a data breach, it directly compromises the integrity of federal legal proceedings and exposes legal practitioners to severe judicial sanctions.
-- **Real-world consequences:** The plaintiff's attorneys unknowingly submitted an opposition brief containing six completely fabricated judicial decisions to the U.S. District Court for the Southern District of New York. The deception was uncovered by opposing counsel and the judge, resulting in the dismissal of the personal injury lawsuit and a $5,000 fine levied against the lawyers for acting in "subjective bad faith."
+- **Real-world consequences:** The plaintiff's attorneys unknowingly submitted an opposition brief containing six completely fabricated judicial decisions to the U.S. District Court for the Southern District of New York. The deception was uncovered by opposing counsel and the judge, resulting in a $5,000 fine levied against the lawyers for acting in "subjective bad faith." In a separate and unrelated order, the court dismissed the personal injury lawsuit because the claim was time-barred under the Montreal Convention's two-year filing window — a procedural defect that existed entirely independent of the AI incident.
 - **Solution/Remediation:** The law firm implemented stricter internal review policies banning unverified AI-generated content, while the American Bar Association (ABA) issued its first formal ethics guidance explicitly detailing attorneys' responsibilities to independently verify any generative AI outputs.
 
 ---
@@ -12,11 +12,11 @@
 ## 2. Air Canada Chatbot False Refund Policy Hallucination (2024)
 
 - **Source URL:** [BC Tribunal Decision — American Bar Association](https://www.americanbar.org/groups/business_law/resources/business-law-today/2024-february/bc-tribunal-confirms-companies-remain-liable-information-provided-ai-chatbot/)
-- **Description:** This defect stems from an unconstrained, customer-facing conversational AI agent hallucinating internal corporate policies without an underlying grounding mechanism or a strict control layer. The chatbot autonomously generated an entirely fabricated retroactive bereavement fare discount policy, establishing a concrete timeline (90 days) and a precise application mechanism that did not exist in the airline's official documentation.
+- **Description:** The chatbot presented an inaccurate refund policy that did not reflect Air Canada's current documentation. The chatbot's underlying architecture was not disclosed in legal proceedings; its output — a specific policy with a concrete 90-day window and a defined application mechanism — is consistent with a rule-based or intent-classification system reading from an outdated policy database, not probabilistic text generation. The incident predates the commercial deployment of LLM-based enterprise chatbots.
 - **Severity:** Medium
   - *Justification:* The issue represents a localized operational failure resulting in financial misrepresentation and minor damages rather than an enterprise-wide system exploit.
 - **Real-world consequences:** A passenger flying under bereavement guidelines relied on the chatbot's false promises, purchased full-price tickets, and was subsequently denied a refund by human agents. The British Columbia Civil Resolution Tribunal ruled against Air Canada, creating a global legal precedent that corporations are legally liable for the claims made by their AI systems.
-- **Solution/Remediation:** Air Canada temporarily disabled the customer-facing chatbot on its web portals and revised its architecture to transition from free-form generation to restricted, retrieval-augmented generation (RAG) tied exclusively to static, validated policy databases.
+- **Solution/Remediation:** Air Canada suspended the chatbot pending a review of its policy data sources. No public disclosure confirms an architectural upgrade to RAG or any generative AI system.
 
 ---
 
@@ -27,14 +27,14 @@
 - **Severity:** High
   - *Justification:* The vulnerability resulted in the direct exposure of proprietary trade secrets and corporate intellectual property to an external third-party environment without non-disclosure agreements.
 - **Real-world consequences:** Over a 20-day period, Samsung engineers inadvertently leaked sensitive intellectual property across three separate incidents, including proprietary semiconductor database source code, equipment defect detection algorithms, and recorded internal executive meeting transcripts.
-- **Solution/Remediation:** Samsung enacted an immediate, company-wide ban on the utilization of public generative AI tools on all corporate devices and networks, while accelerating the engineering of an isolated, internal private AI infrastructure for employee use.
+- **Solution/Remediation:** Following discovery of the leaks, Samsung first implemented an emergency measure in early April 2023 — limiting each employee's ChatGPT prompt to 1,024 bytes — while permitting limited continued use. Approximately one month later, Samsung issued a formal company-wide ban on May 1, 2023, covering ChatGPT, Microsoft Bing, and Google Bard across all corporate devices and internal networks. An internal April survey cited in the ban memo found that 65% of respondents perceived generative AI tools as a security risk. Samsung simultaneously began developing an internal AI assistant as a governed replacement.
 
 ---
 
 ## 4. GitHub Copilot Generating Vulnerable Code Patterns (2022–2023)
 
 - **Source URL:** [GitHub Copilot Security Risks — Precogs AI](https://www.precogs.ai/security/github-copilot-security)
-- **Description:** This systemic defect relates to training dataset poisoning and regression, where an AI code assistant reproduces historical software flaws present in its open-source training data. When prompted with security-relevant contexts, the model frequently completes snippets using insecure coding patterns, specifically producing path traversal vulnerabilities (CWE-022) and SQL injection vulnerabilities via raw string concatenation (CWE-089).
+- **Description:** This systemic defect relates to uncurated training data quality, where an AI code assistant reproduces historical software flaws present in its open-source training data. GitHub Copilot was trained on public code repositories that naturally contain historical bugs, insecure patterns, and deprecated practices accumulated over decades of human development — distinct from "training dataset poisoning," which requires deliberate adversarial data injection (no such attack is documented here). When prompted with security-relevant contexts, the model frequently completes snippets using insecure coding patterns, specifically producing path traversal vulnerabilities (CWE-022) and SQL injection vulnerabilities via raw string concatenation (CWE-089).
 - **Severity:** High
   - *Justification:* It introduces exploitable software vulnerabilities directly into the software supply chains of millions of production applications at the time of development.
 - **Real-world consequences:** Academic studies (including research from NYU and Stanford) confirmed that GitHub Copilot generated insecure or vulnerable code in roughly 40% of security-critical scenarios, presenting a significant risk of data exhilaration or remote code execution for developers who blindly accepted suggestions.
@@ -49,37 +49,37 @@
 - **Severity:** Medium
   - *Justification:* The failure was a public relations and programmatic error that compromised model utility and brand reputation rather than a security breach or data threat.
 - **Real-world consequences:** Gemini generated nonsensical and historically inaccurate depictions, including racially diverse World War II-era German soldiers, a female Pope, and Native American or Black founding fathers of the United States. The widespread public backlash caused Google's stock price to drop significantly, wiping out billions in market value.
-- **Solution/Remediation:** Google immediately suspended Gemini's ability to generate images of people and heavily modified its fine-tuning and prompt-augmentation architectures to allow the model to recognize strict historical constraints.
+- **Solution/Remediation:** Google suspended Gemini's people-image generation on February 22, 2024. Initial patch attempts produced new regressions, and the feature remained fully offline for approximately six months. Google's actual solution was building an entirely new image generation engine — **Imagen 3** — announced at Google I/O in May 2024 and launched for premium users on August 28, 2024, with general rollout in October 2024.
 
 ---
 
 ## 6. Apple Intelligence False BBC News Summary — Luigi Mangione (Dec 2024)
 
 - **Source URL:** [Apple's AI Disastrously Rewrote a BBC Headline — Gizmodo](https://gizmodo.com/apples-ai-disastrously-rewrote-a-bbc-headline-to-say-luigi-mangione-shot-himself-2000538599)
-- **Description:** This flaw is an algorithmic notification-summarization error within the iOS Apple Intelligence engine, driven by an inadequate semantic partitioning algorithm. When compressing multiple, distinct push notifications from a single app into a single, cohesive preview bullet, the LLM cross-contaminated contexts and conflated disparate news stories into a single erroneous sentence.
+- **Description:** This flaw is an algorithmic notification-summarization error within the iOS Apple Intelligence engine. When compressing multiple, distinct push notifications from a single app into a single, cohesive preview bullet, the model correctly separated three BBC notifications into three distinct clauses but generated a factually false statement within a single clause — an isolated hallucination, not a cross-notification context contamination event.
 - **Severity:** High
   - *Justification:* The defect actively manufactures and disseminates high-profile defamation and misinformation to thousands of user lock screens under the trusted banner of authoritative news organizations.
 - **Real-world consequences:** Users who received multiple BBC alerts saw an Apple-generated summary falsely stating that high-profile murder suspect Luigi Mangione had shot himself, an event that never occurred. The incident sparked a formal complaint from the BBC and prompted calls from international bodies like Reporters Without Borders demanding Apple disable the unpolished feature.
-- **Solution/Remediation:** Apple modified the underlying heuristic filters for its on-device summarization model to implement stricter isolation boundaries between distinct incoming notifications, preventing the synthesis of unrelated headlines.
+- **Solution/Remediation:** Apple announced updates to its notification-summary feature and modified how summaries are labelled and presented. The company did not publicly disclose the specific technical mechanism of the fix.
 
 ---
 
 ## 7. DeepSeek Unsecured ClickHouse Database Exposure (Jan 2025)
 
 - **Source URL:** [DeepSeek Cyber Attack and Database Leak — Critical Mission Alliance](https://www.cm-alliance.com/cybersecurity-blog/deepseek-cyber-attack-timeline-impact-and-lessons-learned)
-- **Description:** This defect is a critical cloud infrastructure misconfiguration where a backend ClickHouse analytical database used by the AI platform was deployed directly to the public internet without an authentication layer. This allowed any remote actor uninhibited access to execute arbitrary queries and intercept raw, internal telemetry and logging pipelines.
+- **Description:** This defect is a critical cloud infrastructure misconfiguration where two backend ClickHouse analytical database instances used by the AI platform (`oauth2callback.deepseek.com:9000` and `dev.deepseek.com:9000`) were deployed directly to the public internet without an authentication layer. This allowed any remote actor uninhibited access to execute arbitrary queries and intercept raw, internal telemetry and logging pipelines.
 - **Severity:** Critical
   - *Justification:* The database offered full control, exposing sensitive, real-time user communications and security credentials with no authentication required.
 - **Real-world consequences:** Cybersecurity researchers at Wiz discovered over one million sensitive log entries sitting fully exposed. The compromised data included plaintext user chat histories, active API secret keys, backend operational metadata, and authentication tokens, presenting a catastrophic privacy violation at the height of the platform's global adoption.
-- **Solution/Remediation:** Upon responsible disclosure from the researchers, DeepSeek immediately restricted network access to the ClickHouse instance, enforced default authentication policies, and implemented automated configuration auditing tools.
+- **Solution/Remediation:** Upon responsible disclosure by Wiz Research, DeepSeek secured the exposure by: (1) restricting public network access to both ClickHouse instances; (2) revoking unauthorized access and restricting developer-instance access; (3) updating API security policies. No public source confirms the deployment of automated configuration auditing tools as part of this remediation.
 
 ---
 
 ## 8. Microsoft Recall Plaintext Screenshot Capture (May 2024)
 
 - **Source URL:** [Microsoft Windows Recall Data Extraction Vulnerability — CSO Online](https://www.csoonline.com/article/4159643/microsofts-windows-recall-still-allows-silent-data-extraction.html)
-- **Description:** This architectural flaw involves local privilege boundary mismanagement in the initial design of Windows Recall. The OS-level feature continuously captured high-frequency desktop screenshots, applied Optical Character Recognition (OCR), and stored the resulting plaintext data and indices inside an unencrypted SQLite database located in a standard user directory, completely bypassing hardware-enforced isolation.
+- **Description:** This architectural flaw involves a missing security control in the initial design of Windows Recall. The OS-level feature continuously captured high-frequency desktop screenshots, applied Optical Character Recognition (OCR), and stored the resulting plaintext data and indices inside an unencrypted SQLite database located in a standard user directory, with no encryption and no hardware-enforced isolation present in the original design (CWE-311: Missing Encryption of Sensitive Data) — an architectural omission, not a bypass of an existing control.
 - **Severity:** Critical
   - *Justification:* It essentially built an automated, local spyware infrastructure that allowed any infostealer malware running in the user context to silently exfiltrate every password, email, and bank detail ever displayed on the screen.
-- **Real-world consequences:** Security researchers quickly built proof-of-concept malware ("TotalRecall") that could instantly extract a user's entire digital life history in seconds. The severe privacy backlash forced Microsoft to pull the highly anticipated feature from its Copilot+ PC launch phase.
+- **Real-world consequences:** Security researcher Alexander Hagenah (alias "xaitax") built and published an open-source tool, TotalRecall, demonstrating trivial extraction of the database contents in seconds. The severe privacy backlash forced Microsoft to pull the highly anticipated feature from its Copilot+ PC launch phase.
 - **Solution/Remediation:** Microsoft pulled the tool back to development and completely re-engineered the architecture to make it strictly opt-in, encrypted the database using Windows Hello Enhanced Sign-in Security (ESS), and isolated the entire data processing pipeline inside a secure, hardware-protected Virtualization-Based Security (VBS) Enclave.
