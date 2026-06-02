@@ -390,3 +390,79 @@ Yêu cầu về cấu trúc đầu ra: Hãy đóng vai một chuyên gia QA/QC v
 
 **Lưu ý kiểm thử:** Một số test case (đặc biệt CTC swing khi Mức 0 và giữ trạng thái swing khi tắt/bật gió) phụ thuộc vào thiết kế cơ khí cụ thể của TC1626 — cần xác nhận với tài liệu kỹ thuật/nhà sản xuất để chốt Expected chính xác trước khi chạy.
 ```
+
+### Timestamp: 00:30 03/06/2026
+
+**AI Tool:** `Gemini`
+
+**Prompt:**
+
+```text
+Hãy giúp tôi vẽ một QA/QC role mindmap bằng mermaid
+```
+
+**AI Output:**
+
+```markdown
+### QA/QC Role Mindmap (Mermaid)
+
+Dưới đây là sơ đồ tư duy phân rã vai trò QA/QC. Bạn có thể sao chép đoạn code này vào các trình duyệt hỗ trợ Mermaid (như GitHub, Notion, hoặc Mermaid Live Editor) để xem/chỉnh sửa trực quan.
+
+```mermaid
+mindmap
+  root((QA/QC Role
+  Software))
+    Quality Assurance
+      (Process-Oriented)
+      Prevention Focus
+        Risk Analysis
+        Requirement Review
+      Process Definition
+        SDLC Guidelines
+        Test Strategy Setup
+      Audits & Metrics
+        Process Compliance
+        Quality Metrics Analytics
+    Quality Control
+      (Product-Oriented)
+      Detection Focus
+        Defect Logging
+        Bug Life Cycle
+      Test Execution
+        Manual Testing
+        Automation Testing
+          UI Testing
+          API Testing
+        Non-functional Testing
+          Performance / Load
+          Security
+      Artifacts
+        Test Cases / Scenarios
+        Test Reports
+    Core Skills
+      Hard Skills
+        Coding / Scripting
+          Java, Python, JS
+        Database & SQL
+        Version Control Git
+      Soft Skills
+        Analytical Thinking
+        Attention to Detail
+        Communication
+        Empathy for Users
+    Tools & Ecosystem
+      Test Management
+        TestRail, Xray, Zephyr
+      Issue Tracking
+        Jira, Bugzilla, Trello
+      Automation Frameworks
+        Selenium, Cypress
+        Appium for Mobile
+        Postman for API
+      CI CD & DevOps
+        Jenkins, GitLab CI, Docker
+
+```
+
+### Timestamp: 00:30 03/06/2026
+
