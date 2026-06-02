@@ -51,5 +51,20 @@
 
 ## Section B — Student Edge Cases (AI did NOT generate these)
 
-| TC ID   | Objective | Input | Steps | Expected | Actual | Verdict |
-|---------|-----------|-------|-------|----------|--------|---------|
+> *AI was explicitly prompted to cover each sub-system's functional behavior. The three cases below fall outside that scope: they target power-cycle state recovery, cross-subsystem mechanical interaction, and an installation-context safety hazard.*
+>
+> **Screenshot evidence** (AI conversation proving these were not generated): `./assets/edge_case_evidences`
+
+| TC ID | Objective | Input / Condition | Steps | Expected | Actual | Verdict |
+|-------|-----------|-------------------|-------|----------|--------|---------|
+| EC-01 | Verify SPEED state recovery after power interruption | Mains power cut and restored while fan is running | 1. Set fan to Level 2. 2. Disconnect power (unplug or cut circuit breaker). 3. Wait 5 s. 4. Restore power. | Fan restarts at **Level 2** immediately (mechanical switch retains position). Behavior is documented and user is aware — no unexpected startup. | | |
+| EC-02 | Verify behavior when SPEED and SWING cords are actuated simultaneously | Both cords pulled at the same time (within ~0.2 s) | 1. Fan at Level 0, swing OFF. 2. Pull both SPEED and SWING cords simultaneously. | Both mechanisms engage independently with no binding, jamming, or damage. Each sub-system advances/toggles its state as if operated alone. | | |
+| EC-03 | Verify wall-mount bracket integrity under prolonged max-speed operation | Continuous Level 3 + swing ON for 10 min | 1. Install fan on wall mount normally. 2. Set Level 3 and enable swing. 3. Run continuously for 10 minutes. 4. Inspect mounting screws and bracket for loosening. | All mounting screws and bracket remain tight; no audible rattle from the mount; no visible displacement of the fan from its original mounted position. | | |
+
+### Why AI missed these edge cases
+
+| TC ID | Why AI missed it |
+|-------|-----------------|
+| EC-01 | AI generated functional tests per sub-system in isolation. It did not consider **power-cycle behavior** because the prompt described the device as an active system — the boundary condition of "mains power interruption" is an environmental / reliability concern outside the functional spec AI was given. |
+| EC-02 | AI tested each sub-system **independently**, never modeling concurrent use. The interaction of simultaneous cord pulls is an **interface / interaction test** that requires reasoning about two mechanical inputs overlapping in time — AI's test design was strictly sequential. |
+| EC-03 | AI treated the fan as a generic standalone device. The TC1626 is a **wall-mounted** product; long-term vibration loading on the mounting bracket is an **installation-context safety requirement** invisible to a model that has no knowledge of where or how the device is actually installed. |
