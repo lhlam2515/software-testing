@@ -2,13 +2,13 @@
 
 **Device:** Senko TC1626 · Wall-mounted oscillating fan  
 **Reference:** [`product_info.md`](product_info.md)  
-**Total TCs:** 18 (15 AI-baseline + 3 student edge cases)  
+**Total TCs:** 19 (15 AI-baseline + 4 student edge cases)  
 **Execution required:** ≥ 5 TCs must be executed on the real device with video recording (≤ 60 s each).
 
 > **Execution plan — TCs selected for video recording:**
-> `TC-S02`, `TC-S03`, `TC-W01`, `TC-T01`, `EC-01`
+> `TC-S03` (PASS), `TC-W01` (PASS), `TC-T01` (PASS), `TC-W03` (FAIL), `TC-W05` (FAIL)
 >
-> **Columns:** *Actual* and *Verdict* are intentionally left blank — to be filled during live execution.
+> **Criteria:** 3 PASS + 2 FAIL; each clip ≤ 60 s; all five TCs have visible, unambiguous results on camera.
 
 ---
 
@@ -21,31 +21,31 @@
 
 | TC ID   | Objective | Input | Steps | Expected | Actual | Verdict |
 |---------|-----------|-------|-------|----------|--------|---------|
-| TC-S01 | Verify step-up from OFF to Level 1 | 1 pull from powered-off state | 1. Fan at Level 0 (motor off). 2. Pull SPEED cord once. | Motor runs at Level 1 (lowest speed). | | |
-| TC-S02 | Verify sequential increase 1 → 2 → 3 | 3 consecutive pulls | 1. Fan at Level 0. 2. Pull cord 3 times (one at a time). | Each pull advances one level; speed increases visibly at each step (Level 1 → 2 → 3). | | |
-| TC-S03 | Verify loop-back to Level 0 | 4th pull from Level 3 | 1. Fan at Level 3. 2. Pull SPEED cord once. | Fan returns to Level 0 (motor off). | | |
-| TC-S05 | Verify rapid successive pulls | 2 pulls within < 1 second | 1. Fan at Level 0. 2. Pull cord twice in rapid succession. | Ratchet counts exactly 2 steps; stops at Level 2. No skipped or double-counted notch. | | |
-| TC-S06 | Verify partial-pull (incomplete stroke) | Cord pulled to ~50% of travel, then released | 1. Fan at Level 0. 2. Pull cord halfway, then release without completing the stroke. | Ratchet does NOT advance to next level OR snaps back to rest position. No jammed-between-notch state. | | |
+| TC-S01 | Verify step-up from OFF to Level 1 | 1 pull from powered-off state | 1. Fan at Level 0 (motor off). 2. Pull SPEED cord once. | Motor runs at Level 1 (lowest speed). | Motor runs at Level 1 with highest speed. | FAIL |
+| TC-S02 | Verify sequential increase 1 → 2 → 3 | 3 consecutive pulls | 1. Fan at Level 0. 2. Pull cord 3 times (one at a time). | Each pull advances one level; speed increases visibly at each step (Level 1 → 2 → 3). | Each pull advances one level; but speed decreases visibly at each step (Level 1 → 2 → 3). | FAIL |
+| TC-S03 | Verify loop-back to Level 0 | 4th pull from Level 3 | 1. Fan at Level 3. 2. Pull SPEED cord once. | Fan returns to Level 0 (motor off). | Fan returns to Level 0 (motor off). | PASS |
+| TC-S04 | Verify rapid successive pulls | 2 pulls within < 1 second | 1. Fan at Level 0. 2. Pull cord twice in rapid succession. | Ratchet counts exactly 2 steps; stops at Level 2. No skipped or double-counted notch. | Ratchet counts exactly 2 steps; stops at Level 2. No skipped or double-counted notch. | PASS |
+| TC-S05 | Verify partial-pull (incomplete stroke) | Cord pulled to ~50% of travel, then released | 1. Fan at Level 0. 2. Pull cord halfway, then release without completing the stroke. | Ratchet does NOT advance to next level OR snaps back to rest position. No jammed-between-notch state. | Ratchet does NOT advance to next level OR snaps back to rest position. No jammed-between-notch state. | PASS |
 
 ### A2 — Sub-system: SWING (left pull-cord, toggle oscillation on/off)
 
 | TC ID   | Objective | Input | Steps | Expected | Actual | Verdict |
 |---------|-----------|-------|-------|----------|--------|---------|
-| TC-W01 | Verify oscillation starts on first pull | 1 pull while swing is OFF | 1. Fan running at Level 2; swing OFF. 2. Pull SWING cord once. | Fan head begins left–right oscillation automatically. | | |
-| TC-W02 | Verify oscillation stops on second pull | 1 pull while swing is ON | 1. Fan is oscillating. 2. Pull SWING cord once. | Fan head stops oscillating and holds its current angle. | | |
-| TC-W03 | Verify oscillation sweep range and symmetry | Observe 1 complete sweep cycle after enabling | 1. Enable swing. 2. Observe one full left–right cycle. | Sweep is symmetrical on both sides; head reaches the designed angular limit on each side without stalling or overshooting. | | |
-| TC-W04 | Verify SWING independence from SPEED | Change SPEED level while swing is active | 1. Enable swing at Level 1. 2. Pull SPEED cord to switch to Level 3. | Oscillation continues uninterrupted; only airflow speed changes. | | |
-| TC-W07 | Verify smooth and quiet oscillation | Observe 10 oscillation cycles | 1. Enable swing. 2. Listen and observe 10 complete cycles. | Motion is smooth with no jerking at reversal points; no abnormal noise (grinding, clicking) at direction changes. | | |
+| TC-W01 | Verify oscillation starts on first pull | 1 pull while swing is OFF | 1. Fan running at Level 2; swing OFF. 2. Pull SWING cord once. | Fan head begins left–right oscillation automatically. | Fan head begins left–right oscillation automatically. | PASS |
+| TC-W02 | Verify oscillation stops on second pull | 1 pull while swing is ON | 1. Fan is oscillating. 2. Pull SWING cord once. | Fan head stops oscillating and holds its current angle. | Fan head stops oscillating and holds its current angle. | PASS |
+| TC-W03 | Verify oscillation sweep range and symmetry | Observe 1 complete sweep cycle after enabling | 1. Enable swing. 2. Observe one full left–right cycle. | Sweep is symmetrical on both sides; head reaches the designed angular limit on each side without stalling or overshooting. | Sweep is **asymmetrical**: amplitude deviates noticeably to the right (observer's perspective); right arc is wider than left arc. | FAIL |
+| TC-W04 | Verify SWING independence from SPEED | Change SPEED level while swing is active | 1. Enable swing at Level 1. 2. Pull SPEED cord to switch to Level 3. | Oscillation continues uninterrupted; only airflow speed changes. | Oscillation continues uninterrupted; only airflow speed changes. | PASS |
+| TC-W05 | Verify smooth and quiet oscillation | Observe 10 oscillation cycles | 1. Enable swing. 2. Listen and observe 10 complete cycles. | Motion is smooth with no jerking at reversal points; no abnormal noise (grinding, clicking) at direction changes. | Oscillation is **not smooth**: intermittent jerking observed during sweep cycles. | FAIL |
 
 ### A3 — Sub-system: TILT (neck pivot detent, vertical angle adjustment)
 
 | TC ID   | Objective | Input | Steps | Expected | Actual | Verdict |
 |---------|-----------|-------|-------|----------|--------|---------|
-| TC-T01 | Verify step-up tilt (head tilted upward) | Manual upward push, one notch at a time | 1. Head at horizontal (mid) position. 2. Push head upward one notch. | Notch engages firmly with audible/tactile click; head holds the new angle without drifting. | | |
-| TC-T02 | Verify step-down tilt (head tilted downward) | Manual downward push, one notch at a time | 1. Head at horizontal position. 2. Push head downward one notch. | Notch engages firmly with audible/tactile click; head holds the new angle. | | |
-| TC-T03 | Verify upper tilt limit (hard stop) | Push head upward past the highest notch | 1. Push head up notch by notch to the maximum position. | Head stops at the top notch; a firm mechanical stop prevents over-rotation; no joint cracking or loosening. | | |
-| TC-T04 | Verify lower tilt limit (hard stop) | Push head downward past the lowest notch | 1. Push head down notch by notch to the minimum position. | Head stops at the bottom notch; a firm mechanical stop prevents over-rotation; no joint cracking or loosening. | | |
-| TC-T05 | Verify angle hold under maximum-speed vibration | Run at Level 3 for 2 min at maximum tilt angle | 1. Set head to the highest-tilt notch. 2. Run motor at Level 3 for 2 minutes. | Head maintains the set angle throughout; no self-leveling due to vibration. | | |
+| TC-T01 | Verify step-up tilt (head tilted upward) | Manual upward push, one notch at a time | 1. Head at horizontal (mid) position. 2. Push head upward one notch. | Notch engages firmly with audible/tactile click; head holds the new angle without drifting. | Notch engages firmly with audible/tactile click; head holds the new angle without drifting. | PASS |
+| TC-T02 | Verify step-down tilt (head tilted downward) | Manual downward push, one notch at a time | 1. Head at horizontal position. 2. Push head downward one notch. | Notch engages firmly with audible/tactile click; head holds the new angle. | Notch engages firmly with audible/tactile click; head holds the new angle. | PASS |
+| TC-T03 | Verify upper tilt limit (hard stop) | Push head upward past the highest notch | 1. Push head up notch by notch to the maximum position. | Head stops at the top notch; a firm mechanical stop prevents over-rotation; no joint cracking or loosening. | Head stops at the top notch; a firm mechanical stop prevents over-rotation; no joint cracking or loosening. | PASS |
+| TC-T04 | Verify lower tilt limit (hard stop) | Push head downward past the lowest notch | 1. Push head down notch by notch to the minimum position. | Head stops at the bottom notch; a firm mechanical stop prevents over-rotation; no joint cracking or loosening. | Head stops at the bottom notch; a firm mechanical stop prevents over-rotation; no joint cracking or loosening. | PASS |
+| TC-T05 | Verify angle hold under maximum-speed vibration | Run at Level 3 for 2 min at maximum tilt angle | 1. Set head to the highest-tilt notch. 2. Run motor at Level 3 for 2 minutes. | Head maintains the set angle throughout; no self-leveling due to vibration. | Head maintains the set angle throughout; no self-leveling due to vibration. | PASS |
 
 ---
 
