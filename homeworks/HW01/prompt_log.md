@@ -1,5 +1,7 @@
 ### Timestamp: 16:45 28/05/2026
 
+**AI Tool:** `Claude Code`
+
 **Prompt:**
 
 ```text
@@ -188,4 +190,135 @@
   ---
   Tất cả 10 file đã được cập nhật. Bạn có thể verify bằng cách mở bất kỳ file
   nào trong IDE.
+```
+
+### Timestamp: 9:21 30/05/2026
+
+**AI Tool:** `Gemini`
+
+**Prompt:**
+
+```text
+For each of the following AI/LLM-related software defects, provide a structured entry
+with these exact fields:
+- Source URL (direct link to official report, CVE entry, or authoritative news article)
+- Description (2-3 sentences, technical)
+- Severity: Critical / High / Medium / Low (justify in 1 sentence)
+- Real-world consequences (who was affected, what was the impact)
+- Solution/Remediation (how was it fixed or mitigated)
+
+Defects to cover:
+1. ChatGPT hallucination in legal proceedings — Mata v. Avianca (2023)
+2. Air Canada chatbot false refund policy hallucination (2024)
+3. Samsung employee data leak via ChatGPT (2023)
+4. GitHub Copilot generating vulnerable code patterns (CWE-022, CWE-089) (2022-2023)
+5. Google Gemini racially inaccurate historical image generation (Feb 2024)
+6. Apple Intelligence false BBC news summary — Luigi Mangione (Dec 2024)
+7. DeepSeek unsecured ClickHouse database exposure (Jan 2025)
+8. Microsoft Recall plaintext screenshot capture (May 2024)
+```
+
+**AI Output:**
+
+Link to Google Docs: [AI Defects](https://docs.google.com/document/d/1vT8C7ob3IxrjK1jzGeybkERaL6ICFp5ssbk7tmPHecs/edit?usp=sharing)
+
+---
+
+### Timestamp: 9:31 30/05/2026
+
+**AI Tool:** `Gemini`
+
+**Prompt:**
+
+```text
+For each of the following software defects, provide a structured entry with these exact fields:
+- CVE ID (if applicable)
+- Source URL (CVE database entry or authoritative security advisory)
+- Description (2-3 sentences, technical root cause)
+- Severity: Critical / High / Medium / Low - state the official CVSS score and justify in 1 sentence
+- Real-world consequences (who was affected, what was the impact)
+- Solution/Remediation (how was it fixed or mitigated)
+
+Defects to cover:
+1. Log4Shell (CVE-2021-44228, actively exploited 2022)
+2. MOVEit Transfer SQL Injection first wave (CVE-2023-34362)
+3. LastPass password vault breach (2022)
+4. OpenSSL Buffer Overflow (CVE-2022-3602, 2022)
+5. Microsoft Exchange ProxyNotShell (CVE-2022-41040)
+6. Okta source code breach by Lapsus$ group (2022)
+7. XZ Utils backdoor supply chain attack (CVE-2024-3094)
+8. Citrix Bleed session token hijacking (CVE-2023-4966)
+9. Apple iOS BLASTPASS zero-click exploit (CVE-2023-41064)
+10. Microsoft Outlook zero-click RCE MonikerLink (CVE-2024-21413)
+11. CrowdStrike Falcon sensor update global BSOD (July 2024)
+12. MOVEit Transfer SQL Injection second wave (CVE-2023-35708)
+```
+
+**AI Output:**
+
+Link to Google Docs: [Software Defects](https://docs.google.com/document/d/1OlLViMr7ga0feMZNV4QDXRXjomyCLzHCJpPfR6tbRxk/edit?usp=sharing)
+
+### Timestamp: 2:08 02/06/2026
+
+**AI Tool:** `Gemini`
+
+**Prompt:**
+
+```text
+For each of the following software defects, provide a structured entry with these exact fields:
+- CVE ID
+- Source URL (CVE database entry or authoritative security advisory)
+- Description (2-3 sentences, technical root cause)
+- Severity: Critical / High / Medium / Low — state the official CVSS score and justify in 1 sentence
+- Real-world consequences (who was affected, what was the impact)
+- Solution/Remediation (how was it fixed or mitigated)
+
+Defects to cover:
+1. Ivanti Connect Secure stack buffer overflow RCE (CVE-2025-0282, Jan 2025)
+2. SAP NetWeaver Visual Composer unauthenticated file upload RCE (CVE-2025-31324, Apr 2025)
+3. Windows Common Log File System (CLFS) driver zero-day privilege escalation (CVE-2025-29824, Apr 2025)
+4. Next.js middleware authentication bypass via x-middleware-subrequest header (CVE-2025-29927, Mar 2025)
+5. OpenClaw (aka clawdbot or Moltbot) WebSocket token leakage via unvalidated URL parameter (CVE-2026-25253, Jan 2026)
+6. Linux kernel crypto algif_aead memory boundary fix (CVE-2026-31431)
+
+```
+
+**AI Output:**
+
+Link to Google Docs: [Recent Defects](https://docs.google.com/document/d/18jBCyQNRm1YA8i7rKfHq7hjTSOBswC2CH1cjNDkMCkY/edit?usp=sharing)
+
+### Timestamp: 9:15 02/06/2026
+
+**AI Tool:** `Gemini`
+
+**Prompt:**
+
+```text
+Decribe the XZ Utils backdoor (CVE-2024-3094) as a software defect entry using exactly this format:
+
+- CVE ID
+- Source URL (CVE database entry or authoritative security advisory)
+- Description (2-3 sentences, technical root cause)
+- Severity: Critical / High / Medium / Low — state the official CVSS score and justify in 1 sentence
+- Real-world consequences (who was affected, what was the impact)
+- Solution/Remediation (how was it fixed or mitigated)
+
+Be specific and technical. Include details about: who introduced the backdoor, how it was injected, which systems were affected, how it was discovered, and what the actual impact was.
+```
+
+**AI Output:**
+
+```markdown
+Here is the structured software defect entry for the XZ Utils supply chain compromise, following your exact specifications.
+
+---
+
+## XZ Utils Upstream Supply Chain Compromise
+
+* **CVE ID:** CVE-2024-3094
+* **Source URL:** [https://nvd.nist.gov/vuln/detail/CVE-2024-3094](https://nvd.nist.gov/vuln/detail/CVE-2024-3094)
+* **Description:** The defect is a deliberately engineered backdoor injected into the upstream `xz` repository build infrastructure. During compilation, a malicious `build-to-host.m4` macro executes a multi-stage decoding script that extracts a hidden binary payload from ostensibly benign test compression files (`bad-3-corrupt_lzma2.xz` and `good-large_compressed.lzma`). This payload is statically woven into the resulting `liblzma` shared library, intercepting symbols and using glibc's `IFUNC` mechanism to substitute OpenSSL's cryptographic verification routines (`RSA_public_decrypt`) with malicious code when loaded by an active OpenSSH daemon (`sshd`).
+* **Severity:** Critical — CVSS Score: 10.0. The flaw receives the maximum possible severity rating because it enables remote, unauthenticated attackers to execute arbitrary system commands via public-key authentication payloads without leaving a trace in system logs.
+* **Real-world consequences:** A malicious contributor operating under the persona **"Jia Tan" (JiaT75)** spent over two years gaining project maintainer status through social engineering before embedding the backdoor into versions 5.6.0 and 5.6.1 of XZ Utils. The compromised packages were pulled into rolling-release and bleeding-edge Linux distributions, including Debian (testing/unstable), Fedora 41/Rawhide, openSUSE Tumbleweed, and Kali Linux. Microsoft engineer Andres Freund discovered the backdoor entirely by accident after noticing that `sshd` processes were consuming unexpected CPU cycles and suffering a minor 500ms login latency during routine database performance micro-benchmarks. Because it was intercepted during the distribution testing phase, the backdoor was caught right before making its way into stable enterprise Linux distributions, completely averting what would have been a catastrophic, global remote-access vector across millions of internet-facing servers.
+* **Solution/Remediation:** Linux distribution maintainers immediately purged the 5.6.0 and 5.6.1 upstream tarballs and forced mandatory package downgrades to known-safe legacy baselines (such as XZ Utils 5.4.6 Stable). System administrators running affected instances were advised to roll back package manager states or rebuild environments from fresh installations. Long-term defense necessitated updating continuous integration pipelines to strip unauthorized pre-built binary components from source distribution archives and tightening organizational vetting for third-party open-source project maintainership changes.
 ```
