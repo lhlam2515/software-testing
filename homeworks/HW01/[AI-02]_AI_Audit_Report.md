@@ -155,13 +155,14 @@ Verdicts were assigned by degree of JD deviation: VALID when every claim mapped 
 
 #### (4) Reasoning (ISTQB)
 
-The prompt explicitly scoped AI to "functional testing of each sub-system" — so the AI produced a solid set of **functional black-box tests** (equivalence partitioning, boundary values at level transitions and tilt limits, endurance/durability cases). However, the test set is INCOMPLETE on three axes that ISTQB FL distinguishes from pure functional testing:
+The prompt explicitly scoped AI to "functional testing of each sub-system" — so the AI produced a solid set of **functional black-box tests** (equivalence partitioning, boundary values at level transitions and tilt limits, endurance/durability cases). However, the test set is INCOMPLETE on four axes that ISTQB FL distinguishes from pure functional testing:
 
 1. **Non-functional / reliability testing (ISTQB FL §2.3):** The prompt contained no power-cycle scenario; AI never considered that the SPEED ratchet switch is mechanical and retains state across power loss — a reliability concern outside the stated functional spec.
 2. **Interface and interaction testing (ISTQB FL §4.4):** AI tested each sub-system in strict isolation. It did not model concurrent actuation of SPEED and SWING cords, which is an interface interaction between two independent mechanical inputs.
 3. **Implicit requirements from deployment context (ISTQB FL §1.1 — "implicit requirements"):** AI treated the device as a generic fan. The TC1626 is wall-mounted; vibration-induced bracket loosening is a real-world safety requirement that only surfaces when the installation context is known — information absent from the prompt.
+4. **State transition with unexpected input sequences (ISTQB FL §4.2.4):** TC-W04 confirmed SWING independence from a single SPEED change. AI never modeled rapid repeated SPEED actuation during active oscillation. This targets a timing interaction: each rapid cord pull creates an impulse force; under ≥ 3 successive pulls, accumulated torque fluctuations couple into the oscillation cam mechanism and can trigger a mid-sweep direction reversal. ISTQB FL §4.2.4 requires state transition coverage to include unexpected input sequences, not only the nominal single-input scenario.
 
-Verdict: **INCOMPLETE** — the AI-baseline is correct and useful, but not sufficient without the three student-added edge cases.
+Verdict: **INCOMPLETE** — the AI-baseline is correct and useful, but not sufficient without the four student-added edge cases.
 
 #### (5) Student Fix
 
@@ -172,8 +173,9 @@ Verdict: **INCOMPLETE** — the AI-baseline is correct and useful, but not suffi
 | EC-01 | Verify SPEED state recovery after power interruption | Mains power cut and restored while fan is at Level 2 | AI scoped to functional behavior; power-cycle state recovery is a reliability/non-functional concern outside the prompt scope. |
 | EC-02 | Verify behavior when SPEED and SWING cords are pulled simultaneously | Both cords actuated within ~0.2 s of each other | AI tested sub-systems in isolation; concurrent input interaction was never modeled. |
 | EC-03 | Verify wall-mount bracket integrity under prolonged max-speed + swing operation | Level 3 + swing ON, 10 min continuous run, inspect mounting screws | AI had no knowledge of the wall-mounted installation context; vibration-induced bracket loosening is an implicit real-world safety requirement. |
+| EC-04 | Verify oscillation direction is not reversed mid-sweep by rapid SPEED level transitions | SWING ON; SPEED cord pulled ≥ 3 times in rapid succession (~1 pull/second) while head is mid-sweep | TC-W04 only tested a single SPEED change; AI never modeled rapid repeated SPEED actuation. |
 
-Full student-fixed test cases (EC-01…EC-03 with complete 6-column format): see [`artifacts/physical-product-testing/test_cases.md`](artifacts/physical-product-testing/test_cases.md) — **Section B**.
+Full student-fixed test cases (EC-01…EC-04 with complete 6-column format): see [`artifacts/physical-product-testing/test_cases.md`](artifacts/physical-product-testing/test_cases.md) — **Section B**.
 
 ---
 
