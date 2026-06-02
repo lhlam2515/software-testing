@@ -2,35 +2,39 @@
 
 ```mermaid
 mindmap
-  root((QA/QC Role
-  Software))
+  root((Testing & QA
+  Ecosystem))
     Quality Assurance
       (Process-Oriented)
-      Prevention Focus
-        Risk Analysis
-        Requirement Review
       Process Definition
         SDLC Guidelines
         Test Strategy Setup
       Audits & Metrics
         Process Compliance
         Quality Metrics Analytics
-    Quality Control
+    Testing & QC
       (Product-Oriented)
-      Detection Focus
-        Defect Logging
-        Bug Life Cycle
-      Test Execution
-        Manual Testing
-        Automation Testing
-          UI Testing
-          API Testing
+      Static Testing
+        Document Review
+          Requirements & Design
+        Static Code Analysis
+      Dynamic Testing Process
+        Planning & Control
+        Analysis & Design
+          Test Conditions
+          Test Cases Generation
+        Implementation & Execution
+          Manual Execution
+          Automation Execution
+        Completion
+      Test Types
+        Functional Testing
         Non-functional Testing
           Performance / Load
           Security
-      Artifacts
-        Test Cases / Scenarios
-        Test Reports
+      Defect Management
+        Defect Logging
+        Defect Life Cycle
     Core Skills
       Hard Skills
         Coding / Scripting
@@ -41,13 +45,13 @@ mindmap
         Analytical Thinking
         Attention to Detail
         Communication
-        Empathy for Users
+        Traceability Focus
     Tools & Ecosystem
       Test Management
         TestRail, Xray, Zephyr
       Issue Tracking
         Jira, Bugzilla, Trello
-      Automation Frameworks
+      Automation & Execution
         Selenium, Cypress
         Appium for Mobile
         Postman for API

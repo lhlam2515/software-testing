@@ -20,8 +20,8 @@ CS423 / CSC13003 – Software Testing (AI-augmented · 2026)
 | Student ID:             | 23127216                                |
 | Class / Cohort:         | 23KTPM1                                 |
 | Assignment ID:          | HW#01                                   |
-| Assignment date:        |                                         |
-| AI tool(s) used:        | Claude Code                             |
+| Assignment date:        | 03/06/2026                              |
+| AI tool(s) used:        | Claude Code, Claude, Gemini             |
 | AI tool(s) used:        | [X] Yes [ ] No                          |
 
 ---
@@ -47,41 +47,34 @@ CS423 / CSC13003 – Software Testing (AI-augmented · 2026)
 
 #### (1) Prompt + Tool
 
-> **Tool:** <!-- e.g. Claude / ChatGPT / Gemini -->  
-> **Time:** <!-- HH:MM DD/MM/YYYY -->  
-> **Prompt:**
->
-> ```
-> [Paste the verbatim prompt here — do not paraphrase]
-> ```
+**Tool:** `Gemini`  
+**Time:** 00:30 03/06/2026  
+**Prompt:**
+> Hãy giúp tôi vẽ một QA/QC role mindmap bằng mermaid
 
 #### (2) AI Output
 
-<!-- Paste verbatim AI output below, OR replace this comment with a red-bordered screenshot embedded as: ![Artifact #1 output](assets/<filename>.png) -->
-
-```
-[Paste verbatim AI output here]
-```
+> See in [Prompt Log](prompt_log.md) for the full AI output.
 
 #### (3) Verdict
 
 **[ ] VALID** — correct and accepted as-is  
 **[ ] INVALID** — wrong; rejected  
-**[x] INCOMPLETE** — acceptable after edits ← *(mark the one that applies)*
+**[x] INCOMPLETE** — acceptable after edits
 
 #### (4) Reasoning (ISTQB)
 
-<!-- 2–5 sentences. Cite the matching course slide number or ISTQB FL syllabus section. Example: "The mindmap omitted the ISTQB concept of 'independence of testing' (FL §3.2). Per slide 07-Testing-Principles, independence is a key factor distinguishing a QA role from a Developer role…" -->
+- The AI-generated mindmap misclassified "Requirement Review" under Quality Assurance (Prevention Focus), whereas ISTQB defines document review as a core part of Static Testing.
+- Secondly, it incorrectly placed "Non-functional Testing" as an execution method alongside Manual and Automation, failing to recognize it as a distinct Test Type.
+- Finally, the mindmap jumped straight to "Test Execution," entirely omitting crucial preceding phases like Test Analysis and Test Design, which are mandatory in the seven fundamental testing activities. Additionally, it used the colloquial term "Bug Life Cycle" instead of the standard "Defect Management"
 
 #### (5) Student Fix
 
-<!-- Show the corrected mindmap or list of corrections. Use **bold** or ~~strikethrough~~ to highlight every change. -->
-
-| #   | AI-generated item | Issue | Corrected item |
-| --- | ----------------- | ----- | -------------- |
-| 1   |                   |       |                |
-| 2   |                   |       |                |
-| 3   |                   |       |                |
+| # | AI-generated item | Issue | Corrected item |
+| --- | --- | --- | --- |
+| 1 | `Requirement Review` (under QA branch) | Reviewing requirements is structurally a Static Testing activity, not merely a process-oriented QA prevention task. | Moved under a new **Static Testing -> Document Review** node within the QC/Testing branch. |
+| 2 | `Non-functional Testing` (under Test Execution) | Non-functional testing is a Test Type, not an execution method parallel to manual or automation execution. | Separated into a distinct **Test Types** branch. |
+| 3 | `Test Execution` and `Bug Life Cycle` | Omits the fundamental testing activities (e.g., Analysis, Design) and uses non-standard terminology. | Replaced with ~~Test Execution~~ **Dynamic Testing Process (Analysis & Design, Implementation & Execution)** and ~~Bug Life Cycle~~ **Defect Management**. |
 
 ---
 
