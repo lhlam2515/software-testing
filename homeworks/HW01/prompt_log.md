@@ -322,3 +322,71 @@ Here is the structured software defect entry for the XZ Utils supply chain compr
 * **Real-world consequences:** A malicious contributor operating under the persona **"Jia Tan" (JiaT75)** spent over two years gaining project maintainer status through social engineering before embedding the backdoor into versions 5.6.0 and 5.6.1 of XZ Utils. The compromised packages were pulled into rolling-release and bleeding-edge Linux distributions, including Debian (testing/unstable), Fedora 41/Rawhide, openSUSE Tumbleweed, and Kali Linux. Microsoft engineer Andres Freund discovered the backdoor entirely by accident after noticing that `sshd` processes were consuming unexpected CPU cycles and suffering a minor 500ms login latency during routine database performance micro-benchmarks. Because it was intercepted during the distribution testing phase, the backdoor was caught right before making its way into stable enterprise Linux distributions, completely averting what would have been a catastrophic, global remote-access vector across millions of internet-facing servers.
 * **Solution/Remediation:** Linux distribution maintainers immediately purged the 5.6.0 and 5.6.1 upstream tarballs and forced mandatory package downgrades to known-safe legacy baselines (such as XZ Utils 5.4.6 Stable). System administrators running affected instances were advised to roll back package manager states or rebuild environments from fresh installations. Long-term defense necessitated updating continuous integration pipelines to strip unauthorized pre-built binary components from source distribution archives and tightening organizational vetting for third-party open-source project maintainership changes.
 ```
+
+### Timestamp : 16:08 02/06/2026
+
+**AI Tool:** `Claude`
+
+**Prompt:**
+
+```text
+Tôi đang thực hiện bài tập thiết kế kịch bản kiểm thử hộp đen cho một thiết bị gia dụng trực quan. Thiết bị là một chiếc quạt treo tường hiệu Senko, Model TC1626. Thiết bị này có cấu trúc điều khiển và vận hành gồm ba phân hệ chính:
+
+1. Dây giật bên phải (SPEED): Điều khiển tốc độ gió theo vòng lặp tuần hoàn cơ học (Mức 0 -> 1 -> 2 -> 3 -> 0).
+2. Dây giật bên trái (SWING): Điều khiển bật/tắt chế độ đảo gió tự động sang hai bên trái/phải.
+3. Khớp nối cổ quạt (TILT): Cơ chế nấc lẫy cơ học giữa thân quạt và cụm mô-tơ, cho phép dùng tay bẻ đầu quạt ngẩng lên hoặc gập xuống theo các khấc cố định để chỉnh hướng dọc.
+Yêu cầu về cấu trúc đầu ra: Hãy đóng vai một chuyên gia QA/QC và tạo ra danh sách các test cases tiêu chuẩn để kiểm tra chức năng của từng phân hệ trên. Kết quả đầu ra bắt buộc phải trình bày dưới dạng bảng gồm chính xác 6 cột sau:
+
+* Objective: Mục tiêu kiểm thử.
+* Input: Dữ liệu/Tác động đầu vào.
+* Steps: Các bước thực hiện tuần tự.
+* Expected: Kết quả mong đợi theo thiết kế.
+* Actual: Kết quả thực tế (Yêu cầu: Để trống cột này, không tự ý điền).
+* Verdict: Đánh giá Đạt/Không đạt (Yêu cầu: Để trống cột này, không tự ý điền).
+```
+
+**AI Output:**
+
+```markdown
+# Test Cases – Quạt treo tường Senko TC1626
+
+## Phân hệ 1: Dây giật SPEED (vòng lặp 0→1→2→3→0)
+
+| Objective | Input | Steps | Expected | Actual | Verdict |
+|---|---|---|---|---|---|
+| Kiểm tra chuyển mức từ 0 lên 1 | 1 lần giật từ trạng thái tắt | 1. Quạt ở Mức 0 (tắt)<br>2. Giật dây SPEED 1 lần | Mô-tơ chạy ở Mức 1 (tốc độ thấp nhất) | | |
+| Kiểm tra tăng tuần tự 1→2→3 | 3 lần giật liên tiếp | 1. Quạt ở Mức 0<br>2. Giật lần 1 → 2 → 3 | Lần lượt đạt Mức 1, Mức 2, Mức 3; tốc độ tăng dần | | |
+| Kiểm tra vòng lặp về 0 | Giật lần thứ 4 | 1. Quạt đang ở Mức 3<br>2. Giật dây SPEED 1 lần | Quạt trở về Mức 0 (tắt hoàn toàn) | | |
+| Kiểm tra tính tuần hoàn liên tục | 8 lần giật liên tiếp | 1. Bắt đầu từ Mức 0<br>2. Giật 8 lần | Hoàn thành đúng 2 chu kỳ, kết thúc tại Mức 0 | | |
+| Kiểm tra giật nhanh liên tiếp | 2 lần giật trong <1 giây | 1. Quạt ở Mức 0<br>2. Giật nhanh 2 lần | Đếm đúng 2 nấc, dừng ở Mức 2, không bỏ nấc/nhảy nấc | | |
+| Kiểm tra giật không dứt khoát | Kéo dây nửa hành trình rồi thả | 1. Quạt ở Mức 0<br>2. Kéo dây ~50% hành trình, thả ra | Cơ cấu không đổi mức HOẶC nhả về vị trí cũ; không kẹt giữa hai nấc | | |
+| Kiểm tra độ ổn định tốc độ | Duy trì mỗi mức 60 giây | 1. Đặt lần lượt Mức 1, 2, 3<br>2. Quan sát mỗi mức 60s | Tốc độ gió ổn định, không tự thay đổi/chập chờn | | |
+| Kiểm tra lực giật và độ bền cơ cấu | 50 chu kỳ giật | 1. Lặp lại giật qua 4 mức × 50 lần | Lực giật ổn định, không trượt nấc, dây không đứt/kẹt | | |
+
+## Phân hệ 2: Dây giật SWING (bật/tắt đảo gió)
+
+| Objective | Input | Steps | Expected | Actual | Verdict |
+|---|---|---|---|---|---|
+| Kiểm tra bật chế độ đảo gió | 1 lần giật khi đang tắt swing | 1. Quạt chạy Mức 2, swing OFF<br>2. Giật dây SWING 1 lần | Đầu quạt bắt đầu đảo trái/phải tự động | | |
+| Kiểm tra tắt chế độ đảo gió | 1 lần giật khi đang bật swing | 1. Quạt đang đảo gió<br>2. Giật dây SWING 1 lần | Đầu quạt ngừng đảo, đứng yên tại vị trí hiện tại | | |
+| Kiểm tra biên độ đảo trái/phải | Bật swing, quan sát 1 chu kỳ | 1. Bật swing<br>2. Quan sát góc quét hai bên | Biên độ quét đối xứng, đủ rộng theo thiết kế, dừng đúng giới hạn hai biên | | |
+| Kiểm tra độc lập với SPEED | Đổi mức tốc độ khi đang swing | 1. Bật swing ở Mức 1<br>2. Giật SPEED đổi sang Mức 3 | Đảo gió vẫn duy trì; chỉ tốc độ gió thay đổi | | |
+| Kiểm tra swing khi quạt tắt (Mức 0) | Giật SWING khi mô-tơ gió tắt | 1. Quạt ở Mức 0<br>2. Giật dây SWING | Cơ cấu swing đóng/mở theo thiết kế nhưng không có gió; đầu quạt có/không đảo tùy cơ cấu | | |
+| Kiểm tra duy trì trạng thái swing khi tắt/bật gió | Tắt rồi bật lại quạt | 1. Bật swing + Mức 2<br>2. Giật SPEED về 0 rồi quay lại Mức 1 | Trạng thái swing được giữ/ngắt đúng theo thiết kế cơ khí của model | | |
+| Kiểm tra độ êm khi đảo gió | Quan sát 10 chu kỳ đảo | 1. Bật swing<br>2. Quan sát/lắng nghe | Chuyển động mượt, không giật cục, không tiếng kêu bất thường tại điểm đảo chiều | | |
+
+## Phân hệ 3: Khớp nối cổ quạt TILT (nấc lẫy chỉnh hướng dọc)
+
+| Objective | Input | Steps | Expected | Actual | Verdict |
+|---|---|---|---|---|---|
+| Kiểm tra ngẩng đầu lên từng nấc | Bẻ đầu quạt hướng lên | 1. Đầu quạt ở vị trí ngang<br>2. Dùng tay bẻ ngẩng lên từng khấc | Mỗi khấc giữ chắc, có tiếng/cảm giác "tách" định vị rõ ràng | | |
+| Kiểm tra gập đầu xuống từng nấc | Bẻ đầu quạt hướng xuống | 1. Đầu quạt ở vị trí ngang<br>2. Bẻ gập xuống từng khấc | Mỗi khấc xuống giữ chắc, định vị rõ ràng | | |
+| Kiểm tra giới hạn nấc trên cùng | Bẻ vượt nấc cao nhất | 1. Bẻ đầu quạt lên hết tầm | Dừng tại nấc cuối, có chặn cứng, không gãy/lỏng khớp | | |
+| Kiểm tra giới hạn nấc dưới cùng | Bẻ vượt nấc thấp nhất | 1. Bẻ đầu quạt xuống hết tầm | Dừng tại nấc cuối, có chặn cứng, không gãy/lỏng khớp | | |
+| Kiểm tra độ giữ vị trí khi chạy | Vận hành ở góc nghiêng tối đa | 1. Đặt đầu nghiêng nấc cao nhất<br>2. Chạy Mức 3 trong 2 phút | Đầu quạt giữ nguyên góc, không tự tụt do rung động | | |
+| Kiểm tra giữ vị trí khi kết hợp swing | Tilt nghiêng + swing bật | 1. Nghiêng đầu lên 1 nấc<br>2. Bật swing + Mức 3 | Góc dọc giữ ổn định trong khi đảo ngang; khớp không lỏng dần | | |
+| Kiểm tra độ bền lẫy cơ khí | 30 chu kỳ bẻ lên–xuống | 1. Bẻ qua toàn bộ dải nấc 30 lần | Lực giữ mỗi nấc không suy giảm rõ rệt, không trờn nấc | | |
+| Kiểm tra lực bẻ phù hợp | Cảm nhận lực tay | 1. Bẻ đầu quạt qua các nấc | Lực vừa phải: đủ chặt để giữ, đủ nhẹ để chỉnh bằng tay không cần dụng cụ | | |
+
+**Lưu ý kiểm thử:** Một số test case (đặc biệt CTC swing khi Mức 0 và giữ trạng thái swing khi tắt/bật gió) phụ thuộc vào thiết kế cơ khí cụ thể của TC1626 — cần xác nhận với tài liệu kỹ thuật/nhà sản xuất để chốt Expected chính xác trước khi chạy.
+```
