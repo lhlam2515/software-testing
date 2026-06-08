@@ -1,4 +1,33 @@
-﻿* commit 6bea2a46146c50e66585a9d53b7b2246f0fdec49
+﻿* commit c1b5c750d639544555068b6b0bb47ac8ede45d37
+| Author: VVVu1511 <161138657+VVVu1511@users.noreply.github.com>
+| Date:   Mon Jun 8 15:57:59 2026 +0700
+| 
+|     Translate HW02 reports to English
+| 
+|  23127543_HW02_AI_DomainTesting_100/README.md      | 14 ++--
+|  .../agent_skill/bva_skill.md                      | 44 +++++------
+|  .../agent_skill/demo_videos.md                    | 10 +--
+|  .../agent_skill/domain_testing_skill.md           | 46 +++++------
+|  .../ai/ai_audit_report.md                         |  8 +-
+|  .../ai/ai_critique.md                             |  9 ++-
+|  .../bug_report/bug_report.md                      | 54 ++++++-------
+|  .../features/feature_A_FR04_profile.md            | 80 ++++++++++----------
+|  .../features/feature_B_FR08_checkout.md           | 82 ++++++++++----------
+|  .../feature_C_FR18_admin_order_management.md      | 80 ++++++++++----------
+|  .../features/feature_D_mobile_selected.md         | 84 ++++++++++-----------
+|  23127543_HW02_AI_DomainTesting_100/main_report.md | 38 +++++-----
+|  12 files changed, 275 insertions(+), 274 deletions(-)
+| 
+* commit bf8eb1a3d771ade5a3df690aebdc1ea5f03693d1
+| Author: VVVu1511 <161138657+VVVu1511@users.noreply.github.com>
+| Date:   Mon Jun 8 15:49:48 2026 +0700
+| 
+|     Refresh student folder commit log
+| 
+|  .../git_commit_log.txt                            | 642 +++++++++++++++++++-
+|  1 file changed, 641 insertions(+), 1 deletion(-)
+| 
+* commit 6bea2a46146c50e66585a9d53b7b2246f0fdec49
 | Author: VVVu1511 <161138657+VVVu1511@users.noreply.github.com>
 | Date:   Mon Jun 8 15:49:01 2026 +0700
 | 
