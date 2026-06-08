@@ -127,6 +127,35 @@ Screenshot placeholder: `bug_report/screenshots/BUG-05.png`
 ### GitHub Issue Link
 To be filled after creating issue.
 
+## BUG-FR04-01: Confirmed bug - Profile phone validation does not follow FR-04
+
+**Feature:** FR-04  
+**Severity:** High  
+**Environment:** Windows, Chrome, localhost, EShop SUT  
+**Related Test Case:** FR04-DT-01, FR04-DT-03, FR04-DT-04, FR04-DT-05  
+**Status:** Confirmed by screenshot evidence
+
+### Steps to Reproduce
+1. Log in as a normal user and open the Profile page.
+2. Enter valid phone values starting with `0`, such as `0912345678` or `09123456789`, then click Update.
+3. Enter an invalid phone value not starting with `0`, such as `9123456789`, then click Update.
+
+### Expected Result
+Phone numbers starting with `0` and containing 10-11 digits are accepted. Phone numbers not starting with `0` are rejected.
+
+### Actual Result
+The UI rejects valid phone numbers `0912345678` and `09123456789` with an invalid-phone message requiring 9-10 digits. The UI accepts `9123456789` even though it does not start with `0`.
+
+### Evidence
+Screenshot placeholders:
+- `evidence/test_execution_screenshots/FR04-DT-01.png`
+- `evidence/test_execution_screenshots/FR04-DT-03.png`
+- `evidence/test_execution_screenshots/FR04-DT-04.png`
+- `evidence/test_execution_screenshots/FR04-DT-05.png`
+
+### GitHub Issue Link
+To be filled after creating issue.
+
 ## BUG-XX: [Short title]
 
 **Feature:** FR-XX  
