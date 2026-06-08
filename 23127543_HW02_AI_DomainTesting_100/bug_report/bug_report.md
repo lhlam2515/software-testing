@@ -1,4 +1,4 @@
-# Bug Report - HW02 Domain Testing
+﻿# Bug Report - HW02 Domain Testing
 
 Các mục dưới đây là mẫu ghi nhận lỗi sau khi thực thi. Không có lỗi nào được xác nhận vì chưa chạy test thủ công. Những mục có căn cứ từ inspect code/spec được đánh dấu **Potential bug - needs execution confirmation**.
 

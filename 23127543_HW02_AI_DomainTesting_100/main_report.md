@@ -1,4 +1,4 @@
-# HW02 - Domain Testing on EShop
+﻿# HW02 - Domain Testing on EShop
 
 ## 1. Introduction
 Báo cáo này trình bày thiết kế kiểm thử Domain Testing và Boundary Value Analysis cho EShop SUT. Phạm vi tập trung vào 4 feature thuộc 4 pool: hồ sơ cá nhân, checkout, quản lý đơn hàng admin và một chức năng mobile được chọn sau khi inspect repo. Các test case chưa được thực thi, vì vậy `Actual Result` và `Verdict` đang để `Not Executed`.

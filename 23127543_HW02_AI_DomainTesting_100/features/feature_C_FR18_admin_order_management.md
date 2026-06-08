@@ -1,4 +1,4 @@
-# FR-18 - Quản lý đơn hàng Admin
+﻿# FR-18 - Quản lý đơn hàng Admin
 
 ## 1. Feature Overview
 FR-18 cho phép admin xem toàn bộ đơn hàng của tất cả người dùng và cập nhật trạng thái đơn hàng. Đây là chức năng vận hành quan trọng vì ảnh hưởng trực tiếp đến quy trình xác nhận, giao hàng, hoàn tất và hủy đơn.

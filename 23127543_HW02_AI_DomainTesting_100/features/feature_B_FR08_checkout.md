@@ -1,4 +1,4 @@
-# FR-08 - Thanh toán
+﻿# FR-08 - Thanh toán
 
 ## 1. Feature Overview
 FR-08 xử lý bước đặt hàng cuối cùng của khách hàng. Chức năng này chuyển giỏ hàng thành đơn hàng, hiển thị danh sách sản phẩm đặt mua, tự tính tổng tiền và xóa giỏ hàng sau khi thanh toán thành công.

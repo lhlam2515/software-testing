@@ -1,4 +1,4 @@
-# BVA Skill
+﻿# BVA Skill
 
 ## Mục tiêu
 Tạo quy trình tái sử dụng để thiết kế Boundary Value Analysis cho feature có biến số, độ dài chuỗi, danh sách, trạng thái hoặc ngưỡng nghiệp vụ.

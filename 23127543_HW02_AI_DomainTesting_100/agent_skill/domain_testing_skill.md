@@ -1,4 +1,4 @@
-# Domain Testing Skill
+﻿# Domain Testing Skill
 
 ## Mục tiêu
 Tạo quy trình tái sử dụng để thiết kế test case Domain Testing cho một feature của EShop hoặc hệ thống tương tự.

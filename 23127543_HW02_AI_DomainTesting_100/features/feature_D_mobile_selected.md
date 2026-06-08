@@ -1,4 +1,4 @@
-# FR-20 - Mobile Checkout
+﻿# FR-20 - Mobile Checkout
 
 ## 1. Feature Overview
 Feature D được chọn là **Mobile Checkout** trong FR-20. Đây là luồng thanh toán trên ứng dụng React Native/Expo, cho phép người dùng di động xem giỏ hàng, áp dụng mã giảm giá nếu có và xác nhận đặt hàng.

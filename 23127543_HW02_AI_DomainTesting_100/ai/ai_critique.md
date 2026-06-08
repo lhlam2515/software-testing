@@ -1,4 +1,4 @@
-# AI Critique
+﻿# AI Critique
 
 AI hữu ích trong giai đoạn đầu của bài HW02 vì có thể nhanh chóng tạo cấu trúc báo cáo, bảng test case, nhóm miền hợp lệ/không hợp lệ và đề xuất các giá trị biên cơ bản. Với các feature như FR-04, FR-08, FR-18 và FR-20 Mobile Checkout, AI giúp tiết kiệm thời gian soạn khung tài liệu và nhắc lại các loại ca kiểm thử phổ biến: dữ liệu hợp lệ, dữ liệu rỗng, thiếu đăng nhập, dữ liệu sai định dạng và kiểm tra thông báo lỗi.
 

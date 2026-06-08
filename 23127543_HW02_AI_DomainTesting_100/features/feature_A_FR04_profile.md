@@ -1,4 +1,4 @@
-# FR-04 - Quản lý hồ sơ cá nhân
+﻿# FR-04 - Quản lý hồ sơ cá nhân
 
 ## 1. Feature Overview
 FR-04 cho phép người dùng đã đăng nhập cập nhật thông tin hồ sơ cá nhân như họ tên, số điện thoại và địa chỉ giao hàng mặc định. Mục đích nghiệp vụ là giúp khách hàng duy trì thông tin liên hệ chính xác để hệ thống giao hàng và hỗ trợ sau bán hàng.
