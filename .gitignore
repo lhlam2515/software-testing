@@ -82,3 +82,4 @@ reports/
 
 # ===== CLAUDE CONFIG =====
 audit_config.json
+context/transcripts/

@@ -5,17 +5,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/audit_logger.py"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-           {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/audit_logger.py"
+            "command": "node .claude/hooks/prompt-capture.js",
+            "async": true
           }
         ]
       }
@@ -25,7 +16,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/audit_logger.py"
+            "command": "node .claude/hooks/transcript-capture.js",
+            "async": true
           }
         ]
       }
