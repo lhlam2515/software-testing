@@ -1,4 +1,4 @@
-﻿# HW02 - Domain Testing on EShop
+# HW02 - Domain Testing on EShop
 
 ## Student Information
 - Student ID: [Fill later]
@@ -9,9 +9,9 @@
 ## Selected Features
 | Pool | Feature ID | Feature Name |
 |---|---|---|
-| A | FR-04 | Quản lý hồ sơ cá nhân |
-| B | FR-08 | Thanh toán |
-| C | FR-18 | Quản lý đơn hàng Admin |
+| A | FR-04 | Personal Profile Management |
+| B | FR-08 | Checkout |
+| C | FR-18 | Admin Order Management |
 | D | FR-20 | Mobile Checkout |
 
 ## Test Summary
@@ -40,7 +40,7 @@
 - Test execution demo: [Fill later]
 
 ## Notes
-- Các test cases hiện đang ở trạng thái `Not Executed`.
-- Bug report chỉ ghi nhận potential bugs cần xác nhận bằng thực thi.
-- Evidence folders đã có placeholder để bổ sung screenshot sau khi chạy test.
+- All test cases are currently marked as `Not Executed`.
+- The bug report only lists potential bugs that still need execution confirmation.
+- Evidence folders contain placeholders for screenshots after manual test execution.
 

@@ -1,8 +1,8 @@
-﻿# Bug Report - HW02 Domain Testing
+# Bug Report - HW02 Domain Testing
 
-Các mục dưới đây là mẫu ghi nhận lỗi sau khi thực thi. Không có lỗi nào được xác nhận vì chưa chạy test thủ công. Những mục có căn cứ từ inspect code/spec được đánh dấu **Potential bug - needs execution confirmation**.
+The entries below are templates for defects found during execution. No bug has been confirmed because manual test execution has not been performed. Items supported by code/spec inspection are marked as **Potential bug - needs execution confirmation**.
 
-## BUG-01: Potential bug - API cập nhật profile có thể cho đổi role
+## BUG-01: Potential bug - Profile API may allow role changes
 
 **Feature:** FR-04  
 **Severity:** Critical  
@@ -11,12 +11,12 @@ Các mục dưới đây là mẫu ghi nhận lỗi sau khi thực thi. Không c
 **Status:** Potential bug - needs execution confirmation
 
 ### Steps to Reproduce
-1. Đăng nhập bằng tài khoản user thường.
-2. Gửi `PUT /api/users/me` với body có `role: "admin"`.
-3. Gọi lại API lấy thông tin user hoặc truy cập admin API.
+1. Log in with a regular user account.
+2. Send `PUT /api/users/me` with a body containing `role: "admin"`.
+3. Call the user-info API again or try accessing an admin API.
 
 ### Expected Result
-Backend không cho phép user tự thay đổi `role`; trả lỗi hoặc bỏ qua trường `role`.
+The backend must not allow a user to change their own `role`; it should reject the field or ignore it.
 
 ### Actual Result
 To be filled after execution.
@@ -27,7 +27,7 @@ Screenshot placeholder: `bug_report/screenshots/BUG-01.png`
 ### GitHub Issue Link
 To be filled after creating issue.
 
-## BUG-02: Potential bug - Checkout backend có thể tin `total_amount` từ client
+## BUG-02: Potential bug - Checkout backend may trust client-provided `total_amount`
 
 **Feature:** FR-08 / FR-20 Mobile Checkout  
 **Severity:** Critical  
@@ -36,12 +36,12 @@ To be filled after creating issue.
 **Status:** Potential bug - needs execution confirmation
 
 ### Steps to Reproduce
-1. Đăng nhập và chuẩn bị cart có tổng tiền xác định.
-2. Gửi `POST /api/checkout` với `total_amount` thấp hơn tổng thật.
-3. Kiểm tra order được tạo trong lịch sử/admin.
+1. Log in and prepare a cart with a known total amount.
+2. Send `POST /api/checkout` with `total_amount` lower than the real cart total.
+3. Check the order created in order history/admin order management.
 
 ### Expected Result
-Backend tự tính lại tổng tiền từ cart/server-side data hoặc từ chối payload sai.
+The backend recalculates the total from server-side cart/order data or rejects the incorrect payload.
 
 ### Actual Result
 To be filled after execution.
@@ -52,7 +52,7 @@ Screenshot placeholder: `bug_report/screenshots/BUG-02.png`
 ### GitHub Issue Link
 To be filled after creating issue.
 
-## BUG-03: Potential bug - Admin API có thể thiếu kiểm tra role admin
+## BUG-03: Potential bug - Admin API may be missing admin-role validation
 
 **Feature:** FR-18  
 **Severity:** Critical  
@@ -61,12 +61,12 @@ To be filled after creating issue.
 **Status:** Potential bug - needs execution confirmation
 
 ### Steps to Reproduce
-1. Đăng nhập bằng user thường.
-2. Dùng token user thường gọi `GET /api/admin/orders`.
-3. Quan sát phản hồi.
+1. Log in as a regular user.
+2. Use the regular user's token to call `GET /api/admin/orders`.
+3. Observe the response.
 
 ### Expected Result
-API trả 403/401 vì user không có `role=admin`.
+The API returns 403/401 because the user does not have `role=admin`.
 
 ### Actual Result
 To be filled after execution.
@@ -77,7 +77,7 @@ Screenshot placeholder: `bug_report/screenshots/BUG-03.png`
 ### GitHub Issue Link
 To be filled after creating issue.
 
-## BUG-04: Potential bug - State machine có thể cho `canceled -> delivered`
+## BUG-04: Potential bug - State machine may allow `canceled -> delivered`
 
 **Feature:** FR-18  
 **Severity:** High  
@@ -86,12 +86,12 @@ To be filled after creating issue.
 **Status:** Potential bug - needs execution confirmation
 
 ### Steps to Reproduce
-1. Tạo hoặc tìm order trạng thái `canceled`.
-2. Admin gửi `PUT /api/admin/orders/:id/status` với `status: "delivered"`.
-3. Kiểm tra trạng thái order sau phản hồi.
+1. Create or locate an order with status `canceled`.
+2. As admin, send `PUT /api/admin/orders/:id/status` with `status: "delivered"`.
+3. Check the order status after the response.
 
 ### Expected Result
-API trả lỗi vì `canceled` là final state.
+The API returns an error because `canceled` is a final state.
 
 ### Actual Result
 To be filled after execution.
@@ -102,7 +102,7 @@ Screenshot placeholder: `bug_report/screenshots/BUG-04.png`
 ### GitHub Issue Link
 To be filled after creating issue.
 
-## BUG-05: Potential bug - Mobile checkout có thể gửi thiếu item trong cart
+## BUG-05: Potential bug - Mobile checkout may send an incomplete cart payload
 
 **Feature:** FR-20 Mobile Checkout  
 **Severity:** High  
@@ -111,12 +111,12 @@ To be filled after creating issue.
 **Status:** Potential bug - needs execution confirmation
 
 ### Steps to Reproduce
-1. Chạy mobile app, đăng nhập và thêm nhiều sản phẩm vào cart.
-2. Xác nhận checkout.
-3. Inspect request/response hoặc kiểm tra order được tạo.
+1. Run the mobile app, log in, and add multiple products to the cart.
+2. Confirm checkout.
+3. Inspect the request/response or check the created order.
 
 ### Expected Result
-Order chứa đầy đủ các item trong cart; backend validate dữ liệu.
+The order contains all items in the cart, and the backend validates the data.
 
 ### Actual Result
 To be filled after execution.

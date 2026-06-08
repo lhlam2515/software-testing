@@ -1,28 +1,28 @@
-﻿# Domain Testing Skill
+# Domain Testing Skill
 
-## Mục tiêu
-Tạo quy trình tái sử dụng để thiết kế test case Domain Testing cho một feature của EShop hoặc hệ thống tương tự.
+## Goal
+Provide a reusable process for designing Domain Testing test cases for an EShop feature or a similar system feature.
 
-## Quy trình
-1. Đọc requirement/specification của feature và ghi lại mục tiêu nghiệp vụ.
-2. Xác định các biến đầu vào, điều kiện trạng thái, quyền truy cập và dữ liệu phụ thuộc.
-3. Chia từng biến thành miền hợp lệ và miền không hợp lệ.
-4. Tạo bảng `Input Variables / Conditions` gồm mô tả, valid domain và invalid domain.
-5. Thiết kế test case bao phủ:
-   - Đường đi hợp lệ chính.
-   - Dữ liệu rỗng/sai định dạng.
-   - Quyền truy cập: không token, sai role, truy cập dữ liệu người khác.
-   - State-dependent behavior nếu feature có state machine.
-   - UI/API mismatch, ví dụ UI khóa trường nhưng API vẫn có thể nhận payload.
-   - Security cases như HTML/script input, role escalation, manipulated amount.
-6. Với mỗi test case, ghi rõ preconditions, input data, steps, expected result, actual result, verdict và evidence.
-7. Nếu chưa thực thi, luôn ghi `Not Executed`, không đoán kết quả.
-8. Review AI gaps: hỏi AI có thể đã bỏ sót gì vì prompt tổng quát, chưa inspect code, hoặc thiếu hiểu biết backend/security.
+## Process
+1. Read the feature requirement/specification and record the business purpose.
+2. Identify input variables, state conditions, access-control conditions, and dependent data.
+3. Split each variable into valid and invalid domains.
+4. Create the `Input Variables / Conditions` table with description, valid domain, and invalid domain.
+5. Design test cases that cover:
+   - Main valid path.
+   - Empty or invalid-format data.
+   - Access control: no token, wrong role, accessing another user's data.
+   - State-dependent behavior if the feature has a state machine.
+   - UI/API mismatches, such as a UI-locked field that the API may still accept.
+   - Security cases such as HTML/script input, role escalation, and manipulated amounts.
+6. For each test case, specify preconditions, input data, steps, expected result, actual result, verdict, and evidence.
+7. If execution has not been performed, always write `Not Executed`; do not guess results.
+8. Review AI gaps: identify what AI may have missed because the prompt was too general, code was not inspected, or backend/security behavior was overlooked.
 
 ## Checklist
-- Feature ID rõ ràng.
-- Có ít nhất 8 Domain Testing cases cho mỗi feature.
-- Có cả valid và invalid domains.
-- Có ca authorization/security nếu feature ảnh hưởng dữ liệu hoặc tiền.
-- Evidence path là placeholder thật, không invent screenshot.
+- Feature ID is clear.
+- Each feature has at least 8 Domain Testing cases.
+- Both valid and invalid domains are included.
+- Authorization/security cases are included when the feature affects data or money.
+- Evidence paths are real placeholders; do not invent screenshots.
 

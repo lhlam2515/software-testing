@@ -1,79 +1,79 @@
-﻿# FR-08 - Thanh toán
+# FR-08 - Checkout
 
 ## 1. Feature Overview
-FR-08 xử lý bước đặt hàng cuối cùng của khách hàng. Chức năng này chuyển giỏ hàng thành đơn hàng, hiển thị danh sách sản phẩm đặt mua, tự tính tổng tiền và xóa giỏ hàng sau khi thanh toán thành công.
+FR-08 handles the customer's final ordering step. This feature converts the cart into an order, displays the ordered product list, calculates the total automatically, and clears the cart after successful checkout.
 
 ## 2. Requirement Summary
-Chỉ người dùng đã đăng nhập mới được checkout. Tổng tiền phải được tính tự động từ giỏ hàng, không cho người dùng chỉnh sửa trực tiếp. Backend phải tự tính lại tổng tiền và không tin `total_amount` do client gửi lên. Sau checkout thành công, giỏ hàng được xóa.
+Only logged-in users can checkout. The checkout total must be calculated automatically from the cart and must not be directly editable by the user. The backend must recalculate the total and must not trust `total_amount` sent by the client. After successful checkout, the cart is cleared.
 
 ## 3. Domain Testing
 
 ### 3.1 Input Variables / Conditions
 | Variable / Condition | Description | Valid Domain | Invalid Domain |
 |---|---|---|---|
-| Trạng thái đăng nhập | Quyền checkout | JWT hợp lệ của user | Không token, token sai/hết hạn |
-| Trạng thái giỏ hàng | Dữ liệu đặt hàng | Có ít nhất 1 sản phẩm hợp lệ | Giỏ rỗng, item thiếu id/price/quantity |
-| Số lượng sản phẩm | Quantity trong cart | Số nguyên dương | 0, âm, thập phân, chuỗi |
-| Giá sản phẩm | Price từ dữ liệu sản phẩm | Số dương từ backend | 0, âm, chuỗi, giá client tự sửa |
-| Tổng tiền UI | Tổng hiển thị | Tự tính từ cart, read-only | Editable hoặc khác cart total |
-| `total_amount` API | Tổng tiền client gửi | Backend bỏ qua hoặc kiểm tra lại | Client gửi thấp hơn/cao hơn |
-| Danh sách sản phẩm | UI checkout | Hiển thị đầy đủ item, quantity, giá | Thiếu item, sai quantity, thiếu tên |
-| Sau checkout | Trạng thái cart | Cart rỗng, order được tạo | Cart còn item, order sai tổng |
+| Login status | Checkout permission | Valid user JWT | No token, invalid/expired token |
+| Cart status | Order data | At least 1 valid product | Empty cart, item missing id/price/quantity |
+| Product quantity | Quantity in cart | Positive integer | 0, negative, decimal, string |
+| Product price | Price from product data | Positive number from backend | 0, negative, string, client-modified price |
+| UI total | Displayed total | Automatically calculated from cart, read-only | Editable or different from cart total |
+| `total_amount` API | Total sent by client | Backend ignores or verifies it | Client sends lower/higher amount |
+| Product list | Checkout UI | Displays all items, quantities, prices | Missing item, wrong quantity, missing name |
+| After checkout | Cart state | Empty cart and order created | Cart still has items, order has wrong total |
 
 ### 3.2 Domain Analysis Explanation
-Miền checkout được chia theo quyền truy cập, nội dung giỏ hàng, dữ liệu tiền tệ và trạng thái sau xử lý. Vì checkout là luồng tài chính, kiểm thử không chỉ dừng ở UI mà phải kiểm tra backend với payload bị sửa. Miền hợp lệ là user đăng nhập, cart có item hợp lệ và tổng tiền khớp tính toán; miền không hợp lệ gồm không đăng nhập, cart rỗng, item sai quantity/price và `total_amount` bị thao túng.
+The checkout domain is divided by access permission, cart contents, monetary data, and post-processing state. Because checkout is a financial flow, testing must go beyond the UI and include backend requests with manipulated payloads. The valid domain is a logged-in user with a valid cart and matching calculated total. Invalid domains include unauthenticated access, empty cart, invalid quantity/price, and manipulated `total_amount`.
 
 ### 3.3 Domain Testing Test Cases
 | TC ID | Technique | Domain Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|
-| FR08-DT-01 | Valid domain | Checkout hợp lệ | User đăng nhập, cart có 2 sản phẩm | Cart total đúng | Mở Checkout, xác nhận | Tạo order thành công, tổng đúng, cart rỗng | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-01.png |
-| FR08-DT-02 | Invalid domain | Chưa đăng nhập | Không token, cart có item local | Cart có 1 item | Bấm Thanh toán | Điều hướng/login hoặc API trả 401 | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-02.png |
-| FR08-DT-03 | Invalid domain | Giỏ hàng rỗng | User đăng nhập | Cart rỗng | Mở checkout/xác nhận | Không cho checkout, hiển thị empty state | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-03.png |
-| FR08-DT-04 | Valid domain | Một sản phẩm | User đăng nhập | 1 item, quantity 1 | Checkout | Order có đúng 1 sản phẩm và tổng = price | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-04.png |
-| FR08-DT-05 | Valid domain | Nhiều sản phẩm | User đăng nhập | 3 items, quantity khác nhau | Checkout | UI hiển thị đủ danh sách; tổng = sum price*qty | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-05.png |
-| FR08-DT-06 | Security domain | User cố sửa tổng ở UI | User đăng nhập | Dùng DevTools sửa input total nếu có | Thử chỉnh tổng trước khi xác nhận | Không chỉnh được hoặc không ảnh hưởng order | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-06.png |
-| FR08-DT-07 | Security domain | Client gửi `total_amount` thấp | User đăng nhập, cart 300000 | API body total_amount: 1 | Gửi POST /api/checkout bằng Postman/cURL | Backend tính lại 300000 hoặc từ chối | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-07.png |
-| FR08-DT-08 | Security domain | Client gửi `total_amount` cao | User đăng nhập, cart 300000 | API body total_amount: 999999999 | Gửi POST /api/checkout | Backend tính lại đúng hoặc từ chối | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-08.png |
-| FR08-DT-09 | State domain | Cart clear sau thành công | User đăng nhập, cart có item | Checkout hợp lệ | Xác nhận, quay lại cart | Cart rỗng, không checkout lặp lại cùng item | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-09.png |
-| FR08-DT-10 | Display domain | Danh sách sản phẩm hiển thị đủ | User đăng nhập, cart nhiều item | Tên/giá/quantity khác nhau | Mở Checkout | Hiển thị đủ item, quantity, giá, thành tiền | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-10.png |
-| FR08-DT-11 | Invalid domain | Quantity bằng 0/âm | User đăng nhập | quantity: 0 hoặc -1 qua client/API | Thêm item bất thường rồi checkout | Từ chối item không hợp lệ | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-11.png |
-| FR08-DT-12 | Robustness domain | Price kiểu chuỗi | User đăng nhập | price: "100000" trong cart/API | Checkout | Backend chuẩn hóa an toàn hoặc từ chối, không sai tổng | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-12.png |
+| FR08-DT-01 | Valid domain | Valid checkout | User logged in, cart has 2 products | Correct cart total | Open Checkout and confirm | Order is created successfully, total is correct, cart is empty | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-01.png |
+| FR08-DT-02 | Invalid domain | Not logged in | No token, local cart has item | Cart has 1 item | Click Checkout | Redirects/requires login or API returns 401 | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-02.png |
+| FR08-DT-03 | Invalid domain | Empty cart | User logged in | Empty cart | Open checkout/confirm | Checkout is blocked and empty state is shown | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-03.png |
+| FR08-DT-04 | Valid domain | One product | User logged in | 1 item, quantity 1 | Checkout | Order contains exactly 1 product and total = price | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-04.png |
+| FR08-DT-05 | Valid domain | Multiple products | User logged in | 3 items with different quantities | Checkout | UI displays the full list; total = sum price*qty | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-05.png |
+| FR08-DT-06 | Security domain | User tries to edit UI total | User logged in | Use DevTools to modify total input if present | Try changing total before confirmation | Total cannot be changed or does not affect the order | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-06.png |
+| FR08-DT-07 | Security domain | Client sends low `total_amount` | User logged in, cart total 300000 | API body total_amount: 1 | Send POST /api/checkout using Postman/cURL | Backend recalculates 300000 or rejects request | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-07.png |
+| FR08-DT-08 | Security domain | Client sends high `total_amount` | User logged in, cart total 300000 | API body total_amount: 999999999 | Send POST /api/checkout | Backend recalculates correctly or rejects request | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-08.png |
+| FR08-DT-09 | State domain | Cart cleared after success | User logged in, cart has item | Valid checkout | Confirm and return to cart | Cart is empty and same item cannot be checked out again | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-09.png |
+| FR08-DT-10 | Display domain | Product list displayed fully | User logged in, cart has multiple items | Different names/prices/quantities | Open Checkout | All items, quantities, prices, and subtotals are displayed | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-10.png |
+| FR08-DT-11 | Invalid domain | Quantity 0/negative | User logged in | quantity: 0 or -1 through client/API | Add abnormal item then checkout | Invalid item is rejected | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-11.png |
+| FR08-DT-12 | Robustness domain | Price as string | User logged in | price: "100000" in cart/API | Checkout | Backend safely normalizes or rejects; total is not wrong | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-12.png |
 
 ## 4. Boundary Value Analysis
 
 ### 4.1 Boundary Variables
 | Variable | Boundary Rule | Below Boundary | On Boundary | Above Boundary |
 |---|---|---:|---:|---:|
-| Số item trong cart | Checkout cần ít nhất 1 item | 0 | 1 | 2 |
-| Quantity | Số nguyên dương tối thiểu 1 | 0 | 1 | 2 |
-| Price | Giá sản phẩm phải > 0 | 0 | 1 | 2 |
-| Total amount | Tổng phải bằng sum cart | sum-1 | sum | sum+1 |
-| Độ dài danh sách hiển thị | UI phải hiển thị toàn bộ item | n-1 item | n item | n+1 item sai |
-| Token | Checkout cần token hợp lệ | Không token | Token hợp lệ | Token sai/hết hạn |
+| Number of cart items | Checkout requires at least 1 item | 0 | 1 | 2 |
+| Quantity | Minimum positive integer is 1 | 0 | 1 | 2 |
+| Price | Product price must be > 0 | 0 | 1 | 2 |
+| Total amount | Total must equal cart sum | sum-1 | sum | sum+1 |
+| Displayed list length | UI must display all items | n-1 items | n items | n+1 wrong item |
+| Token | Checkout requires valid token | No token | Valid token | Invalid/expired token |
 
 ### 4.2 BVA Explanation
-BVA cho FR-08 dùng các biên số lượng item, quantity, price và total. Các giá trị `sum-1`, `sum`, `sum+1` giúp phát hiện backend có tin dữ liệu client hay tự tính lại. Biên 0/1/2 item kiểm tra điều kiện tối thiểu của checkout.
+BVA for FR-08 uses boundaries around cart item count, quantity, price, and total. Values `sum-1`, `sum`, and `sum+1` help detect whether the backend trusts client data or recalculates the total. The 0/1/2 item boundary checks the minimum condition for checkout.
 
 ### 4.3 BVA Test Cases
 | TC ID | Technique | Boundary Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|
-| FR08-BVA-01 | BVA | Cart 0 item | User đăng nhập | Cart rỗng | Bấm checkout | Bị chặn | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-BVA-01.png |
-| FR08-BVA-02 | BVA | Cart 1 item | User đăng nhập | 1 item hợp lệ | Checkout | Thành công | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-BVA-02.png |
-| FR08-BVA-03 | BVA | Cart 2 item | User đăng nhập | 2 item hợp lệ | Checkout | Thành công, hiển thị đủ 2 item | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-BVA-03.png |
-| FR08-BVA-04 | BVA | Quantity dưới min | User đăng nhập | quantity: 0 | Checkout qua API/client sửa | Từ chối | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-BVA-04.png |
-| FR08-BVA-05 | BVA | Quantity tại min | User đăng nhập | quantity: 1 | Checkout | Chấp nhận | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-BVA-05.png |
-| FR08-BVA-06 | BVA | Total lệch biên | User đăng nhập, sum=300000 | total_amount: 299999/300000/300001 | Gửi API checkout | Chỉ tổng backend tính đúng được lưu; lệch bị bỏ qua/từ chối | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-BVA-06.png |
+| FR08-BVA-01 | BVA | Cart with 0 items | User logged in | Empty cart | Click checkout | Blocked | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-BVA-01.png |
+| FR08-BVA-02 | BVA | Cart with 1 item | User logged in | 1 valid item | Checkout | Successful | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-BVA-02.png |
+| FR08-BVA-03 | BVA | Cart with 2 items | User logged in | 2 valid items | Checkout | Successful, both items displayed | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-BVA-03.png |
+| FR08-BVA-04 | BVA | Quantity below minimum | User logged in | quantity: 0 | Checkout through API/client modification | Rejected | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-BVA-04.png |
+| FR08-BVA-05 | BVA | Quantity at minimum | User logged in | quantity: 1 | Checkout | Accepted | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-BVA-05.png |
+| FR08-BVA-06 | BVA | Total around boundary | User logged in, sum=300000 | total_amount: 299999/300000/300001 | Send checkout API request | Only backend-calculated correct total is saved; mismatches are ignored/rejected | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-BVA-06.png |
 
 ## 5. AI Gap Analysis
 
 ### 5.1 AI-Suggested Cases
-AI thường gợi ý checkout thành công, chưa đăng nhập, giỏ hàng rỗng, một/nhiều sản phẩm và xóa giỏ sau thanh toán.
+AI commonly suggests successful checkout, unauthenticated checkout, empty cart, one/multiple products, and cart clearing after checkout.
 
 ### 5.2 Missing / Weak AI Cases
-AI có thể bỏ sót việc sửa `total_amount` ở API, price/quantity bất thường, danh sách sản phẩm bị thiếu item và việc backend không được tin dữ liệu client.
+AI may miss API-level `total_amount` manipulation, abnormal price/quantity, missing product list items, and the requirement that the backend must not trust client data.
 
 ### 5.3 Why AI Might Miss Them
-Nguyên nhân chính là prompt quá tập trung vào UI, không inspect API, và bỏ qua rủi ro tài chính ở backend. Đây cũng là trường hợp UI/API mismatch vì UI có thể read-only nhưng API vẫn nhận payload.
+The main cause is that prompts often focus on UI behavior, do not inspect APIs, and overlook backend financial risks. This is also a UI/API mismatch case because the UI may be read-only while the API still accepts payloads.
 
 ### 5.4 Human Corrections
-Người kiểm thử bổ sung ca kiểm tra tổng tiền bị thao túng, quantity/price edge cases, xác minh cart clear và kiểm tra danh sách item hiển thị đủ trước khi xác nhận checkout.
+The tester added manipulated-total cases, quantity/price edge cases, cart-clear verification, and full product-list display checks before checkout confirmation.

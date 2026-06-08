@@ -1,4 +1,4 @@
-﻿# AI Audit Report - HW02
+# AI Audit Report - HW02
 
 ## Entry 01
 
@@ -11,10 +11,10 @@ Paste this full prompt here.
 
 Summary of prompt used in this interaction:
 - Work on Software Testing HW02 - Domain Testing on EShop.
-- Create/update `HW02_DomainTesting/`.
+- Create/update `23127543_HW02_AI_DomainTesting_100/`.
 - Selected features: FR-04 Profile, FR-08 Checkout, FR-18 Admin Order Management, and one inspected FR-20 mobile sub-feature.
-- Write Vietnamese Markdown reports with Domain Testing, BVA, AI gap analysis, executed test tables, bug report templates, evidence placeholders, README, main report, agent skills, and commits after major steps.
-- Do not modify EShop source code and do not claim tests were executed unless actually executed.
+- Write Markdown reports with Domain Testing, BVA, AI gap analysis, executed test tables, bug report templates, evidence placeholders, README, main report, agent skills, and commits after major steps.
+- Do not modify EShop source code and do not claim tests were executed unless they were actually executed.
 
 ### AI Output
 Generated/updated:
