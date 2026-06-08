@@ -1,0 +1,6 @@
+Run this command after finishing commits:
+
+```bash
+git log --graph --all --stat > git_commit_log.txt
+```
+
