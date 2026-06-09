@@ -1,79 +1,152 @@
 # FR-08 - Checkout
 
 ## 1. Feature Overview
-FR-08 handles the customer's final ordering step. This feature converts the cart into an order, displays the ordered product list, calculates the total automatically, and clears the cart after successful checkout.
+
+FR-08 is the web flow that converts a shopping cart into an order. The actual code uses a local React cart context for the UI, `POST /api/checkout` to create an order, and `POST /api/apply-coupon` when a coupon is used. Backend checkout requires a token but only stores `user_id`, `total_amount`, `status=pending`, and `shipping_address`.
 
 ## 2. Requirement Summary
-Only logged-in users can checkout. The checkout total must be calculated automatically from the cart and must not be directly editable by the user. The backend must recalculate the total and must not trust `total_amount` sent by the client. After successful checkout, the cart is cleared.
+
+According to the SRS, only logged-in users can checkout. Checkout total must be calculated from the cart and must not be directly editable. Backend must recalculate the total, UI must display all products, and cart must be cleared after successful checkout. In the actual code, web checkout has an editable `editableTotal` input, sends `items`, `total_amount`, and `coupon_id`, but backend ignores `items`, trusts `total_amount`, does not recalculate total, and the web client does not call `clearCart()` after success.
 
 ## 3. Domain Testing
 
 ### 3.1 Input Variables / Conditions
+
 | Variable / Condition | Description | Valid Domain | Invalid Domain |
 |---|---|---|---|
-| Login status | Checkout permission | Valid user JWT | No token, invalid/expired token |
-| Cart status | Order data | At least 1 valid product | Empty cart, item missing id/price/quantity |
-| Product quantity | Quantity in cart | Positive integer | 0, negative, decimal, string |
-| Product price | Price from product data | Positive number from backend | 0, negative, string, client-modified price |
-| UI total | Displayed total | Automatically calculated from cart, read-only | Editable or different from cart total |
-| `total_amount` API | Total sent by client | Backend ignores or verifies it | Client sends lower/higher amount |
-| Product list | Checkout UI | Displays all items, quantities, prices | Missing item, wrong quantity, missing name |
-| After checkout | Cart state | Empty cart and order created | Cart still has items, order has wrong total |
+| Login status | Checkout permission | User has valid JWT | No token, invalid/expired token |
+| Cart state | Frontend cart | At least 1 valid product | Empty cart, item missing id/name/price/quantity |
+| Quantity | Item quantity | Positive integer | 0, negative, string, decimal |
+| Price | Product price in cart | Positive number from product data | 0, negative, client-modified price |
+| UI total | Web `editableTotal` | Equals `cartTotal` and is not editable according to SRS | Directly edited, different from cart total |
+| Checkout payload | Body of `POST /api/checkout` | `total_amount` is verified/recalculated by backend | Client sends 1, 0, negative, or very large value |
+| Coupon | Optional discount code | Existing, active, not expired, meets minimum | Empty, expired, below minimum, usage exceeded |
+| After checkout | Cart/order state | Pending order created, cart is empty | Wrong order total, cart still has items, missing address |
 
-### 3.2 Domain Analysis Explanation
-The checkout domain is divided by access permission, cart contents, monetary data, and post-processing state. Because checkout is a financial flow, testing must go beyond the UI and include backend requests with manipulated payloads. The valid domain is a logged-in user with a valid cart and matching calculated total. Invalid domains include unauthenticated access, empty cart, invalid quantity/price, and manipulated `total_amount`.
+### 3.2 Domain Testing Explanation
+
+1. Identify variables: token, cart, quantity, price, total, coupon, and post-checkout state.
+2. Divide valid and invalid domains according to the SRS and actual backend/frontend code.
+3. Select representative values: empty cart, one item, multiple items, `total_amount=1`, `total_amount=cartTotal`, valid/expired coupon.
+4. Combine domains into positive and negative cases, especially financial-risk cases.
+5. Add API, security, state, and UI cases because backend trusts client-supplied data.
+6. Review code: `POST /api/checkout` does not read server cart, does not clear `userCarts`, does not save line items, and web checkout does not send `shipping_address`.
 
 ### 3.3 Domain Testing Test Cases
+
 | TC ID | Technique | Domain Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|
-| FR08-DT-01 | Valid domain | Valid checkout | User logged in, cart has 2 products | Correct cart total | Open Checkout and confirm | Order is created successfully, total is correct, cart is empty | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-01.png |
-| FR08-DT-02 | Invalid domain | Not logged in | No token, local cart has item | Cart has 1 item | Click Checkout | Redirects/requires login or API returns 401 | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-02.png |
-| FR08-DT-03 | Invalid domain | Empty cart | User logged in | Empty cart | Open checkout/confirm | Checkout is blocked and empty state is shown | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-03.png |
-| FR08-DT-04 | Valid domain | One product | User logged in | 1 item, quantity 1 | Checkout | Order contains exactly 1 product and total = price | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-04.png |
-| FR08-DT-05 | Valid domain | Multiple products | User logged in | 3 items with different quantities | Checkout | UI displays the full list; total = sum price*qty | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-05.png |
-| FR08-DT-06 | Security domain | User tries to edit UI total | User logged in | Use DevTools to modify total input if present | Try changing total before confirmation | Total cannot be changed or does not affect the order | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-06.png |
-| FR08-DT-07 | Security domain | Client sends low `total_amount` | User logged in, cart total 300000 | API body total_amount: 1 | Send POST /api/checkout using Postman/cURL | Backend recalculates 300000 or rejects request | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-07.png |
-| FR08-DT-08 | Security domain | Client sends high `total_amount` | User logged in, cart total 300000 | API body total_amount: 999999999 | Send POST /api/checkout | Backend recalculates correctly or rejects request | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-08.png |
-| FR08-DT-09 | State domain | Cart cleared after success | User logged in, cart has item | Valid checkout | Confirm and return to cart | Cart is empty and same item cannot be checked out again | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-09.png |
-| FR08-DT-10 | Display domain | Product list displayed fully | User logged in, cart has multiple items | Different names/prices/quantities | Open Checkout | All items, quantities, prices, and subtotals are displayed | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-10.png |
-| FR08-DT-11 | Invalid domain | Quantity 0/negative | User logged in | quantity: 0 or -1 through client/API | Add abnormal item then checkout | Invalid item is rejected | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-11.png |
-| FR08-DT-12 | Robustness domain | Price as string | User logged in | price: "100000" in cart/API | Checkout | Backend safely normalizes or rejects; total is not wrong | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-DT-12.png |
+| FR08-DT-01 | Domain Testing | Valid checkout with cart item | User is logged in, web cart has item | 1 iPhone, qty 1, total 30000000 | Open Checkout, click Confirm Checkout | Pending order is created, total is correct, success is shown | Not Executed | Not Executed | To be added after execution |
+| FR08-DT-02 | Domain Testing | Checkout from UI while not logged in | No user, local cart has item | Cart has 1 item | Click Proceed to Checkout on Cart | UI alerts that login is required and navigates to `/login` | Not Executed | Not Executed | To be added after execution |
+| FR08-DT-03 | Domain Testing | Checkout API without token | No token | `POST /api/checkout`, body `{total_amount:30000000}` | Send API request | Returns `401 Unauthorized`, no order created | Not Executed | Not Executed | To be added after execution |
+| FR08-DT-04 | Domain Testing | Empty cart but checkout page/API | User is logged in, cart is empty | `total_amount=0` | Open `/checkout` directly or call API | SRS requires empty checkout to be blocked | Not Executed | Not Executed | To be added after execution |
+| FR08-DT-05 | Domain Testing | One item | User is logged in | MacBook qty 1 | Checkout | UI displays exactly 1 item and total = price*qty | Not Executed | Not Executed | To be added after execution |
+| FR08-DT-06 | Domain Testing | Multiple items | User is logged in | iPhone qty 1, AirPods qty 2 | Checkout | UI displays all items and correct subtotals | Not Executed | Not Executed | To be added after execution |
+| FR08-DT-07 | Domain Testing | Edit total in UI | User is logged in, cart total is 30000000 | Change total input to `1` | Open Checkout, edit input, confirm | SRS expects UI not editable or backend rejects wrong total | Not Executed | Not Executed | To be added after execution |
+| FR08-DT-08 | Domain Testing | Manipulated `total_amount` through API | User is logged in | Body `{total_amount:1, shipping_address:"A"}` | Send `POST /api/checkout` via Postman/cURL | Backend recalculates from server cart or rejects | Not Executed | Not Executed | To be added after execution |
+| FR08-DT-09 | Domain Testing | Negative/zero total | User is logged in | `total_amount=-1` and `0` | Send checkout API | Backend rejects invalid money values | Not Executed | Not Executed | To be added after execution |
+| FR08-DT-10 | Domain Testing | Cart cleared after success | User is logged in, cart has item | Successful checkout | Return to Cart after success | Cart is empty | Not Executed | Not Executed | To be added after execution |
+| FR08-DT-11 | Domain Testing | Valid coupon | User is logged in, total exceeds minimum | `SAVE10`, total 500000 | Apply coupon then checkout | Discount is correct and usage is recorded after successful checkout | Not Executed | Not Executed | To be added after execution |
+| FR08-DT-12 | Domain Testing | Expired/below-minimum coupon | User is logged in | `EXPIRED` or `SAVE10` with total 300000 | Apply coupon | Clear error is shown and total does not change | Not Executed | Not Executed | To be added after execution |
 
 ## 4. Boundary Value Analysis
 
 ### 4.1 Boundary Variables
+
 | Variable | Boundary Rule | Below Boundary | On Boundary | Above Boundary |
 |---|---|---:|---:|---:|
-| Number of cart items | Checkout requires at least 1 item | 0 | 1 | 2 |
-| Quantity | Minimum positive integer is 1 | 0 | 1 | 2 |
-| Price | Product price must be > 0 | 0 | 1 | 2 |
-| Total amount | Total must equal cart sum | sum-1 | sum | sum+1 |
-| Displayed list length | UI must display all items | n-1 items | n items | n+1 wrong item |
-| Token | Checkout requires valid token | No token | Valid token | Invalid/expired token |
+| Cart item count | Checkout requires >=1 item | 0 | 1 | 2 |
+| Quantity | Minimum quantity is 1 | 0 | 1 | 2 |
+| Price | Product price must be >0 | 0 | 1 | 2 |
+| Total amount | Must equal cart total | sum-1 | sum | sum+1 |
+| Coupon minimum | Coupon applies when order reaches minimum | min-1 | min | min+1 |
+| Token | Valid token is required | No token | Valid token | Invalid token |
 
 ### 4.2 BVA Explanation
-BVA for FR-08 uses boundaries around cart item count, quantity, price, and total. Values `sum-1`, `sum`, and `sum+1` help detect whether the backend trusts client data or recalculates the total. The 0/1/2 item boundary checks the minimum condition for checkout.
 
-### 4.3 BVA Test Cases
+1. Identify quantity, money, token, and coupon-threshold boundaries.
+2. Select below/on/above values: 0/1/2 items, 0/1/2 quantity, `sum-1/sum/sum+1`, `min-1/min/min+1`.
+3. Create tests around boundaries to verify whether UI and backend block correctly.
+4. Include both valid and invalid boundaries.
+5. Review code: backend has no line-item/quantity validation and stores only client-provided `total_amount`.
+
+### 4.3 Boundary Value Analysis Test Cases
+
 | TC ID | Technique | Boundary Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|
-| FR08-BVA-01 | BVA | Cart with 0 items | User logged in | Empty cart | Click checkout | Blocked | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-BVA-01.png |
-| FR08-BVA-02 | BVA | Cart with 1 item | User logged in | 1 valid item | Checkout | Successful | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-BVA-02.png |
-| FR08-BVA-03 | BVA | Cart with 2 items | User logged in | 2 valid items | Checkout | Successful, both items displayed | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-BVA-03.png |
-| FR08-BVA-04 | BVA | Quantity below minimum | User logged in | quantity: 0 | Checkout through API/client modification | Rejected | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-BVA-04.png |
-| FR08-BVA-05 | BVA | Quantity at minimum | User logged in | quantity: 1 | Checkout | Accepted | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-BVA-05.png |
-| FR08-BVA-06 | BVA | Total around boundary | User logged in, sum=300000 | total_amount: 299999/300000/300001 | Send checkout API request | Only backend-calculated correct total is saved; mismatches are ignored/rejected | Not Executed | Not Executed | evidence/test_execution_screenshots/FR08-BVA-06.png |
+| FR08-BVA-01 | Boundary Value Analysis | 0 items | User is logged in, cart is empty | Cart length 0 | Open Checkout or call API | Checkout is blocked | Not Executed | Not Executed | To be added after execution |
+| FR08-BVA-02 | Boundary Value Analysis | 1 item | User is logged in | Cart length 1 | Checkout | Successful if item is valid | Not Executed | Not Executed | To be added after execution |
+| FR08-BVA-03 | Boundary Value Analysis | 2 items | User is logged in | Cart length 2 | Checkout | UI displays both items and correct total | Not Executed | Not Executed | To be added after execution |
+| FR08-BVA-04 | Boundary Value Analysis | Quantity 0/1/2 | User is logged in | qty 0, 1, 2 | Modify cart state/API then checkout | 0 is blocked; 1/2 are calculated correctly | Not Executed | Not Executed | To be added after execution |
+| FR08-BVA-05 | Boundary Value Analysis | Total around cart total | User is logged in, sum=30000000 | `29999999`, `30000000`, `30000001` | Send checkout API | Only correct/recalculated total is accepted/saved | Not Executed | Not Executed | To be added after execution |
+| FR08-BVA-06 | Boundary Value Analysis | Coupon minimum amount | User is logged in | `SAVE10` with 299999, 300000, 300001 | Apply coupon | According to SRS, `>= min` is valid; below min is rejected | Not Executed | Not Executed | To be added after execution |
 
 ## 5. AI Gap Analysis
 
 ### 5.1 AI-Suggested Cases
-AI commonly suggests successful checkout, unauthenticated checkout, empty cart, one/multiple products, and cart clearing after checkout.
+
+AI commonly suggests successful checkout, unauthenticated checkout, empty cart, one/multiple products, and clearing the cart after checkout.
 
 ### 5.2 Missing / Weak AI Cases
-AI may miss API-level `total_amount` manipulation, abnormal price/quantity, missing product list items, and the requirement that the backend must not trust client data.
+
+AI may miss cases where `total_amount` is edited through UI/API, backend does not save line items, checkout does not send address, coupon usage, and web cart is not cleared by the code.
 
 ### 5.3 Why AI Might Miss Them
-The main cause is that prompts often focus on UI behavior, do not inspect APIs, and overlook backend financial risks. This is also a UI/API mismatch case because the UI may be read-only while the API still accepts payloads.
+
+Without source inspection, AI may assume the total is readonly and backend recalculates correctly according to SRS. In the code, financial logic is mostly client-side and the backend checkout route is very short, so source review is required to find the risk.
 
 ### 5.4 Human Corrections
-The tester added manipulated-total cases, quantity/price edge cases, cart-clear verification, and full product-list display checks before checkout confirmation.
+
+Test cases were corrected to use actual route `POST /api/checkout`, actual body `total_amount`, optional `shipping_address` when calling API directly, and web UI behavior with `editableTotal`. All cases without screenshots remain `Not Executed`.
+
+## 6. Potential Bugs / Bug Report Placeholders
+
+### Potential BUG-FR08-01: Backend checkout trusts client-provided `total_amount`
+
+**Feature:** FR-08  
+**Related Test Case:** FR08-DT-08, FR08-BVA-05  
+**Severity:** Critical  
+**Status:** Potential bug - needs execution confirmation  
+
+#### Steps to Reproduce
+1. Log in and prepare a cart with total greater than 1.
+2. Send `POST /api/checkout` with `total_amount: 1`.
+3. Check the newly created order in user order history/admin.
+
+#### Expected Result
+
+Backend recalculates total or rejects the wrong request.
+
+#### Actual Result
+To be filled after execution.
+
+#### Evidence
+To be added after execution.
+
+#### GitHub Issue Link
+To be filled after creating GitHub Issue.
+
+### Potential BUG-FR08-02: Web checkout does not clear cart after success
+
+**Feature:** FR-08  
+**Related Test Case:** FR08-DT-10  
+**Severity:** High  
+**Status:** Potential bug - needs execution confirmation  
+
+#### Steps to Reproduce
+1. Log in on web and add a product to cart.
+2. Complete checkout successfully.
+3. Return to the cart page.
+
+#### Expected Result
+
+Cart is cleared after successful checkout.
+
+#### Actual Result
+To be filled after execution.
+
+#### Evidence
+To be added after execution.
+
+#### GitHub Issue Link
+To be filled after creating GitHub Issue.

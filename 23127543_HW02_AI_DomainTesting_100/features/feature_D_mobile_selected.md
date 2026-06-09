@@ -1,81 +1,152 @@
 # FR-20 - Mobile Checkout
 
 ## 1. Feature Overview
-Feature D is selected as **Mobile Checkout** under FR-20. This is the checkout flow in the React Native/Expo application, allowing mobile users to view the cart, apply a coupon if available, and confirm order placement.
 
-**Reason for selection:** After inspecting `apps/frontend-mobile/App.js`, the mobile app contains cart/checkout screens, `openCheckout`, `handleConfirmCheckout`, `handleApplyCoupon`, and cart/order state. Mobile Checkout is important and high-risk because it involves money, authentication, cart data, and differences between the mobile client and backend behavior.
+Feature D selects Mobile Checkout under FR-20. The mobile app is in `frontend-mobile/App.js`, uses React Native/Expo, and hard-codes API base URL `http://192.168.10.13:3000/api`. The checkout flow uses local state `cart`, `cartTotal`, coupon, token, and sends `POST /api/checkout`.
 
 ## 2. Requirement Summary
-FR-20 requires the mobile app to include full functionality, including cart and checkout. For Mobile Checkout, FR-08 requirements also apply: only logged-in users can checkout, total is calculated from the cart, the product list must be displayed fully, the backend must recalculate the total, and the cart must be cleared after successful checkout.
+
+FR-20 requires the mobile app to include cart and checkout. FR-08 also applies: only logged-in users can checkout, total is calculated from the cart, UI displays product list, backend recalculates total, and cart is cleared after success. In the mobile code, checkout total is readonly and cart is cleared after success, but the payload sends `items: cart.length > 1 ? cart.slice(0, -1) : cart`, so the last item may be dropped when there are multiple items. Backend currently ignores `items` and trusts `total_amount`.
 
 ## 3. Domain Testing
 
 ### 3.1 Input Variables / Conditions
+
 | Variable / Condition | Description | Valid Domain | Invalid Domain |
 |---|---|---|---|
-| Mobile login status | User state in mobile app | Logged in and has token | Not logged in, empty/expired token |
-| Mobile cart | `cart` state in app | At least 1 valid item | Empty cart, item with missing/invalid data |
-| Mobile quantity | Item quantity | Positive integer | 0, negative, text, too large |
-| Mobile total | `cartTotal`/final amount | Calculated from item price*quantity | Editable or different from cart |
-| Mobile coupon | Coupon code if used | Valid code according to FR-09 | Empty, expired, below minimum, usage exceeded |
-| Checkout payload | Body sent to backend | Does not lose items; total is verified by backend | Missing item, manipulated `total_amount` |
-| Network/API | Connection to LAN backend | Correct API_URL and server running | Wrong IP, network lost, API error |
-| After checkout | State after success | Empty cart, success message, orders reloaded | Cart still has items, order missing items |
+| Mobile login state | `user` and `token` in app | Logged in, valid token | Not logged in, empty/invalid token |
+| Mobile cart | Local `cart` state | At least 1 valid item | Empty, item missing fields, item lost in payload |
+| Quantity | Mobile item quantity | Positive integer, normalized to >=1 when added | 0, negative, text, cart input increments incorrectly |
+| Total | `cartTotal` and final amount | Sum of `price * quantity` | Manipulated through proxy/API, wrong due to quantity |
+| Coupon | `POST /api/apply-coupon` | Code exists and conditions are met | Empty, expired, below minimum, usage exceeded |
+| API URL/network | LAN backend connection | Correct IP, backend running | Wrong IP, network lost, API down |
+| Checkout payload | Body sent by mobile | No item lost, total verified | `items` missing last item, manipulated `total_amount` |
+| After checkout | Mobile state | Success, cart empty, order history reloaded | Cart cleared at wrong time, order not created, error but cart cleared |
 
-### 3.2 Domain Analysis Explanation
-Mobile Checkout is analyzed by mobile UI domain, local state domain, and API domain. Because the mobile app stores the cart in client state, testing must cover empty/non-empty cart, valid/invalid quantity, and valid/invalid token. Since checkout sends a payload to the backend, manipulated or missing-item payloads must also be tested to detect UI/API mismatches.
+### 3.2 Domain Testing Explanation
+
+1. Identify inputs: login state, local cart, quantity, total, coupon, network, and payload.
+2. Divide each variable into valid and invalid domains according to mobile and backend code.
+3. Select representatives: not logged in, empty cart, one item, multiple items, `SAVE10`/`EXPIRED`, wrong network IP.
+4. Combine positive and negative cases to cover UI, API, and state behavior.
+5. Add API, security, state, and UI cases because mobile uses local state and backend does not verify line items.
+6. Review code: mobile checkout shows readonly total but payload uses `cart.slice(0, -1)` for multiple items; mobile profile also sends wrong field `shippingAddress` for address.
 
 ### 3.3 Domain Testing Test Cases
+
 | TC ID | Technique | Domain Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|
-| FR20-DT-01 | Valid domain | Valid mobile checkout | Mobile user logged in, cart has item | 1 product quantity 1 | Open Cart, click Checkout, confirm | Order is created successfully and cart is empty | Not Executed | Not Executed | evidence/test_execution_screenshots/FR20-DT-01.png |
-| FR20-DT-02 | Invalid domain | Not logged in | Cart has item, user null | Click checkout | App requires login or navigates to login | Not Executed | Not Executed | evidence/test_execution_screenshots/FR20-DT-02.png |
-| FR20-DT-03 | Invalid domain | Empty cart | User logged in, cart empty | Click checkout if button appears | Confirmation is blocked or empty-cart UI is shown | Not Executed | Not Executed | evidence/test_execution_screenshots/FR20-DT-03.png |
-| FR20-DT-04 | Valid domain | One item | User logged in | Cart: 1 item, qty 1 | Checkout | UI displays exactly 1 item and correct total | Not Executed | Not Executed | evidence/test_execution_screenshots/FR20-DT-04.png |
-| FR20-DT-05 | Valid domain | Multiple items | User logged in | Cart: >=2 items | Checkout | UI displays all items and total = sum | Not Executed | Not Executed | evidence/test_execution_screenshots/FR20-DT-05.png |
-| FR20-DT-06 | Security domain | Mobile payload missing item | User logged in, cart has multiple items | Inspect request body | Checkout on mobile/proxy request | Backend does not create an order with missing products; it uses server-side cart or validates payload | Not Executed | Not Executed | evidence/test_execution_screenshots/FR20-DT-06.png |
-| FR20-DT-07 | Security domain | Manipulated total | User logged in, cart sum=300000 | total_amount: 1 through proxy/API | Send checkout | Backend recalculates/rejects and does not save wrong total | Not Executed | Not Executed | evidence/test_execution_screenshots/FR20-DT-07.png |
-| FR20-DT-08 | Coupon domain | Valid coupon | User logged in, cart meets minimum | SAVE10/VIP100 if eligible | Apply coupon, checkout | Final amount is correct and order total is validated | Not Executed | Not Executed | evidence/test_execution_screenshots/FR20-DT-08.png |
-| FR20-DT-09 | Invalid coupon | Expired/below-minimum coupon | User logged in | EXPIRED or total below minimum | Apply coupon | Clear error shown and final amount not changed | Not Executed | Not Executed | evidence/test_execution_screenshots/FR20-DT-09.png |
-| FR20-DT-10 | State domain | Cart cleared after success | User logged in, cart has item | Successful checkout | Return to Cart | Cart is empty and success message appears | Not Executed | Not Executed | evidence/test_execution_screenshots/FR20-DT-10.png |
-| FR20-DT-11 | Network domain | Wrong API_URL/network lost | Mobile app cannot reach backend | Checkout | Confirm | Friendly error shown and cart is not cleared | Not Executed | Not Executed | evidence/test_execution_screenshots/FR20-DT-11.png |
-| FR20-DT-12 | Invalid domain | Abnormal quantity | User logged in | quantity 0/negative/text through state/input modification | Checkout | Rejected or normalized safely; total is not wrong | Not Executed | Not Executed | evidence/test_execution_screenshots/FR20-DT-12.png |
+| FR20-DT-01 | Domain Testing | Valid mobile checkout | Mobile app running, user logged in, cart has 1 item | iPhone qty 1 | Cart -> Checkout -> Confirm | Order created, success shown, cart empty | Not Executed | Not Executed | To be added after execution |
+| FR20-DT-02 | Domain Testing | Not logged in | Cart has item, `user=null` | Tap checkout | App alerts login required and switches to login | Not Executed | Not Executed | To be added after execution |
+| FR20-DT-03 | Domain Testing | Empty cart | User logged in, cart empty | Open Cart | Empty cart is shown; checkout is not available | Not Executed | Not Executed | To be added after execution |
+| FR20-DT-04 | Domain Testing | One item | User logged in | Cart 1 item qty 1 | Checkout | UI displays exactly 1 item and readonly correct total | Not Executed | Not Executed | To be added after execution |
+| FR20-DT-05 | Domain Testing | Multiple items | User logged in | Cart 2-3 items | Checkout | UI displays all items and correct total | Not Executed | Not Executed | To be added after execution |
+| FR20-DT-06 | Domain Testing | Payload loses last item | User logged in, cart >=2 items | Inspect/proxy checkout request | Confirm checkout and capture request | Payload/order must not lose items; backend validates line items | Not Executed | Not Executed | To be added after execution |
+| FR20-DT-07 | Domain Testing | Manipulated total through proxy/API | User logged in, cart sum is high | `total_amount=1` | Send checkout through proxy/API | Backend recalculates or rejects | Not Executed | Not Executed | To be added after execution |
+| FR20-DT-08 | Domain Testing | Valid coupon | User logged in, total meets minimum | `SAVE10` or `VIP100` | Apply coupon, confirm checkout | Discount/final amount correct, usage recorded after checkout | Not Executed | Not Executed | To be added after execution |
+| FR20-DT-09 | Domain Testing | Invalid coupon | User logged in | `EXPIRED`, non-existing code, below-minimum total | Apply coupon | Error shown, final amount unchanged | Not Executed | Not Executed | To be added after execution |
+| FR20-DT-10 | Domain Testing | Network/API error | Backend stopped or `API_URL` wrong IP | Confirm checkout | App shows error and cart is not cleared | Not Executed | Not Executed | To be added after execution |
+| FR20-DT-11 | Domain Testing | Cart cleared after success | User logged in, cart has item | Successful checkout | Return to Cart | Mobile cart empty and order history reloaded | Not Executed | Not Executed | To be added after execution |
+| FR20-DT-12 | Domain Testing | Abnormal quantity in mobile cart | User logged in | Enter qty 0/text in cart input | Observe quantity and checkout | Quantity is safely normalized; total is not wrong | Not Executed | Not Executed | To be added after execution |
 
 ## 4. Boundary Value Analysis
 
 ### 4.1 Boundary Variables
+
 | Variable | Boundary Rule | Below Boundary | On Boundary | Above Boundary |
 |---|---|---:|---:|---:|
 | Cart item count | Checkout requires >=1 item | 0 | 1 | 2 |
-| Quantity | Minimum quantity is 1 | 0 | 1 | 2 |
-| Total amount | Must match cart sum | sum-1 | sum | sum+1 |
-| Coupon minimum amount | Must reach coupon threshold | min-1 | min | min+1 |
-| Token | Valid token is required | No token | Valid token | Invalid/expired token |
-| Network timeout/error | Local data must not be lost on error | Error before send | Success | Error after send/API response error |
+| Quantity | Minimum valid quantity is 1 | 0 | 1 | 2 |
+| Total amount | Must equal cart sum | sum-1 | sum | sum+1 |
+| Coupon minimum amount | Must reach threshold | min-1 | min | min+1 |
+| Token | Valid token required | No token | Valid token | Invalid token |
+| Network/API result | Local state must not be lost on error | Error before send | Success | Error after response |
 
 ### 4.2 BVA Explanation
-BVA for Mobile Checkout uses boundaries around item count, quantity, total amount, coupon threshold, and token. These boundaries fit the mobile flow because much of the data is stored in client state before being sent to the API. Tests must observe both UI response and order/cart data after the action.
 
-### 4.3 BVA Test Cases
+1. Identify item-count, quantity, total, coupon-threshold, token, and network boundaries.
+2. Select below/on/above boundary values to observe mobile state and API response.
+3. Create tests around 0/1/2 items because mobile code has special logic when `cart.length > 1`.
+4. Include valid and invalid boundaries.
+5. Review code: 2 items is an important boundary because payload starts using `slice(0, -1)`.
+
+### 4.3 Boundary Value Analysis Test Cases
+
 | TC ID | Technique | Boundary Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|
-| FR20-BVA-01 | BVA | Cart with 0 items | User logged in | Empty cart | Open Cart/Checkout | Checkout not allowed | Not Executed | Not Executed | evidence/test_execution_screenshots/FR20-BVA-01.png |
-| FR20-BVA-02 | BVA | Cart with 1 item | User logged in | 1 item | Checkout | Successful if item is valid | Not Executed | Not Executed | evidence/test_execution_screenshots/FR20-BVA-02.png |
-| FR20-BVA-03 | BVA | Cart with 2 items | User logged in | 2 items | Checkout | Successful and no item is lost | Not Executed | Not Executed | evidence/test_execution_screenshots/FR20-BVA-03.png |
-| FR20-BVA-04 | BVA | Quantity below minimum | User logged in | quantity 0 | Checkout through input/state modification | Rejected or normalized safely | Not Executed | Not Executed | evidence/test_execution_screenshots/FR20-BVA-04.png |
-| FR20-BVA-05 | BVA | Coupon below/on/above minimum | User logged in, coupon min 300000 | 299999/300000/300001 | Apply coupon | Below min rejected; on/above min evaluated as valid | Not Executed | Not Executed | evidence/test_execution_screenshots/FR20-BVA-05.png |
-| FR20-BVA-06 | BVA | Total around boundary | User logged in, sum=300000 | 299999/300000/300001 | Send checkout through proxy/API | Backend accepts only correct/recalculated total | Not Executed | Not Executed | evidence/test_execution_screenshots/FR20-BVA-06.png |
+| FR20-BVA-01 | Boundary Value Analysis | 0 items | User logged in, cart empty | Cart length 0 | Open Cart/Checkout | Checkout is not available | Not Executed | Not Executed | To be added after execution |
+| FR20-BVA-02 | Boundary Value Analysis | 1 item | User logged in | Cart length 1 | Checkout | Successful if API OK; payload contains 1 item | Not Executed | Not Executed | To be added after execution |
+| FR20-BVA-03 | Boundary Value Analysis | 2 items | User logged in | Cart length 2 | Checkout and inspect payload | No item is lost | Not Executed | Not Executed | To be added after execution |
+| FR20-BVA-04 | Boundary Value Analysis | Quantity 0/1/2 | User logged in | 0, 1, 2 | Modify quantity in mobile cart | 0 is normalized/blocked; 1/2 calculated correctly | Not Executed | Not Executed | To be added after execution |
+| FR20-BVA-05 | Boundary Value Analysis | Coupon threshold | User logged in | `SAVE10` with 299999, 300000, 300001 | Apply coupon | According to SRS, on/above minimum is valid; below minimum is rejected | Not Executed | Not Executed | To be added after execution |
+| FR20-BVA-06 | Boundary Value Analysis | Total around sum | User logged in, sum=30000000 | 29999999, 30000000, 30000001 via proxy/API | Checkout | Only correct/recalculated total is accepted | Not Executed | Not Executed | To be added after execution |
 
 ## 5. AI Gap Analysis
 
 ### 5.1 AI-Suggested Cases
-AI commonly suggests successful mobile checkout, unauthenticated checkout, empty cart, one/multiple products, and coupon application.
+
+AI commonly suggests successful mobile checkout, unauthenticated checkout, empty cart, one/multiple items, and valid/invalid coupons.
 
 ### 5.2 Missing / Weak AI Cases
-AI may miss mobile payloads with missing items, manipulated mobile `total_amount`, network failure after pressing checkout, coupon boundaries, and differences between local mobile cart state and backend behavior.
+
+AI may miss `cart.slice(0, -1)`, hard-coded LAN `API_URL`, network error, local state versus backend mismatch, and backend ignoring `items`.
 
 ### 5.3 Why AI Might Miss Them
-The causes include AI not always inspecting mobile code, a prompt that may be too general, and mobile flows depending on local state, network behavior, LAN API_URL, and backend security behavior.
+
+These issues are hidden in mobile implementation details and are visible only after reading `App.js`. If only the requirement is used, AI may assume mobile sends the full cart and backend verifies totals.
 
 ### 5.4 Human Corrections
-The tester selected Mobile Checkout after inspecting the repository, then added UI/API mismatch cases, network failure cases, coupon boundaries, and cart-clear verification. No execution is claimed until the app is run on a real emulator/device.
+
+After reading source code, Feature D remained Mobile Checkout and added cases for multiple items/incomplete payload, manipulated total, network error, coupon boundary, and cart clearing after success. All cases without evidence remain `Not Executed`.
+
+## 6. Potential Bugs / Bug Report Placeholders
+
+### Potential BUG-FR20-01: Mobile checkout may send incomplete `items`
+
+**Feature:** FR-20  
+**Related Test Case:** FR20-DT-06, FR20-BVA-03  
+**Severity:** High  
+**Status:** Potential bug - needs execution confirmation  
+
+#### Steps to Reproduce
+1. Log in on mobile and add 2 products to cart.
+2. Confirm checkout and inspect the request body.
+3. Compare sent `items` with cart UI.
+
+#### Expected Result
+
+Payload contains all cart items.
+
+#### Actual Result
+To be filled after execution.
+
+#### Evidence
+To be added after execution.
+
+#### GitHub Issue Link
+To be filled after creating GitHub Issue.
+
+### Potential BUG-FR20-02: Mobile/API checkout may still accept manipulated total
+
+**Feature:** FR-20  
+**Related Test Case:** FR20-DT-07, FR20-BVA-06  
+**Severity:** Critical  
+**Status:** Potential bug - needs execution confirmation  
+
+#### Steps to Reproduce
+1. Log in on mobile with a high-value cart.
+2. Use proxy/API to send `total_amount: 1`.
+3. Check whether an order is created.
+
+#### Expected Result
+
+Backend recalculates total or rejects the request.
+
+#### Actual Result
+To be filled after execution.
+
+#### Evidence
+To be added after execution.
+
+#### GitHub Issue Link
+To be filled after creating GitHub Issue.

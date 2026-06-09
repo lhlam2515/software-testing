@@ -3,52 +3,15 @@
 ## Entry 01
 
 **AI Tool:** Codex  
-**Date and Time:** 2026-06-08 15:32:53 +07:00  
-**Task:** Generate Domain Testing and Boundary Value Analysis documentation for selected EShop features.
+**Task:** Read EShop source code and regenerate Domain Testing and Boundary Value Analysis test cases.  
+**Prompt:** [Paste full prompt here]  
 
-### Prompt
-Paste this full prompt here.
+**AI Output:** Updated feature test design files for FR-04, FR-08, FR-18 and FR-20 Mobile Checkout; updated `main_report.md`, `README.md`, `bug_report/bug_report.md`, `ai/ai_audit_report.md`, and `ai/ai_critique.md`. The regenerated cases use actual routes such as `/api/users/me`, `/api/checkout`, `/api/admin/orders`, `/api/admin/orders/:id/status`, `/api/apply-coupon`, and mobile checkout logic from `frontend-mobile/App.js`.
 
-Summary of prompt used in this interaction:
-- Work on Software Testing HW02 - Domain Testing on EShop.
-- Create/update `23127543_HW02_AI_DomainTesting_100/`.
-- Selected features: FR-04 Profile, FR-08 Checkout, FR-18 Admin Order Management, and one inspected FR-20 mobile sub-feature.
-- Write Markdown reports with Domain Testing, BVA, AI gap analysis, executed test tables, bug report templates, evidence placeholders, README, main report, agent skills, and commits after major steps.
-- Do not modify EShop source code and do not claim tests were executed unless they were actually executed.
+**Human Review / Modification:** [Fill after manual review]
 
-### AI Output
-Generated/updated:
-- `features/feature_A_FR04_profile.md`
-- `features/feature_B_FR08_checkout.md`
-- `features/feature_C_FR18_admin_order_management.md`
-- `features/feature_D_mobile_selected.md`
-- `bug_report/bug_report.md`
-- `ai/ai_audit_report.md`
-- `ai/ai_critique.md`
-- `agent_skill/domain_testing_skill.md`
-- `agent_skill/bva_skill.md`
-- `agent_skill/demo_videos.md`
-- `README.md`
-- `main_report.md`
-- `git_commit_log.txt`
+## Notes
 
-Feature D was selected as FR-20 Mobile Checkout after inspecting `apps/frontend-mobile/App.js`.
-
-### Human Review / Modification
-[Fill after review]
-
-## Entry 02
-
-**AI Tool:** [Fill later]  
-**Date and Time:** [Fill exact date/time]  
-**Task:** [Fill later]
-
-### Prompt
-[Paste prompt here]
-
-### AI Output
-[Summarize generated files and outputs]
-
-### Human Review / Modification
-[Fill after review]
-
+- AI output was grounded by inspecting backend, web, admin and mobile source code.
+- FR-04 screenshot evidence was preserved and reflected in Actual Result/Verdict.
+- No new execution result was invented.
