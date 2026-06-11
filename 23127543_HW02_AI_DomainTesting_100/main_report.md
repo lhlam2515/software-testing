@@ -35,10 +35,10 @@ Results are marked Passed/Failed only when screenshot/evidence exists. Cases wit
 | Feature | Domain Testing | BVA | Total | Executed | Passed | Failed | Not Executed | Needs Review |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | FR-04 Profile | 12 | 6 | 18 | 18 | 7 | 7 | 0 | 4 |
-| FR-08 Checkout | 12 | 6 | 18 | 8 | 4 | 2 | 10 | 2 |
+| FR-08 Checkout | 12 | 13 | 25 | 8 | 4 | 2 | 17 | 2 |
 | FR-18 Admin Order Management | 12 | 6 | 18 | 0 | 0 | 0 | 18 | 0 |
 | FR-20 Mobile Checkout | 12 | 6 | 18 | 0 | 0 | 0 | 18 | 0 |
-| **Total** | **48** | **24** | **72** | **26** | **11** | **9** | **46** | **6** |
+| **Total** | **48** | **31** | **79** | **26** | **11** | **9** | **53** | **6** |
 
 ## 6. Bug Summary
 

@@ -68,32 +68,56 @@ Source-code note: `POST /api/apply-coupon` uses `total_amount > min_order_amount
 
 | Variable | Boundary Rule | Below Boundary | On Boundary | Above Boundary |
 |---|---|---:|---:|---:|
-| Cart item count | Checkout should require at least 1 item | 0 | 1 | 2 |
-| Quantity | Minimum meaningful quantity is 1 | 0 | 1 | 2 |
-| Total amount | Request total should equal calculated cart total | sum - 1 | sum | sum + 1 |
-| API token state | Checkout requires authentication | No token | Valid token | Invalid token |
-| Displayed product count | Checkout/cart UI should show all selected items | expected - 1 | expected | expected + 1 duplicate |
-| Coupon minimum amount | Coupon applies only at/above minimum | min - 1 | min | min + 1 |
+| Cart item count | Checkout should require at least 1 cart item | 0 items | 1 item | 2 items |
+| Product quantity | Product detail quantity should be at least 1; current UI allows direct numeric entry | 0 | 1 | 2 |
+| Authentication state | `POST /api/checkout` requires a bearer token | No token | Valid token | Invalid token |
+| Coupon threshold | `POST /api/apply-coupon` checks coupon minimum order amount before checkout | `SAVE10` at 299999 | `SAVE10` at 300000 | `SAVE10` at 300001 |
+| Coupon usage count | Coupon usage is stored through `POST /api/coupon-usage` after checkout | Before max use | At max use | After max use |
+| Cart state after checkout | Successful checkout should clear frontend cart state | Cart has item before checkout | Cart empty after checkout | Repeat checkout without adding a new item |
 
 ### 4.2 BVA Explanation
 
-1. Use source-code review to choose boundaries that are actually reachable through UI or API.
-2. Cover cart item count because the cart UI blocks empty cart navigation but the backend route does not read the cart.
-3. Cover quantity and displayed product count because the frontend calculates totals from local cart entries.
-4. Cover `total_amount` around the calculated sum because the backend stores the request value directly.
-5. Cover token boundaries because `authenticateToken` returns 401 for missing token and 403 for invalid token.
-6. Do not mark any BVA case as executed without separate evidence.
+BVA was regenerated after inspecting the actual EShop source code. Only boundaries that can be executed through the current browser UI, Apidog/API client, or normal local setup were kept.
+
+The main FR08 boundaries are cart item count, product quantity, authentication state, coupon threshold, coupon usage count, and cart state after checkout. Earlier artificial cases were removed or rewritten when they required changing application source code or checking data that checkout does not store. For each practical boundary, below/on/above values are selected where the implementation exposes a realistic way to test them.
+
+Implementation notes used for this BVA set:
+
+- Web cart data is stored in React `CartContext`, not in a persisted backend cart used by checkout.
+- Web checkout sends `items`, `total_amount`, and optional `coupon_id`, but backend checkout stores only `user_id`, `total_amount`, `status`, and optional `shipping_address`.
+- `POST /api/checkout` requires `Authorization: Bearer <token>`.
+- Coupon validation is a separate `POST /api/apply-coupon` call before checkout.
+- Product quantity can be typed in the product detail UI because the input has no `min` validation in the source.
+- The web checkout code imports `clearCart` but does not call it after checkout success.
 
 ### 4.3 Boundary Value Analysis Test Cases
 
 | TC ID | Technique | Boundary Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|
-| FR08-BVA-01 | Boundary Value Analysis | 0 cart items | User is logged in; cart is empty | Cart length 0 | Open Cart, direct `/checkout`, and API checkout with valid token | Checkout is blocked and no empty order is created | Not Executed | Not Executed | To be added after execution |
-| FR08-BVA-02 | Boundary Value Analysis | 1 cart item | User is logged in | Cart length 1 | Proceed to Checkout | Checkout page displays one item and total equals the item subtotal | Not Executed | Not Executed | To be added after execution |
-| FR08-BVA-03 | Boundary Value Analysis | 2 cart items | User is logged in | Cart length 2 | Proceed to Checkout | Checkout page displays both items and total equals both subtotals | Not Executed | Not Executed | To be added after execution |
-| FR08-BVA-04 | Boundary Value Analysis | Quantity 0, 1, 2 | User is logged in; cart state can be manipulated | qty 0, qty 1, qty 2 | Modify local cart state or API payload, then inspect checkout total | Quantity 0 is blocked; quantity 1 and 2 are calculated correctly | Not Executed | Not Executed | To be added after execution |
-| FR08-BVA-05 | Boundary Value Analysis | Total amount around calculated sum | User is logged in; calculated sum is known | `sum - 1`, `sum`, `sum + 1` | Send checkout API requests with valid token | Only the correct/recalculated total is accepted or saved | Not Executed | Not Executed | To be added after execution |
-| FR08-BVA-06 | Boundary Value Analysis | Token state | Checkout body is otherwise valid | No token, valid token, invalid token | Send checkout API request for each token state | Missing token returns 401, valid token may create order, invalid token returns 403 | Not Executed | Not Executed | To be added after execution |
+| FR08-BVA-01 | Boundary Value Analysis | Cart item count below minimum | User is logged in; frontend cart is empty | 0 cart items | Open Cart, then try to proceed to Checkout; also try direct `/checkout` in the browser if needed | Checkout is blocked for an empty cart and no order is created | Not Executed | Not Executed | To be added after execution |
+| FR08-BVA-02 | Boundary Value Analysis | Cart item count at minimum | User is logged in | 1 cart item with valid product and quantity 1 | Add one product to cart, proceed to Checkout, and confirm checkout | Checkout succeeds and the checkout page displays exactly one product before confirmation | Not Executed | Not Executed | To be added after execution |
+| FR08-BVA-03 | Boundary Value Analysis | Cart item count above minimum | User is logged in | 2 cart items with valid products | Add two products to cart, proceed to Checkout, and confirm checkout | Checkout succeeds and the checkout page displays both products before confirmation | Not Executed | Not Executed | To be added after execution |
+| FR08-BVA-04 | Boundary Value Analysis | Quantity below minimum | User is logged in; product detail page is available | Quantity `0` | Open a product detail page, enter quantity `0`, add to cart, then inspect Cart/Checkout | Quantity `0` is rejected or checkout is blocked before creating an order | Not Executed | Not Executed | To be added after execution |
+| FR08-BVA-05 | Boundary Value Analysis | Quantity at minimum | User is logged in; product detail page is available | Quantity `1` | Open a product detail page, enter quantity `1`, add to cart, then open Checkout | Checkout shows one unit and subtotal equals product price x 1 | Not Executed | Not Executed | To be added after execution |
+| FR08-BVA-06 | Boundary Value Analysis | Quantity above minimum | User is logged in; product detail page is available | Quantity `2` | Open a product detail page, enter quantity `2`, add to cart, then open Checkout | Checkout shows two units and subtotal equals product price x 2 | Not Executed | Not Executed | To be added after execution |
+| FR08-BVA-07 | Boundary Value Analysis | Authentication below boundary | No token is provided | `POST /api/checkout` with valid-looking body and no `Authorization` header | Send checkout request through Apidog/API client | Backend returns `401 Unauthorized` and no order is created | Not Executed | Not Executed | To be added after execution |
+| FR08-BVA-08 | Boundary Value Analysis | Authentication on boundary | Valid user token exists | `POST /api/checkout` with positive `total_amount` and valid bearer token | Log in, copy token, and send checkout request through Apidog/API client | Backend accepts the authenticated checkout request and returns checkout success with an `orderId` | Not Executed | Not Executed | To be added after execution |
+| FR08-BVA-09 | Boundary Value Analysis | Coupon threshold below minimum | User is logged in; coupon has not exceeded usage limit | `SAVE10`, `total_amount = 299999` | Send `POST /api/apply-coupon`, then keep checkout total unchanged | Coupon is rejected because the order total is below the minimum amount | Not Executed | Not Executed | To be added after execution |
+| FR08-BVA-10 | Boundary Value Analysis | Coupon threshold exactly at minimum | User is logged in; coupon has not exceeded usage limit | `SAVE10`, `total_amount = 300000` | Send `POST /api/apply-coupon`, then proceed to checkout only if coupon is accepted | Coupon is accepted at the documented minimum threshold and discounted total is shown | Not Executed | Not Executed | To be added after execution |
+| FR08-BVA-11 | Boundary Value Analysis | Coupon threshold above minimum | User is logged in; coupon has not exceeded usage limit | `SAVE10`, `total_amount = 300001` | Send `POST /api/apply-coupon`, then proceed to checkout if coupon is accepted | Coupon is accepted above the minimum threshold and discounted total is shown | Not Executed | Not Executed | To be added after execution |
+| FR08-BVA-12 | Boundary Value Analysis | Coupon usage limit | User is logged in; `VIP100` has max 2 uses per user | Apply `VIP100` before first use, second use, and third use | Apply coupon, checkout successfully, call `POST /api/coupon-usage`, then repeat until the third apply attempt | First and second uses are allowed; third use is rejected because usage count reaches the max | Not Executed | Not Executed | To be added after execution |
+| FR08-BVA-13 | Boundary Value Analysis | Cart state after checkout | User is logged in; cart has one valid item | Cart before checkout has 1 item; after success should have 0 items; repeat checkout without new item | Add one item, complete checkout, return to Cart, then try checkout again without adding a new item | Cart is cleared after success and repeated checkout is blocked until a new item is added | Not Executed | Not Executed | To be added after execution |
+
+### 4.4 Source-Code Review Notes
+
+The BVA cases above were regenerated after reviewing the actual EShop source code. Some earlier cases were removed because they could not be executed through the current UI/API without modifying the application source code. The final BVA set focuses on executable boundaries: cart item count, quantity, authentication state, coupon threshold, coupon usage count, and cart state after successful checkout.
+
+Specific implementation limitations:
+
+- Checkout does not read a persisted backend cart and does not save order line items, so BVA cases cannot verify stored per-item order details without additional implementation support.
+- Coupon validation is handled by `POST /api/apply-coupon` before checkout, not by `POST /api/checkout` itself.
+- Quantity `0` is testable through the current product detail UI because the input accepts typed numeric values and the cart stores the parsed value.
+- Cart clearing after checkout must be verified through the frontend after success because the backend does not manage the web cart state.
 
 ## 5. AI Gap Analysis
 

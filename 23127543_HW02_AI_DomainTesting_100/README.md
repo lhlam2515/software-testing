@@ -22,12 +22,12 @@
 |---|---:|
 | Number of features | 4 |
 | Domain Testing cases | 48 |
-| Boundary Value Analysis cases | 24 |
-| Total test cases | 72 |
+| Boundary Value Analysis cases | 31 |
+| Total test cases | 79 |
 | Executed | 26 |
 | Passed | 11 |
 | Failed | 9 |
-| Not executed | 46 |
+| Not executed | 53 |
 | Needs review | 6 |
 | Confirmed bugs | 6 |
 
