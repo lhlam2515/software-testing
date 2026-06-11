@@ -258,7 +258,7 @@ To be filled after creating GitHub Issue.
 ### Potential BUG-07: Web checkout may not clear cart after success
 
 **Feature:** FR-08  
-**Related Test Case:** FR08-DT-10  
+**Related Test Case:** FR08-DT-07  
 **Severity:** High  
 **Status:** Potential bug - needs execution confirmation  
 

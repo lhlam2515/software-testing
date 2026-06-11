@@ -35,10 +35,10 @@ Results are marked Passed/Failed only when screenshot/evidence exists. Cases wit
 | Feature | Domain Testing | BVA | Total | Executed | Passed | Failed | Not Executed | Needs Review |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | FR-04 Profile | 12 | 6 | 18 | 18 | 7 | 7 | 0 | 4 |
-| FR-08 Checkout | 12 | 6 | 18 | 0 | 0 | 0 | 18 | 0 |
+| FR-08 Checkout | 12 | 6 | 18 | 4 | 3 | 0 | 14 | 1 |
 | FR-18 Admin Order Management | 12 | 6 | 18 | 0 | 0 | 0 | 18 | 0 |
 | FR-20 Mobile Checkout | 12 | 6 | 18 | 0 | 0 | 0 | 18 | 0 |
-| **Total** | **48** | **24** | **72** | **18** | **7** | **7** | **54** | **4** |
+| **Total** | **48** | **24** | **72** | **22** | **10** | **7** | **50** | **5** |
 
 ## 6. Bug Summary
 
@@ -58,7 +58,7 @@ Potential bug candidates needing execution:
 | Backend profile API may allow role escalation | FR-04 | FR04-DT-08 |
 | Mobile profile may send `shippingAddress` instead of `shipping_address` | FR-04/FR-20 | FR04-DT-12, FR20 manual check |
 | Checkout backend may trust `total_amount` | FR-08/FR-20 | FR08-DT-08, FR20-DT-07 |
-| Web checkout may not clear cart after success | FR-08 | FR08-DT-10 |
+| Web checkout may not clear cart after success | FR-08 | FR08-DT-07 |
 | Admin APIs may not check `role=admin` | FR-18 | FR18-DT-02 |
 | Admin state machine may allow `canceled -> delivered` | FR-18 | FR18-DT-11 |
 | Admin UI may render shipping address HTML | FR-18 | FR18-DT-12 |
