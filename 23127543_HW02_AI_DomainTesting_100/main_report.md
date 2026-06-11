@@ -35,10 +35,10 @@ Results are marked Passed/Failed only when screenshot/evidence exists. Cases wit
 | Feature | Domain Testing | BVA | Total | Executed | Passed | Failed | Not Executed | Needs Review |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | FR-04 Profile | 12 | 6 | 18 | 18 | 7 | 7 | 0 | 4 |
-| FR-08 Checkout | 12 | 13 | 25 | 8 | 4 | 2 | 17 | 2 |
+| FR-08 Checkout | 12 | 13 | 25 | 25 | 12 | 5 | 0 | 8 |
 | FR-18 Admin Order Management | 12 | 6 | 18 | 0 | 0 | 0 | 18 | 0 |
 | FR-20 Mobile Checkout | 12 | 6 | 18 | 0 | 0 | 0 | 18 | 0 |
-| **Total** | **48** | **31** | **79** | **26** | **11** | **9** | **53** | **6** |
+| **Total** | **48** | **31** | **79** | **43** | **19** | **12** | **36** | **12** |
 
 ## 6. Bug Summary
 
@@ -52,6 +52,9 @@ Confirmed bug:
 | BUG-FR04-BVA-05 | FR-04 | Phone not starting with 0 is accepted | FR04-BVA-05 screenshot |
 | BUG-FR08-01 | FR-08 | Backend checkout trusts client-provided `total_amount` | FR08-DT-08 screenshot |
 | BUG-FR08-02 | FR-08 | Checkout API accepts zero and negative totals | FR08-DT-09 screenshots |
+| BUG-FR08-03 | FR-08 | Web checkout does not clear cart after success | FR08-BVA-13 screenshots |
+| BUG-FR08-04 | FR-08 | Product detail accepts quantity 0 | FR08-BVA-04 screenshot |
+| BUG-FR08-05 | FR-08 | Coupon at documented minimum threshold is rejected | FR08-BVA-10 screenshot |
 
 Potential bug candidates needing execution:
 
@@ -59,7 +62,6 @@ Potential bug candidates needing execution:
 |---|---|---|
 | Backend profile API may allow role escalation | FR-04 | FR04-DT-08 |
 | Mobile profile may send `shippingAddress` instead of `shipping_address` | FR-04/FR-20 | FR04-DT-12, FR20 manual check |
-| Web checkout may not clear cart after success | FR-08 | FR08-DT-07 |
 | Admin APIs may not check `role=admin` | FR-18 | FR18-DT-02 |
 | Admin state machine may allow `canceled -> delivered` | FR-18 | FR18-DT-11 |
 | Admin UI may render shipping address HTML | FR-18 | FR18-DT-12 |

@@ -157,6 +157,78 @@ API returns HTTP 200 and creates orders for both negative and zero totals.
 ### GitHub Issue Link
 To be filled after creating GitHub Issue.
 
+## BUG-FR08-03: Web checkout does not clear cart after success
+
+**Feature:** FR-08 Checkout  
+**Related Test Case:** FR08-BVA-13  
+**Severity:** High  
+**Status:** Confirmed by screenshot evidence  
+
+### Steps to Reproduce
+1. Log in on web and add a product to cart.
+2. Complete checkout successfully.
+3. Return to the cart page.
+
+### Expected Result
+Cart is cleared after successful checkout.
+
+### Actual Result
+Checkout success is shown, but returning to Cart still shows the same item with quantity 2 and total 8,000,000 VND.
+
+### Evidence
+[FR08-BVA-13.png](../evidence/test_execution_screenshots/FR08-BVA-13.png)<br>[FR08-BVA-13-2.png](../evidence/test_execution_screenshots/FR08-BVA-13-2.png)
+
+### GitHub Issue Link
+To be filled after creating GitHub Issue.
+
+## BUG-FR08-04: Product detail accepts quantity 0
+
+**Feature:** FR-08 Checkout  
+**Related Test Case:** FR08-BVA-04  
+**Severity:** High  
+**Status:** Confirmed by screenshot evidence  
+
+### Steps to Reproduce
+1. Log in on web and open a product detail page.
+2. Enter quantity `0`.
+3. Click Add to Cart.
+
+### Expected Result
+Quantity `0` is rejected or checkout is blocked before an order can be created.
+
+### Actual Result
+The product detail page accepts quantity `0` and shows the item as added.
+
+### Evidence
+[FR08-BVA-04.png](../evidence/test_execution_screenshots/FR08-BVA-04.png)
+
+### GitHub Issue Link
+To be filled after creating GitHub Issue.
+
+## BUG-FR08-05: Coupon at documented minimum threshold is rejected
+
+**Feature:** FR-08 Checkout  
+**Related Test Case:** FR08-BVA-10  
+**Severity:** Medium  
+**Status:** Confirmed by screenshot evidence  
+
+### Steps to Reproduce
+1. Send `POST /api/apply-coupon`.
+2. Use body `{ "code": "SAVE10", "total_amount": 300000 }`.
+3. Observe the API response.
+
+### Expected Result
+Coupon `SAVE10` is accepted at its documented minimum threshold of 300,000 VND.
+
+### Actual Result
+API returns HTTP 400 and rejects the coupon at exactly 300,000 VND.
+
+### Evidence
+[FR08-BVA-10.png](../evidence/test_execution_screenshots/FR08-BVA-10.png)
+
+### GitHub Issue Link
+To be filled after creating GitHub Issue.
+
 ## Potential Bugs
 
 ### Potential BUG-01: Backend profile API may allow role escalation
@@ -269,30 +341,6 @@ To be filled after creating GitHub Issue.
 
 #### Expected Result
 Payload contains all cart items.
-
-#### Actual Result
-To be filled after execution.
-
-#### Evidence
-To be added after execution.
-
-#### GitHub Issue Link
-To be filled after creating GitHub Issue.
-
-### Potential BUG-07: Web checkout may not clear cart after success
-
-**Feature:** FR-08  
-**Related Test Case:** FR08-DT-07  
-**Severity:** High  
-**Status:** Potential bug - needs execution confirmation  
-
-#### Steps to Reproduce
-1. Log in on web and add an item to cart.
-2. Complete checkout successfully.
-3. Return to the Cart page.
-
-#### Expected Result
-Cart is empty after checkout.
 
 #### Actual Result
 To be filled after execution.

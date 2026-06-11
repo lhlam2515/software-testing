@@ -24,12 +24,12 @@
 | Domain Testing cases | 48 |
 | Boundary Value Analysis cases | 31 |
 | Total test cases | 79 |
-| Executed | 26 |
-| Passed | 11 |
-| Failed | 9 |
-| Not executed | 53 |
-| Needs review | 6 |
-| Confirmed bugs | 6 |
+| Executed | 43 |
+| Passed | 19 |
+| Failed | 12 |
+| Not executed | 36 |
+| Needs review | 12 |
+| Confirmed bugs | 9 |
 
 ## Self-Assessment
 
@@ -51,6 +51,6 @@
 ## Notes
 
 - Test cases were regenerated after inspecting real EShop source code.
-- FR-04 and eight FR-08 Domain Testing cases have screenshot evidence and updated Actual Result/Verdict.
-- FR-18, FR-20, and FR08 cases without evidence remain `Not Executed` until manual testing is performed.
+- FR-04 and all FR-08 Domain Testing/BVA cases have screenshot evidence and updated Actual Result/Verdict.
+- FR-18 and FR-20 remain `Not Executed` until manual testing is performed.
 - Do not submit raw AI output without human review and evidence updates.
