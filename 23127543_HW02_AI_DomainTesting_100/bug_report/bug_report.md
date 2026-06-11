@@ -109,6 +109,54 @@ The UI accepts `1123456789` and shows update success.
 ### GitHub Issue Link
 To be filled after creating GitHub Issue.
 
+## BUG-FR08-01: Backend checkout trusts client-provided `total_amount`
+
+**Feature:** FR-08 Checkout  
+**Related Test Case:** FR08-DT-08  
+**Severity:** Critical  
+**Status:** Confirmed by screenshot evidence  
+
+### Steps to Reproduce
+1. Log in and use a valid user token.
+2. Send `POST /api/checkout` with `total_amount: 1` and a valid-looking `shipping_address`.
+3. Observe the API response.
+
+### Expected Result
+Backend recalculates total from trusted cart/product data or rejects the manipulated total.
+
+### Actual Result
+API returns HTTP 200 and creates an order with checkout success.
+
+### Evidence
+[FR08-DT-08.png](../evidence/test_execution_screenshots/FR08-DT-08.png)
+
+### GitHub Issue Link
+To be filled after creating GitHub Issue.
+
+## BUG-FR08-02: Checkout API accepts zero and negative totals
+
+**Feature:** FR-08 Checkout  
+**Related Test Case:** FR08-DT-09  
+**Severity:** Critical  
+**Status:** Confirmed by screenshot evidence  
+
+### Steps to Reproduce
+1. Log in and use a valid user token.
+2. Send `POST /api/checkout` with `total_amount: -1`.
+3. Send `POST /api/checkout` with `total_amount: 0`.
+
+### Expected Result
+Backend rejects invalid totals and creates no order.
+
+### Actual Result
+API returns HTTP 200 and creates orders for both negative and zero totals.
+
+### Evidence
+[FR08-DT-09-1.png](../evidence/test_execution_screenshots/FR08-DT-09-1.png)<br>[FR08-DT-09-2.png](../evidence/test_execution_screenshots/FR08-DT-09-2.png)
+
+### GitHub Issue Link
+To be filled after creating GitHub Issue.
+
 ## Potential Bugs
 
 ### Potential BUG-01: Backend profile API may allow role escalation
@@ -125,30 +173,6 @@ To be filled after creating GitHub Issue.
 
 #### Expected Result
 Backend does not allow users to change their own role.
-
-#### Actual Result
-To be filled after execution.
-
-#### Evidence
-To be added after execution.
-
-#### GitHub Issue Link
-To be filled after creating GitHub Issue.
-
-### Potential BUG-02: Checkout backend may trust client-provided `total_amount`
-
-**Feature:** FR-08 / FR-20  
-**Related Test Case:** FR08-DT-08, FR20-DT-07  
-**Severity:** Critical  
-**Status:** Potential bug - needs execution confirmation  
-
-#### Steps to Reproduce
-1. Log in and prepare a high-value cart.
-2. Send `POST /api/checkout` with `total_amount: 1`.
-3. Check the new order in user orders/admin orders.
-
-#### Expected Result
-Backend recalculates total or rejects the incorrect payload.
 
 #### Actual Result
 To be filled after execution.

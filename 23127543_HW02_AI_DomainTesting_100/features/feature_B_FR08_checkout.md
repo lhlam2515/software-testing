@@ -8,6 +8,19 @@ FR-08 is the web checkout flow that converts the local shopping cart into an ord
 
 According to the SRS, only logged-in users can checkout. Checkout total must be calculated from the cart and must not be directly editable. Backend must recalculate the total, UI must display all products, and cart must be cleared after successful checkout. In the actual implementation, web checkout has an editable total input, sends `items`, `total_amount`, and optional `coupon_id`, but backend ignores `items`, trusts `total_amount`, does not recalculate from cart data, and the web client does not call `clearCart()` after successful checkout.
 
+### Valid Coupon Codes Found from Source Code
+
+After reading `eshop-sut/backend/database.js` and `eshop-sut/backend/server.js`, the following seeded coupons can be used for checkout-related tests:
+
+| Coupon Code | Type | Discount Value | Minimum Order Amount | Expired At | Is Active | Max Uses/User | Testing Purpose |
+|---|---|---:|---:|---|---:|---:|---|
+| SAVE10 | percent | 10 | 300000 | 2099-12-31 | 1 | 1 | Valid coupon |
+| BIGBUY | fixed | 50000 | 500000 | 2099-12-31 | 1 | 1 | Valid coupon |
+| VIP100 | fixed | 100000 | 300000 | 2099-12-31 | 1 | 2 | Valid coupon |
+| EXPIRED | percent | 20 | 100000 | 2020-01-01 | 1 | 1 | Negative test: expired coupon |
+
+Source-code note: `POST /api/apply-coupon` uses `total_amount > min_order_amount`, while the README says the boundary should be `>= min_order_amount`. The implementation also calculates percent coupons with `total_amount * (1 - discount_value)`, so percent coupon behavior needs execution evidence before any confirmed verdict is assigned.
+
 ## 3. Domain Testing
 
 ### 3.1 Input Variables / Conditions
@@ -42,12 +55,12 @@ According to the SRS, only logged-in users can checkout. Checkout total must be 
 | FR08-DT-04 | Domain Testing | Multiple cart items displayed before checkout | User is logged in; cart has multiple entries | iPhone 15 Pro Max qty 1; AirPods Pro 2 qty 1; AirPods Pro 2 qty 1 | Open Cart | UI displays all cart entries and total equals the sum of displayed line totals | UI displays three cart rows and total 42,000,000 VND, matching 30,000,000 + 6,000,000 + 6,000,000. | Pass | [FR08-DT-04.png](../evidence/test_execution_screenshots/FR08-DT-04.png) |
 | FR08-DT-05 | Domain Testing | Empty cart checkout | User is logged in; cart is empty | Cart length 0; API body may contain `total_amount: 0` | Open Cart, try direct `/checkout`, and send checkout API with valid token | Checkout should be blocked and no empty order should be created | Not Executed | Not Executed | To be added after execution |
 | FR08-DT-06 | Domain Testing | One item on checkout page | User is logged in; cart has one item | One product, qty 1 | Proceed from Cart to Checkout | Checkout page displays exactly one product line and total equals price x quantity | Not Executed | Not Executed | To be added after execution |
-| FR08-DT-07 | Domain Testing | Cart cleared after successful checkout | User is logged in; cart has at least one item | Successful checkout request | Confirm checkout, then return to Cart | Cart is empty after successful checkout | Not Executed | Not Executed | To be added after execution |
-| FR08-DT-08 | Domain Testing | Backend total calculation | User is logged in; real cart total is greater than 1 VND | API body `{ "total_amount": 1, "shipping_address": "Test address" }` | Send `POST /api/checkout` with valid token | Backend recalculates from trusted cart/product data or rejects the wrong total | Not Executed | Not Executed | To be added after execution |
-| FR08-DT-09 | Domain Testing | Zero or negative total through API | User is logged in | `total_amount = 0` and `total_amount = -1` | Send checkout API requests with valid token | Backend rejects invalid money values and creates no order | Not Executed | Not Executed | To be added after execution |
-| FR08-DT-10 | Domain Testing | Missing shipping address through API | User is logged in | Body contains `total_amount` only | Send checkout API request with valid token | If delivery address is required, backend should reject the request; otherwise behavior must be documented | Not Executed | Not Executed | To be added after execution |
-| FR08-DT-11 | Domain Testing | Valid coupon before checkout | User is logged in; total meets coupon minimum | Valid coupon code and cart total above minimum | Apply coupon, then confirm checkout | Discount is shown correctly and coupon usage is recorded after successful checkout | Not Executed | Not Executed | To be added after execution |
-| FR08-DT-12 | Domain Testing | Invalid coupon before checkout | User is logged in | Expired, unknown, or below-minimum coupon | Apply coupon before checkout | Error is shown and checkout total does not change | Not Executed | Not Executed | To be added after execution |
+| FR08-DT-07 | Domain Testing | Cart cleared after successful checkout | User is logged in; cart has at least one item | Successful checkout request | Confirm checkout, then return to Cart | Cart is empty after successful checkout | Screenshot shows checkout success on `/checkout`, but it does not show the cart after checkout. Screenshot evidence is unclear; needs manual confirmation. | Needs Review | [FR08-DT-07.png](../evidence/test_execution_screenshots/FR08-DT-07.png) |
+| FR08-DT-08 | Domain Testing | Backend total calculation | User is logged in; real cart total is greater than 1 VND | API body `{ "total_amount": 1, "shipping_address": "Test address" }` | Send `POST /api/checkout` with valid token | Backend recalculates from trusted cart/product data or rejects the wrong total | API returns HTTP 200 with `{ "message": "Checkout successful", "orderId": 2 }`, so the manipulated total request is accepted. Bug candidate: BUG-FR08-01. | Fail | [FR08-DT-08.png](../evidence/test_execution_screenshots/FR08-DT-08.png) |
+| FR08-DT-09 | Domain Testing | Zero or negative total through API | User is logged in | `total_amount = -1`, then `total_amount = 0`, with `shipping_address = "Test address"` | Send checkout API requests with valid token | Backend rejects invalid money values and creates no order | API returns HTTP 200 and creates orders for both `total_amount = -1` and `total_amount = 0`. Bug candidate: BUG-FR08-02. | Fail | [FR08-DT-09-1.png](../evidence/test_execution_screenshots/FR08-DT-09-1.png)<br>[FR08-DT-09-2.png](../evidence/test_execution_screenshots/FR08-DT-09-2.png) |
+| FR08-DT-10 | Domain Testing | Missing shipping address through API | User is logged in | Body contains `total_amount` only | Send checkout API request with valid token | Backend implementation accepts checkout without `shipping_address` and creates an order; the behavior should be documented because the API does not validate this field | API returns HTTP 200 with `{ "message": "Checkout successful", "orderId": 8 }` when `shipping_address` is omitted. | Pass | [FR08-DT-10.png](../evidence/test_execution_screenshots/FR08-DT-10.png) |
+| FR08-DT-11 | Domain Testing | Valid coupon before checkout | User is logged in; total is above coupon minimum | `BIGBUY` with total above 500000, or `VIP100` with total above 300000 | Apply coupon, then confirm checkout | Fixed discount is shown correctly and coupon usage is recorded after successful checkout | Not Executed | Not Executed | To be added after execution |
+| FR08-DT-12 | Domain Testing | Expired coupon before checkout | User is logged in | `EXPIRED` with total above 100000 | Apply coupon before checkout | Expired-coupon error is shown and checkout total does not change | Not Executed | Not Executed | To be added after execution |
 
 ## 4. Boundary Value Analysis
 
@@ -98,16 +111,16 @@ Without source inspection, AI may assume the backend follows the SRS and recalcu
 
 ### 5.4 Human Corrections
 
-Test cases were corrected to use actual route `POST /api/checkout`, actual token behavior, actual web cart behavior, and actual request body fields. Executed verdicts are based only on the four available screenshots; all source-code-only risks remain `Not Executed`.
+Test cases were corrected to use actual route `POST /api/checkout`, actual token behavior, actual web cart behavior, seeded coupon codes, and actual request body fields. Executed verdicts are based only on the available screenshots; all source-code-only coupon risks remain `Not Executed`.
 
-## 6. Potential Bugs / Bug Report Placeholders
+## 6. Confirmed and Potential Bugs / Bug Report Placeholders
 
-### Potential BUG-FR08-01: Backend checkout trusts client-provided `total_amount`
+### BUG-FR08-01: Backend checkout trusts client-provided `total_amount`
 
 **Feature:** FR-08 Checkout  
 **Related Test Case:** FR08-DT-08, FR08-BVA-05  
 **Severity:** Critical  
-**Status:** Potential bug - needs execution confirmation  
+**Status:** Confirmed by screenshot evidence  
 
 #### Steps to Reproduce
 1. Log in and prepare a cart with total greater than 1 VND.
@@ -119,15 +132,40 @@ Test cases were corrected to use actual route `POST /api/checkout`, actual token
 Backend recalculates total from trusted cart/product data or rejects the wrong request.
 
 #### Actual Result
-To be filled after execution.
+API returns HTTP 200 and creates an order when `total_amount` is manipulated to `1`.
 
 #### Evidence
-To be added after execution.
+[FR08-DT-08.png](../evidence/test_execution_screenshots/FR08-DT-08.png)
 
 #### GitHub Issue Link
 To be filled after creating GitHub Issue.
 
-### Potential BUG-FR08-02: Web checkout does not clear cart after success
+### BUG-FR08-02: Checkout API accepts zero and negative totals
+
+**Feature:** FR-08 Checkout  
+**Related Test Case:** FR08-DT-09  
+**Severity:** Critical  
+**Status:** Confirmed by screenshot evidence  
+
+#### Steps to Reproduce
+1. Log in and use a valid user token.
+2. Send `POST /api/checkout` with `total_amount: -1`.
+3. Send `POST /api/checkout` with `total_amount: 0`.
+
+#### Expected Result
+
+Backend rejects invalid totals and creates no order.
+
+#### Actual Result
+API returns HTTP 200 and creates orders for both negative and zero totals.
+
+#### Evidence
+[FR08-DT-09-1.png](../evidence/test_execution_screenshots/FR08-DT-09-1.png)<br>[FR08-DT-09-2.png](../evidence/test_execution_screenshots/FR08-DT-09-2.png)
+
+#### GitHub Issue Link
+To be filled after creating GitHub Issue.
+
+### Potential BUG-FR08-03: Web checkout does not clear cart after success
 
 **Feature:** FR-08 Checkout  
 **Related Test Case:** FR08-DT-07  
