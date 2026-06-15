@@ -31,22 +31,80 @@ According to the SRS, only admins can view/update orders, order status must foll
 5. Add security/UI cases because the admin UI renders address content as HTML.
 6. Review actual code: middleware does not check role and backend contains suspicious `canceled -> delivered` logic.
 
+### 3.3.0 Test Execution Setup
+
+#### Environment
+- Backend API: `http://localhost:3000/api`
+- Admin Web: `http://localhost:5174`
+- Web Frontend: `http://localhost:5173`
+- API Client: Apidog/Postman/cURL
+
+#### Test Accounts
+| Role | Email | Password | Purpose |
+|---|---|---|---|
+| Admin | admin@eshop.com | Admin123! or admin123 | Used for admin order list and status update tests |
+| Regular User | test@eshop.com | Test1234! | Used for creating orders and non-admin access tests |
+
+Source-code note: `backend/database.js` seeds the admin password as `Admin123!`; `setup_guide.md` mentions `admin123`, so use `Admin123!` first when executing tests.
+
+#### Common API Headers
+For authenticated requests:
+
+```http
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+#### How to Get Tokens
+
+1. Send `POST /api/login`.
+2. Use the email/password from the test accounts.
+3. Copy the returned JWT token.
+4. Use it as `Authorization: Bearer <token>`.
+
+#### How to Prepare Test Orders
+
+To test status transitions, create several orders first.
+
+Option A - using Web UI:
+
+1. Open `http://localhost:5173`.
+2. Log in as `test@eshop.com / Test1234!`.
+3. Add a product to cart.
+4. Complete checkout.
+5. Open Admin Web and verify the new order appears.
+
+Option B - using API:
+
+1. Log in as a regular user.
+2. Send `POST /api/checkout` with a valid user token.
+3. Use a simple request body such as:
+
+```json
+{
+  "total_amount": 100000,
+  "shipping_address": "FR18 Test Address"
+}
+```
+
+4. Save the returned `orderId`.
+
 ### 3.3 Domain Testing Test Cases
 
 | TC ID | Technique | Domain Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|
-| FR18-DT-01 | Domain Testing | Admin views all orders | Admin token is valid; orders from multiple users exist | `GET /api/admin/orders` | Log in as admin, open Orders tab | All orders are displayed with `user_name`, `total_amount`, `status`, `shipping_address` | Not Executed | Not Executed | To be added after execution |
-| FR18-DT-02 | Domain Testing | Regular user calls admin orders | Regular user token | `GET /api/admin/orders` | Call API with user token | Must be rejected with 401/403 according to SRS | Not Executed | Not Executed | To be added after execution |
-| FR18-DT-03 | Domain Testing | No token | No token | `GET /api/admin/orders` | Call API | Returns `401 Unauthorized` | Not Executed | Not Executed | To be added after execution |
-| FR18-DT-04 | Domain Testing | pending -> confirmed | Order is `pending` | Body `{"status":"confirmed"}` | Admin updates status | Success, status becomes `confirmed` | Not Executed | Not Executed | To be added after execution |
-| FR18-DT-05 | Domain Testing | confirmed -> shipping | Order is `confirmed` | `{"status":"shipping"}` | Admin updates status | Success, status becomes `shipping` | Not Executed | Not Executed | To be added after execution |
-| FR18-DT-06 | Domain Testing | shipping -> delivered | Order is `shipping` | `{"status":"delivered"}` | Admin updates status | Success, status becomes `delivered` | Not Executed | Not Executed | To be added after execution |
-| FR18-DT-07 | Domain Testing | pending -> canceled | Order is `pending` | `{"status":"canceled"}` | Admin cancels order | Success, status becomes `canceled` | Not Executed | Not Executed | To be added after execution |
-| FR18-DT-08 | Domain Testing | confirmed -> canceled | Order is `confirmed` | `{"status":"canceled"}` | Admin cancels order | Success, status becomes `canceled` | Not Executed | Not Executed | To be added after execution |
-| FR18-DT-09 | Domain Testing | Invalid pending -> delivered | Order is `pending` | `{"status":"delivered"}` | Call update API | Returns 400, status unchanged | Not Executed | Not Executed | To be added after execution |
-| FR18-DT-10 | Domain Testing | delivered final state | Order is `delivered` | `{"status":"canceled"}` | Call update API | Rejected because `delivered` is a final state | Not Executed | Not Executed | To be added after execution |
-| FR18-DT-11 | Domain Testing | canceled final state | Order is `canceled` | `{"status":"delivered"}` | Call update API | Rejected because `canceled` is a final state | Not Executed | Not Executed | To be added after execution |
-| FR18-DT-12 | Domain Testing | Address contains script in admin UI | Order has `shipping_address=<img src=x onerror=alert(1)>` | Open admin Orders | Observe Address column | HTML is escaped and script does not execute | Not Executed | Not Executed | To be added after execution |
+| FR18-DT-01 | Domain Testing | Admin views all orders | Backend is running; admin account exists; at least one order exists | Admin token: `<admin_token>`<br>Endpoint: `GET /api/admin/orders`<br>Headers: `Authorization: Bearer <admin_token>` | 1. Log in as admin using `POST http://localhost:3000/api/login` with body `{"email":"admin@eshop.com","password":"Admin123!"}`.<br>2. Copy the admin JWT token.<br>3. Send `GET http://localhost:3000/api/admin/orders` with header `Authorization: Bearer <admin_token>`.<br>4. Alternatively, open `http://localhost:5174`, log in as admin, and click the Orders tab.<br>5. Observe whether all orders are displayed. | All orders are displayed with `id`, `user_name`, `total_amount`, `status`, `shipping_address`, and latest orders first. | Not Executed | Not Executed | To be added after execution |
+| FR18-DT-02 | Domain Testing | Regular user calls admin orders | Backend is running; regular user account exists | Regular user token: `<user_token>`<br>Endpoint: `GET /api/admin/orders`<br>Headers: `Authorization: Bearer <user_token>` | 1. Log in as `test@eshop.com` using `POST http://localhost:3000/api/login` with body `{"email":"test@eshop.com","password":"Test1234!"}`.<br>2. Copy the regular user JWT token.<br>3. Send `GET http://localhost:3000/api/admin/orders` with header `Authorization: Bearer <user_token>`.<br>4. Observe response status and body. | According to SRS, regular user should be rejected with 401/403. | Not Executed | Not Executed | To be added after execution |
+| FR18-DT-03 | Domain Testing | No token | Backend is running | No Authorization header<br>Endpoint: `GET /api/admin/orders` | 1. Send `GET http://localhost:3000/api/admin/orders` without the `Authorization` header.<br>2. Observe response status and body. | Returns `401 Unauthorized`. | Not Executed | Not Executed | To be added after execution |
+| FR18-DT-04 | Domain Testing | pending -> confirmed | A pending order exists | Admin token: `<admin_token>`<br>Order ID: `<pending_order_id>`<br>Endpoint: `PUT /api/admin/orders/<pending_order_id>/status`<br>Headers: `Authorization: Bearer <admin_token>`, `Content-Type: application/json`<br>Body: `{"status":"confirmed"}` | 1. Create or find an order with status `pending`.<br>2. Log in as admin and copy token.<br>3. Send `PUT http://localhost:3000/api/admin/orders/<pending_order_id>/status`.<br>4. Use header `Authorization: Bearer <admin_token>`.<br>5. Use body `{"status":"confirmed"}`.<br>6. Send `GET http://localhost:3000/api/admin/orders` again.<br>7. Verify the order status is now `confirmed`. | Success response is returned, and the order status becomes `confirmed`. | Not Executed | Not Executed | To be added after execution |
+| FR18-DT-05 | Domain Testing | confirmed -> shipping | A confirmed order exists | Admin token: `<admin_token>`<br>Order ID: `<confirmed_order_id>`<br>Endpoint: `PUT /api/admin/orders/<confirmed_order_id>/status`<br>Headers: `Authorization: Bearer <admin_token>`, `Content-Type: application/json`<br>Body: `{"status":"shipping"}` | 1. Use an order that is already `confirmed`, or first execute FR18-DT-04.<br>2. Send `PUT http://localhost:3000/api/admin/orders/<confirmed_order_id>/status` with body `{"status":"shipping"}`.<br>3. Call `GET http://localhost:3000/api/admin/orders`.<br>4. Verify status is `shipping`. | Success response is returned, and the order status becomes `shipping`. | Not Executed | Not Executed | To be added after execution |
+| FR18-DT-06 | Domain Testing | shipping -> delivered | A shipping order exists | Admin token: `<admin_token>`<br>Order ID: `<shipping_order_id>`<br>Endpoint: `PUT /api/admin/orders/<shipping_order_id>/status`<br>Headers: `Authorization: Bearer <admin_token>`, `Content-Type: application/json`<br>Body: `{"status":"delivered"}` | 1. Use an order that is already `shipping`, or first execute FR18-DT-04 then FR18-DT-05.<br>2. Send `PUT http://localhost:3000/api/admin/orders/<shipping_order_id>/status` with body `{"status":"delivered"}`.<br>3. Call `GET http://localhost:3000/api/admin/orders`.<br>4. Verify status is `delivered`. | Success response is returned, and the order status becomes `delivered`. | Not Executed | Not Executed | To be added after execution |
+| FR18-DT-07 | Domain Testing | pending -> canceled | A pending order exists | Admin token: `<admin_token>`<br>Order ID: `<pending_order_id>`<br>Endpoint: `PUT /api/admin/orders/<pending_order_id>/status`<br>Headers: `Authorization: Bearer <admin_token>`, `Content-Type: application/json`<br>Body: `{"status":"canceled"}` | 1. Create or find a `pending` order.<br>2. Send `PUT http://localhost:3000/api/admin/orders/<pending_order_id>/status` with body `{"status":"canceled"}`.<br>3. Call `GET http://localhost:3000/api/admin/orders`.<br>4. Verify status is `canceled`. | Success response is returned, and the order status becomes `canceled`. | Not Executed | Not Executed | To be added after execution |
+| FR18-DT-08 | Domain Testing | confirmed -> canceled | A confirmed order exists | Admin token: `<admin_token>`<br>Order ID: `<confirmed_order_id>`<br>Endpoint: `PUT /api/admin/orders/<confirmed_order_id>/status`<br>Headers: `Authorization: Bearer <admin_token>`, `Content-Type: application/json`<br>Body: `{"status":"canceled"}` | 1. Use an order that is already `confirmed`.<br>2. Send `PUT http://localhost:3000/api/admin/orders/<confirmed_order_id>/status` with body `{"status":"canceled"}`.<br>3. Call `GET http://localhost:3000/api/admin/orders`.<br>4. Verify status is `canceled`. | Success response is returned, and the order status becomes `canceled`. | Not Executed | Not Executed | To be added after execution |
+| FR18-DT-09 | Domain Testing | Invalid pending -> delivered | A pending order exists | Admin token: `<admin_token>`<br>Order ID: `<pending_order_id>`<br>Endpoint: `PUT /api/admin/orders/<pending_order_id>/status`<br>Headers: `Authorization: Bearer <admin_token>`, `Content-Type: application/json`<br>Body: `{"status":"delivered"}` | 1. Create or find a `pending` order.<br>2. Send `PUT http://localhost:3000/api/admin/orders/<pending_order_id>/status` with body `{"status":"delivered"}`.<br>3. Observe response status and body.<br>4. Call `GET http://localhost:3000/api/admin/orders`.<br>5. Verify the order status remains `pending`. | Rejected with clear error; status unchanged. | Not Executed | Not Executed | To be added after execution |
+| FR18-DT-10 | Domain Testing | delivered final state | A delivered order exists | Admin token: `<admin_token>`<br>Order ID: `<delivered_order_id>`<br>Endpoint: `PUT /api/admin/orders/<delivered_order_id>/status`<br>Headers: `Authorization: Bearer <admin_token>`, `Content-Type: application/json`<br>Body: `{"status":"canceled"}` | 1. Use an order that is already `delivered`, or execute `pending -> confirmed -> shipping -> delivered` first.<br>2. Send `PUT http://localhost:3000/api/admin/orders/<delivered_order_id>/status` with body `{"status":"canceled"}`.<br>3. Observe response status and body.<br>4. Call `GET http://localhost:3000/api/admin/orders`.<br>5. Verify status remains `delivered`. | Rejected because `delivered` is a final state; status unchanged. | Not Executed | Not Executed | To be added after execution |
+| FR18-DT-11 | Domain Testing | canceled final state | A canceled order exists | Admin token: `<admin_token>`<br>Order ID: `<canceled_order_id>`<br>Endpoint: `PUT /api/admin/orders/<canceled_order_id>/status`<br>Headers: `Authorization: Bearer <admin_token>`, `Content-Type: application/json`<br>Body: `{"status":"delivered"}` | 1. Use an order that is already `canceled`, or execute `pending -> canceled` first.<br>2. Send `PUT http://localhost:3000/api/admin/orders/<canceled_order_id>/status` with body `{"status":"delivered"}`.<br>3. Observe response status and body.<br>4. Call `GET http://localhost:3000/api/admin/orders`.<br>5. Verify status remains `canceled`. | Rejected because `canceled` is a final state; status unchanged. | Not Executed | Not Executed | To be added after execution |
+| FR18-DT-12 | Domain Testing | Shipping address XSS / unsafe HTML rendering | Backend, web frontend, and admin frontend are running | User token: `<user_token>`<br>Admin token: `<admin_token>`<br>Endpoint: `POST /api/checkout`<br>Checkout body: `{"total_amount":100000,"shipping_address":"<img src=x onerror=alert('FR18-XSS')>"}` | 1. Log in as a regular user and copy user token.<br>2. Send `POST http://localhost:3000/api/checkout` with the XSS shipping address.<br>3. Save returned `orderId`.<br>4. Open `http://localhost:5174`.<br>5. Log in as admin.<br>6. Click the Orders tab.<br>7. Locate the order created in step 2.<br>8. Observe whether the address is displayed as plain text or rendered as HTML.<br>9. Check whether any alert popup appears. | Address is escaped as text; no alert popup executes. | Not Executed | Not Executed | To be added after execution |
 
 ## 4. Boundary Value Analysis
 
@@ -73,12 +131,12 @@ According to the SRS, only admins can view/update orders, order status must foll
 
 | TC ID | Technique | Boundary Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|
-| FR18-BVA-01 | Boundary Value Analysis | 0 orders | Admin token, DB has no orders | `GET /api/admin/orders` | Open admin Orders | Empty list/state shown, no crash | Not Executed | Not Executed | To be added after execution |
-| FR18-BVA-02 | Boundary Value Analysis | 1 order | Admin token, DB has 1 order | `GET /api/admin/orders` | Open admin Orders | Exactly 1 order displayed | Not Executed | Not Executed | To be added after execution |
-| FR18-BVA-03 | Boundary Value Analysis | 2+ orders | Admin token, DB has >=2 orders | `GET /api/admin/orders` | Open admin Orders | All orders displayed, sorted by descending id | Not Executed | Not Executed | To be added after execution |
-| FR18-BVA-04 | Boundary Value Analysis | Confirmed boundary | Order is `confirmed` | `shipping` and `canceled` | Update each direction separately | Both valid directions are accepted separately | Not Executed | Not Executed | To be added after execution |
-| FR18-BVA-05 | Boundary Value Analysis | Delivered final boundary | Order is `delivered` | `status=canceled` | Update status | Rejected, status unchanged | Not Executed | Not Executed | To be added after execution |
-| FR18-BVA-06 | Boundary Value Analysis | Canceled final boundary | Order is `canceled` | `status=delivered` | Update status | Rejected, status unchanged | Not Executed | Not Executed | To be added after execution |
+| FR18-BVA-01 | Boundary Value Analysis | 0 orders | Precondition: database has no orders, or run `node database.js` then ensure no checkout has been performed. | Admin token: `<admin_token>`<br>Endpoint: `GET /api/admin/orders`<br>Alternative UI: Admin Orders tab at `http://localhost:5174` | 1. Start backend with an empty `orders` table.<br>2. Log in as admin.<br>3. Call `GET http://localhost:3000/api/admin/orders` or open Admin Orders page.<br>4. Verify empty list/state. | Empty list/state shown, no crash. | Not Executed | Not Executed | To be added after execution |
+| FR18-BVA-02 | Boundary Value Analysis | 1 order | Backend is running; exactly one order can be created for this test. | User token: `<user_token>`<br>Admin token: `<admin_token>`<br>Create endpoint: `POST /api/checkout`<br>List endpoint: `GET /api/admin/orders`<br>Checkout body: `{"total_amount":100000,"shipping_address":"FR18 BVA One Order"}` | 1. Create exactly one order using `POST http://localhost:3000/api/checkout`.<br>2. Log in as admin.<br>3. Call `GET http://localhost:3000/api/admin/orders`.<br>4. Verify exactly one order appears. | Exactly 1 order is displayed. | Not Executed | Not Executed | To be added after execution |
+| FR18-BVA-03 | Boundary Value Analysis | 2+ orders | Backend is running; at least two orders can be created for this test. | User token: `<user_token>`<br>Admin token: `<admin_token>`<br>Create endpoint: `POST /api/checkout`<br>List endpoint: `GET /api/admin/orders`<br>Checkout body examples: `{"total_amount":100000,"shipping_address":"FR18 BVA Order 1"}`, `{"total_amount":200000,"shipping_address":"FR18 BVA Order 2"}` | 1. Create at least two orders using `POST http://localhost:3000/api/checkout`.<br>2. Log in as admin.<br>3. Call `GET http://localhost:3000/api/admin/orders`.<br>4. Verify all orders appear. | All orders are displayed, sorted by descending `id`. | Not Executed | Not Executed | To be added after execution |
+| FR18-BVA-04 | Boundary Value Analysis | Confirmed boundary | Two confirmed orders exist or can be prepared. | Admin token: `<admin_token>`<br>First order ID: `<confirmed_order_id_1>`<br>Second order ID: `<confirmed_order_id_2>`<br>Endpoint: `PUT /api/admin/orders/<order_id>/status`<br>Bodies: `{"status":"shipping"}` and `{"status":"canceled"}` | 1. Create two pending orders.<br>2. Change both to `confirmed` using `PUT /api/admin/orders/<order_id>/status` with body `{"status":"confirmed"}`.<br>3. For the first order, update `confirmed -> shipping` with body `{"status":"shipping"}`.<br>4. For the second order, update `confirmed -> canceled` with body `{"status":"canceled"}`.<br>5. Verify both transitions are accepted separately. | Both valid directions from `confirmed` are accepted separately. | Not Executed | Not Executed | To be added after execution |
+| FR18-BVA-05 | Boundary Value Analysis | Delivered final boundary | A delivered order exists or can be prepared. | Admin token: `<admin_token>`<br>Order ID: `<delivered_order_id>`<br>Endpoint: `PUT /api/admin/orders/<delivered_order_id>/status`<br>Body: `{"status":"canceled"}` | 1. Create a pending order.<br>2. Change `pending -> confirmed -> shipping -> delivered`.<br>3. Try `delivered -> canceled` with body `{"status":"canceled"}`.<br>4. Verify rejection and unchanged status by calling `GET /api/admin/orders`. | Rejected, and status remains `delivered`. | Not Executed | Not Executed | To be added after execution |
+| FR18-BVA-06 | Boundary Value Analysis | Canceled final boundary | A canceled order exists or can be prepared. | Admin token: `<admin_token>`<br>Order ID: `<canceled_order_id>`<br>Endpoint: `PUT /api/admin/orders/<canceled_order_id>/status`<br>Body: `{"status":"delivered"}` | 1. Create a pending order.<br>2. Change `pending -> canceled`.<br>3. Try `canceled -> delivered` with body `{"status":"delivered"}`.<br>4. Verify rejection and unchanged status by calling `GET /api/admin/orders`. | Rejected, and status remains `canceled`. | Not Executed | Not Executed | To be added after execution |
 
 ## 5. AI Gap Analysis
 
@@ -174,3 +232,41 @@ To be added after execution.
 
 #### GitHub Issue Link
 To be filled after creating GitHub Issue.
+
+## 7. API Execution Helper
+
+### Login as Admin
+```bash
+curl -X POST http://localhost:3000/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@eshop.com","password":"Admin123!"}'
+```
+
+### Login as Regular User
+```bash
+curl -X POST http://localhost:3000/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@eshop.com","password":"Test1234!"}'
+```
+
+### Create Order as User
+```bash
+curl -X POST http://localhost:3000/api/checkout \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <user_token>" \
+  -d '{"total_amount":100000,"shipping_address":"FR18 Test Address"}'
+```
+
+### View Admin Orders
+```bash
+curl -X GET http://localhost:3000/api/admin/orders \
+  -H "Authorization: Bearer <admin_token>"
+```
+
+### Update Order Status
+```bash
+curl -X PUT http://localhost:3000/api/admin/orders/<order_id>/status \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <admin_token>" \
+  -d '{"status":"confirmed"}'
+```
