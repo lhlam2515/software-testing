@@ -2,31 +2,35 @@ const fs = require("fs");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
+const ROOT_DIR = path.resolve(__dirname, "..");
 const WEB_BASE_URL = process.env.WEB_BASE_URL || "http://localhost:5173";
 const ADMIN_BASE_URL = process.env.ADMIN_BASE_URL || "http://localhost:5174";
 const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000/api";
-const SCREENSHOT_DIR = path.resolve(__dirname, "../results/screenshots");
-const JSON_DIR = path.resolve(__dirname, "../results/json");
+const SCREENSHOT_DIR = path.resolve(ROOT_DIR, "results/screenshots");
+const JSON_DIR = path.resolve(ROOT_DIR, "results/json");
 
 function ensureDirs() {
   fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
   fs.mkdirSync(JSON_DIR, { recursive: true });
 }
 
-function uniqueFilePath(dir, filename) {
+function relativeFromRoot(filePath) {
+  return path.relative(ROOT_DIR, filePath).replace(/\\/g, "/");
+}
+
+function uniqueFilePath(filename) {
+  ensureDirs();
   const parsed = path.parse(filename);
-  let candidate = path.join(dir, filename);
+  let candidate = path.join(SCREENSHOT_DIR, filename);
   if (!fs.existsSync(candidate)) return candidate;
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  candidate = path.join(dir, `${parsed.name}-${stamp}${parsed.ext}`);
-  return candidate;
+  return path.join(SCREENSHOT_DIR, `${parsed.name}-${stamp}${parsed.ext}`);
 }
 
 async function saveScreenshot(page, filename) {
-  ensureDirs();
-  const target = uniqueFilePath(SCREENSHOT_DIR, filename);
+  const target = uniqueFilePath(filename);
   await page.screenshot({ path: target, fullPage: true });
-  return path.relative(path.resolve(__dirname, ".."), target).replace(/\\/g, "/");
+  return relativeFromRoot(target);
 }
 
 function writeUiResult(filename, entry) {
@@ -42,15 +46,22 @@ function writeUiResult(filename, entry) {
     }
   }
   existing.push({
-    generatedAt: new Date().toISOString(),
+    testCaseId: entry.testCaseId,
+    feature: entry.feature,
+    technique: entry.technique || "Domain Testing",
     executionType: "Manual / UI-assisted",
+    timestamp: new Date().toISOString(),
+    pageUrl: entry.pageUrl || "",
+    inputData: entry.inputData || {},
+    expectedResult: entry.expectedResult || entry.expected || "",
+    actualObservation: entry.actualObservation || entry.actual || "Screenshot captured. Manual visual review required.",
+    screenshotFile: entry.screenshotFile || entry.evidenceFile || "",
     verdictSuggestion: "Needs Review",
     humanReviewRequired: true,
-    notes: "Manual Review Required. Inspect screenshot and UI behavior before updating report.",
-    ...entry,
+    notes: entry.notes || "Manual Review Required. Inspect screenshot before updating Actual Result, Verdict, and Evidence.",
   });
   fs.writeFileSync(target, JSON.stringify(existing, null, 2), "utf8");
-  return path.relative(path.resolve(__dirname, ".."), target).replace(/\\/g, "/");
+  return relativeFromRoot(target);
 }
 
 async function loginWeb(page, email = process.env.USER_EMAIL || "test@eshop.com", password = process.env.USER_PASSWORD || "Test1234!") {

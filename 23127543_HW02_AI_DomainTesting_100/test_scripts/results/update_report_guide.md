@@ -1,42 +1,72 @@
-# Updating Feature Reports From Generated Evidence
+# Update Report Guide
 
-Generated JSON files and screenshots are evidence aids. They are not final report verdicts.
+Generated API and Playwright outputs are evidence, not final report updates.
 
-## Mapping Results To Report Rows
+## Evidence Files
 
-1. Open the relevant file in `test_scripts/results/json/`.
-2. Match `testCaseId` to the same `TC ID` row in the feature report.
-3. Read `expected`, `actual`, `statusCode`, and any screenshots.
-4. Decide the final report `Actual Result` and `Verdict` manually.
+API scripts write:
 
-## Linking Screenshots
+```text
+test_scripts/results/json/
+test_scripts/results/html/
+```
 
-Use relative links from a feature report to the screenshot path. Example:
+UI-assisted Playwright scripts write:
+
+```text
+test_scripts/results/screenshots/
+test_scripts/results/json/
+```
+
+Mobile cases are mainly manual. Save reviewed mobile screenshots and link them manually from the FR20 report.
+
+## Map Evidence To Report Rows
+
+1. Open the feature Markdown file.
+2. Find the row with the same `TC ID`.
+3. Open the generated JSON/HTML result with the matching `testCaseId`.
+4. Review request input, expected result, actual status/response, screenshots, and notes.
+5. Only then update `Actual Result`, `Verdict`, and `Evidence`.
+
+## Suggested Verdict Rules
+
+- `Pass`: actual behavior matches the expected result.
+- `Fail`: actual behavior contradicts the expected result.
+- `Needs Review`: result is unclear or requires visual inspection.
+- `To be executed`: test has not been run yet.
+- `Error`: environment/script issue; not automatically a product bug.
+
+## Evidence Links
+
+Example screenshot link from a feature Markdown file:
 
 ```md
 [FR08-BVA-13-ui-after-checkout-cart.png](../test_scripts/results/screenshots/FR08-BVA-13-ui-after-checkout-cart.png)
 ```
 
-If a screenshot name has a timestamp suffix, link the exact generated file.
+Example JSON evidence link:
 
-## Verdict Meanings
+```md
+[fr08_checkout_api_results.json](../test_scripts/results/json/fr08_checkout_api_results.json)
+```
 
-- `Pass`: Reviewed evidence confirms the expected result.
-- `Fail`: Reviewed evidence confirms behavior violates the expected result.
-- `Needs Review`: Evidence is incomplete, ambiguous, or requires visual/human judgment.
-- `Not Executed`: The case was not run or the environment was not ready.
+Example HTML evidence link:
 
-## GitHub Issues
+```md
+[fr08_checkout_api_results.html](../test_scripts/results/html/fr08_checkout_api_results.html)
+```
 
-Create an issue only after confirming a failed case. Include:
+## GitHub Issues For Confirmed Bugs
+
+Create an issue only after reviewing evidence and confirming the behavior is a product bug. Include:
 
 - Test case ID
 - Environment
 - Steps to reproduce
 - Expected result
 - Actual result
-- Screenshot/JSON evidence path
+- Evidence links
 
 ## Warning
 
-Do not submit raw script output as the final report. The scripts intentionally use `verdictSuggestion` and `Manual Review Required` because the final homework tables should be updated by a human reviewer.
+Do not submit raw script output as the final report. The scripts intentionally use `verdictSuggestion` and `humanReviewRequired` because final Pass/Fail values must be reviewed manually.

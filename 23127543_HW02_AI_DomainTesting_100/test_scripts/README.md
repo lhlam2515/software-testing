@@ -1,8 +1,19 @@
 # HW02 Domain Testing Evidence Scripts
 
-These scripts help generate API logs and UI screenshots for FR04, FR08, FR18, and FR20. They do not produce final report verdicts. Review the evidence manually before updating any feature report table.
+These scripts help generate fresh API logs, HTML summaries, and UI screenshots for FR04, FR08, FR18, and FR20. They do not produce final report verdicts. Review the evidence manually before updating any feature report table.
+
+For the full step-by-step runner guide, read [RUN_TESTS.md](RUN_TESTS.md).
 
 ## Prerequisites
+
+Required:
+
+- Node.js 18 or newer
+- npm
+- Backend running at `http://localhost:3000/api`
+- Web frontend running at `http://localhost:5173`
+- Admin frontend running at `http://localhost:5174`
+- Optional: Expo for mobile manual tests
 
 ```bash
 node -v
@@ -93,8 +104,8 @@ npm run test:ui:fr18
 
 ```text
 test_scripts/results/json/
-test_scripts/results/screenshots/
 test_scripts/results/html/
+test_scripts/results/screenshots/
 ```
 
 Screenshots use collision-safe names. Existing screenshots are not overwritten; a timestamp suffix is added when needed.
@@ -108,3 +119,7 @@ Screenshots use collision-safe names. Existing screenshots are not overwritten; 
 5. Create GitHub Issues only for confirmed failed cases.
 
 Generated values named `verdictSuggestion` are suggestions only, not final report verdicts.
+
+UI and mobile evidence requires human visual review. Do not mark final Pass/Fail in the feature Markdown files until you have checked the generated JSON logs and screenshots.
+
+After this reset, report rows should remain `To be executed` until you rerun scripts or perform manual UI/mobile execution and review the new evidence.

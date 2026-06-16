@@ -1,99 +1,225 @@
 const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
-require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+const dotenv = require("dotenv");
 
-const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000/api";
-const RESULTS_DIR = path.resolve(__dirname, "../results/json");
+const ROOT_DIR = path.resolve(__dirname, "..");
+const JSON_DIR = path.resolve(ROOT_DIR, "results/json");
+const HTML_DIR = path.resolve(ROOT_DIR, "results/html");
+const SCREENSHOT_DIR = path.resolve(ROOT_DIR, "results/screenshots");
+
+function loadEnv() {
+  dotenv.config({ path: path.resolve(ROOT_DIR, ".env") });
+  return {
+    API_BASE_URL: process.env.API_BASE_URL || "http://localhost:3000/api",
+    WEB_BASE_URL: process.env.WEB_BASE_URL || "http://localhost:5173",
+    ADMIN_BASE_URL: process.env.ADMIN_BASE_URL || "http://localhost:5174",
+    USER_EMAIL: process.env.USER_EMAIL || "test@eshop.com",
+    USER_PASSWORD: process.env.USER_PASSWORD || "Test1234!",
+    ADMIN_EMAIL: process.env.ADMIN_EMAIL || "admin@eshop.com",
+    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || "Admin123!",
+    TEST_USER_EMAIL: process.env.TEST_USER_EMAIL || "script_user@test.com",
+    TEST_USER_PASSWORD: process.env.TEST_USER_PASSWORD || "Password123!",
+  };
+}
 
 function ensureDirs() {
-  fs.mkdirSync(RESULTS_DIR, { recursive: true });
-  fs.mkdirSync(path.resolve(__dirname, "../results/screenshots"), { recursive: true });
-  fs.mkdirSync(path.resolve(__dirname, "../results/html"), { recursive: true });
+  fs.mkdirSync(JSON_DIR, { recursive: true });
+  fs.mkdirSync(HTML_DIR, { recursive: true });
+  fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
 }
 
-function maskToken(value) {
-  if (!value) return value;
-  return String(value).replace(/Bearer\s+([A-Za-z0-9._-]+)/g, "Bearer ***JWT***").replace(/eyJ[A-Za-z0-9._-]+/g, "***JWT***");
+function maskToken(token) {
+  if (!token) return token;
+  const value = String(token);
+  if (value.toLowerCase().startsWith("bearer ")) return "Bearer ***masked***";
+  return "***masked***";
 }
 
-function safeStringify(data) {
-  return maskToken(JSON.stringify(data, null, 2));
+function maskDeep(value) {
+  if (Array.isArray(value)) return value.map(maskDeep);
+  if (value && typeof value === "object") {
+    const clone = {};
+    for (const [key, item] of Object.entries(value)) {
+      if (key.toLowerCase() === "authorization") clone[key] = maskToken(item);
+      else if (key.toLowerCase() === "token") clone[key] = "***masked***";
+      else clone[key] = maskDeep(item);
+    }
+    return clone;
+  }
+  if (typeof value === "string" && value.startsWith("eyJ")) return "***masked***";
+  return value;
 }
 
-function safeLog(message, data) {
-  if (data === undefined) console.log(maskToken(message));
-  else console.log(maskToken(message), safeStringify(data));
+function relativeFromRoot(filePath) {
+  return path.relative(ROOT_DIR, filePath).replace(/\\/g, "/");
+}
+
+function apiUrl(pathName) {
+  const env = loadEnv();
+  const cleanPath = pathName.startsWith("/") ? pathName : `/${pathName}`;
+  return `${env.API_BASE_URL}${cleanPath.replace(/^\/api/, "")}`;
 }
 
 async function login(email, password) {
-  const response = await apiRequest("POST", "/login", { email, password });
+  const response = await apiRequest({
+    method: "POST",
+    path: "/api/login",
+    body: { email, password },
+  });
   return {
-    token: response.data && response.data.token,
-    user: response.data && response.data.user,
+    token: response.responseBody && response.responseBody.token,
+    user: response.responseBody && response.responseBody.user,
     response,
   };
 }
 
-async function apiRequest(method, pathName, body, token) {
-  const url = `${API_BASE_URL}${pathName.startsWith("/") ? pathName : `/${pathName}`}`;
+async function apiRequest({ method, path: pathName, token, body, headers = {} }) {
+  const requestHeaders = {
+    "Content-Type": "application/json",
+    ...headers,
+  };
+  if (token) requestHeaders.Authorization = `Bearer ${token}`;
+
   try {
     const response = await axios({
       method,
-      url,
+      url: apiUrl(pathName),
       data: body,
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      headers: requestHeaders,
       validateStatus: () => true,
     });
-    return { status: response.status, data: response.data, error: null };
+    return {
+      endpoint: pathName,
+      method: method.toUpperCase(),
+      requestHeaders: maskDeep(requestHeaders),
+      requestBody: maskDeep(body || {}),
+      statusCode: response.status,
+      responseBody: maskDeep(response.data),
+      error: null,
+    };
   } catch (error) {
     return {
-      status: 0,
-      data: null,
+      endpoint: pathName,
+      method: method.toUpperCase(),
+      requestHeaders: maskDeep(requestHeaders),
+      requestBody: maskDeep(body || {}),
+      statusCode: 0,
+      responseBody: null,
       error: error.message || String(error),
     };
   }
 }
 
-function writeJsonResult(filename, data) {
-  ensureDirs();
-  const target = path.resolve(RESULTS_DIR, filename);
-  fs.writeFileSync(target, JSON.stringify(data, null, 2), "utf8");
-  return path.relative(path.resolve(__dirname, ".."), target).replace(/\\/g, "/");
-}
-
-function appendResult(resultsArray, result) {
-  resultsArray.push({
+function recordResult(results, result) {
+  results.push({
+    testCaseId: result.testCaseId,
+    feature: result.feature,
+    technique: result.technique,
     executionType: "API Automated",
+    timestamp: new Date().toISOString(),
+    endpoint: result.endpoint,
+    method: result.method,
+    requestHeaders: maskDeep(result.requestHeaders || {}),
+    inputData: maskDeep(result.inputData || {}),
+    expectedResult: result.expectedResult,
+    actualStatusCode: result.actualStatusCode,
+    actualResponseBody: maskDeep(result.actualResponseBody),
+    verdictSuggestion: result.verdictSuggestion || "Needs Review",
     humanReviewRequired: true,
-    evidenceFile: "",
-    notes: "Review before copying into report.",
-    ...result,
+    evidenceJsonFile: result.evidenceJsonFile || "",
+    evidenceHtmlFile: result.evidenceHtmlFile || "",
+    notes: result.notes || "Manual review required before updating the feature report.",
   });
 }
 
-function verdictFromStatus(actualOk, review = false) {
-  if (review) return "Needs Review";
-  return actualOk ? "Pass" : "Fail";
+function writeJsonResult(filename, results) {
+  ensureDirs();
+  const target = path.resolve(JSON_DIR, filename);
+  const rel = relativeFromRoot(target);
+  for (const result of results) result.evidenceJsonFile = rel;
+  fs.writeFileSync(target, JSON.stringify(results, null, 2), "utf8");
+  return rel;
 }
 
-function printSummary(feature, results) {
-  console.log(`\n${feature} API evidence summary`);
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function writeHtmlSummary(filename, results) {
+  ensureDirs();
+  const target = path.resolve(HTML_DIR, filename);
+  const rel = relativeFromRoot(target);
+  for (const result of results) result.evidenceHtmlFile = rel;
+  const rows = results.map((r) => `
+    <tr>
+      <td>${escapeHtml(r.testCaseId)}</td>
+      <td>${escapeHtml(r.feature)}</td>
+      <td>${escapeHtml(r.technique)}</td>
+      <td>${escapeHtml(r.method)} ${escapeHtml(r.endpoint)}</td>
+      <td>${escapeHtml(r.actualStatusCode)}</td>
+      <td>${escapeHtml(r.verdictSuggestion)}</td>
+      <td>${escapeHtml(r.humanReviewRequired)}</td>
+      <td><pre>${escapeHtml(JSON.stringify(r.actualResponseBody, null, 2))}</pre></td>
+      <td>${escapeHtml(r.notes)}</td>
+    </tr>`).join("\n");
+  const html = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>HW02 API Evidence</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; vertical-align: top; }
+    th { background: #f3f3f3; }
+    pre { white-space: pre-wrap; max-width: 520px; }
+  </style>
+</head>
+<body>
+  <h1>HW02 API Evidence</h1>
+  <p>Generated evidence is not a final report verdict. Manual review is required.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>TC ID</th><th>Feature</th><th>Technique</th><th>Request</th>
+        <th>Status</th><th>Verdict Suggestion</th><th>Human Review</th><th>Response</th><th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+</body>
+</html>`;
+  fs.writeFileSync(target, html, "utf8");
+  return rel;
+}
+
+function printSummary(featureName, results) {
+  console.log(`\n${featureName} evidence summary`);
   console.log("TC ID                 Status  Suggestion");
   console.log("------------------------------------------");
-  for (const r of results) {
-    console.log(`${r.testCaseId.padEnd(20)} ${String(r.statusCode).padEnd(7)} ${r.verdictSuggestion}`);
+  for (const result of results) {
+    console.log(`${result.testCaseId.padEnd(20)} ${String(result.actualStatusCode).padEnd(7)} ${result.verdictSuggestion}`);
   }
 }
 
+function suggestion(condition, passText = "Pass", failText = "Fail") {
+  return condition ? passText : failText;
+}
+
 module.exports = {
-  API_BASE_URL,
   apiRequest,
-  appendResult,
   ensureDirs,
+  loadEnv,
   login,
+  maskToken,
   printSummary,
-  safeLog,
-  verdictFromStatus,
+  recordResult,
+  suggestion,
+  writeHtmlSummary,
   writeJsonResult,
 };

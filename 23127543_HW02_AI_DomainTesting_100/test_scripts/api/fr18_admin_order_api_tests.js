@@ -1,110 +1,297 @@
 const {
   apiRequest,
-  appendResult,
+  loadEnv,
   login,
   printSummary,
+  recordResult,
+  suggestion,
+  writeHtmlSummary,
   writeJsonResult,
 } = require("./helpers");
 
 const FEATURE = "FR-18 Admin Order Management";
-const FILE = "fr18_admin_order_api_results.json";
+const JSON_FILE = "fr18_admin_order_api_results.json";
+const HTML_FILE = "fr18_admin_order_api_results.html";
 
 async function createOrder(userToken, label, total = 100000) {
-  const response = await apiRequest("POST", "/checkout", {
-    total_amount: total,
-    shipping_address: label,
-  }, userToken);
-  return { response, orderId: response.data && response.data.orderId };
+  const response = await apiRequest({
+    method: "POST",
+    path: "/api/checkout",
+    token: userToken,
+    body: { total_amount: total, shipping_address: label },
+  });
+  return { response, orderId: response.responseBody && response.responseBody.orderId };
 }
 
-async function update(adminToken, orderId, status) {
-  return apiRequest("PUT", `/admin/orders/${orderId}/status`, { status }, adminToken);
+async function adminOrders(adminToken) {
+  return apiRequest({ method: "GET", path: "/api/admin/orders", token: adminToken });
 }
 
-async function getOrder(orderId) {
-  return apiRequest("GET", `/orders/${orderId}`);
+function findOrder(listResponse, orderId) {
+  const rows = Array.isArray(listResponse.responseBody) ? listResponse.responseBody : [];
+  return rows.find((order) => Number(order.id) === Number(orderId)) || null;
 }
 
-function add(results, id, expected, response, review = true, extra = {}) {
-  appendResult(results, {
-    testCaseId: id,
+async function recordTransition(results, { testCaseId, technique, adminToken, orderId, initialStatus, targetStatus, expectedResult, verdictRule, notes }) {
+  const update = await apiRequest({
+    method: "PUT",
+    path: `/api/admin/orders/${orderId}/status`,
+    token: adminToken,
+    body: { status: targetStatus },
+  });
+  const followUp = await adminOrders(adminToken);
+  const orderAfter = findOrder(followUp, orderId);
+  recordResult(results, {
+    testCaseId,
     feature: FEATURE,
-    expected,
-    actual: `Status ${response.status}; body ${JSON.stringify(response.data)}`,
-    statusCode: response.status,
-    verdictSuggestion: extra.suggestion || "Needs Review",
-    humanReviewRequired: review,
-    ...extra,
+    technique,
+    endpoint: update.endpoint,
+    method: update.method,
+    requestHeaders: update.requestHeaders,
+    inputData: { orderId, initialStatus, targetStatus, requestBody: { status: targetStatus } },
+    expectedResult,
+    actualStatusCode: update.statusCode,
+    actualResponseBody: {
+      updateResponse: update.responseBody,
+      followUpOrderStatus: orderAfter && orderAfter.status,
+      followUpOrder: orderAfter,
+    },
+    verdictSuggestion: verdictRule ? verdictRule(update, orderAfter) : "Needs Review",
+    notes: notes || "Review transition response and follow-up order status before updating the report.",
+  });
+}
+
+function recordListResult(results, { testCaseId, technique, response, expectedResult, tokenType, verdictRule, notes }) {
+  recordResult(results, {
+    testCaseId,
+    feature: FEATURE,
+    technique,
+    endpoint: response.endpoint,
+    method: response.method,
+    requestHeaders: response.requestHeaders,
+    inputData: { tokenType },
+    expectedResult,
+    actualStatusCode: response.statusCode,
+    actualResponseBody: response.responseBody,
+    verdictSuggestion: verdictRule ? verdictRule(response) : "Needs Review",
+    notes: notes || "Manual review required before updating the report.",
   });
 }
 
 async function main() {
+  const env = loadEnv();
   const results = [];
-  const userAuth = await login(process.env.USER_EMAIL || "test@eshop.com", process.env.USER_PASSWORD || "Test1234!");
-  const adminAuth = await login(process.env.ADMIN_EMAIL || "admin@eshop.com", process.env.ADMIN_PASSWORD || "Admin123!");
+  const userAuth = await login(env.USER_EMAIL, env.USER_PASSWORD);
+  const adminAuth = await login(env.ADMIN_EMAIL, env.ADMIN_PASSWORD);
   const userToken = userAuth.token;
   const adminToken = adminAuth.token;
 
   const seed = await createOrder(userToken, "FR18 seed order");
-  const adminList = await apiRequest("GET", "/admin/orders", null, adminToken);
-  add(results, "FR18-DT-01", "Admin can view all orders.", adminList, true, { createdOrderId: seed.orderId });
-
-  const regularList = await apiRequest("GET", "/admin/orders", null, userToken);
-  add(results, "FR18-DT-02", "Regular user should be rejected with 401/403.", regularList, true, {
-    suggestion: regularList.status === 401 || regularList.status === 403 ? "Pass" : "Fail",
+  const adminList = await adminOrders(adminToken);
+  recordListResult(results, {
+    testCaseId: "FR18-DT-01",
+    technique: "Domain Testing",
+    response: adminList,
+    tokenType: "admin",
+    expectedResult: "Admin can view all orders.",
+    verdictRule: (r) => suggestion(r.statusCode === 200 && Array.isArray(r.responseBody)),
+    notes: `Created seed order ID: ${seed.orderId}. Review admin order list.`,
   });
 
-  const noToken = await apiRequest("GET", "/admin/orders");
-  add(results, "FR18-DT-03", "No token returns 401 Unauthorized.", noToken, false, {
-    suggestion: noToken.status === 401 ? "Pass" : "Fail",
+  const regularList = await adminOrders(userToken);
+  recordListResult(results, {
+    testCaseId: "FR18-DT-02",
+    technique: "Domain Testing",
+    response: regularList,
+    tokenType: "regular user",
+    expectedResult: "Regular user should be rejected with 401/403.",
+    verdictRule: (r) => suggestion(r.statusCode === 401 || r.statusCode === 403, "Pass", "Fail"),
+    notes: "If status is 200, observed behavior indicates possible missing admin role check.",
   });
 
-  const o1 = await createOrder(userToken, "FR18 pending to delivered invalid");
-  add(results, "FR18-DT-09", "pending -> delivered is rejected and remains pending.", await update(adminToken, o1.orderId, "delivered"), true, {
-    orderAfter: await getOrder(o1.orderId),
+  const noTokenList = await apiRequest({ method: "GET", path: "/api/admin/orders" });
+  recordListResult(results, {
+    testCaseId: "FR18-DT-03",
+    technique: "Domain Testing",
+    response: noTokenList,
+    tokenType: "none",
+    expectedResult: "No token returns 401 Unauthorized.",
+    verdictRule: (r) => suggestion(r.statusCode === 401),
   });
 
-  const o2 = await createOrder(userToken, "FR18 transition chain");
-  add(results, "FR18-DT-04", "pending -> confirmed succeeds.", await update(adminToken, o2.orderId, "confirmed"), true, { orderAfter: await getOrder(o2.orderId) });
-  add(results, "FR18-DT-05", "confirmed -> shipping succeeds.", await update(adminToken, o2.orderId, "shipping"), true, { orderAfter: await getOrder(o2.orderId) });
-  add(results, "FR18-DT-06", "shipping -> delivered succeeds.", await update(adminToken, o2.orderId, "delivered"), true, { orderAfter: await getOrder(o2.orderId) });
-  add(results, "FR18-DT-10", "delivered -> canceled is rejected.", await update(adminToken, o2.orderId, "canceled"), true, { orderAfter: await getOrder(o2.orderId) });
-  add(results, "FR18-BVA-05", "Delivered final-state boundary rejects canceled.", await update(adminToken, o2.orderId, "canceled"), true, { orderAfter: await getOrder(o2.orderId) });
+  const invalidPending = await createOrder(userToken, "FR18 pending to delivered invalid");
+  await recordTransition(results, {
+    testCaseId: "FR18-DT-09",
+    technique: "Domain Testing",
+    adminToken,
+    orderId: invalidPending.orderId,
+    initialStatus: "pending",
+    targetStatus: "delivered",
+    expectedResult: "Invalid pending -> delivered transition is rejected and order remains pending.",
+    verdictRule: (r, order) => suggestion(r.statusCode !== 200 && order && order.status === "pending"),
+  });
 
-  const o3 = await createOrder(userToken, "FR18 pending cancel");
-  add(results, "FR18-DT-07", "pending -> canceled succeeds.", await update(adminToken, o3.orderId, "canceled"), true, { orderAfter: await getOrder(o3.orderId) });
-  add(results, "FR18-DT-11", "canceled -> delivered should be rejected.", await update(adminToken, o3.orderId, "delivered"), true, { orderAfter: await getOrder(o3.orderId) });
-  add(results, "FR18-BVA-06", "Canceled final-state boundary rejects delivered.", await update(adminToken, o3.orderId, "delivered"), true, { orderAfter: await getOrder(o3.orderId) });
+  const chain = await createOrder(userToken, "FR18 transition chain");
+  await recordTransition(results, {
+    testCaseId: "FR18-DT-04",
+    technique: "Domain Testing",
+    adminToken,
+    orderId: chain.orderId,
+    initialStatus: "pending",
+    targetStatus: "confirmed",
+    expectedResult: "pending -> confirmed succeeds.",
+    verdictRule: (r, order) => suggestion(r.statusCode === 200 && order && order.status === "confirmed"),
+  });
+  await recordTransition(results, {
+    testCaseId: "FR18-DT-05",
+    technique: "Domain Testing",
+    adminToken,
+    orderId: chain.orderId,
+    initialStatus: "confirmed",
+    targetStatus: "shipping",
+    expectedResult: "confirmed -> shipping succeeds.",
+    verdictRule: (r, order) => suggestion(r.statusCode === 200 && order && order.status === "shipping"),
+  });
+  await recordTransition(results, {
+    testCaseId: "FR18-DT-06",
+    technique: "Domain Testing",
+    adminToken,
+    orderId: chain.orderId,
+    initialStatus: "shipping",
+    targetStatus: "delivered",
+    expectedResult: "shipping -> delivered succeeds.",
+    verdictRule: (r, order) => suggestion(r.statusCode === 200 && order && order.status === "delivered"),
+  });
+  await recordTransition(results, {
+    testCaseId: "FR18-DT-10",
+    technique: "Domain Testing",
+    adminToken,
+    orderId: chain.orderId,
+    initialStatus: "delivered",
+    targetStatus: "canceled",
+    expectedResult: "delivered -> canceled is rejected and status remains delivered.",
+    verdictRule: (r, order) => suggestion(r.statusCode !== 200 && order && order.status === "delivered"),
+  });
+  await recordTransition(results, {
+    testCaseId: "FR18-BVA-05",
+    technique: "Boundary Value Analysis",
+    adminToken,
+    orderId: chain.orderId,
+    initialStatus: "delivered",
+    targetStatus: "canceled",
+    expectedResult: "Delivered final boundary rejects canceled.",
+    verdictRule: (r, order) => suggestion(r.statusCode !== 200 && order && order.status === "delivered"),
+  });
 
-  const o4 = await createOrder(userToken, "FR18 confirmed cancel");
-  await update(adminToken, o4.orderId, "confirmed");
-  add(results, "FR18-DT-08", "confirmed -> canceled succeeds.", await update(adminToken, o4.orderId, "canceled"), true, { orderAfter: await getOrder(o4.orderId) });
+  const cancelFromPending = await createOrder(userToken, "FR18 pending cancel");
+  await recordTransition(results, {
+    testCaseId: "FR18-DT-07",
+    technique: "Domain Testing",
+    adminToken,
+    orderId: cancelFromPending.orderId,
+    initialStatus: "pending",
+    targetStatus: "canceled",
+    expectedResult: "pending -> canceled succeeds.",
+    verdictRule: (r, order) => suggestion(r.statusCode === 200 && order && order.status === "canceled"),
+  });
+  await recordTransition(results, {
+    testCaseId: "FR18-DT-11",
+    technique: "Domain Testing",
+    adminToken,
+    orderId: cancelFromPending.orderId,
+    initialStatus: "canceled",
+    targetStatus: "delivered",
+    expectedResult: "canceled -> delivered is rejected and status remains canceled.",
+    verdictRule: (r, order) => suggestion(r.statusCode !== 200 && order && order.status === "canceled", "Pass", "Fail"),
+    notes: "If status becomes delivered, observed behavior indicates possible final-state bug.",
+  });
+  await recordTransition(results, {
+    testCaseId: "FR18-BVA-06",
+    technique: "Boundary Value Analysis",
+    adminToken,
+    orderId: cancelFromPending.orderId,
+    initialStatus: "canceled",
+    targetStatus: "delivered",
+    expectedResult: "Canceled final boundary rejects delivered.",
+    verdictRule: (r, order) => suggestion(r.statusCode !== 200 && order && order.status === "canceled", "Pass", "Fail"),
+  });
 
-  const b1 = await createOrder(userToken, "FR18 BVA one order");
-  const b2 = await createOrder(userToken, "FR18 BVA two orders");
-  add(results, "FR18-BVA-02", "At least one created order is visible to admin.", await apiRequest("GET", "/admin/orders", null, adminToken), true, { createdOrderIds: [b1.orderId] });
-  add(results, "FR18-BVA-03", "Two or more orders are visible and sorted for admin review.", await apiRequest("GET", "/admin/orders", null, adminToken), true, { createdOrderIds: [b1.orderId, b2.orderId] });
+  const confirmedCancel = await createOrder(userToken, "FR18 confirmed cancel");
+  await recordTransition(results, {
+    testCaseId: "FR18-DT-04-setup-for-DT08",
+    technique: "Domain Testing",
+    adminToken,
+    orderId: confirmedCancel.orderId,
+    initialStatus: "pending",
+    targetStatus: "confirmed",
+    expectedResult: "Prepare confirmed order for FR18-DT-08.",
+    verdictRule: (r, order) => suggestion(r.statusCode === 200 && order && order.status === "confirmed"),
+  });
+  await recordTransition(results, {
+    testCaseId: "FR18-DT-08",
+    technique: "Domain Testing",
+    adminToken,
+    orderId: confirmedCancel.orderId,
+    initialStatus: "confirmed",
+    targetStatus: "canceled",
+    expectedResult: "confirmed -> canceled succeeds.",
+    verdictRule: (r, order) => suggestion(r.statusCode === 200 && order && order.status === "canceled"),
+  });
 
   const c1 = await createOrder(userToken, "FR18 confirmed boundary shipping");
-  const c2 = await createOrder(userToken, "FR18 confirmed boundary cancel");
-  await update(adminToken, c1.orderId, "confirmed");
-  await update(adminToken, c2.orderId, "confirmed");
-  add(results, "FR18-BVA-04-shipping", "One confirmed order can transition to shipping.", await update(adminToken, c1.orderId, "shipping"), true, { orderAfter: await getOrder(c1.orderId) });
-  add(results, "FR18-BVA-04-canceled", "Another confirmed order can transition to canceled.", await update(adminToken, c2.orderId, "canceled"), true, { orderAfter: await getOrder(c2.orderId) });
-
-  add(results, "FR18-BVA-01", "0-order empty state requires a clean database and is manual/destructive; script does not reset DB.", { status: 0, data: { note: "Not executed by script to avoid deleting existing evidence data." } }, true, { suggestion: "Needs Review" });
-
-  const evidenceFile = writeJsonResult(FILE, {
-    generatedAt: new Date().toISOString(),
-    feature: FEATURE,
-    warning: "Verdict suggestions are not final report verdicts. Review manually before updating report tables.",
-    results,
+  const c2 = await createOrder(userToken, "FR18 confirmed boundary canceled");
+  await recordTransition(results, {
+    testCaseId: "FR18-BVA-04-setup-1",
+    technique: "Boundary Value Analysis",
+    adminToken,
+    orderId: c1.orderId,
+    initialStatus: "pending",
+    targetStatus: "confirmed",
+    expectedResult: "Prepare first confirmed order for BVA-04.",
+    verdictRule: (r, order) => suggestion(r.statusCode === 200 && order && order.status === "confirmed"),
   });
-  results.forEach((r) => (r.evidenceFile = evidenceFile));
-  writeJsonResult(FILE, { generatedAt: new Date().toISOString(), feature: FEATURE, results });
+  await recordTransition(results, {
+    testCaseId: "FR18-BVA-04-setup-2",
+    technique: "Boundary Value Analysis",
+    adminToken,
+    orderId: c2.orderId,
+    initialStatus: "pending",
+    targetStatus: "confirmed",
+    expectedResult: "Prepare second confirmed order for BVA-04.",
+    verdictRule: (r, order) => suggestion(r.statusCode === 200 && order && order.status === "confirmed"),
+  });
+  await recordTransition(results, {
+    testCaseId: "FR18-BVA-04-shipping",
+    technique: "Boundary Value Analysis",
+    adminToken,
+    orderId: c1.orderId,
+    initialStatus: "confirmed",
+    targetStatus: "shipping",
+    expectedResult: "Confirmed boundary allows shipping.",
+    verdictRule: (r, order) => suggestion(r.statusCode === 200 && order && order.status === "shipping"),
+  });
+  await recordTransition(results, {
+    testCaseId: "FR18-BVA-04",
+    technique: "Boundary Value Analysis",
+    adminToken,
+    orderId: c2.orderId,
+    initialStatus: "confirmed",
+    targetStatus: "canceled",
+    expectedResult: "Confirmed boundary allows canceled.",
+    verdictRule: (r, order) => suggestion(r.statusCode === 200 && order && order.status === "canceled"),
+  });
+
+  const htmlPath = writeHtmlSummary(HTML_FILE, results);
+  const jsonPath = writeJsonResult(JSON_FILE, results);
+  for (const result of results) {
+    result.evidenceHtmlFile = htmlPath;
+    result.evidenceJsonFile = jsonPath;
+  }
+  writeHtmlSummary(HTML_FILE, results);
+  writeJsonResult(JSON_FILE, results);
   printSummary(FEATURE, results);
 }
 
 main().catch((error) => {
-  console.error("FR18 API run error:", error.message);
+  console.error("FR18 API evidence script failed:", error.message);
 });
