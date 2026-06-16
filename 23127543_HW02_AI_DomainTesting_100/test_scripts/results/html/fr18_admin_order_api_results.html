@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>HW02 API Evidence</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; vertical-align: top; }
+    th { background: #f3f3f3; }
+    pre { white-space: pre-wrap; max-width: 520px; }
+  </style>
+</head>
+<body>
+  <h1>HW02 API Evidence</h1>
+  <p>Generated evidence is not a final report verdict. Manual review is required.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>TC ID</th><th>Feature</th><th>Technique</th><th>Request</th>
+        <th>Status</th><th>Verdict Suggestion</th><th>Human Review</th><th>Response</th><th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td>FR18-DT-01</td>
+      <td>FR-18 Admin Order Management</td>
+      <td>Domain Testing</td>
+      <td>GET /api/admin/orders</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;error&quot;: &quot;Forbidden&quot;
+}</pre></td>
+      <td>Created seed order ID: undefined. Review admin order list.</td>
+    </tr>
+
+    <tr>
+      <td>FR18-DT-02</td>
+      <td>FR-18 Admin Order Management</td>
+      <td>Domain Testing</td>
+      <td>GET /api/admin/orders</td>
+      <td>403</td>
+      <td>Pass</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;error&quot;: &quot;Forbidden&quot;
+}</pre></td>
+      <td>If status is 200, observed behavior indicates possible missing admin role check.</td>
+    </tr>
+
+    <tr>
+      <td>FR18-DT-03</td>
+      <td>FR-18 Admin Order Management</td>
+      <td>Domain Testing</td>
+      <td>GET /api/admin/orders</td>
+      <td>401</td>
+      <td>Pass</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;error&quot;: &quot;Unauthorized&quot;
+}</pre></td>
+      <td>Manual review required before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR18-DT-09</td>
+      <td>FR-18 Admin Order Management</td>
+      <td>Domain Testing</td>
+      <td>PUT /api/admin/orders/undefined/status</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpOrderStatus&quot;: null,
+  &quot;followUpOrder&quot;: null
+}</pre></td>
+      <td>Review transition response and follow-up order status before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR18-DT-04</td>
+      <td>FR-18 Admin Order Management</td>
+      <td>Domain Testing</td>
+      <td>PUT /api/admin/orders/undefined/status</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpOrderStatus&quot;: null,
+  &quot;followUpOrder&quot;: null
+}</pre></td>
+      <td>Review transition response and follow-up order status before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR18-DT-05</td>
+      <td>FR-18 Admin Order Management</td>
+      <td>Domain Testing</td>
+      <td>PUT /api/admin/orders/undefined/status</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpOrderStatus&quot;: null,
+  &quot;followUpOrder&quot;: null
+}</pre></td>
+      <td>Review transition response and follow-up order status before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR18-DT-06</td>
+      <td>FR-18 Admin Order Management</td>
+      <td>Domain Testing</td>
+      <td>PUT /api/admin/orders/undefined/status</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpOrderStatus&quot;: null,
+  &quot;followUpOrder&quot;: null
+}</pre></td>
+      <td>Review transition response and follow-up order status before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR18-DT-10</td>
+      <td>FR-18 Admin Order Management</td>
+      <td>Domain Testing</td>
+      <td>PUT /api/admin/orders/undefined/status</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpOrderStatus&quot;: null,
+  &quot;followUpOrder&quot;: null
+}</pre></td>
+      <td>Review transition response and follow-up order status before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR18-BVA-05</td>
+      <td>FR-18 Admin Order Management</td>
+      <td>Boundary Value Analysis</td>
+      <td>PUT /api/admin/orders/undefined/status</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpOrderStatus&quot;: null,
+  &quot;followUpOrder&quot;: null
+}</pre></td>
+      <td>Review transition response and follow-up order status before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR18-DT-07</td>
+      <td>FR-18 Admin Order Management</td>
+      <td>Domain Testing</td>
+      <td>PUT /api/admin/orders/undefined/status</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpOrderStatus&quot;: null,
+  &quot;followUpOrder&quot;: null
+}</pre></td>
+      <td>Review transition response and follow-up order status before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR18-DT-11</td>
+      <td>FR-18 Admin Order Management</td>
+      <td>Domain Testing</td>
+      <td>PUT /api/admin/orders/undefined/status</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpOrderStatus&quot;: null,
+  &quot;followUpOrder&quot;: null
+}</pre></td>
+      <td>If status becomes delivered, observed behavior indicates possible final-state bug.</td>
+    </tr>
+
+    <tr>
+      <td>FR18-BVA-06</td>
+      <td>FR-18 Admin Order Management</td>
+      <td>Boundary Value Analysis</td>
+      <td>PUT /api/admin/orders/undefined/status</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpOrderStatus&quot;: null,
+  &quot;followUpOrder&quot;: null
+}</pre></td>
+      <td>Review transition response and follow-up order status before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR18-DT-04-setup-for-DT08</td>
+      <td>FR-18 Admin Order Management</td>
+      <td>Domain Testing</td>
+      <td>PUT /api/admin/orders/undefined/status</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpOrderStatus&quot;: null,
+  &quot;followUpOrder&quot;: null
+}</pre></td>
+      <td>Review transition response and follow-up order status before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR18-DT-08</td>
+      <td>FR-18 Admin Order Management</td>
+      <td>Domain Testing</td>
+      <td>PUT /api/admin/orders/undefined/status</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpOrderStatus&quot;: null,
+  &quot;followUpOrder&quot;: null
+}</pre></td>
+      <td>Review transition response and follow-up order status before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR18-BVA-04-setup-1</td>
+      <td>FR-18 Admin Order Management</td>
+      <td>Boundary Value Analysis</td>
+      <td>PUT /api/admin/orders/undefined/status</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpOrderStatus&quot;: null,
+  &quot;followUpOrder&quot;: null
+}</pre></td>
+      <td>Review transition response and follow-up order status before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR18-BVA-04-setup-2</td>
+      <td>FR-18 Admin Order Management</td>
+      <td>Boundary Value Analysis</td>
+      <td>PUT /api/admin/orders/undefined/status</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpOrderStatus&quot;: null,
+  &quot;followUpOrder&quot;: null
+}</pre></td>
+      <td>Review transition response and follow-up order status before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR18-BVA-04-shipping</td>
+      <td>FR-18 Admin Order Management</td>
+      <td>Boundary Value Analysis</td>
+      <td>PUT /api/admin/orders/undefined/status</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpOrderStatus&quot;: null,
+  &quot;followUpOrder&quot;: null
+}</pre></td>
+      <td>Review transition response and follow-up order status before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR18-BVA-04</td>
+      <td>FR-18 Admin Order Management</td>
+      <td>Boundary Value Analysis</td>
+      <td>PUT /api/admin/orders/undefined/status</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpOrderStatus&quot;: null,
+  &quot;followUpOrder&quot;: null
+}</pre></td>
+      <td>Review transition response and follow-up order status before updating the report.</td>
+    </tr></tbody>
+  </table>
+</body>
+</html>

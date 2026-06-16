@@ -1,1 +1,392 @@
-﻿[]
+[
+  {
+    "testCaseId": "FR04-DT-07",
+    "feature": "FR-04 Profile",
+    "technique": "Domain Testing",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-16T06:07:55.018Z",
+    "endpoint": "/api/users/me",
+    "method": "PUT",
+    "requestHeaders": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ***masked***"
+    },
+    "inputData": {
+      "name": "FR04 Email Attempt",
+      "phone": "9123456789",
+      "shipping_address": "FR04 email attempt",
+      "email": "attacker@eshop.com"
+    },
+    "expectedResult": "Email remains unchanged when email is included in the profile update body.",
+    "actualStatusCode": 403,
+    "actualResponseBody": {
+      "updateResponse": {
+        "error": "Forbidden"
+      },
+      "followUpGetBefore": {
+        "error": "Forbidden"
+      },
+      "followUpGetAfter": {
+        "error": "Forbidden"
+      }
+    },
+    "verdictSuggestion": "Fail",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr04_profile_api_results.json",
+    "evidenceHtmlFile": "results/html/fr04_profile_api_results.html",
+    "notes": "Review the update response and follow-up GET /api/users/me before updating the report."
+  },
+  {
+    "testCaseId": "FR04-DT-08",
+    "feature": "FR-04 Profile",
+    "technique": "Domain Testing",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-16T06:07:55.026Z",
+    "endpoint": "/api/users/me",
+    "method": "PUT",
+    "requestHeaders": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ***masked***"
+    },
+    "inputData": {
+      "name": "FR04 Role Attempt",
+      "phone": "9123456789",
+      "shipping_address": "FR04 role attempt",
+      "role": "admin"
+    },
+    "expectedResult": "Regular user must not be able to change role to admin.",
+    "actualStatusCode": 403,
+    "actualResponseBody": {
+      "updateResponse": {
+        "error": "Forbidden"
+      },
+      "followUpGetBefore": {
+        "error": "Forbidden"
+      },
+      "followUpGetAfter": {
+        "error": "Forbidden"
+      }
+    },
+    "verdictSuggestion": "Pass",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr04_profile_api_results.json",
+    "evidenceHtmlFile": "results/html/fr04_profile_api_results.html",
+    "notes": "Review the update response and follow-up GET /api/users/me before updating the report."
+  },
+  {
+    "testCaseId": "FR04-DT-09",
+    "feature": "FR-04 Profile",
+    "technique": "Domain Testing",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-16T06:07:55.034Z",
+    "endpoint": "/api/users/me",
+    "method": "PUT",
+    "requestHeaders": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ***masked***"
+    },
+    "inputData": {
+      "id": 1,
+      "name": "FR04 Other User Attempt",
+      "phone": "9123456789",
+      "shipping_address": "FR04 id attempt"
+    },
+    "expectedResult": "Payload id must not allow updating another user; /api/users/me should use the token owner.",
+    "actualStatusCode": 403,
+    "actualResponseBody": {
+      "updateResponse": {
+        "error": "Forbidden"
+      },
+      "followUpGetBefore": {
+        "error": "Forbidden"
+      },
+      "followUpGetAfter": {
+        "error": "Forbidden"
+      }
+    },
+    "verdictSuggestion": "Needs Review",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr04_profile_api_results.json",
+    "evidenceHtmlFile": "results/html/fr04_profile_api_results.html",
+    "notes": "Review the update response and follow-up GET /api/users/me before updating the report."
+  },
+  {
+    "testCaseId": "FR04-DT-10",
+    "feature": "FR-04 Profile",
+    "technique": "Domain Testing",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-16T06:07:55.041Z",
+    "endpoint": "/api/users/me",
+    "method": "PUT",
+    "requestHeaders": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ***masked***"
+    },
+    "inputData": {
+      "name": "FR04 Script Address",
+      "phone": "9123456789",
+      "shipping_address": "<script>alert(1)</script>"
+    },
+    "expectedResult": "Script-like shipping address is stored/displayed safely and does not execute in UI.",
+    "actualStatusCode": 403,
+    "actualResponseBody": {
+      "updateResponse": {
+        "error": "Forbidden"
+      },
+      "followUpGetBefore": {
+        "error": "Forbidden"
+      },
+      "followUpGetAfter": {
+        "error": "Forbidden"
+      }
+    },
+    "verdictSuggestion": "Needs Review",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr04_profile_api_results.json",
+    "evidenceHtmlFile": "results/html/fr04_profile_api_results.html",
+    "notes": "Review the update response and follow-up GET /api/users/me before updating the report."
+  },
+  {
+    "testCaseId": "FR04-DT-11",
+    "feature": "FR-04 Profile",
+    "technique": "Domain Testing",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-16T06:07:55.043Z",
+    "endpoint": "/api/users/me",
+    "method": "PUT",
+    "requestHeaders": {
+      "Content-Type": "application/json"
+    },
+    "inputData": {
+      "name": "FR04 No Token",
+      "phone": "0912345678",
+      "shipping_address": "No token address"
+    },
+    "expectedResult": "Request without Authorization token returns 401 Unauthorized.",
+    "actualStatusCode": 401,
+    "actualResponseBody": {
+      "error": "Unauthorized"
+    },
+    "verdictSuggestion": "Pass",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr04_profile_api_results.json",
+    "evidenceHtmlFile": "results/html/fr04_profile_api_results.html",
+    "notes": "Review response body before copying final result."
+  },
+  {
+    "testCaseId": "FR04-DT-12",
+    "feature": "FR-04 Profile",
+    "technique": "Domain Testing",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-16T06:07:55.049Z",
+    "endpoint": "/api/users/me",
+    "method": "PUT",
+    "requestHeaders": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ***masked***"
+    },
+    "inputData": {
+      "name": "FR04 Long Address",
+      "phone": "9123456789",
+      "shipping_address": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "expectedResult": "Very long address is handled stably or rejected with a clear limit.",
+    "actualStatusCode": 403,
+    "actualResponseBody": {
+      "updateResponse": {
+        "error": "Forbidden"
+      },
+      "followUpGetBefore": {
+        "error": "Forbidden"
+      },
+      "followUpGetAfter": {
+        "error": "Forbidden"
+      }
+    },
+    "verdictSuggestion": "Needs Review",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr04_profile_api_results.json",
+    "evidenceHtmlFile": "results/html/fr04_profile_api_results.html",
+    "notes": "Review the update response and follow-up GET /api/users/me before updating the report."
+  },
+  {
+    "testCaseId": "FR04-BVA-01",
+    "feature": "FR-04 Profile",
+    "technique": "Boundary Value Analysis",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-16T06:07:55.053Z",
+    "endpoint": "/api/users/me",
+    "method": "PUT",
+    "requestHeaders": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ***masked***"
+    },
+    "inputData": {
+      "name": "FR04-BVA-01",
+      "phone": "012345678",
+      "shipping_address": "FR04-BVA-01 address"
+    },
+    "expectedResult": "Phone below 10-digit minimum should be rejected.",
+    "actualStatusCode": 403,
+    "actualResponseBody": {
+      "updateResponse": {
+        "error": "Forbidden"
+      },
+      "followUpGetBefore": {
+        "error": "Forbidden"
+      },
+      "followUpGetAfter": {
+        "error": "Forbidden"
+      }
+    },
+    "verdictSuggestion": "Needs Review",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr04_profile_api_results.json",
+    "evidenceHtmlFile": "results/html/fr04_profile_api_results.html",
+    "notes": "Review the update response and follow-up GET /api/users/me before updating the report."
+  },
+  {
+    "testCaseId": "FR04-BVA-02",
+    "feature": "FR-04 Profile",
+    "technique": "Boundary Value Analysis",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-16T06:07:55.059Z",
+    "endpoint": "/api/users/me",
+    "method": "PUT",
+    "requestHeaders": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ***masked***"
+    },
+    "inputData": {
+      "name": "FR04-BVA-02",
+      "phone": "0123456789",
+      "shipping_address": "FR04-BVA-02 address"
+    },
+    "expectedResult": "Phone at 10 digits should be accepted according to SRS.",
+    "actualStatusCode": 403,
+    "actualResponseBody": {
+      "updateResponse": {
+        "error": "Forbidden"
+      },
+      "followUpGetBefore": {
+        "error": "Forbidden"
+      },
+      "followUpGetAfter": {
+        "error": "Forbidden"
+      }
+    },
+    "verdictSuggestion": "Needs Review",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr04_profile_api_results.json",
+    "evidenceHtmlFile": "results/html/fr04_profile_api_results.html",
+    "notes": "Review the update response and follow-up GET /api/users/me before updating the report."
+  },
+  {
+    "testCaseId": "FR04-BVA-03",
+    "feature": "FR-04 Profile",
+    "technique": "Boundary Value Analysis",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-16T06:07:55.064Z",
+    "endpoint": "/api/users/me",
+    "method": "PUT",
+    "requestHeaders": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ***masked***"
+    },
+    "inputData": {
+      "name": "FR04-BVA-03",
+      "phone": "01234567890",
+      "shipping_address": "FR04-BVA-03 address"
+    },
+    "expectedResult": "Phone at 11 digits should be accepted according to SRS.",
+    "actualStatusCode": 403,
+    "actualResponseBody": {
+      "updateResponse": {
+        "error": "Forbidden"
+      },
+      "followUpGetBefore": {
+        "error": "Forbidden"
+      },
+      "followUpGetAfter": {
+        "error": "Forbidden"
+      }
+    },
+    "verdictSuggestion": "Needs Review",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr04_profile_api_results.json",
+    "evidenceHtmlFile": "results/html/fr04_profile_api_results.html",
+    "notes": "Review the update response and follow-up GET /api/users/me before updating the report."
+  },
+  {
+    "testCaseId": "FR04-BVA-04",
+    "feature": "FR-04 Profile",
+    "technique": "Boundary Value Analysis",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-16T06:07:55.069Z",
+    "endpoint": "/api/users/me",
+    "method": "PUT",
+    "requestHeaders": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ***masked***"
+    },
+    "inputData": {
+      "name": "FR04-BVA-04",
+      "phone": "012345678901",
+      "shipping_address": "FR04-BVA-04 address"
+    },
+    "expectedResult": "Phone above maximum should be rejected.",
+    "actualStatusCode": 403,
+    "actualResponseBody": {
+      "updateResponse": {
+        "error": "Forbidden"
+      },
+      "followUpGetBefore": {
+        "error": "Forbidden"
+      },
+      "followUpGetAfter": {
+        "error": "Forbidden"
+      }
+    },
+    "verdictSuggestion": "Needs Review",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr04_profile_api_results.json",
+    "evidenceHtmlFile": "results/html/fr04_profile_api_results.html",
+    "notes": "Review the update response and follow-up GET /api/users/me before updating the report."
+  },
+  {
+    "testCaseId": "FR04-BVA-05",
+    "feature": "FR-04 Profile",
+    "technique": "Boundary Value Analysis",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-16T06:07:55.074Z",
+    "endpoint": "/api/users/me",
+    "method": "PUT",
+    "requestHeaders": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ***masked***"
+    },
+    "inputData": {
+      "name": "FR04-BVA-05",
+      "phone": "9123456789",
+      "shipping_address": "FR04-BVA-05 address"
+    },
+    "expectedResult": "Phone not starting with 0 should be rejected according to SRS.",
+    "actualStatusCode": 403,
+    "actualResponseBody": {
+      "updateResponse": {
+        "error": "Forbidden"
+      },
+      "followUpGetBefore": {
+        "error": "Forbidden"
+      },
+      "followUpGetAfter": {
+        "error": "Forbidden"
+      }
+    },
+    "verdictSuggestion": "Needs Review",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr04_profile_api_results.json",
+    "evidenceHtmlFile": "results/html/fr04_profile_api_results.html",
+    "notes": "Review the update response and follow-up GET /api/users/me before updating the report."
+  }
+]

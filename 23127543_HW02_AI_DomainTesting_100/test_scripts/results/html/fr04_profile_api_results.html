@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>HW02 API Evidence</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; vertical-align: top; }
+    th { background: #f3f3f3; }
+    pre { white-space: pre-wrap; max-width: 520px; }
+  </style>
+</head>
+<body>
+  <h1>HW02 API Evidence</h1>
+  <p>Generated evidence is not a final report verdict. Manual review is required.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>TC ID</th><th>Feature</th><th>Technique</th><th>Request</th>
+        <th>Status</th><th>Verdict Suggestion</th><th>Human Review</th><th>Response</th><th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td>FR04-DT-07</td>
+      <td>FR-04 Profile</td>
+      <td>Domain Testing</td>
+      <td>PUT /api/users/me</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetBefore&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetAfter&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  }
+}</pre></td>
+      <td>Review the update response and follow-up GET /api/users/me before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR04-DT-08</td>
+      <td>FR-04 Profile</td>
+      <td>Domain Testing</td>
+      <td>PUT /api/users/me</td>
+      <td>403</td>
+      <td>Pass</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetBefore&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetAfter&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  }
+}</pre></td>
+      <td>Review the update response and follow-up GET /api/users/me before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR04-DT-09</td>
+      <td>FR-04 Profile</td>
+      <td>Domain Testing</td>
+      <td>PUT /api/users/me</td>
+      <td>403</td>
+      <td>Needs Review</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetBefore&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetAfter&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  }
+}</pre></td>
+      <td>Review the update response and follow-up GET /api/users/me before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR04-DT-10</td>
+      <td>FR-04 Profile</td>
+      <td>Domain Testing</td>
+      <td>PUT /api/users/me</td>
+      <td>403</td>
+      <td>Needs Review</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetBefore&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetAfter&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  }
+}</pre></td>
+      <td>Review the update response and follow-up GET /api/users/me before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR04-DT-11</td>
+      <td>FR-04 Profile</td>
+      <td>Domain Testing</td>
+      <td>PUT /api/users/me</td>
+      <td>401</td>
+      <td>Pass</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;error&quot;: &quot;Unauthorized&quot;
+}</pre></td>
+      <td>Review response body before copying final result.</td>
+    </tr>
+
+    <tr>
+      <td>FR04-DT-12</td>
+      <td>FR-04 Profile</td>
+      <td>Domain Testing</td>
+      <td>PUT /api/users/me</td>
+      <td>403</td>
+      <td>Needs Review</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetBefore&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetAfter&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  }
+}</pre></td>
+      <td>Review the update response and follow-up GET /api/users/me before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR04-BVA-01</td>
+      <td>FR-04 Profile</td>
+      <td>Boundary Value Analysis</td>
+      <td>PUT /api/users/me</td>
+      <td>403</td>
+      <td>Needs Review</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetBefore&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetAfter&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  }
+}</pre></td>
+      <td>Review the update response and follow-up GET /api/users/me before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR04-BVA-02</td>
+      <td>FR-04 Profile</td>
+      <td>Boundary Value Analysis</td>
+      <td>PUT /api/users/me</td>
+      <td>403</td>
+      <td>Needs Review</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetBefore&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetAfter&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  }
+}</pre></td>
+      <td>Review the update response and follow-up GET /api/users/me before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR04-BVA-03</td>
+      <td>FR-04 Profile</td>
+      <td>Boundary Value Analysis</td>
+      <td>PUT /api/users/me</td>
+      <td>403</td>
+      <td>Needs Review</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetBefore&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetAfter&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  }
+}</pre></td>
+      <td>Review the update response and follow-up GET /api/users/me before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR04-BVA-04</td>
+      <td>FR-04 Profile</td>
+      <td>Boundary Value Analysis</td>
+      <td>PUT /api/users/me</td>
+      <td>403</td>
+      <td>Needs Review</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetBefore&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetAfter&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  }
+}</pre></td>
+      <td>Review the update response and follow-up GET /api/users/me before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR04-BVA-05</td>
+      <td>FR-04 Profile</td>
+      <td>Boundary Value Analysis</td>
+      <td>PUT /api/users/me</td>
+      <td>403</td>
+      <td>Needs Review</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;updateResponse&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetBefore&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  },
+  &quot;followUpGetAfter&quot;: {
+    &quot;error&quot;: &quot;Forbidden&quot;
+  }
+}</pre></td>
+      <td>Review the update response and follow-up GET /api/users/me before updating the report.</td>
+    </tr></tbody>
+  </table>
+</body>
+</html>
