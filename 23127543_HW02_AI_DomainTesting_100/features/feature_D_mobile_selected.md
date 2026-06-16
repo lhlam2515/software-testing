@@ -4,6 +4,8 @@
 
 Feature D selects Mobile Checkout under FR-20. The mobile app is in `frontend-mobile/App.js`, uses React Native/Expo, and hard-codes API base URL `http://192.168.10.13:3000/api`. The checkout flow uses local state `cart`, `cartTotal`, coupon, token, and sends `POST /api/checkout`.
 
+Execution method: manual mobile testing using Expo/emulator screenshots. API-level risks may be checked with API scripts, but final mobile behavior requires manual verification.
+
 ## 2. Requirement Summary
 
 FR-20 requires the mobile app to include cart and checkout. FR-08 also applies: only logged-in users can checkout, total is calculated from the cart, UI displays product list, backend recalculates total, and cart is cleared after success. In the mobile code, checkout total is readonly and cart is cleared after success, but the payload sends `items: cart.length > 1 ? cart.slice(0, -1) : cart`, so the last item may be dropped when there are multiple items. Backend currently ignores `items` and trusts `total_amount`.
@@ -33,6 +35,8 @@ FR-20 requires the mobile app to include cart and checkout. FR-08 also applies: 
 6. Review code: mobile checkout shows readonly total but payload uses `cart.slice(0, -1)` for multiple items; mobile profile also sends wrong field `shippingAddress` for address.
 
 ### 3.3 Domain Testing Test Cases
+
+Execution method note for all FR20 rows: manual mobile testing using Expo/emulator screenshots. Do not mark final verdicts until mobile screenshots and any API/proxy evidence have been reviewed.
 
 | TC ID | Technique | Domain Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|
@@ -71,6 +75,8 @@ FR-20 requires the mobile app to include cart and checkout. FR-08 also applies: 
 5. Review code: 2 items is an important boundary because payload starts using `slice(0, -1)`.
 
 ### 4.3 Boundary Value Analysis Test Cases
+
+Execution method note for all FR20 boundary rows: manual mobile testing using Expo/emulator screenshots. API scripts can help check shared backend risks, but mobile UI/state behavior requires manual verification.
 
 | TC ID | Technique | Boundary Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|

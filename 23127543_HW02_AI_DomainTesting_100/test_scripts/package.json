@@ -1,0 +1,20 @@
+{
+  "name": "hw02-domain-testing-scripts",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "test:api:fr04": "node api/fr04_profile_api_tests.js",
+    "test:api:fr08": "node api/fr08_checkout_api_tests.js",
+    "test:api:fr18": "node api/fr18_admin_order_api_tests.js",
+    "test:api:all": "node api/fr04_profile_api_tests.js && node api/fr08_checkout_api_tests.js && node api/fr18_admin_order_api_tests.js",
+    "test:ui:fr04": "npx playwright test ui/fr04_profile_ui_tests.spec.js --project=chromium",
+    "test:ui:fr08": "npx playwright test ui/fr08_checkout_ui_tests.spec.js --project=chromium",
+    "test:ui:fr18": "npx playwright test ui/fr18_admin_order_ui_tests.spec.js --project=chromium",
+    "test:ui:all": "npx playwright test ui --project=chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "latest",
+    "axios": "latest",
+    "dotenv": "latest"
+  }
+}

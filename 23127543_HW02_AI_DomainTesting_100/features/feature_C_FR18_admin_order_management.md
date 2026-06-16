@@ -91,6 +91,8 @@ Option B - using API:
 
 ### 3.3 Domain Testing Test Cases
 
+Execution method note for UI-heavy rows: UI-assisted manual review using Playwright screenshots may be used to collect additional evidence for the Admin Orders page and XSS rendering. API scripts may provide response logs for role access and status-transition cases. Do not mark final verdicts until the generated evidence has been manually reviewed.
+
 | TC ID | Technique | Domain Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|
 | FR18-DT-01 | Domain Testing | Admin views all orders | Backend is running; admin account exists; at least one order exists | Admin token: `<admin_token>`<br>Endpoint: `GET /api/admin/orders`<br>Headers: `Authorization: Bearer <admin_token>` | 1. Log in as admin using `POST http://localhost:3000/api/login` with body `{"email":"admin@eshop.com","password":"Admin123!"}`.<br>2. Copy the admin JWT token.<br>3. Send `GET http://localhost:3000/api/admin/orders` with header `Authorization: Bearer <admin_token>`.<br>4. Alternatively, open `http://localhost:5174`, log in as admin, and click the Orders tab.<br>5. Observe whether all orders are displayed. | All orders are displayed with `id`, `user_name`, `total_amount`, `status`, `shipping_address`, and latest orders first. | Not Executed | Not Executed | To be added after execution |
@@ -128,6 +130,8 @@ Option B - using API:
 5. Review code: `canceled -> delivered` is marked valid in backend, which conflicts with the SRS.
 
 ### 4.3 Boundary Value Analysis Test Cases
+
+Execution method note for UI-heavy rows: UI-assisted manual review using Playwright screenshots may be used to collect additional evidence. API scripts may provide response logs for order-count and final-state boundary cases.
 
 | TC ID | Technique | Boundary Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|

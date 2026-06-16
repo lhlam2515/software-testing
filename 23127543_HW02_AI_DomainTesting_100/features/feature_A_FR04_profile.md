@@ -33,6 +33,8 @@ According to the requirement, a user may update only their own profile. Email mu
 
 ### 3.3 Domain Testing Test Cases
 
+Execution method note for UI-heavy rows: UI-assisted manual review using Playwright screenshots may be used to collect additional evidence. Do not change existing Actual Result or Verdict values until the generated screenshots and JSON logs have been manually reviewed.
+
 | TC ID | Technique | Domain Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|
 | FR04-DT-01 | Domain Testing | Valid profile update according to SRS | User `test@eshop.com` is logged in | `name=Nguyen Van A`, `phone=0912345678`, `shipping_address=1 Le Loi` | Open Profile, enter data, click Update | According to SRS, a 10-digit phone starting with `0` is accepted and profile is saved | UI shows invalid-phone alert for `0912345678`. | Failed | [FR04-DT-01.png](../evidence/test_execution_screenshots/FR04-DT-01.png) |
@@ -70,6 +72,8 @@ According to the requirement, a user may update only their own profile. Email mu
 5. Review against code: current UI phone boundary differs from SRS; backend has no phone validation.
 
 ### 4.3 Boundary Value Analysis Test Cases
+
+Execution method note for UI-heavy rows: UI-assisted manual review using Playwright screenshots may be used to collect additional evidence. API boundary behavior may be checked separately because backend and UI phone validation differ.
 
 | TC ID | Technique | Boundary Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|

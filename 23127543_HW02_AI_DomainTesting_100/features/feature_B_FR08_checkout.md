@@ -47,6 +47,8 @@ Source-code note: `POST /api/apply-coupon` uses `total_amount > min_order_amount
 
 ### 3.3 Domain Testing Test Cases
 
+Execution method note for UI-heavy rows: UI-assisted manual review using Playwright screenshots may be used to collect additional evidence. API scripts may provide response logs for backend-only checkout and coupon cases. Do not change existing Actual Result or Verdict values until evidence has been manually reviewed.
+
 | TC ID | Technique | Domain Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|
 | FR08-DT-01 | Domain Testing | Logged-in user with a valid cart starts checkout | User is logged in; cart has one valid item | MacBook Pro M3, qty 1, total 45,000,000 VND | Open Cart and prepare to click Proceed to Checkout | User can continue to checkout and, after confirmation, a pending order is created with the correct total | Screenshot shows a logged-in user with one valid cart item and the Proceed to Checkout button, but it does not show the final checkout confirmation or created order. Needs manual confirmation. | Needs Review | [FR08-DT-01.png](../evidence/test_execution_screenshots/FR08-DT-01.png) |
@@ -91,6 +93,8 @@ Implementation notes used for this BVA set:
 - The web checkout code imports `clearCart` but does not call it after checkout success.
 
 ### 4.3 Boundary Value Analysis Test Cases
+
+Execution method note for UI-heavy rows: UI-assisted manual review using Playwright screenshots may be used to collect additional evidence. API scripts may provide response logs for authentication, amount, and coupon boundary cases.
 
 | TC ID | Technique | Boundary Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|
