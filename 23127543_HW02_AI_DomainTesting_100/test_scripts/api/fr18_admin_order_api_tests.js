@@ -293,5 +293,5 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error("FR18 API evidence script failed:", error.message);
+  console.error("FR18 API evidence script Fail:", error.message);
 });

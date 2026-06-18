@@ -163,5 +163,5 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error("FR04 API evidence script failed:", error.message);
+  console.error("FR04 API evidence script Fail:", error.message);
 });

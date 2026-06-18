@@ -1,1 +1,388 @@
-﻿[]
+[
+  {
+    "testCaseId": "FR08-DT-03",
+    "feature": "FR-08 Checkout",
+    "technique": "Domain Testing",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-18T04:18:14.033Z",
+    "endpoint": "/api/checkout",
+    "method": "POST",
+    "requestHeaders": {
+      "Content-Type": "application/json"
+    },
+    "inputData": {
+      "total_amount": 30000000,
+      "shipping_address": "FR08 no token"
+    },
+    "expectedResult": "Checkout API without token returns 401 Unauthorized and creates no order.",
+    "actualStatusCode": 401,
+    "actualResponseBody": {
+      "error": "Unauthorized"
+    },
+    "verdictSuggestion": "Pass",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr08_checkout_api_results.json",
+    "evidenceHtmlFile": "results/html/fr08_checkout_api_results.html",
+    "notes": "Manual review required before updating the report."
+  },
+  {
+    "testCaseId": "FR08-BVA-07",
+    "feature": "FR-08 Checkout",
+    "technique": "Boundary Value Analysis",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-18T04:18:14.039Z",
+    "endpoint": "/api/checkout",
+    "method": "POST",
+    "requestHeaders": {
+      "Content-Type": "application/json"
+    },
+    "inputData": {
+      "total_amount": 30000000,
+      "shipping_address": "FR08 no token"
+    },
+    "expectedResult": "Authentication below boundary: no token is rejected.",
+    "actualStatusCode": 401,
+    "actualResponseBody": {
+      "error": "Unauthorized"
+    },
+    "verdictSuggestion": "Pass",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr08_checkout_api_results.json",
+    "evidenceHtmlFile": "results/html/fr08_checkout_api_results.html",
+    "notes": "Manual review required before updating the report."
+  },
+  {
+    "testCaseId": "FR08-BVA-08",
+    "feature": "FR-08 Checkout",
+    "technique": "Boundary Value Analysis",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-18T04:18:14.042Z",
+    "endpoint": "/api/checkout",
+    "method": "POST",
+    "requestHeaders": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ***masked***"
+    },
+    "inputData": {
+      "total_amount": 100000,
+      "shipping_address": "FR08 valid token"
+    },
+    "expectedResult": "Authentication on boundary: valid token checkout succeeds with orderId.",
+    "actualStatusCode": 403,
+    "actualResponseBody": {
+      "error": "Forbidden"
+    },
+    "verdictSuggestion": "Fail",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr08_checkout_api_results.json",
+    "evidenceHtmlFile": "results/html/fr08_checkout_api_results.html",
+    "notes": "Manual review required before updating the report."
+  },
+  {
+    "testCaseId": "FR08-DT-08",
+    "feature": "FR-08 Checkout",
+    "technique": "Domain Testing",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-18T04:18:14.045Z",
+    "endpoint": "/api/checkout",
+    "method": "POST",
+    "requestHeaders": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ***masked***"
+    },
+    "inputData": {
+      "total_amount": 1,
+      "shipping_address": "FR08 manipulated total"
+    },
+    "expectedResult": "Backend recalculates from trusted cart/product data or rejects manipulated total_amount = 1.",
+    "actualStatusCode": 403,
+    "actualResponseBody": {
+      "error": "Forbidden"
+    },
+    "verdictSuggestion": "Pass",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr08_checkout_api_results.json",
+    "evidenceHtmlFile": "results/html/fr08_checkout_api_results.html",
+    "notes": "If status is 200, observed behavior indicates possible backend total-trust bug."
+  },
+  {
+    "testCaseId": "FR08-DT-09-negative",
+    "feature": "FR-08 Checkout",
+    "technique": "Domain Testing",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-18T04:18:14.049Z",
+    "endpoint": "/api/checkout",
+    "method": "POST",
+    "requestHeaders": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ***masked***"
+    },
+    "inputData": {
+      "total_amount": -1,
+      "shipping_address": "FR08 total -1"
+    },
+    "expectedResult": "Backend rejects invalid total_amount = -1.",
+    "actualStatusCode": 403,
+    "actualResponseBody": {
+      "error": "Forbidden"
+    },
+    "verdictSuggestion": "Pass",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr08_checkout_api_results.json",
+    "evidenceHtmlFile": "results/html/fr08_checkout_api_results.html",
+    "notes": "If status is 200, observed behavior indicates possible invalid-money checkout bug."
+  },
+  {
+    "testCaseId": "FR08-DT-09-zero",
+    "feature": "FR-08 Checkout",
+    "technique": "Domain Testing",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-18T04:18:14.052Z",
+    "endpoint": "/api/checkout",
+    "method": "POST",
+    "requestHeaders": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ***masked***"
+    },
+    "inputData": {
+      "total_amount": 0,
+      "shipping_address": "FR08 total 0"
+    },
+    "expectedResult": "Backend rejects invalid total_amount = 0.",
+    "actualStatusCode": 403,
+    "actualResponseBody": {
+      "error": "Forbidden"
+    },
+    "verdictSuggestion": "Pass",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr08_checkout_api_results.json",
+    "evidenceHtmlFile": "results/html/fr08_checkout_api_results.html",
+    "notes": "If status is 200, observed behavior indicates possible invalid-money checkout bug."
+  },
+  {
+    "testCaseId": "FR08-DT-10",
+    "feature": "FR-08 Checkout",
+    "technique": "Domain Testing",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-18T04:18:14.057Z",
+    "endpoint": "/api/checkout",
+    "method": "POST",
+    "requestHeaders": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ***masked***"
+    },
+    "inputData": {
+      "total_amount": 500000
+    },
+    "expectedResult": "Missing shipping address behavior is documented and reviewed against requirements.",
+    "actualStatusCode": 403,
+    "actualResponseBody": {
+      "error": "Forbidden"
+    },
+    "verdictSuggestion": "Needs Review",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr08_checkout_api_results.json",
+    "evidenceHtmlFile": "results/html/fr08_checkout_api_results.html",
+    "notes": "Manual review required before updating the report."
+  },
+  {
+    "testCaseId": "FR08-DT-11",
+    "feature": "FR-08 Checkout",
+    "technique": "Domain Testing",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-18T04:18:14.161Z",
+    "endpoint": "/api/apply-coupon",
+    "method": "POST",
+    "requestHeaders": {
+      "Content-Type": "application/json"
+    },
+    "inputData": {
+      "code": "VIP100",
+      "total_amount": 70000000,
+      "user_id": 2
+    },
+    "expectedResult": "Valid coupon VIP100 applies a fixed discount when total is above the minimum.",
+    "actualStatusCode": 200,
+    "actualResponseBody": {
+      "success": true,
+      "coupon_id": 3,
+      "discount_amount": 100000,
+      "final_amount": 69900000,
+      "message": "Áp dụng thành công! Giảm 100,000 ₫"
+    },
+    "verdictSuggestion": "Pass",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr08_checkout_api_results.json",
+    "evidenceHtmlFile": "results/html/fr08_checkout_api_results.html",
+    "notes": "Manual review required before updating the report."
+  },
+  {
+    "testCaseId": "FR08-DT-12",
+    "feature": "FR-08 Checkout",
+    "technique": "Domain Testing",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-18T04:18:14.167Z",
+    "endpoint": "/api/apply-coupon",
+    "method": "POST",
+    "requestHeaders": {
+      "Content-Type": "application/json"
+    },
+    "inputData": {
+      "code": "EXPIRED",
+      "total_amount": 200000,
+      "user_id": 2
+    },
+    "expectedResult": "Expired coupon EXPIRED is rejected and total remains unchanged.",
+    "actualStatusCode": 400,
+    "actualResponseBody": {
+      "error": "Mã giảm giá đã hết hạn"
+    },
+    "verdictSuggestion": "Pass",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr08_checkout_api_results.json",
+    "evidenceHtmlFile": "results/html/fr08_checkout_api_results.html",
+    "notes": "Manual review required before updating the report."
+  },
+  {
+    "testCaseId": "FR08-BVA-09",
+    "feature": "FR-08 Checkout",
+    "technique": "Boundary Value Analysis",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-18T04:18:14.172Z",
+    "endpoint": "/api/apply-coupon",
+    "method": "POST",
+    "requestHeaders": {
+      "Content-Type": "application/json"
+    },
+    "inputData": {
+      "code": "SAVE10",
+      "total_amount": 299999,
+      "user_id": 2
+    },
+    "expectedResult": "SAVE10 below minimum is rejected.",
+    "actualStatusCode": 400,
+    "actualResponseBody": {
+      "error": "Đơn hàng chưa đủ giá trị tối thiểu 300,000 ₫ để áp dụng mã này"
+    },
+    "verdictSuggestion": "Needs Review",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr08_checkout_api_results.json",
+    "evidenceHtmlFile": "results/html/fr08_checkout_api_results.html",
+    "notes": "Review exact threshold behavior because implementation uses total_amount > min_order_amount."
+  },
+  {
+    "testCaseId": "FR08-BVA-10",
+    "feature": "FR-08 Checkout",
+    "technique": "Boundary Value Analysis",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-18T04:18:14.176Z",
+    "endpoint": "/api/apply-coupon",
+    "method": "POST",
+    "requestHeaders": {
+      "Content-Type": "application/json"
+    },
+    "inputData": {
+      "code": "SAVE10",
+      "total_amount": 300000,
+      "user_id": 2
+    },
+    "expectedResult": "SAVE10 exactly at minimum is accepted according to SRS.",
+    "actualStatusCode": 400,
+    "actualResponseBody": {
+      "error": "Đơn hàng chưa đủ giá trị tối thiểu 300,000 ₫ để áp dụng mã này"
+    },
+    "verdictSuggestion": "Needs Review",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr08_checkout_api_results.json",
+    "evidenceHtmlFile": "results/html/fr08_checkout_api_results.html",
+    "notes": "Review exact threshold behavior because implementation uses total_amount > min_order_amount."
+  },
+  {
+    "testCaseId": "FR08-BVA-11",
+    "feature": "FR-08 Checkout",
+    "technique": "Boundary Value Analysis",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-18T04:18:14.183Z",
+    "endpoint": "/api/apply-coupon",
+    "method": "POST",
+    "requestHeaders": {
+      "Content-Type": "application/json"
+    },
+    "inputData": {
+      "code": "SAVE10",
+      "total_amount": 300001,
+      "user_id": 2
+    },
+    "expectedResult": "SAVE10 above minimum is accepted.",
+    "actualStatusCode": 200,
+    "actualResponseBody": {
+      "success": true,
+      "coupon_id": 1,
+      "discount_amount": -2700009,
+      "final_amount": 3000010,
+      "message": "Áp dụng thành công! Giảm 10%"
+    },
+    "verdictSuggestion": "Needs Review",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr08_checkout_api_results.json",
+    "evidenceHtmlFile": "results/html/fr08_checkout_api_results.html",
+    "notes": "Review exact threshold behavior because implementation uses total_amount > min_order_amount."
+  },
+  {
+    "testCaseId": "FR08-BVA-12-apply",
+    "feature": "FR-08 Checkout",
+    "technique": "Boundary Value Analysis",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-18T04:18:14.189Z",
+    "endpoint": "/api/apply-coupon",
+    "method": "POST",
+    "requestHeaders": {
+      "Content-Type": "application/json"
+    },
+    "inputData": {
+      "code": "VIP100",
+      "total_amount": 70000000,
+      "user_id": 2
+    },
+    "expectedResult": "VIP100 can be applied before recording usage when within max uses.",
+    "actualStatusCode": 200,
+    "actualResponseBody": {
+      "success": true,
+      "coupon_id": 3,
+      "discount_amount": 100000,
+      "final_amount": 69900000,
+      "message": "Áp dụng thành công! Giảm 100,000 ₫"
+    },
+    "verdictSuggestion": "Needs Review",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr08_checkout_api_results.json",
+    "evidenceHtmlFile": "results/html/fr08_checkout_api_results.html",
+    "notes": "Manual review required before updating the report."
+  },
+  {
+    "testCaseId": "FR08-BVA-12",
+    "feature": "FR-08 Checkout",
+    "technique": "Boundary Value Analysis",
+    "executionType": "API Automated",
+    "timestamp": "2026-06-18T04:18:14.192Z",
+    "endpoint": "/api/coupon-usage",
+    "method": "POST",
+    "requestHeaders": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ***masked***"
+    },
+    "inputData": {
+      "coupon_id": 3
+    },
+    "expectedResult": "Coupon usage is recorded after successful checkout when coupon_id is available.",
+    "actualStatusCode": 403,
+    "actualResponseBody": {
+      "error": "Forbidden"
+    },
+    "verdictSuggestion": "Fail",
+    "humanReviewRequired": true,
+    "evidenceJsonFile": "results/json/fr08_checkout_api_results.json",
+    "evidenceHtmlFile": "results/html/fr08_checkout_api_results.html",
+    "notes": "This records one usage. Full first/second/third-use boundary still needs review with fresh data."
+  }
+]

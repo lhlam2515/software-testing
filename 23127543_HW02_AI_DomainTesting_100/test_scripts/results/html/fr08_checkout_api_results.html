@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>HW02 API Evidence</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; vertical-align: top; }
+    th { background: #f3f3f3; }
+    pre { white-space: pre-wrap; max-width: 520px; }
+  </style>
+</head>
+<body>
+  <h1>HW02 API Evidence</h1>
+  <p>Generated evidence is not a final report verdict. Manual review is required.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>TC ID</th><th>Feature</th><th>Technique</th><th>Request</th>
+        <th>Status</th><th>Verdict Suggestion</th><th>Human Review</th><th>Response</th><th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td>FR08-DT-03</td>
+      <td>FR-08 Checkout</td>
+      <td>Domain Testing</td>
+      <td>POST /api/checkout</td>
+      <td>401</td>
+      <td>Pass</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;error&quot;: &quot;Unauthorized&quot;
+}</pre></td>
+      <td>Manual review required before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR08-BVA-07</td>
+      <td>FR-08 Checkout</td>
+      <td>Boundary Value Analysis</td>
+      <td>POST /api/checkout</td>
+      <td>401</td>
+      <td>Pass</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;error&quot;: &quot;Unauthorized&quot;
+}</pre></td>
+      <td>Manual review required before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR08-BVA-08</td>
+      <td>FR-08 Checkout</td>
+      <td>Boundary Value Analysis</td>
+      <td>POST /api/checkout</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;error&quot;: &quot;Forbidden&quot;
+}</pre></td>
+      <td>Manual review required before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR08-DT-08</td>
+      <td>FR-08 Checkout</td>
+      <td>Domain Testing</td>
+      <td>POST /api/checkout</td>
+      <td>403</td>
+      <td>Pass</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;error&quot;: &quot;Forbidden&quot;
+}</pre></td>
+      <td>If status is 200, observed behavior indicates possible backend total-trust bug.</td>
+    </tr>
+
+    <tr>
+      <td>FR08-DT-09-negative</td>
+      <td>FR-08 Checkout</td>
+      <td>Domain Testing</td>
+      <td>POST /api/checkout</td>
+      <td>403</td>
+      <td>Pass</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;error&quot;: &quot;Forbidden&quot;
+}</pre></td>
+      <td>If status is 200, observed behavior indicates possible invalid-money checkout bug.</td>
+    </tr>
+
+    <tr>
+      <td>FR08-DT-09-zero</td>
+      <td>FR-08 Checkout</td>
+      <td>Domain Testing</td>
+      <td>POST /api/checkout</td>
+      <td>403</td>
+      <td>Pass</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;error&quot;: &quot;Forbidden&quot;
+}</pre></td>
+      <td>If status is 200, observed behavior indicates possible invalid-money checkout bug.</td>
+    </tr>
+
+    <tr>
+      <td>FR08-DT-10</td>
+      <td>FR-08 Checkout</td>
+      <td>Domain Testing</td>
+      <td>POST /api/checkout</td>
+      <td>403</td>
+      <td>Needs Review</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;error&quot;: &quot;Forbidden&quot;
+}</pre></td>
+      <td>Manual review required before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR08-DT-11</td>
+      <td>FR-08 Checkout</td>
+      <td>Domain Testing</td>
+      <td>POST /api/apply-coupon</td>
+      <td>200</td>
+      <td>Pass</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;success&quot;: true,
+  &quot;coupon_id&quot;: 3,
+  &quot;discount_amount&quot;: 100000,
+  &quot;final_amount&quot;: 69900000,
+  &quot;message&quot;: &quot;Áp dụng thành công! Giảm 100,000 ₫&quot;
+}</pre></td>
+      <td>Manual review required before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR08-DT-12</td>
+      <td>FR-08 Checkout</td>
+      <td>Domain Testing</td>
+      <td>POST /api/apply-coupon</td>
+      <td>400</td>
+      <td>Pass</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;error&quot;: &quot;Mã giảm giá đã hết hạn&quot;
+}</pre></td>
+      <td>Manual review required before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR08-BVA-09</td>
+      <td>FR-08 Checkout</td>
+      <td>Boundary Value Analysis</td>
+      <td>POST /api/apply-coupon</td>
+      <td>400</td>
+      <td>Needs Review</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;error&quot;: &quot;Đơn hàng chưa đủ giá trị tối thiểu 300,000 ₫ để áp dụng mã này&quot;
+}</pre></td>
+      <td>Review exact threshold behavior because implementation uses total_amount &gt; min_order_amount.</td>
+    </tr>
+
+    <tr>
+      <td>FR08-BVA-10</td>
+      <td>FR-08 Checkout</td>
+      <td>Boundary Value Analysis</td>
+      <td>POST /api/apply-coupon</td>
+      <td>400</td>
+      <td>Needs Review</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;error&quot;: &quot;Đơn hàng chưa đủ giá trị tối thiểu 300,000 ₫ để áp dụng mã này&quot;
+}</pre></td>
+      <td>Review exact threshold behavior because implementation uses total_amount &gt; min_order_amount.</td>
+    </tr>
+
+    <tr>
+      <td>FR08-BVA-11</td>
+      <td>FR-08 Checkout</td>
+      <td>Boundary Value Analysis</td>
+      <td>POST /api/apply-coupon</td>
+      <td>200</td>
+      <td>Needs Review</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;success&quot;: true,
+  &quot;coupon_id&quot;: 1,
+  &quot;discount_amount&quot;: -2700009,
+  &quot;final_amount&quot;: 3000010,
+  &quot;message&quot;: &quot;Áp dụng thành công! Giảm 10%&quot;
+}</pre></td>
+      <td>Review exact threshold behavior because implementation uses total_amount &gt; min_order_amount.</td>
+    </tr>
+
+    <tr>
+      <td>FR08-BVA-12-apply</td>
+      <td>FR-08 Checkout</td>
+      <td>Boundary Value Analysis</td>
+      <td>POST /api/apply-coupon</td>
+      <td>200</td>
+      <td>Needs Review</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;success&quot;: true,
+  &quot;coupon_id&quot;: 3,
+  &quot;discount_amount&quot;: 100000,
+  &quot;final_amount&quot;: 69900000,
+  &quot;message&quot;: &quot;Áp dụng thành công! Giảm 100,000 ₫&quot;
+}</pre></td>
+      <td>Manual review required before updating the report.</td>
+    </tr>
+
+    <tr>
+      <td>FR08-BVA-12</td>
+      <td>FR-08 Checkout</td>
+      <td>Boundary Value Analysis</td>
+      <td>POST /api/coupon-usage</td>
+      <td>403</td>
+      <td>Fail</td>
+      <td>true</td>
+      <td><pre>{
+  &quot;error&quot;: &quot;Forbidden&quot;
+}</pre></td>
+      <td>This records one usage. Full first/second/third-use boundary still needs review with fresh data.</td>
+    </tr></tbody>
+  </table>
+</body>
+</html>

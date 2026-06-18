@@ -2,55 +2,100 @@
 
 ## Student Information
 
-- Student ID: [Fill later]
-- Full Name: [Fill later]
-- Class: [Fill later]
-- Group: [Fill later]
+- Student ID: 23127543
+- Student Name: [Fill in]
+- Class: [Fill in]
+- Repository/SUT: EShop
 
 ## Selected Features
 
-| Pool | Feature ID | Feature Name |
+| Pool | Feature ID | Feature Name | Report File |
+|---|---|---|---|
+| A | FR-04 | Personal Profile Management | [feature_A_FR04_profile.md](feature_A_FR04_profile.md) |
+| B | FR-08 | Checkout | [feature_B_FR08_checkout.md](feature_B_FR08_checkout.md) |
+| C | FR-18 | Admin Order Management | [feature_C_FR18_admin_order_management.md](feature_C_FR18_admin_order_management.md) |
+| D | FR-20 | Mobile Checkout | [feature_D_mobile_selected.md](feature_D_mobile_selected.md) |
+
+## Required Deliverables
+
+| Deliverable | File/Folder | Status |
 |---|---|---|
-| A | FR-04 | Personal Profile Management |
-| B | FR-08 | Checkout |
-| C | FR-18 | Admin Order Management |
-| D | FR-20 | Mobile Checkout |
-
-## Test Summary
-
-| Metric | Number |
-|---|---:|
-| Number of features | 4 |
-| Domain Testing cases | 48 |
-| Boundary Value Analysis cases | 31 |
-| Total test cases | 79 |
-| Executed | 43 |
-| Passed | 19 |
-| Failed | 12 |
-| Not executed | 36 |
-| Needs review | 12 |
-| Confirmed bugs | 9 |
+| Main report | [main_report.md](main_report.md) | Completed / To update after execution |
+| Feature A report | [feature_A_FR04_profile.md](feature_A_FR04_profile.md) | Completed / To execute |
+| Feature B report | [feature_B_FR08_checkout.md](feature_B_FR08_checkout.md) | Completed / To execute |
+| Feature C report | [feature_C_FR18_admin_order_management.md](feature_C_FR18_admin_order_management.md) | Completed / To execute |
+| Feature D report | [feature_D_mobile_selected.md](feature_D_mobile_selected.md) | Completed / To execute |
+| Bug report | [bug_report.md](bug_report.md) | To update after confirmed bugs |
+| AI Audit Report | [ai_audit_report.md](ai_audit_report.md) | To update with exact prompts and times |
+| AI Critique | [ai_critique.md](ai_critique.md) | Completed draft |
+| Git commit log | [git_commit_log.txt](git_commit_log.txt) | To update before submission |
+| Test scripts | [test_scripts/](test_scripts/) | Available |
+| Evidence | [evidence/](evidence/) and [test_scripts/results/](test_scripts/results/) | To be generated or reviewed |
 
 ## Self-Assessment
 
 | No. | Criteria | Grade | Self-Assessed Grade |
 |---|---|---:|---:|
-| 1 | Feature A (Domain + Boundary) | 25 |  |
-| 2 | Feature B (Domain + Boundary) | 25 |  |
-| 3 | Feature C (Domain + Boundary) | 25 |  |
-| 4 | Feature D Mobile (Domain + Boundary) | 15 |  |
-| 5 | Agent Skills | 10 |  |
-|  | Total | 100 |  |
+| 1 | Feature A - Domain + Boundary | 25 | [Fill in] |
+| 2 | Feature B - Domain + Boundary | 25 | [Fill in] |
+| 3 | Feature C - Domain + Boundary | 25 | [Fill in] |
+| 4 | Feature D - Mobile, Domain + Boundary | 15 | [Fill in] |
+| 5 | Agent Skills | 10 | [Fill in] |
+|  | Total | 100 | [Fill in] |
+
+## Test Summary
+
+The counts below are computed from the updated feature report tables after reading the generated result logs under `test_scripts/results/`.
+
+| Metric | Count |
+|---|---:|
+| Features selected | 4 |
+| Test cases designed | 79 |
+| Test cases executed | 37 |
+| Passed | 10 |
+| Failed | 15 |
+| Needs Review | 12 |
+| To be executed | 42 |
+| Confirmed bugs | 6 |
+| Potential bugs requiring review | 12 |
+
+## Evidence Status
+
+| Evidence Type | Folder | Status |
+|---|---|---|
+| API JSON logs | [test_scripts/results/json/](test_scripts/results/json/) | Used for this update |
+| API HTML summaries | [test_scripts/results/html/](test_scripts/results/html/) | Available as supporting logs |
+| UI screenshots | [test_scripts/results/screenshots/](test_scripts/results/screenshots/) | To be generated |
+| Reviewed screenshots | [evidence/screenshots/](evidence/screenshots/) | To be added |
+| GitHub issue evidence | [evidence/github_issues/](evidence/github_issues/) | To be added |
+| GitHub issue text | [github_issue_bugs.txt](github_issue_bugs.txt) | Prepared |
 
 ## Demo Videos
 
-- Agent Skill demo: [Fill later]
-- Test execution demo: [Fill later]
-- PDF/report walkthrough: [Fill later]
+- Agent Skill demo: [Fill in]
+- Test execution demo: [Fill in]
+- Report walkthrough: [Fill in]
 
-## Notes
+## How to Run Scripts
 
-- Test cases were regenerated after inspecting real EShop source code.
-- FR-04 and all FR-08 Domain Testing/BVA cases have screenshot evidence and updated Actual Result/Verdict.
-- FR-18 and FR-20 remain `Not Executed` until manual testing is performed.
-- Do not submit raw AI output without human review and evidence updates.
+Read the full guide: [test_scripts/RUN_TESTS.md](test_scripts/RUN_TESTS.md).
+
+Quick commands:
+
+```bash
+cd 23127543_HW02_AI_DomainTesting_100/test_scripts
+npm install
+cp .env.example .env
+npm run test:api:all
+npm run test:ui:all
+```
+
+Windows PowerShell:
+
+```powershell
+cd 23127543_HW02_AI_DomainTesting_100/test_scripts
+npm install
+Copy-Item .env.example .env
+npm run test:api:all
+npm run test:ui:all
+```

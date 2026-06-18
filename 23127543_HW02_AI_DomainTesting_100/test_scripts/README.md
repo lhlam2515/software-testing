@@ -116,7 +116,7 @@ Screenshots use collision-safe names. Existing screenshots are not overwritten; 
 2. Inspect linked screenshots in `results/screenshots/`.
 3. Manually copy confirmed Actual Result / Verdict into the feature report.
 4. Link screenshot paths only after reviewing them.
-5. Create GitHub Issues only for confirmed failed cases.
+5. Create GitHub Issues only for confirmed Fail cases.
 
 Generated values named `verdictSuggestion` are suggestions only, not final report verdicts.
 

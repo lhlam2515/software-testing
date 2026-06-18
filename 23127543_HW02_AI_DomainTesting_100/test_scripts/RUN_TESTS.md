@@ -272,7 +272,7 @@ Reserved HTML output folder:
 Use links like this in feature Markdown files:
 
 ```md
-[FR08-BVA-13-ui-after-checkout-cart.png](../test_scripts/results/screenshots/FR08-BVA-13-ui-after-checkout-cart.png)
+[FR08-BVA-13-ui-after-checkout-cart.png](test_scripts/results/screenshots/FR08-BVA-13-ui-after-checkout-cart.png)
 ```
 
 If the generated screenshot has a timestamp suffix, link the exact file name.
@@ -291,7 +291,7 @@ Use final report values only after review:
 - `Pass`: evidence confirms expected behavior
 - `Fail`: evidence confirms incorrect behavior
 - `Needs Review`: evidence is incomplete or ambiguous
-- `Not Executed`: test was not run
+- `To be executed`: test was not run
 
 ## 13. Troubleshooting
 

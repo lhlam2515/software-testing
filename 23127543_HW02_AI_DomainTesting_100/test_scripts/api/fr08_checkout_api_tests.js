@@ -170,5 +170,5 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error("FR08 API evidence script failed:", error.message);
+  console.error("FR08 API evidence script Fail:", error.message);
 });

@@ -1,7 +1,56 @@
-Run before submission:
-git log --graph --all --stat > git_commit_log.txt
-
-Note: Codex attempted to run:
-git -c safe.directory=D:/SoftwareTesting/Homework/software-testing -C software-testing log --graph --all --stat > software-testing\23127543_HW02_AI_DomainTesting_100\git_commit_log.txt
-
-The command could read the repository after adding the per-command safe.directory override, but PowerShell returned access denied when overwriting this file in the sandbox.
+c267adc (HEAD -> Vu/feat/HW02) Update reports from test result logs and prepare bug issues
+01c1ce4 (origin/Vu/feat/HW02) add test scripts
+b87bcbf Reset evidence and add executable test scripts
+846c38a Add test scripts and UI-assisted evidence workflow
+2245c25 test feature 18
+7b8e147 Clarify FR18 execution steps and input data
+f650016 Update FR08 DT and BVA results with screenshot evidence
+f2348dc Regenerate FR08 BVA test cases from source code review
+7f6c6c6 Update FR08 checkout results and coupon test data
+f29d246 Update FR08 checkout test cases with evidence and source-code review
+a8c6549 test pool A - 04
+1e6677a Update FR04 domain testing results with screenshot evidence
+8fdc671 Refresh commit log after translation
+c1b5c75 Translate HW02 reports to English
+bf8eb1a Refresh student folder commit log
+6bea2a4 Move HW02 documentation into student folder
+1842bc9 Update HW02 git commit log
+2043b6c Add README and main report
+d042cde Add agent skill documentation
+f2d07aa Add AI audit and critique
+5f21f78 Add bug report templates
+dfb95dd Add selected mobile feature testing
+9a6f50d Add FR18 domain and boundary testing
+cddcd4e Add FR08 domain and boundary testing
+a996dad Add FR04 domain and boundary testing
+0794dda Initialize HW02 structure
+34b84b5 (origin/main, origin/HEAD, main) feat: implement UserPromptSubmit and Stop hooks for capturing prompts and transcripts
+577dd6e feat: add AI Use Agreement and Student Acknowledgement templates for Software Testing course
+df190e0 (origin/feat/HW01) feat(HW01): add YouTube demo videos, GitHub repo link, update self-assessment
+474c08f feat: complete AI-02, AI-03, AI-05, AI-06 documents for HW01
+a50e1ff fix: update QA/QC role mindmap to enhance clarity and structure of testing processes
+0792845 feat: add QA/QC role mindmap as a new artifact in markdown format
+85fe8ec feat: add test summary report as an artifact for HW01
+061835a feat: add product defect report and associated screenshots of github issues
+1e20cd9 feat: record test execution results, add EC-04, and update execution plan for HW01 Req 3
+48326fc feat: update AI Audit Report and test cases to include additional edge case
+452963a feat: add test-cases and test-case checklist as xlsx artifacts for HW01
+fd5b4a4 feat: add edge case evidence and complete Artifact #3 audit for HW01 Req 3
+f0d2b64 feat: add test cases for Senko TC1626 wall-mounted fan functionality
+e0b2042 feat: add product information and device metadata for physical product
+a2068d4 fix: correct hallucinations in HW01 defect artifacts (ai_defects, software_defects)
+37558b1 fix: remove leading space in filename of AI Audit Report
+2ab19c2 feat: add defect audit artifacts (#4, #5) to HW01 AI Audit Report
+43e89df feat: add hallucination report for HW01 defect research artifacts
+3117219 feat: add defect artifact entries and update prompt log for HW01
+a0b850e feat: add AI Audit Report and prompt log for HW01 assignment including student information and AI impact analysis
+70374a8 fix: refine AI impact analysis sections in job market artifacts for clarity and precision
+a6508dc feat: update AI impact analysis sections in job market artifacts
+be3ae3a feat: add job market artifacts for various QA/QC positions including detailed descriptions and requirements
+b93d565 feat: add job market screenshots for various QA/QC positions
+e6eb711 feat: add README for HW01 assignment detailing QA/QC job market and testing requirements
+e8c2e70 feat: update audit logger to handle PostToolUse event and improve log path configuration
+ba82ad4 feat: add comprehensive Playwright CLI documentation
+77762fd feat: add audit logger hook for UserPromptSubmit and Stop events
+17131ca feat: add assignment policies and guidelines for submissions
+f513325 feat: init softwares under test, docs and AI templates

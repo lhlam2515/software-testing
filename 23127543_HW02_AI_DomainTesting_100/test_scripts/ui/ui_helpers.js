@@ -83,7 +83,7 @@ async function loginAdmin(page, email = process.env.ADMIN_EMAIL || "admin@eshop.
 async function addFirstProductToCart(page) {
   await page.goto(WEB_BASE_URL);
   await page.waitForSelector("button", { timeout: 10000 });
-  await page.getByRole("button", { name: /Th.*m|Add/i }).first().click();
+  await page.locator("button").first().click();
   await page.waitForTimeout(300);
 }
 
