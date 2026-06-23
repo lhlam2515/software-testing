@@ -1,7 +1,6 @@
 ---
 name: playwright-cli
-description: Control a real browser to interact with any website — clicking, filling forms, taking screenshots, extracting data, navigating pages, and saving sessions. Use this skill whenever the user needs to: open a URL in a browser, click a button or link, fill out a form, take a screenshot of a page, read page content or check what's on screen, search a website, scrape or collect information from pages, automate repetitive web tasks, record what happens on a page, generate Playwright test code, mock network requests, or manage browser sessions. Also applies to one-off tasks like "open this site and grab X", "check if this form works", "screenshot this page", or any task that requires a real browser rather than just an HTTP request.
-allowed-tools: Bash(playwright-cli:*) Bash(npx:*) Bash(npm:*)
+description: Control a real browser to interact with any website — clicking, filling forms, taking screenshots, extracting data, navigating pages, and saving sessions. Use this skill whenever the user needs to open a URL in a browser, click a button or link, fill out a form, take a screenshot of a page, read page content or check what's on screen, search a website, scrape or collect information from pages, automate repetitive web tasks, record what happens on a page, generate Playwright test code, mock network requests, or manage browser sessions. Also applies to one-off tasks like "open this site and grab X", "check if this form works", "screenshot this page", or any task that requires a real browser rather than just an HTTP request.
 ---
 
 # Browser Automation with playwright-cli
@@ -26,12 +25,14 @@ playwright-cli close
 ## Browser Automation Workflows
 
 ### Explore a page (start here)
+
 1. `playwright-cli open <url>` — open the page
 2. `playwright-cli snapshot` — read page structure; output lists elements with refs (`e1`, `e2`, ...)
 3. Interact using refs: `playwright-cli click e5`, `playwright-cli fill e3 "value"`
 4. `playwright-cli snapshot` again after each action to see the updated state
 
 ### Collect information from a page
+
 ```bash
 playwright-cli open https://example.com
 playwright-cli snapshot                           # read what's on the page
@@ -42,6 +43,7 @@ playwright-cli close
 ```
 
 ### Fill and submit a form
+
 ```bash
 playwright-cli open https://example.com/form
 playwright-cli snapshot                           # identify form element refs
@@ -52,6 +54,7 @@ playwright-cli snapshot                           # verify the result
 ```
 
 ### Save and reuse login state
+
 ```bash
 playwright-cli open https://example.com/login
 playwright-cli fill e1 "user@example.com"
@@ -234,11 +237,13 @@ playwright-cli --raw localstorage-get theme
 ```
 
 For structured output wrapping every reply as JSON, pass --json
+
 ```bash
 playwright-cli list --json
 ```
 
 ## Open parameters
+
 ```bash
 # Use specific browser when creating session
 playwright-cli open --browser=chrome
@@ -417,14 +422,14 @@ playwright-cli show --annotate
 
 ## Specific tasks
 
-* **EShop SUT (course test target)** — credentials, known bugs, testing workflows → [references/eshop-sut.md](references/eshop-sut.md)
-* **Running & debugging Playwright tests** — run `npx playwright test`, inspect failures, attach CLI to paused test → [references/playwright-tests.md](references/playwright-tests.md)
-* **Request mocking** — intercept/stub API calls for isolated testing, simulate error responses → [references/request-mocking.md](references/request-mocking.md)
-* **Running Playwright code** — execute arbitrary page scripts via `run-code` → [references/running-code.md](references/running-code.md)
-* **Browser session management** — named sessions, persistent profiles, attach to running browsers → [references/session-management.md](references/session-management.md)
-* **Spec-driven testing (plan / generate / heal)** — three-phase workflow: explore app → write spec → generate tests → fix failures → [references/spec-driven-testing.md](references/spec-driven-testing.md)
-* **Storage state (cookies, localStorage)** — save/load auth state to reuse login across test runs → [references/storage-state.md](references/storage-state.md)
-* **Test generation** — drive the browser interactively and export TypeScript test code → [references/test-generation.md](references/test-generation.md)
-* **Tracing** — capture Playwright trace for step-by-step replay in trace viewer → [references/tracing.md](references/tracing.md)
-* **Video recording** — record session video with chapter markers for bug reports → [references/video-recording.md](references/video-recording.md)
-* **Inspecting element attributes** — get `id`, `class`, `data-testid`, aria attributes from element refs → [references/element-attributes.md](references/element-attributes.md)
+- **EShop SUT (course test target)** — credentials, known bugs, testing workflows → [references/eshop-sut.md](references/eshop-sut.md)
+- **Running & debugging Playwright tests** — run `npx playwright test`, inspect failures, attach CLI to paused test → [references/playwright-tests.md](references/playwright-tests.md)
+- **Request mocking** — intercept/stub API calls for isolated testing, simulate error responses → [references/request-mocking.md](references/request-mocking.md)
+- **Running Playwright code** — execute arbitrary page scripts via `run-code` → [references/running-code.md](references/running-code.md)
+- **Browser session management** — named sessions, persistent profiles, attach to running browsers → [references/session-management.md](references/session-management.md)
+- **Spec-driven testing (plan / generate / heal)** — three-phase workflow: explore app → write spec → generate tests → fix failures → [references/spec-driven-testing.md](references/spec-driven-testing.md)
+- **Storage state (cookies, localStorage)** — save/load auth state to reuse login across test runs → [references/storage-state.md](references/storage-state.md)
+- **Test generation** — drive the browser interactively and export TypeScript test code → [references/test-generation.md](references/test-generation.md)
+- **Tracing** — capture Playwright trace for step-by-step replay in trace viewer → [references/tracing.md](references/tracing.md)
+- **Video recording** — record session video with chapter markers for bug reports → [references/video-recording.md](references/video-recording.md)
+- **Inspecting element attributes** — get `id`, `class`, `data-testid`, aria attributes from element refs → [references/element-attributes.md](references/element-attributes.md)
