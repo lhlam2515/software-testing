@@ -11,7 +11,7 @@ const now = new Date();
 const p   = n => String(n).padStart(2, '0');
 const ts  = `${p(now.getHours())}:${p(now.getMinutes())} ${p(now.getDate())}/${p(now.getMonth()+1)}/${now.getFullYear()}`;
 
-const pendingDir = path.join(os.homedir(), '.claude', 'hooks', 'pending');
+const pendingDir = path.join('.claude', 'hooks', 'pending');
 fs.mkdirSync(pendingDir, { recursive: true });
 fs.writeFileSync(
   path.join(pendingDir, `${sessionPfx}.json`),

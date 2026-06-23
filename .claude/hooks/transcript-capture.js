@@ -14,7 +14,7 @@ const { session_id, last_assistant_message, cwd } = input;
 const sessionPfx = session_id.slice(0, 8);
 
 // Đọc pending buffer (set bởi UserPromptSubmit)
-const pendingFile = path.join(os.homedir(), '.claude', 'hooks', 'pending', `${sessionPfx}.json`);
+const pendingFile = path.join('.claude', 'hooks', 'pending', `${sessionPfx}.json`);
 let prompt = '[prompt unavailable]';
 let timestamp = (() => {
   const now = new Date(), p = n => String(n).padStart(2, '0');
