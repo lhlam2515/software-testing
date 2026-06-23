@@ -28,6 +28,11 @@ csc13003-software-testing/
 │       ├── ch4_design.md    # Test design techniques (EP, BVA, decision tables…)
 │       ├── ch5_management.md
 │       └── ch6_tools.md
+├── seminar/                 # T10 seminar work (Mutation Testing)
+│   ├── 00-brief/            # Course materials — read-only
+│   ├── 01-research/         # Research notes, clips, baseline metrics
+│   ├── 02-planning/         # Working docs: conventions, outline, task split, timeline
+│   └── 03-deliverables/     # Submission outputs (fixed naming, never rename)
 ├── context/                 # Course policies and AI use agreements
 │   ├── homework_polices.md  # Assignment rules, grading criteria
 │   └── ai_use_agreement.md  # Required AI disclosure policy
@@ -68,6 +73,53 @@ frontend-web  (Vite, :5173)   frontend-admin  (Vite, :5174)
 
 ---
 
+## Seminar: T10 — Mutation Testing & Test Effectiveness
+
+**Live date:** 22/07/2026 | **Dashboard:** `seminar/README.md` (gate checklist + deliverable status)
+
+### Task Ownership
+
+| Person | Code | Test files | FR coverage |
+|--------|------|-----------|-------------|
+| Lâm (T3a) | `coupon.test.js`, `auth.test.js`, shared `helpers/` | `apps/backend/__tests__/` | FR-09 (Coupon), FR-02 (Auth) |
+| Vũ (T3b) | `order-status.test.js`, `cart.test.js` | `apps/backend/__tests__/` | FR-10 (Order Status), FR-08 (Cart) |
+
+### Key Planning Files
+
+| Purpose | File |
+|---------|------|
+| Gate checklist + deliverable status | `seminar/README.md` |
+| Test naming, DB strategy, auth helper | `seminar/02-planning/test-convention.md` |
+| Seminar content outline + slide topics | `seminar/02-planning/content-outline.md` |
+| Preparation plan + weekly timeline | `seminar/02-planning/prep-plan.md` |
+| T3a / T3b task split detail | `seminar/02-planning/task-assignment.md` |
+| Current week checklist | `seminar/02-planning/weekly-checklist.md` |
+| Topic spec, learning objectives, rubric | `seminar/00-brief/topic-t10.md` |
+| Stage workflow S1–S8 | `seminar/00-brief/seminar-workflow.md` |
+
+---
+
+## Test Tooling (Backend)
+
+| Tool | Purpose |
+|------|---------|
+| **Jest 30** | Unit + integration test framework |
+| **supertest** | HTTP assertion library for Express routes |
+| **Stryker** | Mutation testing |
+
+```bash
+# from apps/backend/
+npm test                  # run all tests
+npm run test:coverage     # with coverage report
+npm run stryker           # mutation testing (tests must pass first)
+```
+
+**Auth helper:** `getAuthToken()` in `apps/backend/__tests__/helpers/auth.js` — returns a valid JWT for `Authorization: Bearer <token>` headers. Always import this; never hardcode tokens.
+
+**Test convention:** follow `seminar/02-planning/test-convention.md` for file structure, naming (`it('returns 400 when coupon is expired')`), and DB strategy before writing any test.
+
+---
+
 ## Agent Routing Rules
 
 | Situation | Action |
@@ -77,7 +129,16 @@ frontend-web  (Vite, :5173)   frontend-admin  (Vite, :5174)
 | Start the full SUT | `bash apps/run-servers.sh` |
 | Start backend only | `cd apps/backend && node server.js` |
 | Write Playwright E2E tests | Use skill `playwright-cli`; save tests in `apps/frontend-web/tests/` or `apps/frontend-admin/tests/` |
-| Write backend unit/integration tests | Save in `apps/backend/`; use `supertest` (already installed) |
+| Write backend unit/integration tests | Read `seminar/02-planning/test-convention.md` first; save in `apps/backend/__tests__/`; use `supertest` |
+| Run mutation testing | `cd apps/backend && npm run stryker` (tests must pass first) |
+| Understand seminar scope and gates | Read `seminar/README.md` |
+| Check seminar topic and grading rubric | Read `seminar/00-brief/topic-t10.md` |
+| Check seminar stage workflow (S1–S8) | Read `seminar/00-brief/seminar-workflow.md` |
+| See seminar content outline / slide topics | Read `seminar/02-planning/content-outline.md` |
+| See preparation timeline | Read `seminar/02-planning/prep-plan.md` |
+| See T3a / T3b task split | Read `seminar/02-planning/task-assignment.md` |
+| Check current week checklist | Read `seminar/02-planning/weekly-checklist.md` |
+| View or edit deliverables | Work in `seminar/03-deliverables/` — never rename files |
 | Commit work | Use skill `commit` |
 | Look up test design techniques | Read `docs/istqb/ch4_design.md` |
 | Check assignment rules | Read `context/homework_polices.md` |
