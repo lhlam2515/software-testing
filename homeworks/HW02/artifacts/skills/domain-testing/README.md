@@ -1,4 +1,4 @@
-# domain-bva-skill
+# Domain Testing Skill
 
 Agent skill hỗ trợ áp dụng **Domain Testing** (Equivalence Partitioning) và
 **Boundary Value Analysis** vào kiểm thử tính năng e-Shop SUT.
