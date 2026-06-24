@@ -1,79 +1,80 @@
-# FR-02 — Boundary Value Analysis: Đăng nhập & Khóa tài khoản
+# FR-02 — Boundary Value Analysis: Login & Account Lockout
 
-**Feature:** FR-02 — Đăng nhập & Khóa tài khoản
-**Kỹ thuật:** Boundary Value Analysis (BVA) — bổ sung cho Domain Testing
-**Nguồn SRS:** `docs/eshop-sut/srs.md` — §2 FR-02
-**Người thực hiện:** Lê Hoàng Lâm — 23127216
-
----
-
-## 1. Tổng quan
-
-BVA được áp dụng bổ sung sau Domain Testing (Equivalence Partitioning) để bắt các lỗi off-by-one tại đúng các điểm ranh giới (turning points) của hai biến numeric trong FR-02:
-
-1. **`failed_login_count`** — Ngưỡng khóa tại `count = 3`
-2. **`lock_timer`** — Thời gian khóa tại `30s`
-
-> BVA không thay thế mà **tăng cường** bộ test EC. Các test BVA chỉ test tại ranh giới, không repeat những gì EP đã cover ở midpoint.
+**Feature:** FR-02 — Login & Account Lockout
+**Technique:** Boundary Value Analysis (BVA) — additive to Domain Testing
+**Spec source:** `docs/eshop-sut/srs.md` — §2 FR-02
+**Author:** Lê Hoàng Lâm — 23127216
 
 ---
 
-## 2. Biến Mục tiêu & Boundary Map
+## 1. Overview
 
-### 2.1 `failed_login_count` — Ngưỡng khóa = 3
+BVA is applied as a supplement after Domain Testing (Equivalence Partitioning) to catch off-by-one defects at the exact turning points of the two numeric variables in FR-02:
+
+1. **`failed_login_count`** — Lock threshold at `count = 3`
+2. **`lock_timer`** — Lockout duration at `30s`
+
+> BVA does not replace EP — it **enhances** the EC test set. BVA test cases target only boundary points; they do not repeat what EP already covers at midpoints.
+
+---
+
+## 2. Target Variables & Boundary Map
+
+### 2.1 `failed_login_count` — Lock threshold = 3
 
 ```
-Hành vi hệ thống theo giá trị counter:
+System behavior by counter value:
 
   [0]   [1]   [2]  |  [3]   [4]   ...
-  ──────────────────|─────────────────
-  ← VALID (no lock) | INVALID (locked) →
-                    ↑
-              ON Point (lock trigger)
-              LB của invalid class
+  ─────────────────|─────────────────
+  ← VALID (no lock)| INVALID (locked) →
+                   ↑
+            ON Point (lock trigger)
+             LB of invalid class
 
-  count = 2 → OFF point: tài khoản KHÔNG bị khóa (fail tiếp → count = 3 → lock)
-  count = 3 → ON point:  tài khoản BỊ KHÓA ngay
+  count = 2 → OFF point: account NOT locked (one more fail → count = 3 → lock)
+  count = 3 → ON point:  account LOCKED immediately
 ```
 
-**Operator cần test:** SRS dùng "từ 3 lần trở lên" → `count ≥ 3`.
-Lỗi tiềm năng: hệ thống triển khai `count > 3` (khóa ở lần 4, không phải 3).
+**Operator under test:** SRS states "3 or more consecutive failures" → `count ≥ 3`.
+Potential defect: system implements `count > 3` (locks on 4th failure, not 3rd).
 
-| Điểm BVA | Giá trị count | Vai trò | Hành vi kỳ vọng |
+| BVA Point | count value | Role | Expected Behavior |
 | :--- | :--- | :--- | :--- |
-| UB của valid class | `count = 2` | OFF point (fail → transition sang ON) | Không bị khóa; thêm 1 fail nữa → count = 3 → LOCK |
-| LB của invalid class | `count = 3` | ON point (first locked state) | Bị khóa; mọi attempt đều bị từ chối |
-| Midpoint valid | `count = 1` | Nominal (covered bởi TC-01 trong EP) | Không bị khóa |
-| Floor | `count = 0` | Lower bound (covered bởi TC-06 trong EP) | Không bị khóa |
+| UB of valid class | `count = 2` | OFF point (one more fail → transition to ON) | Not locked; one more fail → count = 3 → LOCK |
+| LB of invalid class | `count = 3` | ON point (first locked state) | Locked; all attempts rejected |
+| Midpoint valid | `count = 1` | Nominal (covered by TC-01 in EP) | Not locked |
+| Floor | `count = 0` | Lower bound (covered by TC-06 in EP) | Not locked |
 
-### 2.2 `lock_timer` — Thời gian khóa = 30 giây
+### 2.2 `lock_timer` — Lockout duration = 30 seconds
 
 ```
-Thời gian elapsed kể từ thời điểm lock:
+Time elapsed since lock moment:
 
   [0s] ...... [15s] ...... [29s] | [30s] [31s] ...
-  ─────────────────────────────────|──────────────
-  ←──────── LOCKED ──────────────→|←─ UNLOCKED ─→
-                                   ↑
-                              OFF point (lock expires)
-                              UB của locked window
+  ───────────────────────────────|──────────────
+  ←──────── LOCKED ─────────────→|←─ UNLOCKED ─→
+                                 ↑
+                            OFF point (lock expires)
+                            UB of locked window
 
-  time_since_lock = 29s → UB-1: còn 1s nữa mới unlock (still locked)
-  time_since_lock = 30s → UB:   đúng ranh giới (should be unlocked)
-  time_since_lock = 31s → UB+1: rõ ràng sau expiry (unlocked)
+  time_since_lock = 29s → UB-1: 1 second before unlock (still locked)
+  time_since_lock = 30s → UB:   exact boundary (should be unlocked)
+  time_since_lock = 31s → UB+1: clearly past expiry (unlocked)
 ```
 
-**Operator cần test:** SRS nói "30 giây" → lock kéo dài 30 giây → unlock tại `elapsed >= 30s`.
-Lỗi tiềm năng:
-- Hệ thống dùng `> 30s` (unlock ở 31s, không phải 30s) → TC-BVA-04 sẽ FAIL.
-- Hệ thống dùng `> 29s` (unlock quá sớm) → TC-BVA-03 sẽ FAIL.
+**Operator under test:** SRS states "30 seconds" → lock lasts 30 seconds → unlocks when `elapsed >= 30s`.
+Potential defects:
 
-| Điểm BVA | `time_since_lock` | Vai trò | Hành vi kỳ vọng |
+- System uses `> 30s` (unlocks at 31s, not 30s) → TC-BVA-04 will FAIL.
+- System uses `> 29s` (unlocks too early) → TC-BVA-03 will FAIL.
+
+| BVA Point | `time_since_lock` | Role | Expected Behavior |
 | :--- | :--- | :--- | :--- |
-| UB-1 của locked window | `29s` | 1 giây trước khi hết khóa | Vẫn bị khóa; login bị từ chối |
-| UB của locked window | `30s` | Chính xác tại ranh giới expiry | Đã unlock; login được phép |
-| UB+1 của locked window | `31s` | 1 giây sau khi hết khóa | Rõ ràng unlocked; login được phép |
-| Midpoint | `15s` | Nominal (covered bởi TC-07 ≈ 5s trong EP) | Vẫn bị khóa |
+| UB-1 of locked window | `29s` | 1 second before lockout expires | Still locked; login rejected |
+| UB of locked window | `30s` | Exact boundary at expiry | Unlocked; login permitted |
+| UB+1 of locked window | `31s` | 1 second past lockout expiry | Clearly unlocked; login permitted |
+| Midpoint | `15s` | Nominal (covered by TC-07 ≈ 5s in EP) | Still locked |
 
 ---
 
@@ -81,175 +82,175 @@ Lỗi tiềm năng:
 
 ---
 
-### TC-BVA-01 — Fail Lần Thứ 3: Lock Trigger tại ON Point
+### TC-BVA-01 — 3rd Failure: Lock Trigger at ON Point
 
-| Trường | Nội dung |
+| Field | Content |
 | :--- | :--- |
 | **TC ID** | TC-BVA-01 |
-| **Tên Test Case** | Fail lần thứ 3 — count: 2 → 3 → LOCK trigger |
-| **Biến mục tiêu** | `failed_login_count` |
-| **Loại điểm biên** | UB(valid) = 2 → **ON Point transition** → 3 (LB of invalid) |
-| **Target Variable State** | `failed_login_count = 2` (đúng tại UB của valid class — 2 lần sai trước đó) |
-| **Pre-conditions** | Tài khoản `test@eshop.com` tồn tại · `failed_login_count = 2` (đã sai 2 lần, 1 lần nữa sẽ lock) · `account_locked = false` |
+| **Test Case Name** | 3rd failure — count: 2 → 3 → LOCK triggered |
+| **Target Variable** | `failed_login_count` |
+| **Boundary Point Type** | UB(valid) = 2 → **ON Point transition** → 3 (LB of invalid) |
+| **Target Variable State** | `failed_login_count = 2` (exactly at UB of valid class — 2 prior failures) |
+| **Pre-conditions** | Account `test@eshop.com` exists · `failed_login_count = 2` (2 prior failures, one more will lock) · `account_locked = false` |
 | **Input — `email`** | `test@eshop.com` |
-| **Input — `password`** | `"WrongPass1!"` (sai — để trigger fail lần 3) |
-| **Bước thực hiện** | 1. Thiết lập `failed_login_count = 2`: thực hiện 2 lần đăng nhập sai liên tiếp từ tài khoản fresh (count=0) · 2. Mở trang đăng nhập · 3. Nhập `test@eshop.com` · 4. Nhập `WrongPass1!` · 5. Bấm "Đăng nhập" · 6. Quan sát ngay lập tức: có bị khóa không? |
-| **Mục tiêu Defect** | Bắt lỗi operator sai: nếu hệ thống dùng `> 3` thay vì `>= 3`, fail lần 3 này sẽ KHÔNG lock → tài khoản vẫn nhận request tiếp theo (test FAIL). Nếu hệ thống dùng `>= 3` đúng, fail lần 3 = LOCK ngay. |
-| **Kết quả kỳ vọng** | ❌ Fail với generic error · `failed_login_count: 2 → 3` · **Tài khoản BỊ KHÓA ngay sau fail này** · Attempt ngay tiếp theo (dù credential đúng) phải bị từ chối trong vòng 30s |
-| **Điểm xác minh** | 1. Counter chuyển từ 2 → 3 (đúng 1 đơn vị) · 2. Ngay sau TC này: thử đăng nhập với credential đúng → phải bị từ chối (lock active) · 3. Sau 30s: thử lại với credential đúng → phải thành công |
-| **Trạng thái** | ⬜ Chưa thực thi |
+| **Input — `password`** | `"WrongPass1!"` (wrong — to trigger 3rd failure) |
+| **Steps** | 1. Set `failed_login_count = 2`: perform 2 consecutive failed logins from a fresh account (count=0) · 2. Open login page · 3. Enter `test@eshop.com` · 4. Enter `WrongPass1!` · 5. Click "Login" · 6. Immediately observe: is the account locked? |
+| **Defect Target** | Catches wrong operator: if system uses `> 3` instead of `>= 3`, the 3rd failure will NOT lock → account still accepts the next attempt (test FAILS). If system correctly uses `>= 3`, the 3rd failure = LOCK immediately. |
+| **Expected Result** | ❌ Fails with generic error · `failed_login_count: 2 → 3` · **Account LOCKED immediately after this failure** · Next attempt (even with correct credentials) must be rejected within 30s |
+| **Verification Points** | 1. Counter transitions from 2 → 3 (exactly 1 unit) · 2. Immediately after: attempt login with correct credentials → must be rejected (lock active) · 3. After 30s: retry with correct credentials → must succeed |
+| **Status** | ⬜ Not yet executed |
 
 ---
 
-### TC-BVA-02 — Success tại UB của Valid Class (count = 2)
+### TC-BVA-02 — Success at UB of Valid Class (count = 2)
 
-| Trường | Nội dung |
+| Field | Content |
 | :--- | :--- |
 | **TC ID** | TC-BVA-02 |
-| **Tên Test Case** | Đăng nhập thành công khi count = 2 (UB của valid class) — counter reset |
-| **Biến mục tiêu** | `failed_login_count` |
-| **Loại điểm biên** | **UB(valid) = 2** — success scenario tại ngưỡng trên của valid class |
-| **Target Variable State** | `failed_login_count = 2` (đúng tại UB, 1 fail nữa sẽ lock — nhưng test này dùng credential đúng) |
-| **Pre-conditions** | Tài khoản `test@eshop.com` tồn tại · `failed_login_count = 2` · `account_locked = false` |
+| **Test Case Name** | Successful login when count = 2 (UB of valid class) — counter reset |
+| **Target Variable** | `failed_login_count` |
+| **Boundary Point Type** | **UB(valid) = 2** — success scenario at the upper bound of the valid class |
+| **Target Variable State** | `failed_login_count = 2` (exactly at UB, one more fail would lock — but this test uses correct credentials) |
+| **Pre-conditions** | Account `test@eshop.com` exists · `failed_login_count = 2` · `account_locked = false` |
 | **Input — `email`** | `test@eshop.com` |
-| **Input — `password`** | `"Test1234!"` (đúng) |
-| **Bước thực hiện** | 1. Thiết lập `failed_login_count = 2`: thực hiện 2 lần sai liên tiếp · 2. Mở trang đăng nhập · 3. Nhập `test@eshop.com` · 4. Nhập `Test1234!` (đúng) · 5. Bấm "Đăng nhập" · 6. Kiểm tra counter và JWT |
-| **Mục tiêu Defect** | Bắt lỗi reset logic tại UB: nếu counter không reset sau success khi count=2, lần sai tiếp theo sẽ tính là "fail thứ 3" (không phải fail thứ 1 của chuỗi mới) → logic lockout sai. |
-| **Kết quả kỳ vọng** | ✅ Đăng nhập thành công · JWT Token trả về · `failed_login_count: 2 → 0` (reset hoàn toàn) · Không có thông báo lỗi · Sau đó: 1 lần sai mới = count = 1 (không phải 3) |
-| **Điểm xác minh** | 1. JWT được trả về trong response · 2. Để verify counter = 0: thực hiện 1 lần sai → count phải là 1 (không phải 3, không lock) · 3. Nếu hệ thống sai: 1 lần sai sau đó → count = 3 → lock → bug! |
-| **Trạng thái** | ⬜ Chưa thực thi |
+| **Input — `password`** | `"Test1234!"` (correct) |
+| **Steps** | 1. Set `failed_login_count = 2`: perform 2 consecutive failures · 2. Open login page · 3. Enter `test@eshop.com` · 4. Enter `Test1234!` (correct) · 5. Click "Login" · 6. Verify counter and JWT |
+| **Defect Target** | Catches reset logic defect at UB: if the counter does not reset after success when count=2, the next failure would be counted as "3rd failure" (not the 1st of a new sequence) → lockout logic broken. |
+| **Expected Result** | ✅ Login successful · JWT Token returned · `failed_login_count: 2 → 0` (fully reset) · No error message · Afterwards: 1 new failure = count = 1 (not 3) |
+| **Verification Points** | 1. JWT returned in response · 2. To verify counter = 0: perform 1 failure → count must be 1 (not 3, no lock) · 3. If system is broken: 1 failure after → count = 3 → lock → bug! |
+| **Status** | ⬜ Not yet executed |
 
 ---
 
-### TC-BVA-03 — Lock Timer tại 29s (UB-1, còn 1s nữa)
+### TC-BVA-03 — Lock Timer at 29s (UB-1, 1 Second Remaining)
 
-| Trường | Nội dung |
+| Field | Content |
 | :--- | :--- |
 | **TC ID** | TC-BVA-03 |
-| **Tên Test Case** | Lock timer tại 29s — tài khoản vẫn bị khóa (UB-1) |
-| **Biến mục tiêu** | `lock_timer` (`time_since_lock`) |
-| **Loại điểm biên** | **UB-1 của locked window** — 1 giây trước khi hết khóa, tài khoản phải vẫn bị khóa |
-| **Target Variable State** | `failed_login_count = 3` · `time_since_lock = 29s` (còn 1s trong cửa sổ 30s) |
-| **Pre-conditions** | Tài khoản `test@eshop.com` tồn tại · Thực hiện 3 lần sai liên tiếp để trigger lock · Đợi đúng 29 giây kể từ thời điểm lock · `account_locked = true` |
+| **Test Case Name** | Lock timer at 29s — account still locked (UB-1) |
+| **Target Variable** | `lock_timer` (`time_since_lock`) |
+| **Boundary Point Type** | **UB-1 of locked window** — 1 second before expiry, account must still be locked |
+| **Target Variable State** | `failed_login_count = 3` · `time_since_lock = 29s` (1 second remaining in the 30s window) |
+| **Pre-conditions** | Account `test@eshop.com` exists · Perform 3 consecutive failures to trigger lock · Wait exactly 29 seconds from lock moment · `account_locked = true` |
 | **Input — `email`** | `test@eshop.com` |
-| **Input — `password`** | `"Test1234!"` (đúng — để loại trừ "bị reject vì sai password") |
-| **Bước thực hiện** | 1. Fail 3 lần liên tiếp → ghi lại `T_lock` (thời điểm lock) · 2. Đợi đến `T_lock + 29s` · 3. Mở trang đăng nhập · 4. Nhập `test@eshop.com` + `Test1234!` · 5. Bấm "Đăng nhập" tại đúng giây thứ 29 |
-| **Mục tiêu Defect** | Bắt lỗi timeout quá ngắn: nếu hệ thống unlock ở 29s thay vì 30s, test này sẽ PASS (nhận JWT) khi expected là FAIL (bị từ chối). |
-| **Kết quả kỳ vọng** | ❌ Login **vẫn bị từ chối** tại 29s · Generic error · Không có JWT · Lock chưa hết (còn 1 giây) |
-| **Điểm xác minh** | 1. Response không chứa `token` · 2. Ghi lại exact timestamp để đảm bảo test được thực hiện đúng tại 29s (không phải 30s hay 31s) · 3. Sau 1s thêm (≥ 30s total): thử lại — phải thành công (xác nhận 30s là ranh giới đúng) |
-| **Ghi chú setup** | Precision timing quan trọng: sử dụng automation (Playwright) hoặc DB query để set `lock_start_time` chính xác. Manual timing có thể gây lệch ±1s. |
-| **Trạng thái** | ⬜ Chưa thực thi |
+| **Input — `password`** | `"Test1234!"` (correct — to eliminate "rejected due to wrong password") |
+| **Steps** | 1. Fail 3 times consecutively → record `T_lock` (moment of lock) · 2. Wait until `T_lock + 29s` · 3. Open login page · 4. Enter `test@eshop.com` + `Test1234!` · 5. Click "Login" at exactly second 29 |
+| **Defect Target** | Catches too-short timeout: if system unlocks at 29s instead of 30s, this test will PASS (receives JWT) when expected is FAIL (rejected). |
+| **Expected Result** | ❌ Login **still rejected** at 29s · Generic error · No JWT · Lock has not expired (1 second remaining) |
+| **Verification Points** | 1. Response contains no `token` · 2. Record exact timestamp to ensure test is executed at 29s (not 30s or 31s) · 3. After 1 more second (≥ 30s total): retry — must succeed (confirms 30s is the correct boundary) |
+| **Setup Note** | Precision timing is critical: use automation (Playwright) or DB query to set `lock_start_time` accurately. Manual timing may drift ±1s. |
+| **Status** | ⬜ Not yet executed |
 
 ---
 
-### TC-BVA-04 — Lock Timer tại Đúng 30s (UB — OFF Point)
+### TC-BVA-04 — Lock Timer at Exactly 30s (UB — OFF Point)
 
-| Trường | Nội dung |
+| Field | Content |
 | :--- | :--- |
 | **TC ID** | TC-BVA-04 |
-| **Tên Test Case** | Lock timer tại đúng 30s — tài khoản phải được unlock (UB / OFF point) |
-| **Biến mục tiêu** | `lock_timer` (`time_since_lock`) |
-| **Loại điểm biên** | **UB của locked window = OFF point của lock** — đúng tại ranh giới 30s |
-| **Target Variable State** | `failed_login_count = 3` · `time_since_lock = 30s` (chính xác tại thời điểm hết khóa) |
-| **Pre-conditions** | Tài khoản `test@eshop.com` tồn tại · Fail 3 lần để trigger lock · Đợi đúng 30 giây |
+| **Test Case Name** | Lock timer at exactly 30s — account must be unlocked (UB / OFF point) |
+| **Target Variable** | `lock_timer` (`time_since_lock`) |
+| **Boundary Point Type** | **UB of locked window = OFF point of lock** — exactly at the 30s boundary |
+| **Target Variable State** | `failed_login_count = 3` · `time_since_lock = 30s` (exactly at lockout expiry) |
+| **Pre-conditions** | Account `test@eshop.com` exists · Fail 3 times to trigger lock · Wait exactly 30 seconds |
 | **Input — `email`** | `test@eshop.com` |
-| **Input — `password`** | `"Test1234!"` (đúng) |
-| **Bước thực hiện** | 1. Fail 3 lần → ghi lại `T_lock` · 2. Đợi đến `T_lock + 30s` · 3. Mở trang đăng nhập · 4. Nhập `test@eshop.com` + `Test1234!` · 5. Bấm "Đăng nhập" tại đúng giây thứ 30 |
-| **Mục tiêu Defect** | Bắt lỗi operator sai: nếu hệ thống dùng `elapsed > 30s` (strict greater-than) thay vì `elapsed >= 30s`, tài khoản sẽ vẫn bị khóa ở giây 30 → test FAIL khi expected là SUCCESS. |
-| **Kết quả kỳ vọng** | ✅ Login **được phép** tại đúng 30s · JWT Token trả về · Tài khoản unlock · ⚠️ **Gap G1:** Ghi lại `failed_login_count` sau unlock — có tự reset về 0 không? Hay vẫn = 3? (Hành vi này quyết định risk của lần fail tiếp theo) |
-| **Điểm xác minh** | 1. JWT được trả về tại `T_lock + 30s` · 2. Ghi lại giá trị `failed_login_count` sau khi login thành công: nếu = 3 (không reset), 1 lần sai tiếp → lock lại ngay · 3. Nếu = 0 (reset), hành vi bình thường trở lại |
-| **Ghi chú setup** | Đây là test quan trọng nhất của BVA cho `lock_timer`. Nên dùng DB direct manipulation để set `lock_start_time = NOW() - 30s` cho precision tuyệt đối, thay vì đợi thủ công. |
-| **Trạng thái** | ⬜ Chưa thực thi |
+| **Input — `password`** | `"Test1234!"` (correct) |
+| **Steps** | 1. Fail 3 times → record `T_lock` · 2. Wait until `T_lock + 30s` · 3. Open login page · 4. Enter `test@eshop.com` + `Test1234!` · 5. Click "Login" at exactly second 30 |
+| **Defect Target** | Catches wrong operator: if system uses `elapsed > 30s` (strict greater-than) instead of `elapsed >= 30s`, account will still be locked at second 30 → test FAILS when expected is SUCCESS. |
+| **Expected Result** | ✅ Login **permitted** at exactly 30s · JWT Token returned · Account unlocked · ⚠️ **Gap G1:** Record `failed_login_count` after unlock — does it auto-reset to 0? Or remain = 3? (This determines the risk of the next failure) |
+| **Verification Points** | 1. JWT returned at `T_lock + 30s` · 2. Record `failed_login_count` value after successful login: if = 3 (not reset), one more failure → re-locks immediately · 3. If = 0 (reset), behavior returns to normal |
+| **Setup Note** | This is the most important BVA test for `lock_timer`. Prefer DB direct manipulation to set `lock_start_time = NOW() - 30s` for absolute precision, rather than waiting manually. |
+| **Status** | ⬜ Not yet executed |
 
 ---
 
-### TC-BVA-05 — Lock Timer tại 31s (UB+1, sau Expiry)
+### TC-BVA-05 — Lock Timer at 31s (UB+1, Past Expiry)
 
-| Trường | Nội dung |
+| Field | Content |
 | :--- | :--- |
 | **TC ID** | TC-BVA-05 |
-| **Tên Test Case** | Lock timer tại 31s — rõ ràng sau expiry, tài khoản accessible (UB+1) |
-| **Biến mục tiêu** | `lock_timer` (`time_since_lock`) |
-| **Loại điểm biên** | **UB+1 của locked window** — 1 giây sau khi hết khóa, baseline confirmation |
-| **Target Variable State** | `failed_login_count = 3` · `time_since_lock = 31s` (rõ ràng sau 30s window) |
-| **Pre-conditions** | Tài khoản `test@eshop.com` tồn tại · Fail 3 lần để trigger lock · Đợi 31 giây |
+| **Test Case Name** | Lock timer at 31s — clearly past expiry, account accessible (UB+1) |
+| **Target Variable** | `lock_timer` (`time_since_lock`) |
+| **Boundary Point Type** | **UB+1 of locked window** — 1 second past lockout expiry, baseline confirmation |
+| **Target Variable State** | `failed_login_count = 3` · `time_since_lock = 31s` (clearly past 30s window) |
+| **Pre-conditions** | Account `test@eshop.com` exists · Fail 3 times to trigger lock · Wait 31 seconds |
 | **Input — `email`** | `test@eshop.com` |
-| **Input — `password`** | `"Test1234!"` (đúng) |
-| **Bước thực hiện** | 1. Fail 3 lần → ghi lại `T_lock` · 2. Đợi đến `T_lock + 31s` · 3. Mở trang đăng nhập · 4. Nhập `test@eshop.com` + `Test1234!` · 5. Bấm "Đăng nhập" |
-| **Mục tiêu Defect** | Baseline confirmation sau ranh giới: xác nhận tài khoản hoàn toàn accessible sau 31s. Catch race conditions hoặc timer drift trong implementation. |
-| **Kết quả kỳ vọng** | ✅ Login thành công · JWT Token trả về · ⚠️ **Gap G1 (continued):** Nếu `failed_login_count` vẫn = 3 sau unlock (không reset), thì: 1 lần sai tiếp theo → count = 4 → lock lại ngay (vì count ≥ 3). Hành vi này cần được document là bug hoặc expected behavior. |
-| **Điểm xác minh** | 1. JWT được trả về · 2. Ghi lại `failed_login_count` sau success: nếu reset = 0 → OK. Nếu vẫn = 3 → tiềm ẩn lỗi logic · 3. Thực hiện 1 lần sai ngay sau đó → quan sát counter behavior (kiểm tra Gap G1) |
-| **Trạng thái** | ⬜ Chưa thực thi |
+| **Input — `password`** | `"Test1234!"` (correct) |
+| **Steps** | 1. Fail 3 times → record `T_lock` · 2. Wait until `T_lock + 31s` · 3. Open login page · 4. Enter `test@eshop.com` + `Test1234!` · 5. Click "Login" |
+| **Defect Target** | Baseline confirmation past the boundary: confirms account is fully accessible at 31s. Catches race conditions or timer drift in the implementation. |
+| **Expected Result** | ✅ Login successful · JWT Token returned · ⚠️ **Gap G1 (continued):** If `failed_login_count` remains = 3 after unlock (not reset), one more failure → count = 4 → re-locks immediately (since count ≥ 3). This behavior must be documented as either a bug or expected behavior. |
+| **Verification Points** | 1. JWT returned · 2. Record `failed_login_count` after success: if reset = 0 → OK. If still = 3 → potential logic defect · 3. Perform 1 failure immediately after → observe counter behavior (verify Gap G1) |
+| **Status** | ⬜ Not yet executed |
 
 ---
 
 ## 4. Defect Coverage Matrix
 
-| TC | Biến | Điểm biên | Operator lỗi bị bắt | Nếu hệ thống sai → Actual ≠ Expected |
+| TC | Variable | Boundary Point | Wrong Operator Caught | If system is broken → Actual ≠ Expected |
 | :--- | :--- | :--- | :--- | :--- |
-| TC-BVA-01 | `failed_login_count` | 2 → 3 (transition) | `> 3` thay vì `>= 3` | Fail lần 3 không lock → TC FAIL (còn nhận request) |
-| TC-BVA-01 | `failed_login_count` | 2 → 3 (transition) | `>= 2` (lock quá sớm) | Fail lần 2 đã lock → Pre-condition phá vỡ |
-| TC-BVA-02 | `failed_login_count` | count=2, success | Counter không reset tại UB | 1 sai tiếp → tính là "fail 3" → lock unexpected |
-| TC-BVA-03 | `lock_timer` | 29s (UB-1) | Timeout `< 30s` (unlock sớm) | 29s accepted → TC FAIL (expected reject, got JWT) |
-| TC-BVA-04 | `lock_timer` | 30s (UB) | `> 30s` thay vì `>= 30s` | 30s vẫn locked → TC FAIL (expected JWT, got error) |
-| TC-BVA-05 | `lock_timer` | 31s (UB+1) | Race condition / timer drift | 31s vẫn locked → rare but possible timing bug |
+| TC-BVA-01 | `failed_login_count` | 2 → 3 (transition) | `> 3` instead of `>= 3` | 3rd failure does not lock → TC FAILS (still accepts requests) |
+| TC-BVA-01 | `failed_login_count` | 2 → 3 (transition) | `>= 2` (locks too early) | 2nd failure already locks → pre-condition breaks |
+| TC-BVA-02 | `failed_login_count` | count=2, success | Counter not reset at UB | 1 subsequent fail counted as "3rd fail" → unexpected lock |
+| TC-BVA-03 | `lock_timer` | 29s (UB-1) | Timeout `< 30s` (unlocks early) | 29s accepted → TC FAILS (expected reject, got JWT) |
+| TC-BVA-04 | `lock_timer` | 30s (UB) | `> 30s` instead of `>= 30s` | 30s still locked → TC FAILS (expected JWT, got error) |
+| TC-BVA-05 | `lock_timer` | 31s (UB+1) | Race condition / timer drift | 31s still locked → rare but possible timing bug |
 
 ---
 
-## 5. Setup Protocol — Precision Timing
+## 5. Setup Protocol
 
-Đối với TC-BVA-03, TC-BVA-04, TC-BVA-05, timing chính xác là yếu tố then chốt:
+For TC-BVA-03, TC-BVA-04, and TC-BVA-05, precise timing is critical:
 
-### Option A: Manual Timing (đủ cho demo, ±1s tolerance)
+### Option A: Manual Timing (sufficient for demo, ±1s tolerance)
 
 ```
-1. Reset tài khoản test về failed_login_count = 0
-2. Fail đăng nhập 3 lần liên tiếp
-3. Ghi lại T_lock = thời điểm lần fail thứ 3
-4. Chạy test tại:
+1. Reset test account to failed_login_count = 0
+2. Fail login 3 consecutive times
+3. Record T_lock = timestamp of the 3rd failure
+4. Execute tests at:
    - TC-BVA-03: T_lock + 29s
    - TC-BVA-04: T_lock + 30s
    - TC-BVA-05: T_lock + 31s
-5. Ghi lại actual behavior tại từng thời điểm
+5. Record actual behavior at each moment
 ```
 
-### Option B: Database Direct Manipulation (khuyến nghị cho automation)
+### Option B: Database Direct Manipulation (recommended for automation)
 
 ```sql
--- Set lock_start_time để simulate "vừa lock xong T giây trước"
+-- Set lock_until to simulate "locked T seconds ago"
 UPDATE users
 SET lock_until = datetime('now', '+' || (30 - T) || ' seconds')
 WHERE email = 'test@eshop.com';
 
--- Ví dụ: simulate đã lock được 29s (còn 1s nữa)
+-- Example: simulate locked 29s ago (1 second remaining)
 UPDATE users
 SET lock_until = datetime('now', '+1 seconds')
 WHERE email = 'test@eshop.com';
 
--- Simulate đã hết lock (30s elapsed)
+-- Simulate lock just expired (30s elapsed)
 UPDATE users
 SET lock_until = datetime('now', '-0 seconds')
 WHERE email = 'test@eshop.com';
 ```
 
-> ⚠️ Cần kiểm tra schema thực tế của DB để xác định field name (`lock_until`, `locked_at`, `lockout_until`…). Schema có thể khác với giả định trên.
+> ⚠️ Verify the actual DB schema to confirm the correct field name (`lock_until`, `locked_at`, `lockout_until`…). The schema may differ from the assumptions above.
 
 ---
 
-## 6. Tổng hợp Test Suite
+## 6. Test Suite Summary
 
-| Nhóm | TC | Biến | Điểm biên | Mục tiêu |
+| Group | TC | Variable | Boundary Point | Objective |
 | :--- | :--- | :--- | :--- | :--- |
-| BVA — count threshold | TC-BVA-01 | `failed_login_count` | count=2 → 3 (transition) | Off-by-one tại lock trigger |
-| BVA — count threshold | TC-BVA-02 | `failed_login_count` | count=2, success | Counter reset tại UB |
+| BVA — count threshold | TC-BVA-01 | `failed_login_count` | count=2 → 3 (transition) | Off-by-one at lock trigger |
+| BVA — count threshold | TC-BVA-02 | `failed_login_count` | count=2, success | Counter reset at UB |
 | BVA — timer window | TC-BVA-03 | `lock_timer` | 29s (UB-1) | Early unlock bug |
 | BVA — timer window | TC-BVA-04 | `lock_timer` | 30s (UB / OFF point) | Exact boundary operator |
 | BVA — timer window | TC-BVA-05 | `lock_timer` | 31s (UB+1) | Post-expiry baseline |
 
-**Tổng cộng toàn bộ FR-02:**
+**Total for FR-02:**
 
-| Nhóm | Số TC |
+| Group | TC Count |
 | :--- | :--- |
-| Domain Testing (EP) — TC-01 đến TC-07 | 7 |
-| BVA Enhancement — TC-BVA-01 đến TC-BVA-05 | 5 |
-| **Tổng** | **12** |
+| Domain Testing (EP) — TC-01 to TC-07 | 7 |
+| BVA Enhancement — TC-BVA-01 to TC-BVA-05 | 5 |
+| **Total** | **12** |

@@ -1,291 +1,291 @@
-# FR-02 — Domain Testing: Đăng nhập & Khóa tài khoản
+# FR-02 — Domain Testing: Login & Account Lockout
 
-**Feature:** FR-02 — Đăng nhập & Khóa tài khoản
-**Kỹ thuật:** Domain Testing (Equivalence Partitioning)
-**Nguồn SRS:** `docs/eshop-sut/srs.md` — §2 FR-02 (liên hệ FR-01 cho format email/password, FR-22 cho form requirements)
-**Người thực hiện:** Lê Hoàng Lâm — 23127216
-
----
-
-## 1. Tổng quan Feature
-
-FR-02 kiểm soát hai hành vi chính:
-
-1. **Đăng nhập:** Xác thực email + mật khẩu → trả về JWT Token khi đúng, generic error khi sai.
-2. **Khóa tài khoản:** Sau **3 lần sai liên tiếp**, tài khoản bị tạm khóa **30 giây** (môi trường demo). Hệ thống trả về thông báo lỗi phù hợp nhưng không tiết lộ chi tiết nguyên nhân.
-
-Ràng buộc format lấy từ:
-
-- **FR-01:** Email phải đúng định dạng `user@domain.com`; password đã được đăng ký với quy tắc: ≥ 8 ký tự, ≥ 1 hoa, ≥ 1 thường, ≥ 1 số, ≥ 1 ký tự đặc biệt (`@$!%*?&`).
-- **FR-22:** Trường email dùng `type="email"`, trường password dùng `type="password"`. Thông báo lỗi hiển thị **phía trên** nút submit.
+**Feature:** FR-02 — Login & Account Lockout
+**Technique:** Domain Testing (Equivalence Partitioning)
+**Spec source:** `docs/eshop-sut/srs.md` — §2 FR-02 (cross-refs FR-01 for email/password format, FR-22 for form requirements)
+**Author:** Lê Hoàng Lâm — 23127216
 
 ---
 
-## 2. Bước 1 — Xác định Biến & Ràng buộc
+## 1. Feature Overview
 
-| Variable | Type | Mô tả | Valid Domain / Boundaries | Dependencies & Constraints | Expected Error / Behavior |
+FR-02 controls two core behaviors:
+
+1. **Login:** Authenticate email + password → return a JWT Token on success, a generic error on failure.
+2. **Account Lockout:** After **3 consecutive failures**, the account is temporarily locked for **30 seconds** (demo environment). The system returns an appropriate error message without revealing the specific reason.
+
+Format constraints sourced from:
+
+- **FR-01:** Email must follow `user@domain.com` format; password registered under rules: ≥ 8 characters, ≥ 1 uppercase, ≥ 1 lowercase, ≥ 1 digit, ≥ 1 special character (`@$!%*?&`).
+- **FR-22:** Email field uses `type="email"`, password field uses `type="password"`. Error messages are displayed **above** the submit button.
+
+---
+
+## 2. Step 1 — Variables & Constraints
+
+| Variable | Type | Description | Valid Domain / Boundaries | Dependencies & Constraints | Expected Error / Behavior |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `email` | Input | Địa chỉ email nhập vào form đăng nhập | **Valid:** Chuỗi đúng format `user@domain.com` (HTML5 `type="email"`). Resolution: 1 ký tự. | Phải tồn tại trong DB (registered). Trường dùng `type="email"`. Gắn với `failed_login_count` của tài khoản tương ứng. | Sai format → HTML5 ngăn submit. Không tồn tại → generic error (không lộ lý do). |
-| `password` | Input | Mật khẩu nhập vào form đăng nhập | **Valid:** Bất kỳ chuỗi nào khớp hash đã lưu (không re-validate độ phức tạp tại login). Resolution: 1 ký tự. | So khớp với hash đã lưu. Trường dùng `type="password"`. Quy tắc độ phức tạp (FR-01) chỉ áp dụng tại đăng ký, KHÔNG re-check tại login. | Không khớp → generic error + `failed_login_count++`. |
-| `failed_login_count` | System State | Bộ đếm số lần đăng nhập sai **liên tiếp** của tài khoản | **Valid (không khóa):** `[0, 2]`. **Invalid (khóa):** `[3, +∞)`. Boundaries: `0` (khởi tạo), `2` (OFF point), `3` (ON point — ngưỡng khóa). Resolution: 1 (integer). | Tăng đúng 1 mỗi lần sai. Reset về 0 khi thành công ("liên tiếp" — ngầm định). Gắn với từng email. ⚠️ SRS không nói counter reset sau khi hết 30s lockout hay không. | count < 3 → login thất bại, counter tăng, không khóa. count ≥ 3 → tài khoản bị khóa. |
-| `account_locked` | System State | Trạng thái khóa tạm thời (derived từ count + timer) | Binary: `false` (mở) / `true` (khóa). | Kích hoạt khi `failed_login_count ≥ 3`. Tự mở sau 30s. ⚠️ SRS không nói rõ lockout per-account hay per-IP/session. | Khi `true` → mọi attempt bị từ chối kể cả credential đúng. Thông báo "phù hợp" nhưng không lộ chi tiết. |
-| `lock_timer` | System State | Thời gian còn lại của lockout (giây) tính từ lần sai thứ 3 | **Locked:** `(0s, 30s]`. **Expired:** `0s`. Boundaries: `30s` (ON — vừa khóa), `0s` (OFF — vừa hết). Resolution: 1 giây. | Chỉ có nghĩa khi `account_locked = true`. ⚠️ SRS không nói `failed_login_count` có reset về 0 khi timer hết không. | Trong (0s, 30s]: mọi request bị từ chối. Tại 0s (hết 30s): tài khoản mở, cho phép thử lại. |
-| `jwt_token` | Output | JWT Token trả về khi đăng nhập thành công | **Valid:** Chuỗi JWT hợp lệ. **Invalid:** Không có (null/empty) mọi trường hợp thất bại. | Chỉ phát sinh khi email tồn tại + password khớp + account không bị khóa. Lưu client-side, gửi qua `Authorization: Bearer <token>`. | Thành công → token. Mọi case lỗi → không có token. |
-| `error_message` | Output | Thông báo lỗi khi đăng nhập thất bại | **Valid:** Chuỗi text chung, không tiết lộ nguyên nhân cụ thể. | Hiển thị **phía trên** nút submit (FR-22). Áp dụng: sai credential, bị khóa, email không tồn tại — dùng cùng 1 dạng message chung. | Sai credential → generic error. Bị khóa → generic error (không nói thời gian còn lại). Sai format email → HTML5 validation (không qua server). |
+| `email` | Input | Email address entered in the login form | **Valid:** String matching `user@domain.com` format (HTML5 `type="email"`). Resolution: 1 character. | Must exist in DB (registered). Field uses `type="email"`. Linked to the corresponding account's `failed_login_count`. | Invalid format → HTML5 blocks submission. Not found → generic error (reason not revealed). |
+| `password` | Input | Password entered in the login form | **Valid:** Any string matching the stored hash (complexity rules not re-validated at login). Resolution: 1 character. | Must match stored hash. Field uses `type="password"`. Complexity rules (FR-01) apply only at registration, NOT re-checked at login. | No match → generic error + `failed_login_count++`. |
+| `failed_login_count` | System State | Counter tracking **consecutive** failed login attempts for the account | **Valid (no lock):** `[0, 2]`. **Invalid (locked):** `[3, +∞)`. Boundaries: `0` (init), `2` (OFF point), `3` (ON point — lock threshold). Resolution: 1 (integer). | Increments by exactly 1 per failure. Resets to 0 on success ("consecutive" — implied). Scoped per email. ⚠️ SRS does not specify whether counter resets after the 30s lockout expires. | count < 3 → login fails, counter increments, no lock. count ≥ 3 → account locked. |
+| `account_locked` | System State | Temporary lock state (derived from count + timer) | Binary: `false` (open) / `true` (locked). | Activated when `failed_login_count ≥ 3`. Auto-releases after 30s. ⚠️ SRS does not clarify whether lockout is per-account or per-IP/session. | When `true` → all attempts rejected, even with correct credentials. Message is "appropriate" but reveals no details. |
+| `lock_timer` | System State | Remaining lockout time (seconds) since the 3rd failure | **Locked:** `(0s, 30s]`. **Expired:** `0s`. Boundaries: `30s` (ON — just locked), `0s` (OFF — just expired). Resolution: 1 second. | Only meaningful when `account_locked = true`. ⚠️ SRS does not specify whether `failed_login_count` resets to 0 when the timer expires. | Within (0s, 30s]: all requests rejected. At 0s (30s elapsed): account unlocked, attempts allowed. |
+| `jwt_token` | Output | JWT Token returned on successful login | **Valid:** Well-formed JWT string. **Invalid:** Absent (null/empty) in all failure cases. | Only issued when email exists + password matches + account is not locked. Stored client-side, sent via `Authorization: Bearer <token>`. | Success → token. All error cases → no token. |
+| `error_message` | Output | Error message displayed on login failure | **Valid:** Generic text string, does not reveal the specific reason. | Displayed **above** the submit button (FR-22). Applies to: wrong credentials, locked account, email not found — same generic message format for all. | Wrong credentials → generic error. Locked → generic error (no remaining time revealed). Invalid email format → HTML5 validation (does not reach server). |
 
-### Implicit Gaps (cần xác minh khi test)
+### Implicit Gaps
 
-| # | Gap | Rủi ro nếu không xác định |
+| # | Gap | Risk if not clarified |
 | :--- | :--- | :--- |
-| G1 | `failed_login_count` có reset về 0 sau 30s lockout hết không? | Nếu không reset: 1 lần sai tiếp theo sẽ lock lại ngay — behavior khác với "sai lần đầu". |
-| G2 | Counter có tiếp tục tăng khi account đang bị locked không? | Ảnh hưởng đến tổng số lần cần thử sau khi unlock. |
-| G3 | Lockout per-account hay per-IP/session? | Ảnh hưởng đến khả năng bypass bằng cách đổi IP hoặc session. |
-| G4 | Không có giới hạn độ dài tường minh cho email và password tại login. | Cần test với chuỗi rất dài để phát hiện lỗi tiềm năng. |
+| G1 | Does `failed_login_count` reset to 0 after the 30s lockout expires? | If not: one more failure would re-lock immediately — different behavior from "first failure". |
+| G2 | Does the counter keep incrementing while the account is locked? | Affects how many attempts are needed after unlock. |
+| G3 | Is lockout per-account or per-IP/session? | Affects whether the lockout can be bypassed by switching IP or session. |
+| G4 | No explicit length limit for email and password at login. | Must test with very long strings to detect potential bugs. |
 
 ---
 
-## 3. Bước 2 — Phân hoạch Equivalence Classes
+## 3. Step 2 — Equivalence Classes
 
-### Group 1 — `email` : Định dạng (Format)
+### Group 1 — `email` : Format
 
-| Variable / Condition | EC ID | Mô tả | Loại | Expected System Output |
+| Variable / Condition | EC ID | Description | Type | Expected System Output |
 | :--- | :--- | :--- | :--- | :--- |
-| `email` — Định dạng | **EC01** | Chuỗi rỗng hoặc chỉ khoảng trắng | Invalid | HTML5 `type="email"` ngăn submit; không gửi request lên server |
-| `email` — Định dạng | **EC02** | Chuỗi không rỗng, sai format (thiếu `@`, thiếu domain, có dấu cách, nhiều `@`…) | Invalid | HTML5 `type="email"` ngăn submit; không gửi request lên server |
-| `email` — Định dạng | **EC03** | Chuỗi đúng format `user@domain.com` | Valid | Request gửi lên server; tiếp tục kiểm tra Existence |
+| `email` — Format | **EC01** | Empty string or whitespace only | Invalid | HTML5 `type="email"` blocks submission; no request sent to server |
+| `email` — Format | **EC02** | Non-empty string, invalid format (missing `@`, missing domain, contains spaces, multiple `@`…) | Invalid | HTML5 `type="email"` blocks submission; no request sent to server |
+| `email` — Format | **EC03** | String matching `user@domain.com` format | Valid | Request sent to server; continues to Existence check |
 
-### Group 2 — `email` : Tồn tại trong DB *(chỉ áp dụng khi EC03)*
+### Group 2 — `email` : Existence in DB *(applies only when EC03)*
 
-| Variable / Condition | EC ID | Mô tả | Loại | Expected System Output |
+| Variable / Condition | EC ID | Description | Type | Expected System Output |
 | :--- | :--- | :--- | :--- | :--- |
-| `email` — Existence | **EC04** | Email đúng format nhưng **chưa đăng ký** (không trong DB) | Invalid | Server trả về generic error; **không lộ** "email không tồn tại" |
-| `email` — Existence | **EC05** | Email đúng format và **đã đăng ký** (tồn tại trong DB) | Valid | Server tiếp tục kiểm tra password |
+| `email` — Existence | **EC04** | Valid format but **not registered** (not in DB) | Invalid | Server returns generic error; does **not** reveal "email not found" |
+| `email` — Existence | **EC05** | Valid format and **registered** (exists in DB) | Valid | Server continues to password check |
 
-### Group 3 — `password` : Khớp hash
+### Group 3 — `password` : Hash Match
 
-| Variable / Condition | EC ID | Mô tả | Loại | Expected System Output |
+| Variable / Condition | EC ID | Description | Type | Expected System Output |
 | :--- | :--- | :--- | :--- | :--- |
-| `password` — Giá trị | **EC06** | Chuỗi rỗng | Invalid | Bị chặn bởi `required` (nếu có) **hoặc** generic error từ server; ⚠️ SRS không tường minh `required` cho login password |
-| `password` — Giá trị | **EC07** | Chuỗi không rỗng, **không khớp** hash đã lưu | Invalid | Generic error; `failed_login_count` tăng đúng 1 |
-| `password` — Giá trị | **EC08** | Chuỗi **khớp chính xác** với hash đã lưu | Valid | Tiếp tục luồng đăng nhập thành công (nếu account không bị khóa) |
+| `password` — Value | **EC06** | Empty string | Invalid | Blocked by `required` (if present) **or** generic error from server; ⚠️ SRS does not explicitly state `required` for the login password field |
+| `password` — Value | **EC07** | Non-empty string, **does not match** stored hash | Invalid | Generic error; `failed_login_count` increments by 1 |
+| `password` — Value | **EC08** | String **exactly matches** stored hash | Valid | Proceeds through the successful login flow (if account is not locked) |
 
-### Group 4 — `failed_login_count` : Ngưỡng khóa
+### Group 4 — `failed_login_count` : Lock Threshold
 
-| Variable / Condition | EC ID | Mô tả | Loại | Expected System Output |
+| Variable / Condition | EC ID | Description | Type | Expected System Output |
 | :--- | :--- | :--- | :--- | :--- |
-| `failed_login_count` | **EC09** | `count ∈ [0, 2]` — dưới ngưỡng khóa | Valid | Tài khoản chưa khóa; login attempt được phép |
-| `failed_login_count` | **EC10** | `count ≥ 3` — đạt hoặc vượt ngưỡng khóa | Invalid | Tài khoản bị khóa; **mọi** attempt bị từ chối kể cả khi credential đúng |
+| `failed_login_count` | **EC09** | `count ∈ [0, 2]` — below lock threshold | Valid | Account not locked; login attempt is permitted |
+| `failed_login_count` | **EC10** | `count ≥ 3` — at or above lock threshold | Invalid | Account locked; **all** attempts rejected, even with correct credentials |
 
-### Group 5 — `lock_timer` : Cửa sổ khóa 30 giây
+### Group 5 — `lock_timer` : 30-Second Lockout Window
 
-| Variable / Condition | EC ID | Mô tả | Loại | Expected System Output |
+| Variable / Condition | EC ID | Description | Type | Expected System Output |
 | :--- | :--- | :--- | :--- | :--- |
-| `lock_timer` | **EC11** | Không trong cửa sổ khóa: `count < 3` HOẶC `time_since_lock ≥ 30s` | Valid | Tài khoản có thể truy cập; login attempt được phép |
-| `lock_timer` | **EC12** | Đang trong cửa sổ khóa: `count ≥ 3` VÀ `0 < time_since_lock < 30s` | Invalid | Login bị từ chối; generic error (không tiết lộ thời gian còn lại) |
+| `lock_timer` | **EC11** | Outside lockout window: `count < 3` OR `time_since_lock ≥ 30s` | Valid | Account accessible; login attempt is permitted |
+| `lock_timer` | **EC12** | Within lockout window: `count ≥ 3` AND `0 < time_since_lock < 30s` | Invalid | Login rejected; generic error (remaining time not revealed) |
 
-### Group 6 — Hành vi bộ đếm `failed_login_count`
+### Group 6 — `failed_login_count` Counter Behavior
 
-| Variable / Condition | EC ID | Mô tả | Loại | Expected System Output |
+| Variable / Condition | EC ID | Description | Type | Expected System Output |
 | :--- | :--- | :--- | :--- | :--- |
-| `counter` — Tăng sau fail | **EC13** | Sau 1 lần login sai: counter tăng **đúng 1** | Valid | `count_after = count_before + 1` (exactly) |
-| `counter` — Tăng sai | **EC14** | Sau 1 lần login sai: counter tăng **≠ 1** (0 hoặc ≥ 2) | Invalid | Vi phạm spec "tăng bộ đếm lên đúng 1 đơn vị" |
-| `counter` — Reset | **EC15** | Sau đăng nhập thành công: counter **reset về 0** | Valid | `count = 0`; phù hợp với nghĩa "liên tiếp" trong SRS |
-| `counter` — Không reset | **EC16** | Sau đăng nhập thành công: counter **không reset** | Invalid | Vi phạm ý nghĩa "liên tiếp" — ngưỡng khóa bị tính sai |
+| `counter` — Increment on fail | **EC13** | After 1 failed login: counter increments by **exactly 1** | Valid | `count_after = count_before + 1` (exactly) |
+| `counter` — Wrong increment | **EC14** | After 1 failed login: counter increments by **≠ 1** (0 or ≥ 2) | Invalid | Violates spec "increment counter by exactly 1 unit" |
+| `counter` — Reset | **EC15** | After successful login: counter **resets to 0** | Valid | `count = 0`; consistent with the meaning of "consecutive" in SRS |
+| `counter` — No reset | **EC16** | After successful login: counter **does not reset** | Invalid | Violates the meaning of "consecutive" — lock threshold miscounted |
 
 ### Group 7 — Output: `jwt_token`
 
-| Variable / Condition | EC ID | Mô tả | Loại | Expected System Output |
+| Variable / Condition | EC ID | Description | Type | Expected System Output |
 | :--- | :--- | :--- | :--- | :--- |
-| `jwt_token` — Thành công | **EC17** | Login thành công (EC05 + EC08 + EC11) → JWT **được** trả về | Valid | JWT hợp lệ; lưu client-side; dùng cho `Authorization: Bearer` |
-| `jwt_token` — Thất bại | **EC18** | Login thất bại (bất kỳ EC invalid) → JWT **không** trả về | Valid | Response không chứa token |
-| `jwt_token` — Vi phạm | **EC19** | Login thất bại nhưng server vẫn trả về JWT | Invalid | Security violation — authentication bypass |
+| `jwt_token` — Success | **EC17** | Login succeeds (EC05 + EC08 + EC11) → JWT **is** returned | Valid | Valid JWT; stored client-side; used for `Authorization: Bearer` |
+| `jwt_token` — Failure | **EC18** | Login fails (any invalid EC) → JWT **is not** returned | Valid | Response contains no token |
+| `jwt_token` — Violation | **EC19** | Login fails but server still returns a JWT | Invalid | Security violation — authentication bypass |
 
-### Group 8 — Output: `error_message` — Nội dung
+### Group 8 — Output: `error_message` — Content
 
-| Variable / Condition | EC ID | Mô tả | Loại | Expected System Output |
+| Variable / Condition | EC ID | Description | Type | Expected System Output |
 | :--- | :--- | :--- | :--- | :--- |
-| `error_message` — Generic | **EC20** | Thông báo lỗi **chung chung**, không phân biệt lý do | Valid | Đúng spec; không cho phép credential enumeration |
-| `error_message` — Lộ chi tiết | **EC21** | Thông báo lộ lý do cụ thể: "Email không tồn tại", "Sai mật khẩu"… | Invalid | Credential enumeration — vi phạm security spec |
-| `error_message` — Thiếu feedback | **EC22** | Login thất bại nhưng **không có** thông báo nào hiển thị | Invalid | Thiếu user feedback |
+| `error_message` — Generic | **EC20** | Error message is **generic**, does not distinguish the reason | Valid | Correct per spec; prevents credential enumeration |
+| `error_message` — Reveals details | **EC21** | Error message reveals the specific reason: "Email not found", "Wrong password"… | Invalid | Credential enumeration — violates security spec |
+| `error_message` — Missing feedback | **EC22** | Login fails but **no message** is displayed | Invalid | Missing user feedback |
 
-### Group 9 — Output: `error_message` — Vị trí hiển thị (FR-22)
+### Group 9 — Output: `error_message` — Display Position (FR-22)
 
-| Variable / Condition | EC ID | Mô tả | Loại | Expected System Output |
+| Variable / Condition | EC ID | Description | Type | Expected System Output |
 | :--- | :--- | :--- | :--- | :--- |
-| `error_message` — Vị trí | **EC23** | Thông báo lỗi hiển thị **phía trên** nút Submit | Valid | Tuân thủ FR-22 |
-| `error_message` — Vị trí | **EC24** | Thông báo lỗi hiển thị **phía dưới** nút Submit | Invalid | Vi phạm FR-22 |
+| `error_message` — Position | **EC23** | Error message displayed **above** the Submit button | Valid | Compliant with FR-22 |
+| `error_message` — Position | **EC24** | Error message displayed **below** the Submit button | Invalid | Violates FR-22 |
 
 ---
 
-## 4. Bước 3 — Minimum Test Cases
+## 4. Step 3 — Minimum Test Cases
 
-> **Chiến lược:** Gom tối đa Valid EC vào ít TC nhất (Happy Path); sau đó 1 TC/Invalid EC với các biến còn lại ở nominal valid (Error Isolation).
+> **Strategy:** Pack as many Valid ECs as possible into the fewest TCs (Happy Path); then 1 TC per Invalid EC with remaining variables at nominal valid (Error Isolation).
 
 ---
 
-### TC-01 — Happy Path: Đăng nhập thành công
+### TC-01 — Happy Path: Successful Login
 
-| Trường | Nội dung |
+| Field | Content |
 | :--- | :--- |
 | **TC ID** | TC-01 |
-| **Tên Test Case** | Happy Path — Đăng nhập thành công với counter reset |
-| **EC Phủ** | EC03, EC05, EC08, EC09, EC11, EC15, EC17 |
-| **EC Verified Absent** | EC16 (counter không reset — không xảy ra) |
-| **Pre-conditions** | Tài khoản `test@eshop.com` / `Test1234!` tồn tại trong DB · `failed_login_count = 1` (đã có 1 lần sai trước đó — để kiểm tra EC15 reset) · `account_locked = false` |
+| **Test Case Name** | Happy Path — Successful login with counter reset |
+| **ECs Covered** | EC03, EC05, EC08, EC09, EC11, EC15, EC17 |
+| **ECs Verified Absent** | EC16 (counter not reset — does not occur) |
+| **Pre-conditions** | Account `test@eshop.com` / `Test1234!` exists in DB · `failed_login_count = 1` (one prior failure — to verify EC15 reset) · `account_locked = false` |
 | **Input — `email`** | `test@eshop.com` |
 | **Input — `password`** | `Test1234!` |
-| **Bước thực hiện** | 1. Đảm bảo pre-conditions: reset counter = 1 (thực hiện 1 lần đăng nhập sai trước đó) · 2. Mở trang đăng nhập tại `http://localhost:5173` · 3. Nhập email `test@eshop.com` vào trường Email · 4. Nhập password `Test1234!` vào trường Mật khẩu · 5. Bấm nút "Đăng nhập" |
-| **Kết quả kỳ vọng** | ✅ HTTP 200 · JWT Token hợp lệ được trả về và lưu client-side · Người dùng được điều hướng đến trang chủ/dashboard · `failed_login_count` reset về `0` |
-| **Điểm xác minh** | 1. Response body chứa `token` field · 2. Không có thông báo lỗi hiển thị · 3. `failed_login_count` về 0 (kiểm tra bằng DB hoặc thực hiện 2 lần sai tiếp → phải cần đủ 3 lần mới lock, không phải 2) |
-| **Trạng thái** | ⬜ Chưa thực thi |
+| **Steps** | 1. Ensure pre-conditions: set counter = 1 (perform one failed login beforehand) · 2. Open login page at `http://localhost:5173` · 3. Enter `test@eshop.com` in the Email field · 4. Enter `Test1234!` in the Password field · 5. Click "Login" |
+| **Expected Result** | ✅ HTTP 200 · Valid JWT Token returned and stored client-side · User redirected to home/dashboard · `failed_login_count` reset to `0` |
+| **Verification Points** | 1. Response body contains `token` field · 2. No error message displayed · 3. `failed_login_count` = 0 (verify via DB or by performing 2 more failures → should require a full 3 to lock, not 2) |
+| **Status** | ⬜ Not yet executed |
 
 ---
 
-### TC-02 — Email Rỗng
+### TC-02 — Empty Email
 
-| Trường | Nội dung |
+| Field | Content |
 | :--- | :--- |
 | **TC ID** | TC-02 |
-| **Tên Test Case** | Email rỗng — HTML5 validation chặn |
-| **EC Phủ** | EC01 |
-| **EC Verified Absent** | — |
-| **Pre-conditions** | Không yêu cầu pre-condition đặc biệt |
-| **Input — `email`** | `""` (chuỗi rỗng) |
+| **Test Case Name** | Empty email — HTML5 validation blocks submission |
+| **ECs Covered** | EC01 |
+| **ECs Verified Absent** | — |
+| **Pre-conditions** | No special pre-conditions required |
+| **Input — `email`** | `""` (empty string) |
 | **Input — `password`** | `Test1234!` (nominal valid) |
-| **Bước thực hiện** | 1. Mở trang đăng nhập tại `http://localhost:5173` · 2. Để **trống** trường Email · 3. Nhập password `Test1234!` · 4. Bấm nút "Đăng nhập" |
-| **Kết quả kỳ vọng** | ❌ Trình duyệt hiển thị HTML5 validation message (VD: "Vui lòng điền vào trường này") · Form **không được submit** · Không có HTTP request gửi lên server · Không có JWT · `failed_login_count` không tăng |
-| **Điểm xác minh** | 1. Không có network request đến `/api/auth/login` (kiểm tra DevTools → Network) · 2. HTML5 error tooltip hiển thị trên trường email |
-| **Trạng thái** | ⬜ Chưa thực thi |
+| **Steps** | 1. Open login page at `http://localhost:5173` · 2. Leave the Email field **empty** · 3. Enter `Test1234!` in the Password field · 4. Click "Login" |
+| **Expected Result** | ❌ Browser displays HTML5 validation message (e.g., "Please fill in this field") · Form **not submitted** · No HTTP request sent to server · No JWT · `failed_login_count` not incremented |
+| **Verification Points** | 1. No network request to `/api/auth/login` (check DevTools → Network) · 2. HTML5 error tooltip displayed on the email field |
+| **Status** | ⬜ Not yet executed |
 
 ---
 
-### TC-03 — Email Sai Định Dạng
+### TC-03 — Invalid Email Format
 
-| Trường | Nội dung |
+| Field | Content |
 | :--- | :--- |
 | **TC ID** | TC-03 |
-| **Tên Test Case** | Email sai format — HTML5 `type="email"` validation chặn |
-| **EC Phủ** | EC02 |
-| **EC Verified Absent** | — |
-| **Pre-conditions** | Không yêu cầu pre-condition đặc biệt |
-| **Input — `email`** | `"invalid_no_at_sign"` (không có `@`) |
+| **Test Case Name** | Invalid email format — HTML5 `type="email"` validation blocks submission |
+| **ECs Covered** | EC02 |
+| **ECs Verified Absent** | — |
+| **Pre-conditions** | No special pre-conditions required |
+| **Input — `email`** | `"invalid_no_at_sign"` (missing `@`) |
 | **Input — `password`** | `Test1234!` (nominal valid) |
-| **Bước thực hiện** | 1. Mở trang đăng nhập · 2. Nhập `invalid_no_at_sign` vào trường Email · 3. Nhập password `Test1234!` · 4. Bấm nút "Đăng nhập" |
-| **Kết quả kỳ vọng** | ❌ Trình duyệt HTML5 `type="email"` validation ngăn submit · HTML5 error tooltip hiển thị (VD: "Hãy nhập một địa chỉ email") · Không có HTTP request gửi lên server · Không có JWT |
-| **Điểm xác minh** | 1. Không có network request đến `/api/auth/login` · 2. HTML5 tooltip xuất hiện tại trường email với thông báo format · 3. Thử thêm các pattern khác: `test@`, `@domain.com`, `test @domain.com` |
-| **Trạng thái** | ⬜ Chưa thực thi |
+| **Steps** | 1. Open login page · 2. Enter `invalid_no_at_sign` in the Email field · 3. Enter `Test1234!` in the Password field · 4. Click "Login" |
+| **Expected Result** | ❌ Browser HTML5 `type="email"` validation blocks submission · HTML5 error tooltip displayed (e.g., "Please enter an email address") · No HTTP request sent to server · No JWT |
+| **Verification Points** | 1. No network request to `/api/auth/login` · 2. HTML5 tooltip appears on the email field with a format error · 3. Also test with: `test@`, `@domain.com`, `test @domain.com` |
+| **Status** | ⬜ Not yet executed |
 
 ---
 
-### TC-04 — Email Chưa Đăng Ký
+### TC-04 — Unregistered Email
 
-| Trường | Nội dung |
+| Field | Content |
 | :--- | :--- |
 | **TC ID** | TC-04 |
-| **Tên Test Case** | Email đúng format nhưng không tồn tại trong DB |
-| **EC Phủ** | EC04 |
-| **EC Observed (valid outputs)** | EC18 (không có JWT), EC20 (generic error), EC23 (error trên Submit) |
-| **EC Verified Absent** | EC19 (JWT không được trả về dù fail), EC21 (không lộ "email không tồn tại"), EC22 (error message phải hiển thị), EC24 (error không ở dưới Submit) |
-| **Pre-conditions** | Email `notfound@example.com` **không tồn tại** trong DB · `failed_login_count` không liên quan (email không có trong hệ thống) |
+| **Test Case Name** | Valid email format but not found in DB |
+| **ECs Covered** | EC04 |
+| **ECs Observed (valid outputs)** | EC18 (no JWT), EC20 (generic error), EC23 (error above Submit) |
+| **ECs Verified Absent** | EC19 (JWT not returned on failure), EC21 (does not reveal "email not found"), EC22 (error message must be shown), EC24 (error not below Submit) |
+| **Pre-conditions** | Email `notfound@example.com` does **not** exist in DB · `failed_login_count` not applicable (email not in system) |
 | **Input — `email`** | `notfound@example.com` |
 | **Input — `password`** | `Test1234!` (nominal valid) |
-| **Bước thực hiện** | 1. Mở trang đăng nhập · 2. Nhập `notfound@example.com` vào trường Email · 3. Nhập password `Test1234!` · 4. Bấm nút "Đăng nhập" |
-| **Kết quả kỳ vọng** | ❌ Server trả về lỗi · Thông báo lỗi **generic** — không nói "email không tồn tại" hay "tài khoản không được đăng ký" · Thông báo hiển thị **phía trên** nút Submit · Không có JWT trong response |
-| **Điểm xác minh** | 1. Response không chứa `token` field · 2. Error message KHÔNG tiết lộ lý do (không phải "Email not found", "Tài khoản không tồn tại") · 3. Vị trí error message: phải nằm trên nút Submit trong DOM · 4. Có error message (không im lặng) |
-| **Trạng thái** | ⬜ Chưa thực thi |
+| **Steps** | 1. Open login page · 2. Enter `notfound@example.com` in the Email field · 3. Enter `Test1234!` in the Password field · 4. Click "Login" |
+| **Expected Result** | ❌ Server returns an error · Error message is **generic** — does not say "email not found" or "account not registered" · Message displayed **above** the Submit button · No JWT in response |
+| **Verification Points** | 1. Response contains no `token` field · 2. Error message does NOT reveal the reason (not "Email not found", "Account does not exist") · 3. Error message position: must appear above Submit button in DOM · 4. Error message is present (not silent) |
+| **Status** | ⬜ Not yet executed |
 
 ---
 
-### TC-05 — Password Rỗng
+### TC-05 — Empty Password
 
-| Trường | Nội dung |
+| Field | Content |
 | :--- | :--- |
 | **TC ID** | TC-05 |
-| **Tên Test Case** | Password rỗng tại form đăng nhập |
-| **EC Phủ** | EC06 |
-| **EC Observed** | EC18 (không có JWT) |
-| **EC Verified Absent** | — |
-| **Pre-conditions** | Tài khoản `test@eshop.com` tồn tại · `failed_login_count = 0` · `account_locked = false` |
+| **Test Case Name** | Empty password on the login form |
+| **ECs Covered** | EC06 |
+| **ECs Observed** | EC18 (no JWT) |
+| **ECs Verified Absent** | — |
+| **Pre-conditions** | Account `test@eshop.com` exists · `failed_login_count = 0` · `account_locked = false` |
 | **Input — `email`** | `test@eshop.com` |
-| **Input — `password`** | `""` (chuỗi rỗng) |
-| **Bước thực hiện** | 1. Mở trang đăng nhập · 2. Nhập `test@eshop.com` vào trường Email · 3. Để **trống** trường Mật khẩu · 4. Bấm nút "Đăng nhập" |
-| **Kết quả kỳ vọng** | ❌ **Nhánh A (nếu có `required`):** HTML5 chặn form submit; không có request · **Nhánh B (nếu không có `required`):** Request gửi lên server; server trả về generic error; không có JWT |
-| **Điểm xác minh** | 1. ⚠️ **Gap:** SRS không tường minh `required` attribute cho password field tại login — ghi lại actual behavior · 2. Nếu Nhánh B: kiểm tra `failed_login_count` — có tăng không? (empty password = sai password?) · 3. Không có JWT trong mọi trường hợp |
-| **Trạng thái** | ⬜ Chưa thực thi |
+| **Input — `password`** | `""` (empty string) |
+| **Steps** | 1. Open login page · 2. Enter `test@eshop.com` in the Email field · 3. Leave the Password field **empty** · 4. Click "Login" |
+| **Expected Result** | ❌ **Branch A (if `required` is present):** HTML5 blocks form submission; no request sent · **Branch B (if `required` is absent):** Request sent to server; server returns generic error; no JWT |
+| **Verification Points** | 1. ⚠️ **Gap:** SRS does not explicitly state `required` attribute for the password field at login — record actual behavior · 2. If Branch B: check `failed_login_count` — does it increment? (empty password = wrong password?) · 3. No JWT in either case |
+| **Status** | ⬜ Not yet executed |
 
 ---
 
-### TC-06 — Password Sai & Kiểm tra Counter Increment
+### TC-06 — Wrong Password & Counter Increment Check
 
-| Trường | Nội dung |
+| Field | Content |
 | :--- | :--- |
 | **TC ID** | TC-06 |
-| **Tên Test Case** | Password sai (không rỗng) — counter tăng đúng 1 |
-| **EC Phủ** | EC07, EC13 |
-| **EC Observed (valid outputs)** | EC18 (không có JWT), EC20 (generic error), EC23 (error trên Submit) |
-| **EC Verified Absent** | EC14 (counter tăng ≠ 1 — không xảy ra), EC19, EC21, EC22, EC24 |
-| **Pre-conditions** | Tài khoản `test@eshop.com` / `Test1234!` tồn tại · `failed_login_count = 0` (trạng thái sạch) · `account_locked = false` |
+| **Test Case Name** | Wrong password (non-empty) — counter increments by exactly 1 |
+| **ECs Covered** | EC07, EC13 |
+| **ECs Observed (valid outputs)** | EC18 (no JWT), EC20 (generic error), EC23 (error above Submit) |
+| **ECs Verified Absent** | EC14 (counter increment ≠ 1 — does not occur), EC19, EC21, EC22, EC24 |
+| **Pre-conditions** | Account `test@eshop.com` / `Test1234!` exists · `failed_login_count = 0` (clean state) · `account_locked = false` |
 | **Input — `email`** | `test@eshop.com` |
-| **Input — `password`** | `"WrongPass1!"` (sai, không rỗng) |
-| **Bước thực hiện** | 1. Reset tài khoản test về `failed_login_count = 0` (nếu cần) · 2. Mở trang đăng nhập · 3. Nhập `test@eshop.com` vào trường Email · 4. Nhập `WrongPass1!` vào trường Mật khẩu · 5. Bấm "Đăng nhập" · 6. Quan sát response và kiểm tra counter |
-| **Kết quả kỳ vọng** | ❌ Generic error message hiển thị · `failed_login_count` tăng từ `0 → 1` (đúng 1 đơn vị) · Không có JWT · Error message hiển thị **phía trên** nút Submit |
-| **Điểm xác minh** | 1. Response không chứa `token` · 2. Error message là generic (không nói "sai mật khẩu") · 3. Vị trí error: trên Submit button · 4. Verify counter = 1: thực hiện thêm 1 lần sai nữa → counter = 2; lần thứ 3 → counter = 3 → lock triggers (indirect verification of EC13) |
-| **Trạng thái** | ⬜ Chưa thực thi |
+| **Input — `password`** | `"WrongPass1!"` (wrong, non-empty) |
+| **Steps** | 1. Reset test account to `failed_login_count = 0` (if needed) · 2. Open login page · 3. Enter `test@eshop.com` in the Email field · 4. Enter `WrongPass1!` in the Password field · 5. Click "Login" · 6. Observe response and verify counter |
+| **Expected Result** | ❌ Generic error message displayed · `failed_login_count` increments from `0 → 1` (exactly 1 unit) · No JWT · Error message displayed **above** the Submit button |
+| **Verification Points** | 1. Response contains no `token` · 2. Error message is generic (does not say "wrong password") · 3. Error position: above Submit button · 4. Verify counter = 1: perform one more failure → counter = 2; third failure → counter = 3 → lock triggers (indirect verification of EC13) |
+| **Status** | ⬜ Not yet executed |
 
 ---
 
-### TC-07 — Tài khoản Đang Bị Khóa
+### TC-07 — Account Currently Locked
 
-| Trường | Nội dung |
+| Field | Content |
 | :--- | :--- |
 | **TC ID** | TC-07 |
-| **Tên Test Case** | Tài khoản đang bị khóa — từ chối kể cả credential đúng |
-| **EC Phủ** | EC10, EC12 *(coupled: không thể tách rời — xem ghi chú)* |
-| **EC Observed (valid outputs)** | EC18 (không có JWT) |
-| **EC Verified Absent** | EC19 (JWT không được trả về dù credential đúng), EC21 (không lộ "bị khóa vì X lần sai") |
-| **Pre-conditions** | Tài khoản `test@eshop.com` tồn tại · `failed_login_count = 3` (đã đủ ngưỡng khóa) · `time_since_lock = 5s` (đang trong cửa sổ 30s) · `account_locked = true` |
+| **Test Case Name** | Account currently locked — rejected even with correct credentials |
+| **ECs Covered** | EC10, EC12 *(coupled: inseparable — see note)* |
+| **ECs Observed (valid outputs)** | EC18 (no JWT) |
+| **ECs Verified Absent** | EC19 (JWT not returned even with correct credentials), EC21 (does not reveal "locked due to X failures") |
+| **Pre-conditions** | Account `test@eshop.com` exists · `failed_login_count = 3` (threshold reached) · `time_since_lock = 5s` (within 30s window) · `account_locked = true` |
 | **Input — `email`** | `test@eshop.com` |
-| **Input — `password`** | `"Test1234!"` *(credential **đúng** — để chứng minh lock override cả khi đúng)* |
-| **Bước thực hiện** | 1. Thực hiện 3 lần đăng nhập sai liên tiếp để lock tài khoản · 2. Đợi khoảng 5 giây (vẫn trong cửa sổ 30s) · 3. Mở trang đăng nhập · 4. Nhập `test@eshop.com` vào Email · 5. Nhập `Test1234!` (đúng) vào Mật khẩu · 6. Bấm "Đăng nhập" |
-| **Kết quả kỳ vọng** | ❌ Login **bị từ chối** dù credential hoàn toàn đúng · Generic error (không nói "bị khóa vì sai 3 lần" hoặc "còn X giây") · Không có JWT |
-| **Điểm xác minh** | 1. Response không chứa `token` · 2. Error message là generic (không tiết lộ nguyên nhân hoặc thời gian còn lại) · 3. ⚠️ **Gap G2:** Ghi lại `failed_login_count` sau attempt này — counter có tăng lên 4 không? |
-| **Ghi chú** | EC10 (count ≥ 3 = state locked) và EC12 (0 < time < 30s = window active) không thể tách biệt trong thực tế — chúng luôn đồng thời tồn tại khi tài khoản đang bị khóa. Error Isolation không bị vi phạm vì đây là composite system-state, không phải hai input độc lập. |
-| **Trạng thái** | ⬜ Chưa thực thi |
+| **Input — `password`** | `"Test1234!"` *(correct credentials — to prove lock overrides even when correct)* |
+| **Steps** | 1. Perform 3 consecutive failed logins to lock the account · 2. Wait approximately 5 seconds (still within 30s window) · 3. Open login page · 4. Enter `test@eshop.com` in the Email field · 5. Enter `Test1234!` (correct) in the Password field · 6. Click "Login" |
+| **Expected Result** | ❌ Login **rejected** despite completely correct credentials · Generic error (does not say "locked due to 3 failures" or "X seconds remaining") · No JWT |
+| **Verification Points** | 1. Response contains no `token` · 2. Error message is generic (does not reveal reason or remaining time) · 3. ⚠️ **Gap G2:** Record `failed_login_count` after this attempt — does the counter increment to 4? |
+| **Note** | EC10 (count ≥ 3 = state locked) and EC12 (0 < time < 30s = window active) cannot be separated in practice — they always coexist when the account is locked. Error Isolation is not violated because this is a composite system-state, not two independent inputs. |
+| **Status** | ⬜ Not yet executed |
 
 ---
 
 ## 5. EC Coverage Matrix
 
-| EC ID | Mô tả ngắn | TC Phủ | Cơ chế |
+| EC ID | Short Description | TC Covering | Mechanism |
 | :--- | :--- | :--- | :--- |
-| EC01 | Email rỗng | TC-02 | Trigger trực tiếp |
-| EC02 | Email sai format | TC-03 | Trigger trực tiếp |
-| EC03 | Email valid format | TC-01 | Input nominal valid |
-| EC04 | Email chưa đăng ký | TC-04 | Trigger trực tiếp |
-| EC05 | Email đã đăng ký | TC-01 | Pre-condition |
-| EC06 | Password rỗng | TC-05 | Trigger trực tiếp |
-| EC07 | Password sai (không rỗng) | TC-06 | Trigger trực tiếp |
-| EC08 | Password đúng | TC-01 | Input nominal valid |
+| EC01 | Empty email | TC-02 | Direct trigger |
+| EC02 | Invalid email format | TC-03 | Direct trigger |
+| EC03 | Valid email format | TC-01 | Nominal valid input |
+| EC04 | Unregistered email | TC-04 | Direct trigger |
+| EC05 | Registered email | TC-01 | Pre-condition |
+| EC06 | Empty password | TC-05 | Direct trigger |
+| EC07 | Wrong password (non-empty) | TC-06 | Direct trigger |
+| EC08 | Correct password | TC-01 | Nominal valid input |
 | EC09 | count ∈ [0, 2] | TC-01 | Pre-condition `count=1 ∈ [0,2]` |
 | EC10 | count ≥ 3 (locked) | TC-07 | Pre-condition `count=3` |
-| EC11 | Không trong lockout window | TC-01 | Pre-condition `locked=false` |
-| EC12 | Đang trong lockout window | TC-07 | Pre-condition `time_since_lock=5s` |
-| EC13 | Counter tăng đúng 1 | TC-06 | Observed: `0 → 1` |
-| EC14 | Counter tăng ≠ 1 | TC-06 | Verified absent (EC13 đúng ↔ EC14 không xảy ra) |
-| EC15 | Counter reset sau success | TC-01 | Observed: `1 → 0` sau login thành công |
-| EC16 | Counter không reset | TC-01 | Verified absent (EC15 đúng ↔ EC16 không xảy ra) |
-| EC17 | JWT được trả về (success) | TC-01 | Observed output |
-| EC18 | JWT không trả về (failure) | TC-04, TC-06, TC-07 | Observed output |
-| EC19 | JWT trả về khi fail (vi phạm) | TC-07 | Verified absent |
-| EC20 | Generic error (không lộ lý do) | TC-04, TC-06 | Observed output |
-| EC21 | Error lộ lý do cụ thể (vi phạm) | TC-04, TC-06 | Verified absent |
-| EC22 | Không có error khi fail (vi phạm) | TC-04, TC-06 | Verified absent (error IS shown) |
-| EC23 | Error hiển thị trên Submit | TC-04, TC-06 | Observed output |
-| EC24 | Error hiển thị dưới Submit (vi phạm) | TC-04, TC-06 | Verified absent |
+| EC11 | Outside lockout window | TC-01 | Pre-condition `locked=false` |
+| EC12 | Within lockout window | TC-07 | Pre-condition `time_since_lock=5s` |
+| EC13 | Counter increments by exactly 1 | TC-06 | Observed: `0 → 1` |
+| EC14 | Counter increment ≠ 1 | TC-06 | Verified absent (EC13 correct ↔ EC14 does not occur) |
+| EC15 | Counter reset after success | TC-01 | Observed: `1 → 0` after successful login |
+| EC16 | Counter not reset | TC-01 | Verified absent (EC15 correct ↔ EC16 does not occur) |
+| EC17 | JWT returned (success) | TC-01 | Observed output |
+| EC18 | JWT not returned (failure) | TC-04, TC-06, TC-07 | Observed output |
+| EC19 | JWT returned on failure (violation) | TC-07 | Verified absent |
+| EC20 | Generic error (reason not revealed) | TC-04, TC-06 | Observed output |
+| EC21 | Error reveals specific reason (violation) | TC-04, TC-06 | Verified absent |
+| EC22 | No error shown on failure (violation) | TC-04, TC-06 | Verified absent (error IS shown) |
+| EC23 | Error displayed above Submit | TC-04, TC-06 | Observed output |
+| EC24 | Error displayed below Submit (violation) | TC-04, TC-06 | Verified absent |
 
-**Tổng kết:** 7 TC → 100% coverage (24/24 EC)
+**Summary:** 7 TCs → 100% coverage (24/24 ECs)
 
-| Nhóm | Valid EC | Invalid EC | Total |
+| Group | Valid ECs | Invalid ECs | Total |
 | :--- | :--- | :--- | :--- |
 | email Format | EC03 | EC01, EC02 | 3 |
 | email Existence | EC05 | EC04 | 2 |
