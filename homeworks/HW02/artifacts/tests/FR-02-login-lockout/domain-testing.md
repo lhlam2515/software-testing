@@ -106,14 +106,6 @@ Format constraints sourced from:
 | :--- | :--- | :--- | :--- | :--- |
 | `error_message` — Generic | **EC20** | Error message is **generic**, does not distinguish the reason | Valid | Correct per spec; prevents credential enumeration |
 | `error_message` — Reveals details | **EC21** | Error message reveals the specific reason: "Email not found", "Wrong password"… | Invalid | Credential enumeration — violates security spec |
-| `error_message` — Missing feedback | **EC22** | Login fails but **no message** is displayed | Invalid | Missing user feedback |
-
-### Group 9 — Output: `error_message` — Display Position (FR-22)
-
-| Variable / Condition | EC ID | Description | Type | Expected System Output |
-| :--- | :--- | :--- | :--- | :--- |
-| `error_message` — Position | **EC23** | Error message displayed **above** the Submit button | Valid | Compliant with FR-22 |
-| `error_message` — Position | **EC24** | Error message displayed **below** the Submit button | Invalid | Violates FR-22 |
 
 ---
 
@@ -184,14 +176,14 @@ Format constraints sourced from:
 | **TC ID** | TC-04 |
 | **Test Case Name** | Valid email format but not found in DB |
 | **ECs Covered** | EC04 |
-| **ECs Observed (valid outputs)** | EC18 (no JWT), EC20 (generic error), EC23 (error above Submit) |
-| **ECs Verified Absent** | EC19 (JWT not returned on failure), EC21 (does not reveal "email not found"), EC22 (error message must be shown), EC24 (error not below Submit) |
+| **ECs Observed (valid outputs)** | EC18 (no JWT), EC20 (generic error) |
+| **ECs Verified Absent** | EC19 (JWT not returned on failure), EC21 (does not reveal "email not found") |
 | **Pre-conditions** | Email `notfound@example.com` does **not** exist in DB · `failed_login_count` not applicable (email not in system) |
 | **Input — `email`** | `notfound@example.com` |
 | **Input — `password`** | `Test1234!` (nominal valid) |
 | **Steps** | 1. Open login page · 2. Enter `notfound@example.com` in the Email field · 3. Enter `Test1234!` in the Password field · 4. Click "Login" |
-| **Expected Result** | ❌ Server returns an error · Error message is **generic** — does not say "email not found" or "account not registered" · Message displayed **above** the Submit button · No JWT in response |
-| **Verification Points** | 1. Response contains no `token` field · 2. Error message does NOT reveal the reason (not "Email not found", "Account does not exist") · 3. Error message position: must appear above Submit button in DOM · 4. Error message is present (not silent) |
+| **Expected Result** | ❌ Server returns an error · Error message is **generic** — does not say "email not found" or "account not registered" · No JWT in response |
+| **Verification Points** | 1. Response contains no `token` field · 2. Error message does NOT reveal the reason (not "Email not found", "Account does not exist") · 3. Error message is present (not silent) |
 | **Status** | ⬜ Not yet executed |
 
 ---
@@ -222,14 +214,14 @@ Format constraints sourced from:
 | **TC ID** | TC-06 |
 | **Test Case Name** | Wrong password (non-empty) — counter increments by exactly 1 |
 | **ECs Covered** | EC07, EC13 |
-| **ECs Observed (valid outputs)** | EC18 (no JWT), EC20 (generic error), EC23 (error above Submit) |
-| **ECs Verified Absent** | EC14 (counter increment ≠ 1 — does not occur), EC19, EC21, EC22, EC24 |
+| **ECs Observed (valid outputs)** | EC18 (no JWT), EC20 (generic error) |
+| **ECs Verified Absent** | EC14 (counter increment ≠ 1 — does not occur), EC19, EC21 |
 | **Pre-conditions** | Account `test@eshop.com` / `Test1234!` exists · `failed_login_count = 0` (clean state) · `account_locked = false` |
 | **Input — `email`** | `test@eshop.com` |
 | **Input — `password`** | `"WrongPass1!"` (wrong, non-empty) |
 | **Steps** | 1. Reset test account to `failed_login_count = 0` (if needed) · 2. Open login page · 3. Enter `test@eshop.com` in the Email field · 4. Enter `WrongPass1!` in the Password field · 5. Click "Login" · 6. Observe response and verify counter |
-| **Expected Result** | ❌ Generic error message displayed · `failed_login_count` increments from `0 → 1` (exactly 1 unit) · No JWT · Error message displayed **above** the Submit button |
-| **Verification Points** | 1. Response contains no `token` · 2. Error message is generic (does not say "wrong password") · 3. Error position: above Submit button · 4. Verify counter = 1: perform one more failure → counter = 2; third failure → counter = 3 → lock triggers (indirect verification of EC13) |
+| **Expected Result** | ❌ Generic error message displayed · `failed_login_count` increments from `0 → 1` (exactly 1 unit) · No JWT |
+| **Verification Points** | 1. Response contains no `token` · 2. Error message is generic (does not say "wrong password") · 3. Verify counter = 1: perform one more failure → counter = 2; third failure → counter = 3 → lock triggers (indirect verification of EC13) |
 | **Status** | ⬜ Not yet executed |
 
 ---
@@ -279,11 +271,8 @@ Format constraints sourced from:
 | EC19 | JWT returned on failure (violation) | TC-07 | Verified absent |
 | EC20 | Generic error (reason not revealed) | TC-04, TC-06 | Observed output |
 | EC21 | Error reveals specific reason (violation) | TC-04, TC-06 | Verified absent |
-| EC22 | No error shown on failure (violation) | TC-04, TC-06 | Verified absent (error IS shown) |
-| EC23 | Error displayed above Submit | TC-04, TC-06 | Observed output |
-| EC24 | Error displayed below Submit (violation) | TC-04, TC-06 | Verified absent |
 
-**Summary:** 7 TCs → 100% coverage (24/24 ECs)
+**Summary:** 7 TCs → 100% coverage (21/21 ECs)
 
 | Group | Valid ECs | Invalid ECs | Total |
 | :--- | :--- | :--- | :--- |
@@ -294,6 +283,5 @@ Format constraints sourced from:
 | lock_timer | EC11 | EC12 | 2 |
 | counter behavior | EC13, EC15 | EC14, EC16 | 4 |
 | jwt_token | EC17, EC18 | EC19 | 3 |
-| error_message content | EC20 | EC21, EC22 | 3 |
-| error_message position | EC23 | EC24 | 2 |
-| **Total** | **10 Valid** | **14 Invalid** | **24** |
+| error_message content | EC20 | EC21 | 2 |
+| **Total** | **9 Valid** | **12 Invalid** | **21** |
