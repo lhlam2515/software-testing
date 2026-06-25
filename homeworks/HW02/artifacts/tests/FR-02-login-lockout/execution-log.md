@@ -90,7 +90,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | `node test-db.cjs reset test@eshop.com` → `login_attempts=0` |
 | **Executed at** | 2026-06-25 16:38 |
 | **Actual result** | POST /api/login → 401 · `login_attempts` incremented 0→2 (not 0→1) · no JWT · generic error message |
-| **Screenshot** | `artifacts/bugs/screenshots/BUG-02-003-double-submit-locked.png` |
+| **Screenshot** | `artifacts/bugs/screenshots/BUG-02-003-login-attempts-plus2.png` |
 | **Bug ID** | **BUG-02-003** |
 | **Notes** | EC13 VIOLATED: counter increments by 2 not 1. Root cause: server increments `login_attempts` by 2 per failed attempt instead of 1. Consequence: account locks after 2 wrong attempts instead of 3 (effective lockout threshold = 2, not 3 as spec). EC14 (wrong increment) IS occurring. |
 
