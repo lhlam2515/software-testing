@@ -40,36 +40,52 @@ CS423 / CSC13003 – Software Testing (AI-augmented · 2026)
 
 ## 3. Audit
 
-### Artifact #1 — FR-02 Domain Testing (Equivalence Classes + Test Cases)
+### Artifact #1: FR-02 Domain Testing (Equivalence Classes + Test Cases)
 
-> **Requirement mapping:** FR-02 Login & Lockout — EP & BVA
+> **Requirement mapping:** FR-02 Login and Lockout (EP and BVA)
 
 #### (1) Prompt + Tool
 
-**Tool:** Claude Code  
-**Time:** _**:**_ DD/MM/2026  
-**Prompt:**
-> _[Paste verbatim prompt here]_
+**Tool:** Claude Code (claude-sonnet-4-6)
+**Time:** 09:39 to 10:30, 24/06/2026 (6-turn interactive session)
+**Prompts:** See [Prompt Log](prompt_log.md), Entries 001 to 006, 24/06/2026
 
 #### (2) AI Output
 
-> See [Prompt Log](prompt_log.md) — entry **_**:**_ DD/MM/2026**.
+See [Prompt Log](prompt_log.md), Entries 001 to 006 (24/06/2026).
+
+Deliverables written to disk:
+
+- `artifacts/tests/FR-02-login-lockout/domain-testing.md`
+- `artifacts/tests/FR-02-login-lockout/bva.md`
 
 #### (3) Verdict
 
-**[ ] VALID** — correct and accepted as-is  
-**[ ] INVALID** — wrong; rejected  
-**[ ] INCOMPLETE** — acceptable after edits
+**[ ] VALID**: correct and accepted as-is  
+**[ ] INVALID**: wrong; rejected  
+**[x] INCOMPLETE**: acceptable after edits
 
 #### (4) Reasoning (ISTQB / S04)
 
-_[2–5 sentences. Reference slide S04 steps, ISTQB FL §4.2, or SRS FR-02 constraints]_
+The AI correctly applied ISTQB FL 4.2 Equivalence Partitioning across the functional
+domain of FR-02, producing valid groupings for email format, email existence, password
+match, counter threshold, lockout window, counter behavior, JWT output, and error
+message content. Per S04 Step 2 guidelines, equivalence classes must reflect
+functional system behavior only; however, the AI included Group 9 (EC23 and EC24,
+covering error message display position derived from FR-22) which belongs to GUI
+conformance testing, not to the functional equivalence space of FR-02. Additionally,
+the AI inferred internal variable names (`failed_login_count`, `lock_timer`) from SRS
+semantics rather than the actual database schema (`login_attempts`, `locked_until`),
+making the pre-condition SQL setup scripts incorrect. These two deficiencies required
+student corrections before test execution could proceed.
 
 #### (5) Student Fix
 
 | # | AI-generated item | Issue | Corrected item |
 | - | ----------------- | ----- | -------------- |
-| | | | |
+| 1 | Variable names `failed_login_count` (Step 1) and `lock_timer` (Step 1) | Names do not match actual DB schema: columns are `login_attempts` (INTEGER) and `locked_until` (DATETIME) in the `users` table. SQL pre-condition scripts fail with wrong column names. | Renamed to `login_attempts` and `locked_until` throughout `domain-testing.md` and `bva.md`. |
+| 2 | Group 9 containing EC23 (error above Submit, Valid) and EC24 (error below Submit, Invalid); also EC22 (no error message displayed, Invalid) | GUI and presentation-layer ECs. FR-22 display placement is a GUI conformance defect category, confirmed by TA to be outside domain testing scope. AI over-included ECs from cross-referencing FR-22. | Removed Group 9 and EC22. EC count reduced from 24 to 21. BUG-02-002 (error below Submit) documented separately in `BUG_REPORT.md`. |
+| 3 | TC-04 and TC-06 expected results contain "error message displayed above Submit (EC23 correct / EC24 absent)" | Consequence of Fix 2: TCs were asserting GUI positioning rather than functional behavior. | Removed EC23/EC24 lines from TC-04 and TC-06 expected results. Coverage matrix updated: 7 TC x 21 EC. |
 
 ---
 

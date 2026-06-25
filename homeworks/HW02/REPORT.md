@@ -27,97 +27,144 @@ CS423 / CSC13003 – Software Testing (AI-augmented · 2026)
 
 ---
 
-## 2. Feature A — FR-02: Login & Account Lockout
+## 2. Feature A - FR-02: Login and Account Lockout
 
-> **Technique applied:** Domain Testing (Equivalence Partitioning) + Boundary Value Analysis  
-> **Detailed test cases:** [`artifacts/tests/FR-02-login-lockout/`](artifacts/tests/FR-02-login-lockout/)
+> **Technique:** Domain Testing (Equivalence Partitioning) + Boundary Value Analysis
+> **Artifacts:** [`artifacts/tests/FR-02-login-lockout/`](artifacts/tests/FR-02-login-lockout/)
 
-### 2.1 Domain Testing — Step-by-Step Application
+### 2.1 Domain Testing
 
-#### Step 1: Identify Input & Output Variables
+#### Step 1 - Identify Input/Output Variables
 
-_Based on `docs/eshop-sut/srs.md` §2 FR-02._
+FR-02 controls two core behaviors: authenticate email and password and return a JWT
+token on success; and lock the account for 30 seconds after 3 consecutive failures.
+Seven variables were identified across three types: two user inputs (`email`,
+`password`), three server-side system states (`login_attempts`, `account_locked`,
+`locked_until`), and two outputs (`jwt_token`, `error_message`).
 
-| Variable | Type | Source |
-| -------- | ---- | ------ |
-| `email` | Input | User-entered |
-| `password` | Input | User-entered |
-| `fail_counter` | Internal state | Server-side, reset on success |
-| `lockout_timer` | Internal state | 30s countdown on lockout |
-| `result` | Output | JWT token / error / lockout message |
+The most complex variables are `login_attempts` (the primary state driver, an INTEGER
+column that triggers lockout at 3) and `locked_until` (a DATETIME column set
+server-side and checked against `datetime('now')` on every request). Four implicit
+gaps were flagged where the SRS is silent: whether `login_attempts` resets after the
+lock expires (G1), whether the counter increments while the account is locked (G2),
+whether lockout scope is per-account or per-IP (G3), and whether any length limit
+exists for email or password at login (G4).
 
-#### Step 2: Identify Equivalence Classes
+Full variable table: [`domain-testing.md` - Step 1](artifacts/tests/FR-02-login-lockout/domain-testing.md)
 
-See detailed EC table in [`artifacts/tests/FR-02-login-lockout/domain-testing.md`](artifacts/tests/FR-02-login-lockout/domain-testing.md).
+#### Step 2 - Identify Equivalence Classes
 
-| EC | Variable | Description | Type |
-| -- | -------- | ----------- | ---- |
-| EC1 | email | Valid format, registered | Valid |
-| EC2 | email | Valid format, unregistered | Invalid |
-| EC3 | email | Invalid format | Invalid |
-| EC4 | email | Empty | Invalid |
-| EC5 | password | Correct | Valid |
-| EC6 | password | Incorrect | Invalid |
-| EC7 | password | Empty | Invalid |
-| EC8 | fail_counter | 0–2 (no lockout) | Valid |
-| EC9 | fail_counter | ≥ 3 (locked) | Invalid |
-| EC10 | lockout_timer | 0–29s (still locked) | Invalid |
-| EC11 | lockout_timer | ≥ 30s (released) | Valid |
+Equivalence partitioning was applied across 8 functional groups using Range Rule,
+Must-Be Rule, and Splitting Rule, producing 21 ECs total (9 valid, 12 invalid).
 
-#### Step 3 & 4: Test Cases
+Key design decisions:
 
-| TC ID | EC Covered | Email | Password | Precondition | Expected Result |
-| ----- | ---------- | ----- | -------- | ------------ | --------------- |
-| TC-02-EP-01 | EC1,5,8 | <test@eshop.com> | Test1234! | counter=0 | JWT Token returned |
-| TC-02-EP-02 | EC2 | <noone@x.com> | Test1234! | — | Error: account not found |
-| TC-02-EP-03 | EC3 | invalidemail | Test1234! | — | Error: invalid email format |
-| TC-02-EP-04 | EC4 | (empty) | Test1234! | — | Validation error |
-| TC-02-EP-05 | EC1,6,8 | <test@eshop.com> | wrongpass | counter=0 | Error: wrong credentials |
-| TC-02-EP-06 | EC7 | <test@eshop.com> | (empty) | — | Validation error |
-| TC-02-EP-07 | EC1,6,9 | <test@eshop.com> | wrongpass | counter=3 | Error: account locked |
-| TC-02-EP-08 | EC1,5,10 | <test@eshop.com> | Test1234! | locked, timer=15s | Error: still locked |
-| TC-02-EP-09 | EC1,5,11 | <test@eshop.com> | Test1234! | locked, timer=31s | JWT Token returned |
+**Splitting Rule on `email`:** EC01 (empty string) and EC02 (non-empty but invalid
+format) are separate classes because they test two distinct mechanisms: a missing
+`required` attribute versus HTML5 `type="email"` format validation. These mechanisms
+can fail independently, so collapsing them into one class would mask one defect with
+the other.
 
-### 2.2 Boundary Value Analysis — Step-by-Step Application
+**EC10 and EC12 coupling:** `login_attempts >= 3` (EC10) and `locked_until >
+datetime('now')` (EC12) cannot be triggered independently in practice. They always
+coexist when an account is locked. Both are assigned to TC-07 as a composite system
+state; this is not a violation of Error Isolation because the coupling is a physical
+constraint of the SUT, not a test design choice.
 
-#### Boundaries Identified
+**Output-space invalid ECs (EC14, EC16, EC19, EC21):** These describe behaviors the
+system must NOT exhibit (counter increments by != 1, counter does not reset, JWT
+returned on failure, error reveals the specific reason). They cannot be triggered by
+the tester; they are verified absent within existing TCs. Error Isolation applies to
+the input domain, not the output domain.
 
-| Boundary | LB | UB | Key insight |
-| -------- | -- | -- | ----------- |
-| fail_counter lockout | 3 | 2 | Off-by-one: counter=2 (last allowed) vs counter=3 (first locked) |
-| lockout_timer release | 30s | 29s | 29s (locked) vs 30s (released) |
+| Group | Variable | Valid | Invalid | Total |
+| ----- | -------- | ----- | ------- | ----- |
+| 1 | `email` - Format | EC03 | EC01, EC02 | 3 |
+| 2 | `email` - Existence | EC05 | EC04 | 2 |
+| 3 | `password` - Match | EC08 | EC06, EC07 | 3 |
+| 4 | `login_attempts` - Threshold | EC09 | EC10 | 2 |
+| 5 | `locked_until` - Window | EC11 | EC12 | 2 |
+| 6 | Counter behavior | EC13, EC15 | EC14, EC16 | 4 |
+| 7 | `jwt_token` - Output | EC17, EC18 | EC19 | 3 |
+| 8 | `error_message` - Content | EC20 | EC21 | 2 |
+| **Total** | | **9 Valid** | **12 Invalid** | **21** |
 
-#### BVA Test Cases
+Full EC table: [`domain-testing.md` - Step 2](artifacts/tests/FR-02-login-lockout/domain-testing.md)
 
-| TC ID | Variable | Value | Point | Expected |
-| ----- | -------- | ----- | ----- | -------- |
-| TC-02-BVA-01 | fail_counter | 0 | Nominal | counter→1; error message |
-| TC-02-BVA-02 | fail_counter | 1 | LB+1 | counter→2; error message |
-| TC-02-BVA-03 | fail_counter | 2 | UB (no-lock) | counter→3; **account locked** |
-| TC-02-BVA-04 | fail_counter | 3 | LB (locked) | Error: account locked 30s |
-| TC-02-BVA-05 | fail_counter | 3 | LB (locked) | Correct password also rejected while locked |
-| TC-02-BVA-06 | lockout_timer | 29s | UB−1 (before release) | Error: still locked |
-| TC-02-BVA-07 | lockout_timer | 30s | Boundary (release) | Login possible again |
-| TC-02-BVA-08 | lockout_timer | 31s | UB+1 (after release) | Login possible again |
+#### Step 3 - Minimum Test Case Set
+
+7 test cases were derived using Error Isolation: 1 happy-path TC combining all 7
+valid ECs, plus 6 negative TCs each isolating one triggerable invalid EC group.
+
+TC-01 sets `login_attempts = 1` as a pre-condition (not 0) so it simultaneously
+verifies EC09 (counter below threshold) and EC15 (counter resets to 0 on success)
+within a single execution, without needing a separate TC for the reset check.
+
+TC-07 covers the coupled EC10 and EC12 composite state using correct credentials as
+input. This is intentional: submitting correct credentials while locked proves that
+the lockout mechanism overrides authentication, which is the core behavioral invariant
+of FR-02.
+
+| TC | ECs Covered | Input | Pre-condition | Expected Result |
+| -- | ----------- | ----- | ------------- | --------------- |
+| TC-01 | EC03,05,08,09,11,15,17 | test@eshop.com / Test1234! | login_attempts=1 | 200 OK, JWT returned, counter reset to 0 |
+| TC-02 | EC01 | email="" | none | No request sent, HTML5 required blocks |
+| TC-03 | EC02 | email="invalid_no_at_sign" | none | HTML5 type="email" blocks (or 401 if field is type="text") |
+| TC-04 | EC04 | notfound@example.com / Test1234! | none | 401, generic error, no JWT |
+| TC-05 | EC06 | test@eshop.com / "" | login_attempts=0 | 401 or client block, no JWT |
+| TC-06 | EC07, EC13 | test@eshop.com / WrongPass1! | login_attempts=0 | 401, generic error, counter 0 to 1 exactly |
+| TC-07 | EC10, EC12 | test@eshop.com / Test1234! | login_attempts=3, locked_until=NOW+25s | 403, rejected despite correct credentials |
+
+Full TC specifications: [`domain-testing.md` - Step 3](artifacts/tests/FR-02-login-lockout/domain-testing.md)
+
+### 2.2 Boundary Value Analysis
+
+Two numeric variables were identified for BVA enhancement based on their role in
+triggering discrete behavioral transitions.
+
+**`login_attempts` at lock threshold = 3.** The SRS states "3 or more consecutive
+failures." The critical boundary is the transition from the last non-locked state
+(login_attempts = 2, the OFF point) to the first locked state (login_attempts = 3,
+the ON point). A potential off-by-one defect would implement `> 3` instead of `>= 3`,
+delaying the lockout by one attempt.
+
+**`locked_until` at the 30-second lockout window.** The expiry condition is
+`locked_until <= datetime('now')`. Three boundary points are tested: UB-1 (NOW+1s, 1
+second remaining, account must still be rejected), UB (NOW, exact expiry, account
+must be allowed), and UB+1 (NOW-1s, 1 second past expiry, account must be allowed).
+A potential defect would use strict less-than `locked_until < datetime('now')`,
+keeping the account locked at the exact expiry boundary.
+
+| TC | Variable | Boundary Point | Defect Targeted |
+| -- | -------- | -------------- | --------------- |
+| TC-BVA-01 | `login_attempts` | 2 to 3 (ON point transition) | `> 3` instead of `>= 3`, lock delayed by one attempt |
+| TC-BVA-02 | `login_attempts` | UB=2, success path | Counter not reset at UB, next failure miscounted as third |
+| TC-BVA-03 | `locked_until` | NOW+1s (UB-1) | Unlock before `locked_until`, early release |
+| TC-BVA-04 | `locked_until` | NOW (UB / OFF point) | `< NOW` instead of `<= NOW`, locked at exact boundary |
+| TC-BVA-05 | `locked_until` | NOW-1s (UB+1) | Post-expiry race condition or timer drift |
+
+Full BVA specifications and DB setup protocol: [`bva.md`](artifacts/tests/FR-02-login-lockout/bva.md)
 
 ### 2.3 AI Gap Analysis
 
-_Điền sau khi chạy AI và review kết quả._
-
-| # | Missed test case | Root cause (why AI missed it) |
-| - | ---------------- | ----------------------------- |
-| | | |
+| # | Missed item | Root cause (why AI missed it) |
+| - | ----------- | ----------------------------- |
+| 1 | Missed TC: No test case asserting that HTTP 401 (wrong credentials) and HTTP 403 (account locked) are two distinct observable behavioral states. AI collapsed both into a single EC20 ("generic error, reason not revealed") covering all failure modes. | Spec quality: SRS FR-02 describes both failure outputs with identical language ("appropriate error message, no reason revealed"). AI had no oracle support to partition EC20 further. The distinction was discovered during execution when TC-07 returned 403 and TC-04/TC-06 returned 401, with the same UI message but different server codes. |
+| 2 | Missed bug (D7): No TC to verify that the login response body does not expose the `password` field. The server returned `user.password` in plaintext in the JSON response. | AI tool limitation: AI assumed spec-compliant hash storage ("matches stored hash" in Step 1 analysis). Black-box design from SRS provides no signal to suspect data exposure in the response body. Discovered only by inspecting the raw API response during execution. |
 
 ### 2.4 Execution Summary
 
 | Metric | Count |
 | ------ | ----- |
-| TC Designed (EP) | 9 |
-| TC Designed (BVA) | 8 |
-| TC Executed | — |
-| Passed | — |
-| Failed | — |
-| Bugs found | — |
+| TC Designed (EP) | 7 |
+| TC Designed (BVA) | 5 |
+| TC Executed | 12 / 12 |
+| Passed | 10 |
+| Pass with deviation | 1 (TC-02: blocked by `required`, not `type="email"`) |
+| Failed | 1 (TC-06, BUG-02-003) |
+| Bugs found | 4 (BUG-02-001 to BUG-02-004) |
+
+Full execution log: [`execution-log.md`](artifacts/tests/FR-02-login-lockout/execution-log.md)
 
 ---
 
