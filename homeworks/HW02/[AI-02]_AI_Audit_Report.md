@@ -67,17 +67,28 @@ Deliverables written to disk:
 
 #### (4) Reasoning (ISTQB / S04)
 
-The AI correctly applied ISTQB FL 4.2 Equivalence Partitioning across the functional
-domain of FR-02, producing valid groupings for email format, email existence, password
-match, counter threshold, lockout window, counter behavior, JWT output, and error
-message content. Per S04 Step 2 guidelines, equivalence classes must reflect
-functional system behavior only; however, the AI included Group 9 (EC23 and EC24,
-covering error message display position derived from FR-22) which belongs to GUI
-conformance testing, not to the functional equivalence space of FR-02. Additionally,
-the AI inferred internal variable names (`failed_login_count`, `lock_timer`) from SRS
-semantics rather than the actual database schema (`login_attempts`, `locked_until`),
-making the pre-condition SQL setup scripts incorrect. These two deficiencies required
-student corrections before test execution could proceed.
+The AI correctly applied ISTQB FL 4.2 EP across FR-02's functional domain, producing
+valid groupings for email format, existence, password match, counter threshold, lockout
+window, counter behavior, JWT output, and error message content. Two deficiencies
+required student correction before execution (see Student Fix below):
+
+**Deficiency 1 — Wrong variable names (`failed_login_count`, `lock_timer`)**
+- Root cause: design prompt (Entry 002) provided only `srs.md` as spec source —
+  no database schema context was available at design time; AI was forced to infer
+  column names from SRS prose semantics; the correct names were only discoverable
+  by inspecting the actual schema, which occurred during the execution phase
+
+**Deficiency 2 — Group 9 out-of-scope (EC23, EC24: display position from FR-22)**
+- Root cause (a): Entry 002 Execution Guidelines specified "collect from functional
+  specs, UI designs, and database/API schemas" — the inclusion of "UI designs"
+  opened the scope to FR-22 display positioning
+- Root cause (b): SRS FR-02 internally cross-references FR-22; no cross-reference
+  filter was stated in the prompt, so AI fetched and included FR-22 autonomously
+
+**Structural factor — No intermediate approval gate**
+- Session used a 6-turn sequential pipeline (Entry 001–006) with no user review
+  between steps — the out-of-scope ECs from Step 2 propagated undetected into
+  Step 3 TC expected results before post-session audit caught them
 
 #### (5) Student Fix
 
