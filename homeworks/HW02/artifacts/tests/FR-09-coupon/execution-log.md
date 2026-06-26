@@ -166,6 +166,20 @@ Screenshots: `homeworks/HW02/artifacts/tests/FR-09-coupon/screenshots/`
 
 ---
 
+### TC-12 — Gap: `total_amount = 0` with `min_order_amount = 0` (zero-amount degenerate)
+
+| Field | Value |
+| :---- | :---- |
+| **Status** | ❌ FAIL — BUG-09-005 (degenerate case) |
+| **Pre-condition setup** | ZERO01 created via `POST /api/admin/coupons`: type=percent, discount_value=10, min_order_amount=0, expired_at=2099-12-31, max_uses_per_user=5; user_id=2, uses=0 |
+| **Executed at** | 2026-06-26 14:14 |
+| **Actual result** | POST /api/apply-coupon (total=0, code=ZERO01) → HTTP 400 · error: "Đơn hàng chưa đủ giá trị tối thiểu 0 ₫ để áp dụng mã này" |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/TC-12-zero-amount-bug09005-degenerate.png` |
+| **Bug ID** | **BUG-09-005** (same root cause — degenerate manifestation) |
+| **Notes** | C3 should pass: `0 >= 0 = TRUE`. Instead system uses `total_amount > min_order_amount` (strict >): `0 > 0 = FALSE` → HTTP 400. Error message is logically absurd: "minimum 0₫ not met" cannot be resolved by the user — no total below 0 is possible. This is BUG-09-005 (off-by-one in C3 operator) confirmed in the degenerate zero-intersection case. The same root cause manifests as an absurd error state when `min_order_amount=0` (coupon with no minimum) is paired with `total_amount=0`. EC07 degenerate path confirmed as **failing**. |
+
+---
+
 ## Boundary Value Analysis (BVA) — TC-BVA-01 to TC-BVA-08
 
 ### TC-BVA-01 — `total_amount` = 299,999 (OFF point)
@@ -284,11 +298,11 @@ Screenshots: `homeworks/HW02/artifacts/tests/FR-09-coupon/screenshots/`
 
 | Metric | Count |
 | :----- | :---- |
-| TC Designed (EP) | 11 |
+| TC Designed (EP) | 12 |
 | TC Designed (BVA) | 8 |
-| TC Executed | 19 / 19 |
+| TC Executed | 20 / 20 |
 | Passed | 12 |
-| Failed | 5 (TC-01, TC-08, TC-09, TC-11, TC-BVA-02) |
+| Failed | 6 (TC-01, TC-08, TC-09, TC-11, TC-12, TC-BVA-02) |
 | Pass with deviation | 2 (TC-BVA-03, TC-BVA-08) |
 | Bugs found | 5 (BUG-09-001 to BUG-09-005) |
 

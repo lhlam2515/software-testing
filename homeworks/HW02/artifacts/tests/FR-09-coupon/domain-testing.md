@@ -329,6 +329,26 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 
 ---
 
+### TC-12 — Gap: `total_amount = 0` with `min_order_amount = 0` (zero-amount degenerate)
+
+| Field | Content |
+|:---|:---|
+| **TC ID** | TC-12 |
+| **Test Case Name** | Gap probe: degenerate zero-amount intersection — `total_amount=0` satisfies C3 when `min_order_amount=0` |
+| **ECs Covered** | EC07 (degenerate path: C3 passes with total=0, min=0), EC01, EC05, EC09, EC12, EC14 |
+| **ECs Verified Absent** | N/A — gap test, discover actual behavior |
+| **Pre-conditions** | Create coupon `ZERO01` via Admin API: `POST /api/admin/coupons` with `{"code":"ZERO01","type":"percent","discount_value":10,"min_order_amount":0,"expired_at":"2099-12-31","max_uses_per_user":5}`; user has not used `ZERO01`; valid JWT |
+| **Input — `code`** | `"ZERO01"` |
+| **Input — `total_amount`** | `0` |
+| **Input — `user_id`** | ID of `test@eshop.com` |
+| **Input — Authorization** | `Bearer <valid_token>` |
+| **Steps** | 1. Admin creates `ZERO01` with `min_order_amount=0` (see Pre-conditions) · 2. Login as `test@eshop.com` to get token · 3. `POST /api/apply-coupon` with `{"code":"ZERO01","total_amount":0,"user_id":<id>}` + Auth header · 4. Record full response |
+| **Expected Result** | Discover actual behavior — plausible outcomes: (1) HTTP 4xx → system guards against zero total (undocumented validation); (2) HTTP 200 with `discount_amount=0, final_amount=0` → correct degenerate result; (3) HTTP 200 with unexpected values → additional calculation bug |
+| **Verification Points** | 1. Record HTTP status · 2. If 200: record `discount_amount` and `final_amount` exact values · 3. If `final_amount < 0` → BUG (analogous to BUG-09-004 via zero-total path) · 4. Note: with `type=percent` and `total=0`, BUG-09-001 formula produces `0×10=0`, so buggy formula coincidentally yields correct result — document this masking effect if observed |
+| **Status** | ❌ FAIL — BUG-09-005 (degenerate case: `0 > 0 = FALSE`, error "tối thiểu 0₫ chưa đạt") |
+
+---
+
 ## 5. EC Coverage Matrix
 
 | EC ID | Description | TC Cover | Mechanism |
@@ -351,5 +371,6 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | EC16 | Correct output: `discount_amount` + `final_amount` per formula | TC-01, TC-02 | Verified present |
 | EC17 | HTTP 4xx error response | TC-03 → TC-10 | Verified present (cross-check) |
 | EC18 | `final_amount < 0` (gap: fixed > total) | TC-11 | Direct trigger (gap test) |
+| EC07 (zero path) | C3 passes with `total=0`, `min=0` — degenerate intersection | TC-12 | Direct trigger (gap probe) |
 
-**Total: 11 TCs covering 18 ECs — 100% coverage.**
+**Total: 12 TCs covering 18 ECs — 100% EP coverage + 1 additional gap probe (TC-12, added after human review).**
