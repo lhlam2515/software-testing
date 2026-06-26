@@ -38,6 +38,15 @@ Before starting, collect three things:
    password rules, form validation policies), read those cross-references too. Don't
    skip this — constraints in cross-referenced specs are test targets, not background noise.
 
+   **Cross-reference filter:** Use cross-referenced specs only to extract constraints
+   that apply to variables already in your Step 1 table. Do not create new EC Groups
+   for behaviors owned by the cross-referenced feature. The signal: if a constraint from
+   FR-X applies to a variable you already have, add it to that variable's row. If FR-X
+   introduces a new entity or behavior that FR-X itself owns (e.g., error display
+   positioning, response formatting), note it in the Feature Overview as a cross-feature
+   dependency — not as a new EC Group. Pulling other-feature behaviors into your EC table
+   inflates the suite with out-of-scope cases that fail audit review.
+
 3. **Locate output folder:** Check the agreed output directory for an existing folder
    named after the feature. If it doesn't exist, create it. If `domain-testing.md` or
    `bva.md` already exist, ask the user: "Files already exist — overwrite completely or
@@ -63,16 +72,25 @@ whole EC table has a hole.
 - Dependencies and constraints (including cross-feature constraints)
 - Expected error/behavior when the constraint is violated
 
-**Flag Implicit Gaps** — places where the spec specifies one boundary but is silent on
-the other, or where behavior is ambiguous. These are real test targets: undefined
-behavior is a defect risk.
+**Flag Implicit Gaps and Spec Conflicts** — both represent real test targets because they
+describe scenarios where the SUT's behavior cannot be predicted from the spec alone.
 
-**Present as a Markdown table:**
+- **Implicit Gap** — the spec is silent on behavior at a particular boundary or condition.
+  No expected output can be derived from spec text. Risk: undefined behavior in the SUT.
+- **Spec Conflict** — two spec sources contradict each other (e.g., SRS says the backend
+  must recompute a value, but the API spec accepts that value from the client). State which
+  assumption is used for test design and flag it for a gap-probe TC to verify what the SUT
+  actually implements.
+
+Both use the same table format.
+
+**Present the main variable table as:**
 ```
 | Variable | Type | Description | Valid Domain / Boundaries | Dependencies & Constraints | Expected Error / Behavior |
 ```
 
-If there are Implicit Gaps, add a separate `### Implicit Gaps` table after the main table.
+If there are gaps or conflicts, add a separate `### Implicit Gaps & Spec Conflicts` table
+after the main table: `| Variable | Gap / Conflict | Risk |`
 
 **→ Use AskUserQuestion (see Protocol section) before proceeding to Step 2.**
 
@@ -91,6 +109,7 @@ identically. Testing one member of a class is sufficient — testing more is red
 | **Set Rule** | Input is a discrete set with distinct handling per value | 1 valid class per value + 1 invalid for "none of the above" |
 | **Must-Be Rule** | A condition must be true for processing to succeed | 1 valid (condition True) + 1 invalid (condition False) |
 | **Splitting Rule** | Elements within a class are handled differently | Split into finer subclasses — don't lump what the system distinguishes |
+| **Gap Rule** | Behavior is undefined or conflicting in the spec (from Step 1 gap table) | 1 `Invalid/Gap` class per gap — distinct from `Invalid` because no expected output exists; marks this EC for a gap-probe TC in Step 3 |
 
 **Assign unique IDs:** EC01, EC02, EC03, … (sequential across all groups, never reuse).
 
@@ -99,7 +118,7 @@ that test case design in Step 3 has something to verify.
 
 **Present as a Markdown table, grouped by variable:**
 ```
-| Variable / Condition | EC ID | Description | Type (Valid/Invalid) | Expected System Output |
+| Variable / Condition | EC ID | Description | Type (Valid / Invalid / Invalid/Gap) | Expected System Output |
 ```
 
 **Output ECs matter too** — partition what the system returns (token vs no-token, generic
@@ -153,6 +172,23 @@ After all TCs, add an **EC Coverage Matrix** — a Markdown table mapping each E
 TC that covers it, with a "Mechanism" column (Direct trigger / Nominal valid input /
 Observed / Verified absent).
 
+**Gap-Probe TCs (one per Implicit Gap or Spec Conflict from Step 1)**
+
+Each gap or conflict identified in Step 1 becomes exactly one gap-probe TC. These differ
+from normal TCs in two important ways:
+
+1. `ECs Verified Absent` → write `N/A — gap test, discover actual behavior`
+2. `Expected Result` → list all plausible outcome branches rather than a single assertion.
+   The reader needs to know what each outcome means, not just what you hope will happen.
+   For example:
+   - "If HTTP 4xx → system handles edge case correctly; record the error message"
+   - "If HTTP 200 with `final_amount = -40000` → BUG: discount exceeds total, report it"
+   - "If HTTP 200 with `final_amount = 0` → clamping behavior; document as undocumented feature"
+
+The value of a gap-probe TC is that it converts a spec silence into an observable,
+repeatable test target without manufacturing a fake expected result. The tester goes in
+knowing what to look for and how to classify what they find.
+
 **→ Use AskUserQuestion before writing files.**
 **→ When accepted: Write Steps 1–3 content to `domain-testing.md`** (see File Format below).
 
@@ -172,6 +208,21 @@ and amounts are BVA targets.
 - `UB`: the upper boundary itself (the turning point — this is where `>` vs `>=` is exposed)
 - `UB+1`: one unit past the boundary (should be in the invalid/expired state)
 - Mirror for lower boundary: `LB-1`, `LB`, `LB+1`
+
+**Parameter Variation (for configurable boundary parameters)**
+
+If the boundary condition is `X < MAX` or `X >= THRESHOLD` and `MAX`/`THRESHOLD` is a
+configurable parameter (not a hardcoded constant in the spec), test the ON point with at
+least two different parameter values. The reason: an implementation might hardcode the
+limit (e.g., `if uses >= 1`) instead of reading from config (`if uses >= max_per_user`).
+A single ON-point test with `max=1` passes both the correct and the hardcoded version —
+it can't tell them apart. A second ON-point test with `max=2` fails the hardcoded version
+and surfaces the bug. Name both TCs so the parameter difference is visible:
+e.g., `TC-BVA-05 (COUPON_A, max=1)` and `TC-BVA-06 (COUPON_B, max=2)`.
+
+**For date/timestamp boundaries**, note the test design date in the TC and add a
+maintenance warning: "If executed after [design date], update `expired_at` to
+`current_date` (for the ON point TC) and `current_date + 1 day` (for UB+1) accordingly."
 
 **For each BVA test case, name the specific defect it targets.** "Off-by-one" is too
 vague. Write the actual wrong operator: "Catches bug where system uses `count > 3` instead
@@ -257,8 +308,8 @@ Options:
 ## 2. Step 1 — Variables & Constraints
 [Step 1 table]
 
-### Implicit Gaps
-[Gap table — omit section if no gaps]
+### Implicit Gaps & Spec Conflicts
+[Gap/conflict table — omit section if none]
 
 ---
 
@@ -327,5 +378,9 @@ Options:
 - [ ] Pre-conditions are precise enough to reproduce without guessing
 - [ ] Verification points say HOW to check, not just WHAT to check
 - [ ] BVA cases name a specific wrong operator, not just "off-by-one"
-- [ ] Implicit Gaps are flagged with their risk — not silently assumed away
+- [ ] Implicit Gaps and Spec Conflicts are flagged with their risk — not silently assumed away
 - [ ] Output ECs are partitioned and tracked via "Verified Absent" in relevant TCs
+- [ ] Cross-referenced specs were used only to add constraints to existing Step 1 variables — no new EC Groups were created for behaviors owned by the cross-referenced feature
+- [ ] Every Implicit Gap and Spec Conflict from Step 1 has a corresponding gap-probe TC in Step 3 with a multi-branch Expected Result (not a single assertion)
+- [ ] BVA parameter variation applied wherever the boundary condition has a configurable parameter — at least 2 different parameter values tested at the ON point
+- [ ] Date/timestamp BVA TCs include a maintenance note stating the design date and instructing the executor to update boundary values to `current_date` before running
