@@ -37,7 +37,7 @@ Before running any TC, confirm:
 
 3. **Test account ready:** verify via `node test-db.cjs get <email>` — account must exist in DB
 
-4. **Screenshot directory exists:** `homeworks/HW02/artifacts/bugs/screenshots/`
+4. **Screenshot directory exists:** `homeworks/HW02/artifacts/tests/<feature>/screenshots/` (create with `mkdir -p` if missing)
 
 ---
 
@@ -89,7 +89,7 @@ playwright-cli fill e<N> "<value>"
 playwright-cli click e<submit-btn>
 
 # Capture the result page
-playwright-cli screenshot --filename=homeworks/HW02/artifacts/bugs/screenshots/<name>.png
+playwright-cli screenshot --filename=homeworks/HW02/artifacts/tests/<feature>/screenshots/<name>.png
 
 # Inspect the network request (HTTP method + status)
 playwright-cli requests
@@ -111,7 +111,7 @@ Write the entry into `execution-log.md` immediately after each TC — don't batc
 | **Pre-condition setup** | `node test-db.cjs ...` → `field=value` confirmed |
 | **Executed at** | YYYY-MM-DD HH:MM |
 | **Actual result** | POST /api/<endpoint> → <status> · <UI behavior> · `<field>` <before>→<after> |
-| **Screenshot** | `artifacts/bugs/screenshots/<name>.png` |
+| **Screenshot** | `artifacts/tests/<feature>/screenshots/<name>.png` |
 | **Bug ID** | BUG-XX-NNN or — |
 | **Notes** | EC<N> confirmed ✅. <Deviations or observations.> |
 ```
@@ -169,7 +169,7 @@ Stage and commit the execution artifacts:
 
 ```bash
 git add homeworks/HW02/artifacts/tests/<feature>/execution-log.md
-git add homeworks/HW02/artifacts/bugs/screenshots/
+git add homeworks/HW02/artifacts/tests/<feature>/screenshots/
 ```
 
 Then invoke the `commit` skill for the commit message.
