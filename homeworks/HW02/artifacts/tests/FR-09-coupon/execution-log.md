@@ -6,7 +6,7 @@
 **DB:** `apps/backend/database.sqlite` · test account: `test@eshop.com` / `Test1234!`
 **Started:** 2026-06-26
 
-Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
+Screenshots: `homeworks/HW02/artifacts/tests/FR-09-coupon/screenshots/`
 
 ---
 
@@ -20,7 +20,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | SAVE10: is_active=1, type=percent, discount_value=10, min_order_amount=300000, expired_at=2099-12-31, max_uses_per_user=5; coupon_usage empty (uses=0) |
 | **Executed at** | 2026-06-26 11:06 |
 | **Actual result** | POST /api/apply-coupon → HTTP 200 · discount_amount=-4,500,000 (expected 50,000) · final_amount=5,000,000 (expected 450,000) |
-| **Screenshot** | `artifacts/bugs/screenshots/BUG-09-001-percent-formula-wrong.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/BUG-09-001-percent-formula-wrong.png` |
 | **Bug ID** | **BUG-09-001** |
 | **Notes** | HTTP status 200 OK but output values wrong. Formula computes `total_amount × discount_value` = 500,000 × 10 = 5,000,000 without dividing by 100. Then discount_amount = total_amount - (total_amount × discount_value) = 500,000 - 5,000,000 = -4,500,000. final_amount = total_amount - discount_amount = 500,000 - (-4,500,000) = 5,000,000. EC01, EC05, EC07, EC09, EC12, EC14 verified; EC16 FAILED (wrong formula). |
 
@@ -34,7 +34,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | BIGBUY: is_active=1, type=fixed, discount_value=50000, min_order_amount=500000, expired_at=2099-12-31, max_uses_per_user=1; coupon_usage empty (uses=0) |
 | **Executed at** | 2026-06-26 11:06 |
 | **Actual result** | POST /api/apply-coupon → HTTP 200 · discount_amount=50,000 · final_amount=550,000 |
-| **Screenshot** | `artifacts/bugs/screenshots/TC-02-fixed-pass.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/TC-02-fixed-pass.png` |
 | **Bug ID** | — |
 | **Notes** | EC01, EC05, EC07, EC09, EC12, EC15, EC16 all verified. Fixed-type formula correct: discount=50,000 (flat), final=600,000-50,000=550,000. |
 
@@ -48,7 +48,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | "NOTEXIST99" does not exist in coupons table |
 | **Executed at** | 2026-06-26 11:06 |
 | **Actual result** | POST /api/apply-coupon → HTTP 404 · error: "Mã giảm giá không tồn tại hoặc đã bị vô hiệu hóa" |
-| **Screenshot** | `artifacts/bugs/screenshots/TC-03-not-exist.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/TC-03-not-exist.png` |
 | **Bug ID** | — |
 | **Notes** | EC02, EC17 confirmed. HTTP 404 is within expected "4xx" range. Error message combines "not found" and "inactive" — generic enough not to leak existence. |
 
@@ -62,7 +62,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | DEAD01: is_active=0 (deactivated via `UPDATE coupons SET is_active=0 WHERE code='DEAD01'`) |
 | **Executed at** | 2026-06-26 11:06 |
 | **Actual result** | POST /api/apply-coupon → HTTP 404 · error: "Mã giảm giá không tồn tại hoặc đã bị vô hiệu hóa" |
-| **Screenshot** | `artifacts/bugs/screenshots/TC-04-inactive.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/TC-04-inactive.png` |
 | **Bug ID** | — |
 | **Notes** | EC03, EC17 confirmed. System returns same 404 for inactive as for not-found — generic error masks the distinction (acceptable from security standpoint). |
 
@@ -76,7 +76,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | SAVE10 exists and is active; sending code="save10" (all lowercase) |
 | **Executed at** | 2026-06-26 11:06 |
 | **Actual result** | POST /api/apply-coupon → HTTP 404 · error: "Mã giảm giá không tồn tại hoặc đã bị vô hiệu hóa" |
-| **Screenshot** | `artifacts/bugs/screenshots/TC-05-wrong-case.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/TC-05-wrong-case.png` |
 | **Bug ID** | — |
 | **Notes** | EC04 gap resolved: system is **case-sensitive**. "save10" does not match "SAVE10" → treated as non-existent code. No security leak in error message. EC17 confirmed. |
 
@@ -90,7 +90,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | EXPIRED: expired_at=2020-01-01 (past date) |
 | **Executed at** | 2026-06-26 11:06 |
 | **Actual result** | POST /api/apply-coupon → HTTP 400 · error: "Mã giảm giá đã hết hạn" |
-| **Screenshot** | `artifacts/bugs/screenshots/TC-06-expired.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/TC-06-expired.png` |
 | **Bug ID** | — |
 | **Notes** | EC06, EC17 confirmed. Specific "expired" message distinct from "not found" — acceptable and informative. |
 
@@ -104,7 +104,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | SAVE10: min_order_amount=300,000; sending total_amount=200,000 |
 | **Executed at** | 2026-06-26 11:06 |
 | **Actual result** | POST /api/apply-coupon → HTTP 400 · error: "Đơn hàng chưa đủ giá trị tối thiểu 300,000 ₫ để áp dụng mã này" |
-| **Screenshot** | `artifacts/bugs/screenshots/TC-07-below-min.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/TC-07-below-min.png` |
 | **Bug ID** | — |
 | **Notes** | EC08, EC17 confirmed. Error message includes specific minimum amount (300,000₫) — helpful for users. |
 
@@ -118,7 +118,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | No Authorization header sent in request |
 | **Executed at** | 2026-06-26 11:06 |
 | **Actual result** | POST /api/apply-coupon → HTTP 200 · coupon applied successfully without authentication |
-| **Screenshot** | `artifacts/bugs/screenshots/BUG-09-002-no-auth-accepted.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/BUG-09-002-no-auth-accepted.png` |
 | **Bug ID** | **BUG-09-002** |
 | **Notes** | EC10 FAILED: C4 (user authentication) is not enforced. The /api/apply-coupon endpoint has no auth middleware — any unauthenticated request is accepted. This is a security defect: unauthenticated users can manipulate coupon discounts. EC17 absent (no error returned). |
 
@@ -132,7 +132,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | Authorization: Bearer invalidtokenstring123abc (fabricated invalid token) |
 | **Executed at** | 2026-06-26 11:06 |
 | **Actual result** | POST /api/apply-coupon → HTTP 200 · coupon applied with invalid token |
-| **Screenshot** | `artifacts/bugs/screenshots/BUG-09-003-invalid-jwt-accepted.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/BUG-09-003-invalid-jwt-accepted.png` |
 | **Bug ID** | **BUG-09-003** |
 | **Notes** | EC11 FAILED: same root cause as BUG-09-002 — the endpoint does not verify JWT signatures. Any arbitrary string in the Authorization header is accepted (or ignored entirely). |
 
@@ -146,7 +146,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | `INSERT INTO coupon_usage (coupon_id, user_id) VALUES (1, 2)` → uses_by_user=1; SAVE10 max_uses_per_user=1 |
 | **Executed at** | 2026-06-26 11:10 |
 | **Actual result** | POST /api/apply-coupon → HTTP 400 · error: "Bạn đã sử dụng mã này 1 lần (đã đạt giới hạn)" |
-| **Screenshot** | `artifacts/bugs/screenshots/TC-10-limit-reached.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/TC-10-limit-reached.png` |
 | **Bug ID** | — |
 | **Notes** | EC13, EC17 confirmed. Usage limit enforcement works correctly. Error message includes exact usage count and indicates limit reached. |
 
@@ -160,7 +160,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | GAPTEST1: type=fixed, discount_value=100,000, min_order_amount=50,000; sending total_amount=60,000 |
 | **Executed at** | 2026-06-26 11:06 |
 | **Actual result** | POST /api/apply-coupon → HTTP 200 · discount_amount=100,000 · final_amount=-40,000 |
-| **Screenshot** | `artifacts/bugs/screenshots/BUG-09-004-negative-final-amount.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/BUG-09-004-negative-final-amount.png` |
 | **Bug ID** | **BUG-09-004** |
 | **Notes** | EC18 gap confirmed as real bug. System returns HTTP 200 with final_amount=-40,000 (negative). No guard against discount exceeding total. A negative final_amount at checkout could corrupt order totals or result in free orders. |
 
@@ -176,7 +176,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | SAVE10 uses=1, max=1 (TC-10 state); total=299,999 — rejected by min_order check before usage check |
 | **Executed at** | 2026-06-26 11:10 |
 | **Actual result** | POST /api/apply-coupon → HTTP 400 · error: "Đơn hàng chưa đủ giá trị tối thiểu 300,000 ₫ để áp dụng mã này" |
-| **Screenshot** | `artifacts/bugs/screenshots/TC-BVA-01-off-point.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/TC-BVA-01-off-point.png` |
 | **Bug ID** | — |
 | **Notes** | OFF point (299,999) correctly rejected. Rejection reason is min_order_amount, not usage limit. BVA target (off-by-one for >= boundary) confirmed: 299,999 < 300,000 = rejected. |
 
@@ -190,7 +190,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | SAVE10 usage deleted → uses=0; max_uses=1; total_amount=300,000 = min_order_amount=300,000 |
 | **Executed at** | 2026-06-26 11:11 |
 | **Actual result** | POST /api/apply-coupon → HTTP 400 · error: "Đơn hàng chưa đủ giá trị tối thiểu 300,000 ₫ để áp dụng mã này" |
-| **Screenshot** | `artifacts/bugs/screenshots/BUG-09-005-on-point-rejected.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/BUG-09-005-on-point-rejected.png` |
 | **Bug ID** | **BUG-09-005** |
 | **Notes** | ON point (total=300,000 = min_order=300,000) incorrectly rejected. Spec requires `total_amount >= min_order_amount` but system uses `total_amount > min_order_amount` (strict greater-than). 300,000 > 300,000 = FALSE → rejected. Off-by-one confirmed at the exact boundary. |
 
@@ -204,7 +204,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | SAVE10 uses=0 (usage deleted); total_amount=300,001 |
 | **Executed at** | 2026-06-26 11:11 |
 | **Actual result** | POST /api/apply-coupon → HTTP 200 · discount_amount=-2,700,009 · final_amount=3,000,010 |
-| **Screenshot** | `artifacts/bugs/screenshots/TC-BVA-03-ub-plus1.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/TC-BVA-03-ub-plus1.png` |
 | **Bug ID** | — (deviation from BUG-09-001) |
 | **Notes** | HTTP 200 confirms total=300,001 > 300,000 passes C3. Boundary acceptance correct ✅. Amount values wrong due to BUG-09-001 formula bug (percent type). BVA objective (verifying UB+1 is accepted) met. |
 
@@ -218,7 +218,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | `INSERT INTO coupon_usage (coupon_id, user_id) VALUES (3, 2)` → VIP100 uses=1; max_uses_per_user=2 |
 | **Executed at** | 2026-06-26 11:11 |
 | **Actual result** | POST /api/apply-coupon → HTTP 200 · discount_amount=100,000 · final_amount=300,000 |
-| **Screenshot** | `artifacts/bugs/screenshots/TC-BVA-04-last-valid-use.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/TC-BVA-04-last-valid-use.png` |
 | **Bug ID** | — |
 | **Notes** | uses=1 < max=2 → C5 passes. Fixed-type formula correct (100,000 flat discount, 400,000-100,000=300,000). Last valid use accepted. No off-by-one in subtraction (`< max_uses_per_user - 1` not used). EC12 and EC16 verified. |
 
@@ -232,7 +232,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | SAVE10 coupon_usage has 1 row for user_id=2; max_uses_per_user=1 |
 | **Executed at** | 2026-06-26 11:11 |
 | **Actual result** | POST /api/apply-coupon → HTTP 400 · error: "Bạn đã sử dụng mã này 1 lần (đã đạt giới hạn)" |
-| **Screenshot** | `artifacts/bugs/screenshots/TC-BVA-05-max-uses-1-1.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/TC-BVA-05-max-uses-1-1.png` |
 | **Bug ID** | — |
 | **Notes** | uses=1 < max=1 → FALSE → correctly rejected. No `uses <= max` bug (which would accept 1 when max=1). EC13 and EC17 confirmed. |
 
@@ -246,7 +246,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | `INSERT INTO coupon_usage (coupon_id, user_id) VALUES (3, 2)` again → VIP100 uses=2; max_uses_per_user=2 |
 | **Executed at** | 2026-06-26 11:11 |
 | **Actual result** | POST /api/apply-coupon → HTTP 400 · error: "Bạn đã sử dụng mã này 2 lần (đã đạt giới hạn)" |
-| **Screenshot** | `artifacts/bugs/screenshots/TC-BVA-06-max-uses-2-2.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/TC-BVA-06-max-uses-2-2.png` |
 | **Bug ID** | — |
 | **Notes** | uses=2 < max=2 → FALSE → correctly rejected. Rules out any hardcoded max=1 behavior — same check works for max=2. EC13 and EC17 confirmed. |
 
@@ -260,7 +260,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | TODAYEXP: expired_at=2026-06-26 (created via admin API; today is 2026-06-26, adjusted from original 2026-06-25 design date) |
 | **Executed at** | 2026-06-26 11:10 |
 | **Actual result** | POST /api/apply-coupon → HTTP 400 · error: "Mã giảm giá đã hết hạn" |
-| **Screenshot** | `artifacts/bugs/screenshots/TC-BVA-07-expires-today.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/TC-BVA-07-expires-today.png` |
 | **Bug ID** | — |
 | **Notes** | Strict `<` comparison confirmed: current_date (2026-06-26) < expired_at (2026-06-26) = FALSE → rejected correctly. No `<=` bug (which would accept a coupon expiring today). EC06 boundary case verified. |
 
@@ -274,7 +274,7 @@ Screenshots: `homeworks/HW02/artifacts/bugs/screenshots/`
 | **Pre-condition setup** | TOMORROWEXP: expired_at=2026-06-27; today=2026-06-26; total=500,000 |
 | **Executed at** | 2026-06-26 11:10 |
 | **Actual result** | POST /api/apply-coupon → HTTP 200 · discount_amount=-4,500,000 · final_amount=5,000,000 |
-| **Screenshot** | `artifacts/bugs/screenshots/TC-BVA-08-expires-tomorrow.png` |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/TC-BVA-08-expires-tomorrow.png` |
 | **Bug ID** | — (deviation from BUG-09-001) |
 | **Notes** | HTTP 200 confirms expired_at=tomorrow is correctly accepted by C2. Boundary objective ✅. Amount values wrong due to pre-existing BUG-09-001 (percent formula). No off-by-one in reverse direction (tomorrow is not incorrectly rejected). EC05 confirmed. |
 
