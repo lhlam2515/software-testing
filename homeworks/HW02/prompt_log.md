@@ -540,4 +540,49 @@ Bao gồm:
 
 ---
 
+## Entry 007 | 21:17 25/06/2026
+
+**Tool:** Claude Code (claude-sonnet-4-6, domain-testing skill)
+**Feature:** FR-09
+**Step:** Full domain testing design via `/domain-testing` skill (Steps 1-4 in one invocation)
+
+### Prompt
+
+```
+Hãy áp dụng kỹ thuật /domain-testing để thực hiện thiết kế test case cho FR-09 - Coupon
+đã được document bên trong eshop-sut/srs.md và eshop-sut/api-specification.md.
+```
+
+Follow-up at 21:37 (same session):
+
+```
+hãy chuyển đổi toàn bộ nội dung design sang tiếng Anh
+```
+
+### AI Output
+
+AI executed the 4-step domain testing framework autonomously via the `domain-testing` skill, using both `srs.md` (FR-09 section) and `api_specification.md` (concrete field names and types) as input sources. Output initially produced in Vietnamese, then translated to English per follow-up.
+
+---
+
+#### `artifacts/tests/FR-09-coupon/domain-testing.md`
+
+- **Step 1** — 13 variables across 3 categories (Input: `code`, `total_amount`; System State: `is_active`, `expired_at`, `min_order_amount`, `uses_by_user`, `max_uses_per_user`, `type`, `discount_value`; Output: `discount_amount`, `final_amount`, `http_status`, `error_message`) + 5 Implicit Gaps (G1: case sensitivity, G2: `total_amount` spec conflict with FR-08, G3: `final_amount` negative when fixed discount exceeds total, G4: usage count rollback on failed checkout, G5: `expired_at` timezone boundary)
+- **Step 2** — 18 ECs across 8 Groups: Group 1 (C1 Must-Be: code exists and active), Group 2 (Implicit Gap: case sensitivity probe), Group 3 (C2 Must-Be: not expired), Group 4 (C3 Range: total meets minimum), Group 5 (C4 Must-Be: valid JWT), Group 6 (C5 Range: usage limit not reached), Group 7 (Splitting Rule: discount type percent vs fixed), Group 8 (Output: correct response and error response and negative final_amount gap)
+- **Step 3** — **11 TCs** (TC-01 through TC-11): 2 happy paths (percent + fixed) + 9 negative TCs (one per invalid EC, each isolating a single condition) + EC Coverage Matrix
+
+#### `artifacts/tests/FR-09-coupon/bva.md`
+
+- **3 target variables**: `total_amount` vs `min_order_amount` (3 boundary points), `uses_by_user` vs `max_uses_per_user` (3 points across 2 coupons), `expired_at` vs `current_date` (2 points)
+- **8 BVA TCs** (TC-BVA-01 through TC-BVA-08) each identifying the specific operator error detected
+- Setup Protocol with exact SQLite INSERT/DELETE commands and curl sequences for stateful pre-conditions
+
+**Note:** AI output at commit `6153cc0` (21:42 25/06/2026) contained 11 EP TCs. TC-12 (zero-amount degenerate probe) was added by the student on 26/06/2026 after post-design human review (commit `e8d0d84`).
+
+### Used in
+
+- `[AI-02]_AI_Audit_Report.md`, Artifact 2
+
+---
+
 <!-- Duplicate an entry block above for each AI interaction -->

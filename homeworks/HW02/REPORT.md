@@ -168,106 +168,114 @@ Full execution log: [`execution-log.md`](artifacts/tests/FR-02-login-lockout/exe
 
 ---
 
-## 3. Feature B — FR-09: Mã Giảm Giá (Coupon)
+## 3. Feature B - FR-09: Discount Coupons
 
-> **Technique applied:** Domain Testing (Equivalence Partitioning) + Boundary Value Analysis  
+> **Technique applied:** Domain Testing (Equivalence Partitioning) + Boundary Value Analysis
 > **Detailed test cases:** [`artifacts/tests/FR-09-coupon/`](artifacts/tests/FR-09-coupon/)
 
-### 3.1 Domain Testing — Step-by-Step Application
+### 3.1 Domain Testing
 
-#### Step 1: Identify Input & Output Variables
+#### Step 1 - Identify Input/Output Variables
 
-_Based on `docs/eshop-sut/srs.md` §4 FR-09 — 5 conditions, 2 discount types._
+FR-09 governs coupon application at checkout, enforcing five simultaneous conditions (C1 through C5): the code exists and is active, has not expired, the order total meets the minimum threshold, the user holds a valid JWT, and the user has not exhausted their per-user usage allowance. Twelve variables were identified across three categories: three user-supplied inputs (`code`, `total_amount`, `user_id`), seven system-state fields retrieved from the database (`is_active`, `expired_at`, `min_order_amount`, `uses_by_user`, `max_uses_per_user`, `type`, `discount_value`), and two output signals (`discount_amount`, `final_amount`). Five implicit gaps were flagged where the SRS is silent: whether coupon code matching is case-sensitive (G1), a spec conflict between FR-08 (backend must recompute the order total independently) and the `apply-coupon` API accepting a client-supplied `total_amount` (G2), undefined behavior when a fixed `discount_value` exceeds `total_amount` and produces a negative `final_amount` (G3), no specification of whether usage is rolled back when an order is cancelled (G4), and ambiguous granularity for `expired_at` comparisons with no timezone specified (G5).
 
-| Variable | Type | Description |
-| -------- | ---- | ----------- |
-| `coupon_code` | Input | Mã nhập bởi user |
-| `order_total` | Input | Tổng tiền đơn hàng |
-| `auth_status` | Input | Đã đăng nhập hay chưa |
-| `coupon.is_active` | DB | Trạng thái active |
-| `coupon.expired_at` | DB | Ngày hết hạn |
-| `coupon.min_order_amount` | DB | Ngưỡng tối thiểu |
-| `coupon.discount_type` | DB | `percent` hoặc `fixed` |
-| `coupon.discount_value` | DB | Giá trị giảm |
-| `coupon.max_uses_per_user` | DB | Giới hạn lượt/người |
-| `user_uses` | DB | Số lần user đã dùng |
-| `final_amount` | Output | Tổng tiền sau giảm |
+Full variable table: [`domain-testing.md` - Step 1](artifacts/tests/FR-09-coupon/domain-testing.md)
 
-#### Step 2: Equivalence Classes (per condition)
+#### Step 2 - Identify Equivalence Classes
 
-| EC | Condition | Description | Type |
-| -- | --------- | ----------- | ---- |
-| EC1 | C1 | Mã tồn tại, `is_active=1` | Valid |
-| EC2 | C1 | Mã không tồn tại | Invalid |
-| EC3 | C1 | Mã tồn tại, `is_active=0` | Invalid |
-| EC4 | C2 | `now() < expired_at` | Valid |
-| EC5 | C2 | `now() >= expired_at` | Invalid |
-| EC6 | C3 | `order_total >= min_order_amount` | Valid |
-| EC7 | C3 | `order_total < min_order_amount` | Invalid |
-| EC8 | C4 | JWT Token hợp lệ | Valid |
-| EC9 | C4 | Chưa đăng nhập | Invalid |
-| EC10 | C5 | `uses < max_uses_per_user` | Valid |
-| EC11 | C5 | `uses >= max_uses_per_user` | Invalid |
-| EC12 | type | `percent` — `final = total × (1 − value/100)` | Valid |
-| EC13 | type | `fixed` — `final = total − value` | Valid |
+Equivalence partitioning was applied across eight functional groups using three rules, producing 18 ECs total (8 valid, 10 invalid).
 
-#### Step 3 & 4: Test Cases
+**Must-Be Rule for C1, C2, and C4.** Code existence and active status, expiry, and authentication are binary gates with no numeric range to partition. Each condition either holds or fails outright, yielding one valid class and one or two invalid classes per group. Range Rule does not apply because there is no continuum.
 
-| TC ID | EC Covered | Code | Order Total | Expected |
-| ----- | ---------- | ---- | ----------- | -------- |
-| TC-09-EP-01 | EC1,4,6,8,10,12 | SAVE10 | 400,000₫ | final=360,000₫ (−10%) |
-| TC-09-EP-02 | EC1,4,6,8,10,13 | BIGBUY | 600,000₫ | final=550,000₫ (−50,000₫) |
-| TC-09-EP-03 | EC2 | FAKE123 | 400,000₫ | Error: mã không tồn tại |
-| TC-09-EP-04 | EC3 | INACTIVE | 400,000₫ | Error: mã không hoạt động |
-| TC-09-EP-05 | EC5 | EXPIRED | 150,000₫ | Error: mã đã hết hạn |
-| TC-09-EP-06 | EC7 | SAVE10 | 200,000₫ | Error: chưa đủ ngưỡng 300,000₫ |
-| TC-09-EP-07 | EC9 | SAVE10 | 400,000₫ | Error / redirect to login |
-| TC-09-EP-08 | EC11 | SAVE10 | 400,000₫ | Error: đã dùng hết lượt |
-| TC-09-EP-09 | EC1,4,6,8,10,13 | VIP100 (uses=1,max=2) | 400,000₫ | final=300,000₫ (−100,000₫) |
+**Range Rule for C3 and C5.** Both conditions use numeric comparisons: `total_amount >= min_order_amount` and `uses_by_user < max_uses_per_user`. Each produces exactly two classes: the region where the condition holds and the region where it fails. These two groups are the primary BVA targets in section 3.2.
 
-### 3.2 Boundary Value Analysis — Step-by-Step Application
+**Splitting Rule for `type`.** The `percent` and `fixed` types trigger entirely different formula paths (`discount = total * value / 100` vs. `discount = value`). Although both are syntactically valid inputs, their behavioral outputs differ completely. Collapsing them into one valid EC would execute only one formula path and leave the other untested.
 
-#### Boundaries Identified
+**Gap-driven ECs (EC04 and EC18).** EC04 (wrong-case code input) and EC18 (negative `final_amount` when fixed discount exceeds total) cannot be derived from SRS text alone. They are labeled gap tests to distinguish them from spec-derived ECs and are assigned dedicated TCs to discover actual system behavior rather than verify a known expected outcome.
 
-| Boundary | Variable | LB | UB |
-| -------- | -------- | -- | -- |
-| B1 | `order_total` vs SAVE10 min=300,000₫ | 300,000₫ | 299,999₫ |
-| B2 | `order_total` vs BIGBUY min=500,000₫ | 500,000₫ | 499,999₫ |
-| B3 | `user_uses` vs VIP100 max=2 | uses=2 (exceeded) | uses=1 (last allowed) |
-| B4 | `expired_at` date | today < expired | today ≥ expired |
+| Group | Variable / Condition | Valid ECs | Invalid ECs | Total |
+| ----- | -------------------- | --------- | ----------- | ----- |
+| 1 | `code` exists + `is_active=1` (C1, Must-Be) | EC01 | EC02, EC03 | 3 |
+| 2 | `code` case format (Gap G1) | none | EC04 | 1 |
+| 3 | `expired_at` not expired (C2, Must-Be) | EC05 | EC06 | 2 |
+| 4 | `total_amount >= min_order_amount` (C3, Range) | EC07 | EC08 | 2 |
+| 5 | JWT Token valid (C4, Must-Be) | EC09 | EC10, EC11 | 3 |
+| 6 | `uses_by_user < max_uses_per_user` (C5, Range) | EC12 | EC13 | 2 |
+| 7 | `type` discount formula (Splitting) | EC14, EC15 | none | 2 |
+| 8 | Output correctness | EC16 | EC17, EC18 | 3 |
+| **Total** | | **8 Valid** | **10 Invalid** | **18** |
 
-#### BVA Test Cases
+Full EC table: [`domain-testing.md` - Step 2](artifacts/tests/FR-09-coupon/domain-testing.md)
 
-| TC ID | Boundary | Value | Expected |
-| ----- | -------- | ----- | -------- |
-| TC-09-BVA-01 | B1 UB−1 | 299,999₫ | Error: chưa đủ ngưỡng |
-| TC-09-BVA-02 | B1 LB | 300,000₫ | Áp dụng; −10% |
-| TC-09-BVA-03 | B1 LB+1 | 300,001₫ | Áp dụng; −10% |
-| TC-09-BVA-04 | B2 UB−1 | 499,999₫ | Error: chưa đủ ngưỡng |
-| TC-09-BVA-05 | B2 LB | 500,000₫ | Áp dụng; −50,000₫ |
-| TC-09-BVA-06 | B3 uses=1 | Last allowed | Áp dụng thành công |
-| TC-09-BVA-07 | B3 uses=2 | Exceeded | Error: đã dùng hết lượt |
-| TC-09-BVA-08 | B4 EXPIRED | now > expired_at | Error: mã đã hết hạn |
-| TC-09-BVA-09 | B4 SAVE10 | now < 2099-12-31 | Áp dụng thành công |
+#### Step 3 - Minimum Test Case Set
+
+Eleven test cases were derived using Error Isolation: two happy-path TCs covering all valid ECs, eight negative TCs each isolating one triggerable invalid EC, and one dedicated gap test.
+
+TC-01 and TC-02 both represent valid-all-five-conditions scenarios but must be separate because the Splitting Rule requires one TC per `type` value. TC-01 uses `SAVE10` (`type=percent`) and TC-02 uses `BIGBUY` (`type=fixed`). Collapsing them into one TC would execute only one formula path and leave EC14 or EC15 uncovered. TC-11 is a dedicated gap test for EC18: it uses a coupon where `discount_value > total_amount` and records whether the system returns a negative `final_amount` or guards against it, since the SRS specifies no behavior for this case.
+
+| TC | ECs Covered | Input `code` | `total_amount` | Expected Result |
+| -- | ----------- | ------------ | -------------- | --------------- |
+| TC-01 | EC01,05,07,09,12,14,16 | SAVE10 | 500,000 VND | 200 OK, discount_amount=50,000, final_amount=450,000 |
+| TC-02 | EC01,05,07,09,12,15,16 | BIGBUY | 600,000 VND | 200 OK, discount_amount=50,000, final_amount=550,000 |
+| TC-03 | EC02,17 | NOTEXIST99 | 500,000 VND | 4xx, code not found |
+| TC-04 | EC03,17 | DEAD01 (is_active=0) | 500,000 VND | 4xx, code inactive |
+| TC-05 | EC04,17 | save10 (wrong case) | 500,000 VND | gap probe: 4xx expected if system is case-sensitive |
+| TC-06 | EC06,17 | EXPIRED | 200,000 VND | 4xx, coupon expired |
+| TC-07 | EC08,17 | SAVE10 | 200,000 VND | 4xx, below minimum 300,000 VND |
+| TC-08 | EC10,17 | SAVE10 | 500,000 VND | 401, no Authorization header |
+| TC-09 | EC11,17 | SAVE10 | 500,000 VND | 401, invalid JWT |
+| TC-10 | EC13,17 | SAVE10 (uses=1, max=1) | 500,000 VND | 4xx, usage limit reached |
+| TC-11 | EC18 | GAPTEST1 (fixed=100k, min=50k) | 60,000 VND | gap probe: negative final_amount or 4xx |
+| TC-12 | EC07 (zero path) | ZERO01 (percent=10%, min=0) | 0 VND | gap probe: zero-amount degenerate — C3 passes (0≥0), discover system behavior |
+
+Full TC specifications: [`domain-testing.md` - Step 3](artifacts/tests/FR-09-coupon/domain-testing.md)
+
+### 3.2 Boundary Value Analysis
+
+Three numeric variables were identified for BVA enhancement based on their role in triggering discrete behavioral transitions under Range Rule and strict-comparison conditions.
+
+**`total_amount` vs. `min_order_amount` (C3, `>=` condition).** The spec requires `total_amount >= min_order_amount`. Using `SAVE10` (min=300,000 VND), three boundary points are tested: UB-1 at 299,999 VND (must be rejected), ON point at 300,000 VND (must be accepted per `>=`), and UB+1 at 300,001 VND (confirming the valid range starts exactly at min_order). A potential off-by-one defect would implement `total_amount > min_order_amount` (strict greater-than), causing TC-BVA-02 to fail: an order at exactly 300,000 VND would be incorrectly rejected despite satisfying the spec condition.
+
+**`uses_by_user` vs. `max_uses_per_user` (C5, `<` condition).** The condition is `uses_by_user < max_uses_per_user`. Two coupons are tested: `SAVE10` (max=1) and `VIP100` (max=2). Using both max values rules out any hardcoded comparison logic. UB-1 is the last valid use (uses=1, max=2: the second use with VIP100 must be accepted). UB is the transition point where `uses < max` first becomes false (uses=max=1 for SAVE10, uses=max=2 for VIP100: both must be rejected). A potential defect would use `uses <= max`, incorrectly accepting a request when `uses` already equals `max`.
+
+**`expired_at` vs. `current_date` (C2, strict `<` condition).** The SRS states "current date must be before `expired_at`" (strict less-than). The ON point is today's date set as `expired_at`: `today < today` evaluates to FALSE, so the coupon must be rejected. UB+1 is tomorrow's date: `today < tomorrow` is TRUE and the coupon must be accepted. A potential defect would use `current_date <= expired_at`, incorrectly accepting a coupon that expires today.
+
+String conditions (code format and case sensitivity) are not BVA targets as they are not numeric ranges and are already covered by EC04 in the gap test group.
+
+| TC | Variable | Boundary Point | State | Defect Targeted |
+| -- | -------- | -------------- | ----- | --------------- |
+| TC-BVA-01 | `total_amount` | UB-1 = 299,999 VND | Invalid | `>= min_order - 1` instead of `>= min_order`, off-by-one accepting sub-threshold orders |
+| TC-BVA-02 | `total_amount` | ON = 300,000 VND | Valid | `total > min_order` instead of `total >= min_order`, ON point incorrectly rejected |
+| TC-BVA-03 | `total_amount` | UB+1 = 300,001 VND | Valid | Confirms valid range starts at 300,000, not 300,001 |
+| TC-BVA-04 | `uses_by_user` | UB-1: uses=1, max=2 | Valid | `uses < max - 1` instead of `uses < max`, last valid use incorrectly rejected |
+| TC-BVA-05 | `uses_by_user` | UB: uses=1, max=1 | Invalid | `uses <= max` instead of `uses < max`, allows exceeding limit when max=1 |
+| TC-BVA-06 | `uses_by_user` | UB: uses=2, max=2 | Invalid | Same defect as TC-BVA-05 at max=2, rules out hardcoded max=1 logic |
+| TC-BVA-07 | `expired_at` | ON = today | Invalid | `current_date <= expired_at` instead of `<`, coupon expiring today incorrectly accepted |
+| TC-BVA-08 | `expired_at` | UB+1 = tomorrow | Valid | Confirms tomorrow is still valid; catches reverse off-by-one |
+
+Full BVA specifications and DB setup protocol: [`bva.md`](artifacts/tests/FR-09-coupon/bva.md)
 
 ### 3.3 AI Gap Analysis
 
-_Điền sau khi chạy AI và review kết quả._
-
-| # | Missed test case | Root cause (why AI missed it) |
-| - | ---------------- | ----------------------------- |
-| | | |
+| # | Missed item | Root cause (why AI missed it) |
+| - | ----------- | ----------------------------- |
+| 1 | Missed TC: No test case probes concurrent coupon application by the same user. Two simultaneous requests for the same coupon could both pass the C5 check (`uses < max`) before either increments the usage counter, resulting in double usage when `max_uses_per_user=1`. | Technique limitation: Domain Testing and BVA are inherently sequential techniques. Each TC assumes a stable, single-user system state. The `domain-testing` skill designs one TC per EC and has no mechanism to model concurrent state transitions. Concurrency testing is a separate dimension (load and stress testing) that falls outside the Domain Testing methodology scope. |
+| 2 | Missed TC: No test case covers the degenerate combination where `total_amount=0` and `min_order_amount=0`. FR-17 explicitly allows `min_order_amount >= 0`, so C3 should pass (0 >= 0), but the system rejected the request. TC-12 was added after human review and executed: result was HTTP 400 with error "Đơn hàng chưa đủ giá trị tối thiểu 0 ₫ để áp dụng mã này" — confirming BUG-09-005 (strict `>` instead of `>=`) in a degenerate state where the error message is logically absurd ("minimum 0₫ not met" is impossible for a user to satisfy). | Reasoning gap at EC composition: the AI noted the `min_order_amount >= 0` constraint in the Step 1 variable table but applied single-variable analysis. EC07 (`total_amount >= min_order_amount`) was derived without enumerating the degenerate case where both values are zero. The AI identified the range rule correctly but stopped short of exhausting the edge cases that the rule creates when combined with boundary-valid inputs from a different variable. TC-12 serves as a concrete artifact demonstrating this gap: it was not generated by the AI tool, and its execution revealed a qualitatively distinct bug manifestation (absurd error message on a zero-minimum coupon) that the original 11-TC suite did not surface. |
+| 3 | Missed TC: No test case sends a deliberately manipulated `total_amount` (inflated above the actual cart value) to verify whether the backend recomputes the total independently per FR-08 or trusts the client-supplied value. If the backend uses the client value, a user can bypass C3 by sending `total_amount` equal to `min_order_amount` regardless of actual cart contents. | Scope limitation of the `domain-testing` skill: the skill documented this conflict as an Implicit Gap in Step 1 but its workflow covers TC design from spec conditions (EP/BVA from the SRS), not adversarial input probes. Security testing requires intentionally invalid inputs designed to exploit trust boundaries, which is outside the EP methodology. The skill correctly flagged the risk but had no workflow step to convert a noted concern into an attack-scenario TC. |
 
 ### 3.4 Execution Summary
 
 | Metric | Count |
 | ------ | ----- |
-| TC Designed (EP) | 9 |
-| TC Designed (BVA) | 9 |
-| TC Executed | — |
-| Passed | — |
-| Failed | — |
-| Bugs found | — |
+| TC Designed (EP) | 12 |
+| TC Designed (BVA) | 8 |
+| TC Executed | 20 / 20 |
+| Passed | 12 |
+| Pass with deviation | 2 (TC-BVA-03, TC-BVA-08: boundary acceptance correct, output values wrong due to BUG-09-001) |
+| Failed | 6 (TC-01, TC-08, TC-09, TC-11, TC-12, TC-BVA-02) |
+| Bugs found | 5 (BUG-09-001 to BUG-09-005) |
+
+Full execution log: [`execution-log.md`](artifacts/tests/FR-09-coupon/execution-log.md)
 
 ---
 

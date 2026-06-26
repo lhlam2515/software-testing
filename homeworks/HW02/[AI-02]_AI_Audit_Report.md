@@ -106,30 +106,32 @@ required student correction before execution (see Student Fix below):
 
 #### (1) Prompt + Tool
 
-**Tool:** Claude Code  
-**Time:** _**:**_ DD/MM/2026  
+**Tool:** Claude Code (domain-testing skill, single invocation)  
+**Time:** 21:17 25/06/2026  
 **Prompt:**
-> _[Paste verbatim prompt here]_
+> Hãy áp dụng kỹ thuật /domain-testing để thực hiện thiết kế test case cho FR-09 - Coupon đã được document bên trong eshop-sut/srs.md và eshop-sut/api-specification.md.
 
 #### (2) AI Output
 
-> See [Prompt Log](prompt_log.md) — entry **_**:**_ DD/MM/2026**.
+> See [Prompt Log](prompt_log.md), entry **21:17 25/06/2026**.
+
+AI autonomously executed all 4 steps of the domain testing framework via the `domain-testing` skill: 13 variables (Step 1), 18 ECs across 8 Groups (Step 2), 11 EP Test Cases with EC Coverage Matrix (Step 3), and 8 BVA Test Cases across 3 boundary targets (Step 4). Output was initially produced in Vietnamese and translated to English per a follow-up request in the same session (21:37). Committed as `6153cc0`.
 
 #### (3) Verdict
 
 **[ ] VALID** — correct and accepted as-is  
 **[ ] INVALID** — wrong; rejected  
-**[ ] INCOMPLETE** — acceptable after edits
+**[x] INCOMPLETE** — acceptable after edits
 
 #### (4) Reasoning (ISTQB / S04)
 
-_[2–5 sentences. Reference 5 conditions C1–C5, EC isolation rule for invalid classes]_
+Per ISTQB FL section 4.2.1, equivalence partitioning requires identifying all partitions in which the system processes inputs identically. The AI output correctly applied all 5 conditions (C1-C5) and used accurate variable names sourced from `api_specification.md`, eliminating the naming deficiency that affected FR-02. The Splitting Rule (S04 Step 2) was correctly applied for `type` (percent vs fixed) in Group 7, and EC17 was used as a cross-cutting shared expectation for all negative TCs, both improvements over FR-02 design. However, the AI listed `min_order_amount >= 0` as an implicit constraint in Step 1 (Implicit Gap G5: spec does not forbid a zero minimum order threshold), but did not extend this observation into a dedicated test case for the degenerate intersection where `total_amount = 0` satisfies condition C3 when `min_order_amount = 0`. EC07 was covered only via nominal positive values in TC-01 and TC-02. This is a reasoning miss: the constraint data was present in the AI's own Step 1 output, but the inference chain from constraint observation to degenerate boundary probe was not completed in Step 3.
 
 #### (5) Student Fix
 
 | # | AI-generated item | Issue | Corrected item |
 | - | ----------------- | ----- | -------------- |
-| | | | |
+| 1 | 11 EP TCs (TC-01 through TC-11) covering EC01-EC18 via nominal inputs | Degenerate intersection not covered: EC07 (`total_amount >= min_order_amount`) was tested only with positive values; zero-amount path (`total_amount=0`, `min_order_amount=0`) was not probed despite AI identifying the constraint in Step 1 | Added TC-12: gap probe for zero-amount degenerate path with coupon `ZERO01` (`min_order_amount=0`); added `EC07 (zero path)` row to EC Coverage Matrix (commit `0a855b2`, 26/06/2026) |
 
 ---
 
