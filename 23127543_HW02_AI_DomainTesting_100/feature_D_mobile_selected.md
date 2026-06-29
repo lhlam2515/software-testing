@@ -110,52 +110,9 @@ After reading source code, Feature D remained Mobile Checkout and added cases fo
 
 ## 6. Potential or Confirmed Bugs
 
-### Potential BUG-FR20-01: Mobile checkout may send incomplete `items`
+No FR-20 mobile bugs are confirmed by the available result files. All FR-20 mobile test cases remain `To be executed` and require Expo/emulator execution, request capture, and screenshots or logs before any bug can be confirmed.
 
-**Feature:** FR-20  
-**Related Test Case:** FR20-DT-06, FR20-BVA-03  
-**Severity:** High  
-**Status:** Potential bug - needs execution evidence  
-
-#### Steps to Reproduce
-1. Log in on mobile and add 2 products to cart.
-2. Confirm checkout and inspect the request body.
-3. Compare sent `items` with cart UI.
-
-#### Expected Result
-
-Payload contains all cart items.
-
-#### Actual Result
-To be executed.
-
-#### Evidence
-To be generated.
-
-#### GitHub Issue Link
-[To be added]
-
-### Potential BUG-FR20-02: Mobile/API checkout may still accept manipulated total
-
-**Feature:** FR-20  
-**Related Test Case:** FR20-DT-07, FR20-BVA-06  
-**Severity:** Critical  
-**Status:** Potential bug - needs execution evidence  
-
-#### Steps to Reproduce
-1. Log in on mobile with a high-value cart.
-2. Use proxy/API to send `total_amount: 1`.
-3. Check whether an order is created.
-
-#### Expected Result
-
-Backend recalculates total or rejects the request.
-
-#### Actual Result
-To be executed.
-
-#### Evidence
-To be generated.
-
-#### GitHub Issue Link
-[To be added]
+| Related Test Case | Verdict | Required Evidence |
+|---|---|---|
+| FR20-DT-01 to FR20-DT-12 | To be executed | Mobile execution log and screenshots or captured API requests |
+| FR20-BVA-01 to FR20-BVA-06 | To be executed | Mobile execution log and screenshots or captured API requests |

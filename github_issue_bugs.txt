@@ -30,50 +30,7 @@ Suggested Fix:
 Validate unsupported profile fields explicitly and return a clear response without changing protected fields.
 
 Evidence:
-`test_scripts/results/json/fr04_profile_api_results.json`, `test_scripts/results/html/fr04_profile_api_results.html`
-
-GitHub Issue Link:
-[To be added]
-============================================================
-
-============================================================
-BUG ID: BUG-FR04-02
-Title: [FR04] Web profile phone validation conflicts with SRS
-Feature: FR04 - Personal Profile Management
-Related Test Case(s): FR04-DT-01, FR04-DT-03, FR04-DT-04, FR04-DT-05
-Severity: High
-Status: Confirmed by screenshot evidence
-
-Description:
-The web profile UI rejects phone numbers that are valid according to the SRS and accepts a phone number that should be invalid according to the SRS. The SRS expects phone numbers to start with `0` and contain 10-11 digits.
-
-Steps to Reproduce:
-1. Log in as `test@eshop.com`.
-2. Open the Profile page.
-3. Enter the test phone number from the related test case.
-4. Click Update.
-5. Observe the browser alert.
-
-Input Data:
-`0912345678`, `09123456789`, and `9123456789`.
-
-Expected Result:
-`0912345678` and `09123456789` are accepted. `9123456789` is rejected because it does not start with `0`.
-
-Actual Result:
-The UI displayed an invalid-phone alert for `0912345678` and `09123456789`, but displayed an update-success alert for `9123456789`.
-
-Impact:
-Users with SRS-valid phone numbers may be blocked from updating their profile, while invalid phone data can be accepted.
-
-Suggested Fix:
-Align the web profile phone validation rule with the SRS: require a leading `0` and 10-11 digits, and apply the same validation consistently in the backend.
-
-Evidence:
-Screenshot: `evidence/screenshots/FR04-DT-01.png`
-Screenshot: `evidence/screenshots/FR04-DT-03.png`
-Screenshot: `evidence/screenshots/FR04-DT-04.png`
-Screenshot: `evidence/screenshots/FR04-DT-05.png`
+`23127543_HW02_AI_DomainTesting_100/test_scripts/results/json/fr04_profile_api_results.json`, `23127543_HW02_AI_DomainTesting_100/test_scripts/results/html/fr04_profile_api_results.html`
 
 GitHub Issue Link:
 [To be added]
@@ -111,7 +68,7 @@ Suggested Fix:
 Review checkout authentication/authorization handling and ensure valid user tokens can create orders.
 
 Evidence:
-`test_scripts/results/json/fr08_checkout_api_results.json`, `test_scripts/results/html/fr08_checkout_api_results.html`
+`23127543_HW02_AI_DomainTesting_100/test_scripts/results/json/fr08_checkout_api_results.json`, `23127543_HW02_AI_DomainTesting_100/test_scripts/results/html/fr08_checkout_api_results.html`
 
 GitHub Issue Link:
 [To be added]
@@ -149,89 +106,7 @@ Suggested Fix:
 Review coupon usage authorization and ensure successful checkout can record coupon usage for the authenticated user.
 
 Evidence:
-`test_scripts/results/json/fr08_checkout_api_results.json`, `test_scripts/results/html/fr08_checkout_api_results.html`
-
-GitHub Issue Link:
-[To be added]
-============================================================
-
-============================================================
-BUG ID: BUG-FR08-03
-Title: [FR08] Cart is not cleared after successful checkout
-Feature: FR08 - Checkout
-Related Test Case(s): FR08-DT-07, FR08-BVA-13
-Severity: High
-Status: Confirmed by screenshot evidence
-
-Description:
-The web checkout flow displayed a successful checkout page, but the cart still contained items after returning to the Cart page.
-
-Steps to Reproduce:
-1. Log in as a regular user.
-2. Add one or more products to the cart.
-3. Complete checkout successfully.
-4. Return to the Cart page.
-
-Input Data:
-Cart containing products such as iPhone 15 Pro Max and Keychron Q1 keyboard.
-
-Expected Result:
-Cart is cleared after successful checkout, and repeat checkout is blocked until a new item is added.
-
-Actual Result:
-Checkout success was shown, but returning to Cart still displayed items and the checkout button.
-
-Impact:
-Users may accidentally submit duplicate orders because the cart remains populated after a successful checkout.
-
-Suggested Fix:
-Call the frontend cart-clearing logic after successful checkout and verify the cart state before allowing another checkout.
-
-Evidence:
-Screenshot: `evidence/screenshots/FR08-DT-07.png`
-Screenshot: `evidence/screenshots/FR08-DT-07-2.png`
-Screenshot: `evidence/screenshots/FR08-BVA-13.png`
-Screenshot: `evidence/screenshots/FR08-BVA-13-2.png`
-
-GitHub Issue Link:
-[To be added]
-============================================================
-
-============================================================
-BUG ID: BUG-FR08-04
-Title: [FR08] Quantity zero is accepted into cart and checkout remains available
-Feature: FR08 - Checkout
-Related Test Case(s): FR08-BVA-04
-Severity: High
-Status: Confirmed by screenshot evidence
-
-Description:
-The cart displayed an item with quantity `0`, and the checkout button remained available.
-
-Steps to Reproduce:
-1. Log in as a regular user.
-2. Open a product detail page.
-3. Enter quantity `0`.
-4. Add the item to cart.
-5. Open the Cart page.
-
-Input Data:
-Quantity `0`.
-
-Expected Result:
-Quantity `0` is rejected or checkout is blocked before creating an order.
-
-Actual Result:
-The cart displayed a product row with quantity `0`, line total `0`, and the checkout button was still available.
-
-Impact:
-Invalid cart data can enter the checkout flow, which may cause incorrect order totals or inconsistent order contents.
-
-Suggested Fix:
-Validate quantity on the product detail page, cart state, and checkout submission. Reject quantities below `1`.
-
-Evidence:
-Screenshot: `evidence/screenshots/FR08-BVA-04.png`
+`23127543_HW02_AI_DomainTesting_100/test_scripts/results/json/fr08_checkout_api_results.json`, `23127543_HW02_AI_DomainTesting_100/test_scripts/results/html/fr08_checkout_api_results.html`
 
 GitHub Issue Link:
 [To be added]
@@ -269,7 +144,7 @@ Suggested Fix:
 Review admin login token generation, role claims, and admin order authorization checks.
 
 Evidence:
-`test_scripts/results/json/fr18_admin_order_api_results.json`, `test_scripts/results/html/fr18_admin_order_api_results.html`
+`23127543_HW02_AI_DomainTesting_100/test_scripts/results/json/fr18_admin_order_api_results.json`, `23127543_HW02_AI_DomainTesting_100/test_scripts/results/html/fr18_admin_order_api_results.html`
 
 GitHub Issue Link:
 [To be added]
@@ -307,7 +182,7 @@ Suggested Fix:
 Review authorization and state-transition handling for admin status update routes.
 
 Evidence:
-`test_scripts/results/json/fr18_admin_order_api_results.json`, `test_scripts/results/html/fr18_admin_order_api_results.html`
+`23127543_HW02_AI_DomainTesting_100/test_scripts/results/json/fr18_admin_order_api_results.json`, `23127543_HW02_AI_DomainTesting_100/test_scripts/results/html/fr18_admin_order_api_results.html`
 
 GitHub Issue Link:
 [To be added]
@@ -345,7 +220,7 @@ Suggested Fix:
 Ensure authorized admin requests reach state-machine validation and return clear transition errors when appropriate.
 
 Evidence:
-`test_scripts/results/json/fr18_admin_order_api_results.json`, `test_scripts/results/html/fr18_admin_order_api_results.html`
+`23127543_HW02_AI_DomainTesting_100/test_scripts/results/json/fr18_admin_order_api_results.json`, `23127543_HW02_AI_DomainTesting_100/test_scripts/results/html/fr18_admin_order_api_results.html`
 
 GitHub Issue Link:
 [To be added]

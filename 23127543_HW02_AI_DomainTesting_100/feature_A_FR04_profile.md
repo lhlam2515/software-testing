@@ -38,12 +38,12 @@ According to the requirement, a user may update only their own profile. Email mu
 
 | TC ID | Technique | Domain Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|
-|FR04-DT-01 | Domain Testing | Valid profile update according to SRS | User `test@eshop.com` is logged in | `name=Nguyen Van A`, `phone=0912345678`, `shipping_address=1 Le Loi` | Open Profile, enter data, click Update | According to SRS, a 10-digit phone starting with `0` is accepted and profile is saved | To be executed | To be executed | To be generated|
-|FR04-DT-02 | Domain Testing | Empty full name | User is logged in | `name=""`, valid phone/address | Clear the full name field and submit | Browser/app blocks submission because name is required | To be executed | To be executed | To be generated|
-|FR04-DT-03 | Domain Testing | 10-digit phone starting with 0 | User is logged in | `phone=0912345678` | Update phone | Accepted according to SRS | To be executed | To be executed | To be generated|
-|FR04-DT-04 | Domain Testing | 11-digit phone starting with 0 | User is logged in | `phone=09123456789` | Update phone | Accepted according to SRS | To be executed | To be executed | To be generated|
-|FR04-DT-05 | Domain Testing | Phone does not start with 0 | User is logged in | `phone=9123456789` | Update phone | Rejected according to SRS | To be executed | To be executed | To be generated|
-|FR04-DT-06 | Domain Testing | Phone contains letters/special characters | User is logged in | `phone=09A234567!` | Update phone | Rejected and not saved | To be executed | To be executed | To be generated|
+|FR04-DT-01 | Domain Testing | Valid profile update according to SRS | User `test@eshop.com` is logged in | `name=Nguyen Van A`, `phone=0912345678`, `shipping_address=1 Le Loi` | Open Profile, enter data, click Update | According to SRS, a 10-digit phone starting with `0` is accepted and profile is saved | UI displayed an invalid phone alert for `0912345678`, so the SRS-valid profile update was blocked. | Fail | [FR04-DT-01 screenshot](evidence/screenshots/FR04-DT-01.png)|
+|FR04-DT-02 | Domain Testing | Empty full name | User is logged in | `name=""`, valid phone/address | Clear the full name field and submit | Browser/app blocks submission because name is required | Browser required-field validation blocked submission for the empty name field. | Pass | [FR04-DT-02 screenshot](evidence/screenshots/FR04-DT-02.png)|
+|FR04-DT-03 | Domain Testing | 10-digit phone starting with 0 | User is logged in | `phone=0912345678` | Update phone | Accepted according to SRS | UI displayed an invalid phone alert for the SRS-valid 10-digit phone number `0912345678`. | Fail | [FR04-DT-03 screenshot](evidence/screenshots/FR04-DT-03.png)|
+|FR04-DT-04 | Domain Testing | 11-digit phone starting with 0 | User is logged in | `phone=09123456789` | Update phone | Accepted according to SRS | UI displayed an invalid phone alert for the SRS-valid 11-digit phone number `09123456789`. | Fail | [FR04-DT-04 screenshot](evidence/screenshots/FR04-DT-04.png)|
+|FR04-DT-05 | Domain Testing | Phone does not start with 0 | User is logged in | `phone=9123456789` | Update phone | Rejected according to SRS | UI displayed an update-success alert for `9123456789`, even though the phone does not start with `0`. | Fail | [FR04-DT-05 screenshot](evidence/screenshots/FR04-DT-05.png)|
+|FR04-DT-06 | Domain Testing | Phone contains letters/special characters | User is logged in | `phone=09A234567!` | Update phone | Rejected and not saved | UI displayed an invalid phone alert for `09A234567!`, so the invalid phone was blocked. | Pass | [FR04-DT-06 screenshot](evidence/screenshots/FR04-DT-06.png)|
 | FR04-DT-07 | Domain Testing | Attempt to change email through API | User is logged in and has token | Body: `{"name":"A","phone":"9123456789","shipping_address":"X","email":"attacker@eshop.com"}` | Send `PUT /api/users/me`, then call `GET /api/users/me` | Email remains unchanged; API ignores or rejects `email` | API returned HTTP 403 Forbidden when the update payload included an email field; follow-up profile checks also returned Forbidden. | Fail | Result log available in test_scripts/results/ |
 | FR04-DT-08 | Domain Testing | Attempt role escalation with `role` | Regular user is logged in | Body includes `role:"admin"` | Send `PUT /api/users/me`, then call `GET /api/users/me` or an admin API | Role must not change; API ignores or rejects `role` | API returned HTTP 403 Forbidden when the update payload included role escalation data. | Pass | Result log available in test_scripts/results/ |
 | FR04-DT-09 | Domain Testing | Attempt to update another user | User A and User B exist | User A token, payload includes User B id | Send `PUT /api/users/me` with User B id, then check both users | Only User A from token is affected; User B remains unchanged | API returned HTTP 403 Forbidden for the profile ownership payload; follow-up checks also returned Forbidden and require review. | Needs Review | Result log available in test_scripts/results/ |
@@ -84,7 +84,7 @@ According to the requirement, a user may update only their own profile. Email mu
 | FR04-BVA-03 | Boundary Value Analysis | Phone at 11-digit maximum | User is logged in | `phone=01234567890` | Update profile | Accepted according to SRS | API returned HTTP 403 Forbidden for this profile boundary update; the result requires review against the expected boundary behavior. | Needs Review | Result log available in test_scripts/results/ |
 | FR04-BVA-04 | Boundary Value Analysis | Phone above 12-digit maximum | User is logged in | `phone=012345678901` | Update profile | Rejected | API returned HTTP 403 Forbidden for this profile boundary update; the result requires review against the expected boundary behavior. | Needs Review | Result log available in test_scripts/results/ |
 | FR04-BVA-05 | Boundary Value Analysis | First character is not 0 | User is logged in | `phone=1123456789` | Update profile | Rejected according to SRS | API returned HTTP 403 Forbidden for this profile boundary update; the result requires review against the expected boundary behavior. | Needs Review | Result log available in test_scripts/results/ |
-|FR04-BVA-06 | Boundary Value Analysis | Empty and 1-character name | User is logged in | `name=""`, then `name="A"` | Submit form/API | Empty is blocked; 1-character behavior is clear | To be executed | To be executed | To be generated|
+|FR04-BVA-06 | Boundary Value Analysis | Empty and 1-character name | User is logged in | `name=""`, then `name="A"` | Submit form/API | Empty is blocked; 1-character behavior is clear | Empty name was blocked by browser validation, and the 1-character name `A` was accepted with an update-success alert. | Pass | [FR04-BVA-06 screenshot](evidence/screenshots/FR04-BVA-06.png), [FR04-BVA-06 second screenshot](evidence/screenshots/FR04-BVA-06-2.png)|
 
 ## 5. AI Gap Analysis
 
@@ -106,52 +106,12 @@ After reading the code, tests were corrected to use `/api/users/me` and request 
 
 ## 6. Potential or Confirmed Bugs
 
-### Potential BUG-FR04-02: Backend profile API may allow role escalation
+Confirmed FR-04 bugs are listed in `bug_report.md`.
 
-**Feature:** FR-04  
-**Related Test Case:** FR04-DT-08  
-**Severity:** Critical  
-**Status:** Potential bug - needs execution evidence  
+| Related Test Case | Verdict | Notes | Evidence |
+|---|---|---|---|
+| FR04-DT-01, FR04-DT-03, FR04-DT-04, FR04-DT-05 | Fail | Web UI phone validation conflicts with the SRS: valid `0`-starting phone numbers are rejected, while a non-`0` phone number is accepted. | [FR04-DT-01 screenshot](evidence/screenshots/FR04-DT-01.png), [FR04-DT-03 screenshot](evidence/screenshots/FR04-DT-03.png), [FR04-DT-04 screenshot](evidence/screenshots/FR04-DT-04.png), [FR04-DT-05 screenshot](evidence/screenshots/FR04-DT-05.png) |
+| FR04-DT-07 | Fail | Profile update with email field returned HTTP 403 instead of a clear protected-field behavior. | `test_scripts/results/json/fr04_profile_api_results.json`, `test_scripts/results/html/fr04_profile_api_results.html` |
+| FR04-DT-09, FR04-DT-10, FR04-DT-12, FR04-BVA-01, FR04-BVA-02, FR04-BVA-03, FR04-BVA-04, FR04-BVA-05 | Needs Review | Automated API results returned HTTP 403, but the expected profile validation/storage behavior cannot be fully judged from the result log alone. | `test_scripts/results/json/fr04_profile_api_results.json`, `test_scripts/results/html/fr04_profile_api_results.html` |
 
-#### Steps to Reproduce
-1. Log in as a regular user.
-2. Send `PUT /api/users/me` with body containing `role: "admin"`.
-3. Call `GET /api/users/me` or try accessing an admin API.
-
-#### Expected Result
-
-Backend does not allow a user to change their own `role`.
-
-#### Actual Result
-To be executed.
-
-#### Evidence
-To be generated.
-
-#### GitHub Issue Link
-[To be added]
-
-### Potential BUG-FR04-03: Mobile profile sends `shippingAddress` instead of backend field `shipping_address`
-
-**Feature:** FR-04 / FR-20  
-**Related Test Case:** FR04-DT-12, FR20-DT-12  
-**Severity:** Medium  
-**Status:** Potential bug - needs execution evidence  
-
-#### Steps to Reproduce
-1. Log in on mobile.
-2. Update the shipping address.
-3. Call `GET /api/users/me` to check `shipping_address`.
-
-#### Expected Result
-
-Mobile address is saved into `shipping_address`.
-
-#### Actual Result
-To be executed.
-
-#### Evidence
-To be generated.
-
-#### GitHub Issue Link
-[To be added]
+FR04-DT-08 is not listed as a bug because the result log shows the role escalation attempt was blocked with HTTP 403.

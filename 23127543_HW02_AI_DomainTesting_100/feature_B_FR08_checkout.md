@@ -52,13 +52,13 @@ Source-code note: `POST /api/apply-coupon` uses `total_amount > min_order_amount
 
 | TC ID | Technique | Domain Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|
-|FR08-DT-01 | Domain Testing | Logged-in user with a valid cart starts checkout | User is logged in; cart has one valid item | MacBook Pro M3, qty 1, total 45,000,000 VND | Open Cart and prepare to click Proceed to Checkout | User can continue to checkout and, after confirmation, a pending order is created with the correct total | To be executed | To be executed | To be generated|
-|FR08-DT-02 | Domain Testing | Checkout from UI without login | No logged-in user; local cart has one item | Samsung Galaxy S24 Ultra, qty 1, total 28,000,000 VND | Click Proceed to Checkout from Cart | UI blocks checkout and requires the user to log in | To be executed | To be executed | To be generated|
+|FR08-DT-01 | Domain Testing | Logged-in user with a valid cart starts checkout | User is logged in; cart has one valid item | MacBook Pro M3, qty 1, total 45,000,000 VND | Open Cart and prepare to click Proceed to Checkout | User can continue to checkout and, after confirmation, a pending order is created with the correct total | Screenshot shows the checkout success page, but it does not prove the created order status or correct total. | Needs Review | [FR08-DT-01 screenshot](evidence/screenshots/FR08-DT-01.png)|
+|FR08-DT-02 | Domain Testing | Checkout from UI without login | No logged-in user; local cart has one item | Samsung Galaxy S24 Ultra, qty 1, total 28,000,000 VND | Click Proceed to Checkout from Cart | UI blocks checkout and requires the user to log in | UI displayed a login-required alert and did not continue to checkout. | Pass | [FR08-DT-02 screenshot](evidence/screenshots/FR08-DT-02.png)|
 | FR08-DT-03 | Domain Testing | Checkout API without token | No `Authorization` token | `POST /api/checkout` with body `{ "total_amount": 30000000 }` | Send the checkout request through an API client | Backend returns `401 Unauthorized`; no order is created | API returned HTTP 401 Unauthorized, so checkout without a token was blocked. | Pass | Result log available in test_scripts/results/ |
-|FR08-DT-04 | Domain Testing | Multiple cart items displayed before checkout | User is logged in; cart has multiple entries | iPhone 15 Pro Max qty 1; AirPods Pro 2 qty 1; AirPods Pro 2 qty 1 | Open Cart | UI displays all cart entries and total equals the sum of displayed line totals | To be executed | To be executed | To be generated|
-|FR08-DT-05 | Domain Testing | One cart item displayed before checkout | User is logged in; cart has one valid item | MacBook Pro M3, qty 1, total 45,000,000 VND | Open Cart before proceeding to Checkout | Cart displays exactly one product row and total equals price x quantity | To be executed | To be executed | To be generated|
-|FR08-DT-06 | Domain Testing | Multiple cart items displayed before checkout | User is logged in; cart has multiple entries | iPhone 15 Pro Max qty 1; AirPods Pro 2 qty 1; AirPods Pro 2 qty 1 | Open Cart before proceeding to Checkout | Cart displays all product rows and total equals the sum of displayed line totals | To be executed | To be executed | To be generated|
-|FR08-DT-07 | Domain Testing | Cart cleared after successful checkout | User is logged in; cart has at least one item | Successful checkout request | Confirm checkout, then return to Cart | Cart is empty after successful checkout | To be executed | To be executed | To be generated|
+|FR08-DT-04 | Domain Testing | Multiple cart items displayed before checkout | User is logged in; cart has multiple entries | iPhone 15 Pro Max qty 1; AirPods Pro 2 qty 1; AirPods Pro 2 qty 1 | Open Cart | UI displays all cart entries and total equals the sum of displayed line totals | Cart displayed all three product rows and total 42,000,000 VND, matching the visible line totals. | Pass | [FR08-DT-04 screenshot](evidence/screenshots/FR08-DT-04.png)|
+|FR08-DT-05 | Domain Testing | One cart item displayed before checkout | User is logged in; cart has one valid item | MacBook Pro M3, qty 1, total 45,000,000 VND | Open Cart before proceeding to Checkout | Cart displays exactly one product row and total equals price x quantity | Cart displayed exactly one MacBook Pro M3 row with quantity 1 and total 45,000,000 VND. | Pass | [FR08-DT-05 screenshot](evidence/screenshots/FR08-DT-05.png)|
+|FR08-DT-06 | Domain Testing | Multiple cart items displayed before checkout | User is logged in; cart has multiple entries | iPhone 15 Pro Max qty 1; AirPods Pro 2 qty 1; AirPods Pro 2 qty 1 | Open Cart before proceeding to Checkout | Cart displays all product rows and total equals the sum of displayed line totals | Cart displayed all three product rows and total 42,000,000 VND, matching the visible line totals. | Pass | [FR08-DT-06 screenshot](evidence/screenshots/FR08-DT-06.png)|
+|FR08-DT-07 | Domain Testing | Cart cleared after successful checkout | User is logged in; cart has at least one item | Successful checkout request | Confirm checkout, then return to Cart | Cart is empty after successful checkout | Checkout success was shown, but returning to Cart still displayed the previous items. | Fail | [FR08-DT-07 screenshot](evidence/screenshots/FR08-DT-07.png), [FR08-DT-07 second screenshot](evidence/screenshots/FR08-DT-07-2.png)|
 | FR08-DT-08 | Domain Testing | Backend total calculation | User is logged in; real cart total is greater than 1 VND | API body `{ "total_amount": 1, "shipping_address": "Test address" }` | Send `POST /api/checkout` with valid token | Backend recalculates from trusted cart/product data or rejects the wrong total | API returned HTTP 403 Forbidden for the manipulated total_amount checkout request. | Pass | Result log available in test_scripts/results/ |
 | FR08-DT-09 | Domain Testing | Zero or negative total through API | User is logged in | `total_amount = -1`, then `total_amount = 0`, with `shipping_address = "Test address"` | Send checkout API requests with valid token | Backend rejects invalid money values and creates no order | FR08-DT-09-negative returned HTTP 403 Forbidden. FR08-DT-09-zero returned HTTP 403 Forbidden. | Pass | Result log available in test_scripts/results/ |
 | FR08-DT-10 | Domain Testing | Missing shipping address through API | User is logged in | Body contains `total_amount` only | Send checkout API request with valid token | Backend implementation accepts checkout without `shipping_address` and creates an order; the behavior should be documented because the API does not validate this field | API returned HTTP 403 Forbidden for checkout without shipping address; behavior requires review. | Needs Review | Result log available in test_scripts/results/ |
@@ -100,19 +100,19 @@ Implementation notes used for this BVA set:
 
 | TC ID | Technique | Domain Focus | Preconditions | Input Data | Steps | Expected Result | Actual Result | Verdict | Evidence |
 |---|---|---|---|---|---|---|---|---|---|
-|FR08-BVA-01 | Boundary Value Analysis | Cart item count below minimum | User is logged in; frontend cart is empty | 0 cart items | Open Cart, then try to proceed to Checkout; also try direct `/checkout` in the browser if needed | Checkout is blocked for an empty cart and no order is created | To be executed | To be executed | To be generated|
-|FR08-BVA-02 | Boundary Value Analysis | Cart item count at minimum | User is logged in | 1 cart item with valid product and quantity 1 | Add one product to cart, proceed to Checkout, and confirm checkout | Checkout succeeds and the checkout page displays exactly one product before confirmation | To be executed | To be executed | To be generated|
-|FR08-BVA-03 | Boundary Value Analysis | Cart item count above minimum | User is logged in | 2 cart items with valid products | Add two products to cart, proceed to Checkout, and confirm checkout | Checkout succeeds and the checkout page displays both products before confirmation | To be executed | To be executed | To be generated|
-|FR08-BVA-04 | Boundary Value Analysis | Quantity below minimum | User is logged in; product detail page is available | Quantity `0` | Open a product detail page, enter quantity `0`, add to cart, then inspect Cart/Checkout | Quantity `0` is rejected or checkout is blocked before creating an order | To be executed | To be executed | To be generated|
-|FR08-BVA-05 | Boundary Value Analysis | Quantity at minimum | User is logged in; product detail page is available | Quantity `1` | Open a product detail page, enter quantity `1`, add to cart, then open Checkout | Checkout shows one unit and subtotal equals product price x 1 | To be executed | To be executed | To be generated|
-|FR08-BVA-06 | Boundary Value Analysis | Quantity above minimum | User is logged in; product detail page is available | Quantity `2` | Open a product detail page, enter quantity `2`, add to cart, then open Checkout | Checkout shows two units and subtotal equals product price x 2 | To be executed | To be executed | To be generated|
+|FR08-BVA-01 | Boundary Value Analysis | Cart item count below minimum | User is logged in; frontend cart is empty | 0 cart items | Open Cart, then try to proceed to Checkout; also try direct `/checkout` in the browser if needed | Checkout is blocked for an empty cart and no order is created | Cart page displayed the empty-cart state with no checkout action available. | Pass | [FR08-BVA-01 screenshot](evidence/screenshots/FR08-BVA-01.png)|
+|FR08-BVA-02 | Boundary Value Analysis | Cart item count at minimum | User is logged in | 1 cart item with valid product and quantity 1 | Add one product to cart, proceed to Checkout, and confirm checkout | Checkout succeeds and the checkout page displays exactly one product before confirmation | Screenshot shows one product on the checkout confirmation page, but it does not prove checkout success after confirmation. | Needs Review | [FR08-BVA-02 screenshot](evidence/screenshots/FR08-BVA-02.png)|
+|FR08-BVA-03 | Boundary Value Analysis | Cart item count above minimum | User is logged in | 2 cart items with valid products | Add two products to cart, proceed to Checkout, and confirm checkout | Checkout succeeds and the checkout page displays both products before confirmation | Screenshot shows two products and total 73,000,000 VND on the checkout confirmation page, but it does not prove checkout success after confirmation. | Needs Review | [FR08-BVA-03 screenshot](evidence/screenshots/FR08-BVA-03.png)|
+|FR08-BVA-04 | Boundary Value Analysis | Quantity below minimum | User is logged in; product detail page is available | Quantity `0` | Open a product detail page, enter quantity `0`, add to cart, then inspect Cart/Checkout | Quantity `0` is rejected or checkout is blocked before creating an order | Cart displayed a product row with quantity 0 and still showed the checkout button. | Fail | [FR08-BVA-04 screenshot](evidence/screenshots/FR08-BVA-04.png)|
+|FR08-BVA-05 | Boundary Value Analysis | Quantity at minimum | User is logged in; product detail page is available | Quantity `1` | Open a product detail page, enter quantity `1`, add to cart, then open Checkout | Checkout shows one unit and subtotal equals product price x 1 | Screenshot shows quantity 1 on the product detail page, but does not show the cart or checkout subtotal. | Needs Review | [FR08-BVA-05 screenshot](evidence/screenshots/FR08-BVA-05.png)|
+|FR08-BVA-06 | Boundary Value Analysis | Quantity above minimum | User is logged in; product detail page is available | Quantity `2` | Open a product detail page, enter quantity `2`, add to cart, then open Checkout | Checkout shows two units and subtotal equals product price x 2 | Screenshot shows quantity 2 on the product detail page, but does not show the cart or checkout subtotal. | Needs Review | [FR08-BVA-06 screenshot](evidence/screenshots/FR08-BVA-06.png)|
 | FR08-BVA-07 | Boundary Value Analysis | Authentication below boundary | No token is provided | `POST /api/checkout` with valid-looking body and no `Authorization` header | Send checkout request through Apidog/API client | Backend returns `401 Unauthorized` and no order is created | API returned HTTP 401 Unauthorized, so the no-token boundary was blocked. | Pass | Result log available in test_scripts/results/ |
 | FR08-BVA-08 | Boundary Value Analysis | Authentication on boundary | Valid user token exists | `POST /api/checkout` with positive `total_amount` and valid bearer token | Log in, copy token, and send checkout request through Apidog/API client | Backend accepts the authenticated checkout request and returns checkout success with an `orderId` | API returned HTTP 403 Forbidden for the valid-token checkout boundary instead of creating an order. | Fail | Result log available in test_scripts/results/ |
 | FR08-BVA-09 | Boundary Value Analysis | Coupon threshold below minimum | User is logged in; coupon has not exceeded usage limit | `SAVE10`, `total_amount = 299999` | Send `POST /api/apply-coupon`, then keep checkout total unchanged | Coupon is rejected because the order total is below the minimum amount | API returned HTTP 400 for SAVE10 below the minimum threshold; review the exact threshold behavior. | Needs Review | Result log available in test_scripts/results/ |
 | FR08-BVA-10 | Boundary Value Analysis | Coupon threshold exactly at minimum | User is logged in; coupon has not exceeded usage limit | `SAVE10`, `total_amount = 300000` | Send `POST /api/apply-coupon`, then proceed to checkout only if coupon is accepted | Coupon is accepted at the documented minimum threshold and discounted total is shown | API returned HTTP 400 for SAVE10 exactly at the documented minimum threshold; review whether the threshold should be inclusive. | Needs Review | Result log available in test_scripts/results/ |
 | FR08-BVA-11 | Boundary Value Analysis | Coupon threshold above minimum | User is logged in; coupon has not exceeded usage limit | `SAVE10`, `total_amount = 300001` | Send `POST /api/apply-coupon`, then proceed to checkout if coupon is accepted | Coupon is accepted above the minimum threshold and discounted total is shown | API returned HTTP 200 for SAVE10 above the minimum threshold, but the discount amount requires review. | Needs Review | Result log available in test_scripts/results/ |
 | FR08-BVA-12 | Boundary Value Analysis | Coupon usage limit | User is logged in; `VIP100` has max 2 uses per user | Apply `VIP100` before first use, second use, and third use | Apply coupon, checkout successfully, call `POST /api/coupon-usage`, then repeat until the third apply attempt | First and second uses are allowed; third use is rejected because usage count reaches the max | Coupon apply step returned HTTP 200, but the coupon usage recording request returned HTTP 403 Forbidden. | Fail | Result log available in test_scripts/results/ |
-|FR08-BVA-13 | Boundary Value Analysis | Cart state after checkout | User is logged in; cart has one valid item | Cart before checkout has 1 item; after success should have 0 items; repeat checkout without new item | Add one item, complete checkout, return to Cart, then try checkout again without adding a new item | Cart is cleared after success and repeated checkout is blocked until a new item is added | To be executed | To be executed | To be generated|
+|FR08-BVA-13 | Boundary Value Analysis | Cart state after checkout | User is logged in; cart has one valid item | Cart before checkout has 1 item; after success should have 0 items; repeat checkout without new item | Add one item, complete checkout, return to Cart, then try checkout again without adding a new item | Cart is cleared after success and repeated checkout is blocked until a new item is added | Checkout success was shown, but returning to Cart still displayed items, so repeated checkout was not blocked by an empty cart. | Fail | [FR08-BVA-13 screenshot](evidence/screenshots/FR08-BVA-13.png), [FR08-BVA-13 second screenshot](evidence/screenshots/FR08-BVA-13-2.png)|
 
 ### 4.4 Source-Code Review Notes
 
@@ -145,127 +145,15 @@ Test cases were corrected to use actual route `POST /api/checkout`, actual token
 
 ## 6. Potential or Confirmed Bugs
 
-### BUG-FR08-01: Backend checkout trusts client-provided `total_amount`
+Confirmed FR-08 bugs are listed in `bug_report.md`.
 
-**Feature:** FR-08 Checkout  
-**Related Test Case:** FR08-DT-08, FR08-BVA-05  
-**Severity:** Critical  
-**Status:** Potential bug - needs execution evidence  
+| Related Test Case | Verdict | Notes | Evidence |
+|---|---|---|---|
+| FR08-BVA-08 | Fail | Checkout with a valid bearer token returned HTTP 403 instead of creating an order. | `test_scripts/results/json/fr08_checkout_api_results.json`, `test_scripts/results/html/fr08_checkout_api_results.html` |
+| FR08-BVA-12 | Fail | Coupon application returned HTTP 200, but coupon usage recording returned HTTP 403. | `test_scripts/results/json/fr08_checkout_api_results.json`, `test_scripts/results/html/fr08_checkout_api_results.html` |
+| FR08-DT-07, FR08-BVA-13 | Fail | Web checkout shows success, but the cart still contains items afterward. | [FR08-DT-07 screenshot](evidence/screenshots/FR08-DT-07.png), [FR08-DT-07 second screenshot](evidence/screenshots/FR08-DT-07-2.png), [FR08-BVA-13 screenshot](evidence/screenshots/FR08-BVA-13.png), [FR08-BVA-13 second screenshot](evidence/screenshots/FR08-BVA-13-2.png) |
+| FR08-BVA-04 | Fail | Quantity `0` is accepted into the cart and checkout remains available. | [FR08-BVA-04 screenshot](evidence/screenshots/FR08-BVA-04.png) |
+| FR08-DT-10, FR08-BVA-09, FR08-BVA-10, FR08-BVA-11 | Needs Review | The API result exists, but the expected behavior requires manual review of requirements and coupon calculation/threshold behavior. | `test_scripts/results/json/fr08_checkout_api_results.json`, `test_scripts/results/html/fr08_checkout_api_results.html` |
+| FR08-DT-01, FR08-BVA-02, FR08-BVA-03, FR08-BVA-05, FR08-BVA-06 | Needs Review | Screenshot evidence exists, but it proves only part of the expected behavior. | [FR08-DT-01 screenshot](evidence/screenshots/FR08-DT-01.png), [FR08-BVA-02 screenshot](evidence/screenshots/FR08-BVA-02.png), [FR08-BVA-03 screenshot](evidence/screenshots/FR08-BVA-03.png), [FR08-BVA-05 screenshot](evidence/screenshots/FR08-BVA-05.png), [FR08-BVA-06 screenshot](evidence/screenshots/FR08-BVA-06.png) |
 
-#### Steps to Reproduce
-1. Log in and prepare a cart with total greater than 1 VND.
-2. Send `POST /api/checkout` with `total_amount: 1`.
-3. Check the newly created order in user order history or admin order list.
-
-#### Expected Result
-
-Backend recalculates total from trusted cart/product data or rejects the wrong request.
-
-#### Actual Result
-API returns HTTP 200 and creates an order when `total_amount` is manipulated to `1`.
-
-#### Evidence
-To be generated.
-
-#### GitHub Issue Link
-[To be added]
-
-### BUG-FR08-02: Checkout API accepts zero and negative totals
-
-**Feature:** FR-08 Checkout  
-**Related Test Case:** FR08-DT-09  
-**Severity:** Critical  
-**Status:** Potential bug - needs execution evidence  
-
-#### Steps to Reproduce
-1. Log in and use a valid user token.
-2. Send `POST /api/checkout` with `total_amount: -1`.
-3. Send `POST /api/checkout` with `total_amount: 0`.
-
-#### Expected Result
-
-Backend rejects invalid totals and creates no order.
-
-#### Actual Result
-API returns HTTP 200 and creates orders for both negative and zero totals.
-
-#### Evidence
-To be generated.
-
-#### GitHub Issue Link
-[To be added]
-
-### BUG-FR08-03: Web checkout does not clear cart after success
-
-**Feature:** FR-08 Checkout  
-**Related Test Case:** FR08-BVA-13  
-**Severity:** High  
-**Status:** Potential bug - needs execution evidence  
-
-#### Steps to Reproduce
-1. Log in on web and add a product to cart.
-2. Complete checkout successfully.
-3. Return to the cart page.
-
-#### Expected Result
-
-Cart is cleared after successful checkout.
-
-#### Actual Result
-Checkout success is shown, but returning to Cart still shows the same item with quantity 2 and total 8,000,000 VND.
-
-#### Evidence
-To be generated.
-
-#### GitHub Issue Link
-[To be added]
-
-### BUG-FR08-04: Product detail accepts quantity 0
-
-**Feature:** FR-08 Checkout  
-**Related Test Case:** FR08-BVA-04  
-**Severity:** High  
-**Status:** Potential bug - needs execution evidence  
-
-#### Steps to Reproduce
-1. Log in on web and open a product detail page.
-2. Enter quantity `0`.
-3. Click Add to Cart.
-
-#### Expected Result
-
-Quantity `0` is rejected or checkout is blocked before an order can be created.
-
-#### Actual Result
-The product detail page accepts quantity `0` and shows the item as added.
-
-#### Evidence
-To be generated.
-
-#### GitHub Issue Link
-[To be added]
-
-### BUG-FR08-05: Coupon at documented minimum threshold is rejected
-
-**Feature:** FR-08 Checkout  
-**Related Test Case:** FR08-BVA-10  
-**Severity:** Medium  
-**Status:** Potential bug - needs execution evidence  
-
-#### Steps to Reproduce
-1. Send `POST /api/apply-coupon`.
-2. Use body `{ "code": "SAVE10", "total_amount": 300000 }`.
-3. Observe the API response.
-
-#### Expected Result
-
-Coupon `SAVE10` is accepted at its documented minimum threshold of 300,000 VND.
-
-#### Actual Result
-API returns HTTP 400 and rejects the coupon at exactly 300,000 VND.
-
-#### Evidence
-To be generated.
-
-#### GitHub Issue Link
-[To be added]
+Rows still marked `To be executed` are not listed as confirmed or potential bugs because no result file exists for them.

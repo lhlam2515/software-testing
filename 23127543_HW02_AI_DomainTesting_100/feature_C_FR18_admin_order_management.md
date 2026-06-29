@@ -164,80 +164,15 @@ Tests were corrected according to actual routes, with added role/user-token case
 
 ## 6. Potential or Confirmed Bugs
 
-### Potential BUG-FR18-01: Admin APIs may not check `role=admin`
+Confirmed FR-18 bugs are listed in `bug_report.md`.
 
-**Feature:** FR-18  
-**Related Test Case:** FR18-DT-02  
-**Severity:** Critical  
-**Status:** Potential bug - needs execution evidence  
+| Related Test Case | Verdict | Notes | Evidence |
+|---|---|---|---|
+| FR18-DT-01 | Fail | Admin token returned HTTP 403 when viewing the admin order list. | `test_scripts/results/json/fr18_admin_order_api_results.json`, `test_scripts/results/html/fr18_admin_order_api_results.html` |
+| FR18-DT-04, FR18-DT-05, FR18-DT-06, FR18-DT-07, FR18-DT-08, FR18-BVA-04 | Fail | Valid admin order status transitions returned HTTP 403. | `test_scripts/results/json/fr18_admin_order_api_results.json`, `test_scripts/results/html/fr18_admin_order_api_results.html` |
+| FR18-DT-09, FR18-DT-10, FR18-DT-11, FR18-BVA-05, FR18-BVA-06 | Fail | State-machine validation could not be reached because admin status update requests returned HTTP 403 and no follow-up status was available. | `test_scripts/results/json/fr18_admin_order_api_results.json`, `test_scripts/results/html/fr18_admin_order_api_results.html` |
 
-#### Steps to Reproduce
-1. Log in as a regular user.
-2. Use the regular user token to call `GET /api/admin/orders`.
-3. Observe the response.
-
-#### Expected Result
-
-API returns 401/403 because the user is not an admin.
-
-#### Actual Result
-To be executed.
-
-#### Evidence
-To be generated.
-
-#### GitHub Issue Link
-[To be added]
-
-### Potential BUG-FR18-02: `canceled -> delivered` may be allowed
-
-**Feature:** FR-18  
-**Related Test Case:** FR18-DT-11, FR18-BVA-06  
-**Severity:** High  
-**Status:** Potential bug - needs execution evidence  
-
-#### Steps to Reproduce
-1. Create or locate an order with status `canceled`.
-2. Send `PUT /api/admin/orders/:id/status` with `{"status":"delivered"}`.
-3. Check status after the response.
-
-#### Expected Result
-
-API rejects the transition because `canceled` is a final state.
-
-#### Actual Result
-To be executed.
-
-#### Evidence
-To be generated.
-
-#### GitHub Issue Link
-[To be added]
-
-### Potential BUG-FR18-03: Admin UI may render shipping address as HTML
-
-**Feature:** FR-18  
-**Related Test Case:** FR18-DT-12  
-**Severity:** Critical  
-**Status:** Potential bug - needs execution evidence  
-
-#### Steps to Reproduce
-1. Create an order whose address contains HTML/script.
-2. Open the Orders tab in admin.
-3. Observe whether script/HTML is rendered.
-
-#### Expected Result
-
-Address is escaped as text.
-
-#### Actual Result
-To be executed.
-
-#### Evidence
-To be generated.
-
-#### GitHub Issue Link
-[To be added]
+FR18-DT-02 and FR18-DT-03 are not listed as bugs because the result logs show non-admin and no-token access were blocked. Rows still marked `To be executed` are not listed as confirmed or potential bugs because no result file exists for them.
 
 ## 7. API Execution Helper
 

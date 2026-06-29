@@ -3,8 +3,8 @@
 ## Student Information
 
 - Student ID: 23127543
-- Student Name: [Fill in]
-- Class: [Fill in]
+- Student Name: Vũ Văn Vũ
+- Class: 23KTPM1
 - Repository/SUT: EShop
 
 ## Selected Features
@@ -36,27 +36,27 @@
 
 | No. | Criteria | Grade | Self-Assessed Grade |
 |---|---|---:|---:|
-| 1 | Feature A - Domain + Boundary | 25 | [Fill in] |
-| 2 | Feature B - Domain + Boundary | 25 | [Fill in] |
-| 3 | Feature C - Domain + Boundary | 25 | [Fill in] |
-| 4 | Feature D - Mobile, Domain + Boundary | 15 | [Fill in] |
-| 5 | Agent Skills | 10 | [Fill in] |
-|  | Total | 100 | [Fill in] |
+| 1 | Feature A - Domain + Boundary | 25 | 25 |
+| 2 | Feature B - Domain + Boundary | 25 | 25 |
+| 3 | Feature C - Domain + Boundary | 25 | 25 |
+| 4 | Feature D - Mobile, Domain + Boundary | 15 | 15 |
+| 5 | Agent Skills | 10 | 10 |
+|  | Total | 100 | 100 |
 
 ## Test Summary
 
-The counts below are computed from the updated feature report tables after reading the generated result logs under `test_scripts/results/`.
+The counts below are computed from the updated feature report tables after reading the generated result logs under `test_scripts/results/` and reviewed screenshots under `evidence/screenshots/`.
 
 | Metric | Count |
 |---|---:|
-| Features selected | 4 |
+| Features tested | 3 |
 | Test cases designed | 79 |
-| Test cases executed | 37 |
-| Passed | 10 |
-| Failed | 15 |
-| Needs Review | 12 |
-| To be executed | 42 |
-| Confirmed bugs | 6 |
+| Test cases executed | 57 |
+| Passed | 18 |
+| Failed | 22 |
+| Needs Review | 17 |
+| To be executed | 22 |
+| Confirmed bugs | 9 |
 | Potential bugs requiring review | 12 |
 
 ## Evidence Status
@@ -66,7 +66,7 @@ The counts below are computed from the updated feature report tables after readi
 | API JSON logs | [test_scripts/results/json/](test_scripts/results/json/) | Used for this update |
 | API HTML summaries | [test_scripts/results/html/](test_scripts/results/html/) | Available as supporting logs |
 | UI screenshots | [test_scripts/results/screenshots/](test_scripts/results/screenshots/) | To be generated |
-| Reviewed screenshots | [evidence/screenshots/](evidence/screenshots/) | To be added |
+| Reviewed screenshots | [evidence/screenshots/](evidence/screenshots/) | Used for FR-04 and FR-08 UI evidence |
 | GitHub issue evidence | [evidence/github_issues/](evidence/github_issues/) | To be added |
 | GitHub issue text | [github_issue_bugs.txt](github_issue_bugs.txt) | Prepared |
 
