@@ -189,6 +189,31 @@ The value of a gap-probe TC is that it converts a spec silence into an observabl
 repeatable test target without manufacturing a fake expected result. The tester goes in
 knowing what to look for and how to classify what they find.
 
+**Gap Completeness Cross-Check (mandatory before AskUserQuestion)**
+
+After all normal TCs and gap-probe TCs are drafted, scan the Step 1 gap table row by row.
+For each gap, ask: "Which TC specifically answers the behavioral question this gap raises?"
+EC coverage alone does not satisfy this check — a TC closes a gap only if its verification
+points directly address what the gap's uncertainty was.
+
+Two gap types that EC minimization routinely skips:
+
+1. **Observational gaps** (unknown schema, format, or field names): No new EC exists for
+   these — they do not represent a new input partition, so EC minimization never generates
+   a TC for them. Use the same valid input as TC-01 and add a verification point that
+   records the raw response body verbatim. The output becomes the verified schema for all
+   subsequent TCs that assert field names.
+
+2. **Intra-EC behavioral gaps** (how the system behaves *within* an already-covered class):
+   An existing TC covers the EC, so minimization stops — but if the spec is silent on the
+   internal mechanism (e.g., early-exit vs. full-scan for a failure batch, per-row vs.
+   first-failure-only error reporting), a behavioral question remains open. EC coverage ≠
+   behavioral gap resolved. Create a separate gap-probe TC even when the EC is already
+   covered.
+
+If any Step 1 gap has no TC that specifically answers it, create the missing gap-probe TC
+before proceeding.
+
 **→ Use AskUserQuestion before writing files.**
 **→ When accepted: Write Steps 1–3 content to `domain-testing.md`** (see File Format below).
 
@@ -381,6 +406,7 @@ Options:
 - [ ] Implicit Gaps and Spec Conflicts are flagged with their risk — not silently assumed away
 - [ ] Output ECs are partitioned and tracked via "Verified Absent" in relevant TCs
 - [ ] Cross-referenced specs were used only to add constraints to existing Step 1 variables — no new EC Groups were created for behaviors owned by the cross-referenced feature
-- [ ] Every Implicit Gap and Spec Conflict from Step 1 has a corresponding gap-probe TC in Step 3 with a multi-branch Expected Result (not a single assertion)
+- [ ] Every Implicit Gap and Spec Conflict from Step 1 maps to a gap-probe TC that specifically answers its behavioral question — verify row by row against the Step 1 gap table; EC coverage of the same class is not sufficient; observational gaps and intra-EC behavioral gaps each require their own TC even when all ECs are already covered
+- [ ] Gap-probe TCs have a multi-branch Expected Result listing every plausible outcome, not a single assertion
 - [ ] BVA parameter variation applied wherever the boundary condition has a configurable parameter — at least 2 different parameter values tested at the ON point
 - [ ] Date/timestamp BVA TCs include a maintenance note stating the design date and instructing the executor to update boundary values to `current_date` before running

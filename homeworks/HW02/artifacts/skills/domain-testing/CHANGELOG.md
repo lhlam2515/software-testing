@@ -1,5 +1,12 @@
 # CHANGELOG — domain-testing
 
+## v0.3 — 2026-06-30
+
+- Added Gap Completeness Cross-Check to Step 3: mandatory row-by-row scan of the Step 1 gap table after all TCs are drafted, before AskUserQuestion; EC coverage of the same class does not satisfy a gap
+- Defined two gap types that EC minimization routinely skips: (1) Observational gaps — no new EC exists, probe uses valid input + raw-response record; (2) Intra-EC behavioral gaps — EC is already covered but spec is silent on internal mechanism (e.g., early-exit vs. full-scan), requiring a separate gap-probe TC
+- Split Quality Checklist gap item into two: (1) row-by-row gap-to-TC mapping with explicit callout that observational and intra-EC behavioral gaps each need their own TC; (2) multi-branch Expected Result requirement separated for clarity
+- Root cause: FR-16 audit identified the same structural omission as FR-09 — Step 1 gaps were correctly identified but the pipeline had no back-reference pass, allowing EC minimization to silently skip gaps that did not produce new ECs
+
 ## v0.2 — 2026-06-26
 
 - Added cross-reference filter rule to Phase 0: cross-referenced specs may only add constraints to existing Step 1 variables — no new EC Groups for behaviors owned by other features
