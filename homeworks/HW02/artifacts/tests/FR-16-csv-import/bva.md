@@ -222,8 +222,9 @@ console.assert(name256.length === 256, 'TC-BVA-05: name must be exactly 256 char
 | EP — Invalid Input | TC-05–TC-11 | EC05, EC08, EC09, EC12, EC13, EC14, EC15 + EC19, EC21 |
 | EP — Atomicity | TC-12 | EC19, EC21 (multi-row context) |
 | Gap Probes | TC-13–TC-16 | EC06, EC10, EC17, EC22 |
-| **EP Subtotal** | **16 TCs** | 22/22 ECs |
+| Student-added Gap Probes | TC-17, TC-18 | Response schema + all-invalid rollback |
+| **EP Subtotal** | **18 TCs** | 22/22 ECs |
 | BVA — `price` boundary | TC-BVA-01, TC-BVA-02 | ON point (0) + min valid (1) |
 | BVA — `name` length boundary | TC-BVA-03, TC-BVA-04, TC-BVA-05 | UB-1 / UB / UB+1 at 255-char limit |
 | **BVA Subtotal** | **5 TCs** | — |
-| **GRAND TOTAL** | **21 TCs** | 22/22 ECs fully covered |
+| **GRAND TOTAL** | **23 TCs** | 22/22 ECs fully covered |

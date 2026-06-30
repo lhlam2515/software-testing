@@ -416,6 +416,44 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 
 ---
 
+### TC-17 [Gap Probe] — Import report response schema
+
+| Field | Content |
+|:---|:---|
+| **TC ID** | TC-17 |
+| **Test Case Name** | [Gap Probe] What JSON fields does the import report response actually return? (Step 1 Gap #6 — API spec defines no response body example) |
+| **ECs Covered** | EC01, EC04, EC07, EC11, EC16, EC18, EC20 _(valid path required; schema observation needs a successful import)_ |
+| **ECs Verified Absent** | N/A — gap test, discover actual response structure |
+| **Pre-conditions** | Admin JWT; category ID=1 exists |
+| **Input — endpoint** | `POST /api/admin/import-products` |
+| **Input — header** | `Authorization: Bearer <admin_token>` |
+| **Input — body** | `{"products": [{"name": "Schema Probe Product", "price": 75000, "description": "", "imageUrl": "", "category_id": 1}]}` |
+| **Steps** | 1. Log in, obtain token · 2. Send POST · 3. Record raw response body verbatim — every key, type, and value |
+| **Expected Result** | _Multiple branches — record actual result:_ · If response contains `{"imported": 1, "failed": 0, ...}` → document `imported` and `failed` as canonical field names · If response contains `{"success": 1}` or other schema → record actual field names and update Verification Points in TC-01, TC-02, TC-06 through TC-12 accordingly · If HTTP 500 → **BUG**: schema probe crashes the server on valid input |
+| **Verification Points** | 1. Record complete raw JSON response body · 2. List all top-level keys and their types · 3. Confirm "Schema Probe Product" appears in `GET /api/products` (validates import succeeded, not just response received) |
+| **Status** | ⬜ Not yet executed |
+
+---
+
+### TC-18 [Gap Probe] — All-rows-invalid batch: rollback and report completeness
+
+| Field | Content |
+|:---|:---|
+| **TC ID** | TC-18 |
+| **Test Case Name** | [Gap Probe] When every row is invalid, does the report list per-row failure reasons for all rows or only the first? (Step 1 Gap #7 — rollback scope when all rows fail) |
+| **ECs Covered** | EC19, EC21 _(all-invalid multi-row context — TC-12 tests mixed valid+invalid; this probes the all-fail case)_ |
+| **ECs Verified Absent** | N/A — gap test, discover actual behavior |
+| **Pre-conditions** | Admin JWT; category ID=1 exists; record product count before request |
+| **Input — endpoint** | `POST /api/admin/import-products` |
+| **Input — header** | `Authorization: Bearer <admin_token>` |
+| **Input — body** | `{"products": [{"name": "Invalid Row 1", "price": 0, "description": "", "imageUrl": "", "category_id": 1}, {"name": "Invalid Row 2", "price": -1, "description": "", "imageUrl": "", "category_id": 1}, {"name": "Invalid Row 3", "price": "abc", "description": "", "imageUrl": "", "category_id": 1}]}` _(3 rows, each with a distinct price violation)_ |
+| **Steps** | 1. Log in, obtain token · 2. Record product count · 3. Send POST · 4. Record full response body · 5. Call `GET /api/products` and verify count unchanged |
+| **Expected Result** | _Multiple branches — record actual result:_ · If response lists 3 separate failure entries (one per row, each with a distinct reason) → SUT processes all rows before rolling back; SRS "lý do từng dòng" requirement satisfied · If response lists only 1 failure entry → SUT early-exits after first invalid row; rows 2 and 3 unreported → **undocumented behavior**: report is incomplete per SRS · If HTTP 4xx with no per-row detail → **BUG**: batch rejected without per-row report; "lý do" requirement violated |
+| **Verification Points** | 1. Product count unchanged (full rollback confirmed) · 2. Number of failure entries in response body (1 vs 3?) · 3. Each failure entry identifies which row and what reason? |
+| **Status** | ⬜ Not yet executed |
+
+---
+
 ## 5. EC Coverage Matrix
 
 | EC ID | Description (summary) | TC | Mechanism |
@@ -443,4 +481,11 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | EC21 | Report: failure with reasons | TC-06–TC-12 | Observed |
 | EC22 | `price` as string "10000" | TC-16 | Gap Probe |
 
-**Total: 16 TCs** — 12 EP TCs + 4 Gap Probes — covering 22/22 ECs.
+**Student-added Gap Probes (Step 1 gaps not converted to TCs by AI — no new ECs defined):**
+
+| TC | Gap Probed | Step 1 Gap Source |
+|:---|:---|:---|
+| TC-17 | Response schema: records actual JSON field names returned by a successful import | Gap #6 — Report response schema not defined in API spec §6.3 |
+| TC-18 | All-rows-invalid batch: verifies whether report lists per-row reasons for all N failures or only the first | Gap #7 — Rollback scope when all rows fail not addressed in SRS |
+
+**Total: 18 TCs** — 12 EP TCs + 4 AI-generated Gap Probes + 2 Student-added Gap Probes — covering 22/22 ECs.
