@@ -135,36 +135,64 @@ Per ISTQB FL section 4.2.1, equivalence partitioning requires identifying all pa
 
 ---
 
-### Artifact #3 — FR-16 Domain Testing (File Domain + Atomicity Classes)
+### Artifact #3: FR-16 Domain Testing (File Domain + Atomicity Classes)
 
-> **Requirement mapping:** FR-16 CSV Import — EP for file format, row validation, atomic rollback
+> **Requirement mapping:** FR-16 CSV Import: EP for file format, row validation, atomic rollback
 
 #### (1) Prompt + Tool
 
-**Tool:** Claude Code  
-**Time:** _**:**_ DD/MM/2026  
+**Tool:** Claude Code (claude-sonnet-4-6, domain-testing skill)  
+**Time:** 21:31 27/06/2026  
 **Prompt:**
-> _[Paste verbatim prompt here]_
+> Hãy áp dụng kỹ thuật /domain-testing để thực hiện thiết kế test case chi tiết cho FR-16 - CSV Import đã được document bên trong eshop-sut/srs.md và eshop-sut/api-specification.md
 
 #### (2) AI Output
 
-> See [Prompt Log](prompt_log.md) — entry **_**:**_ DD/MM/2026**.
+See [Prompt Log](prompt_log.md), entry **21:31 27/06/2026**.
+
+AI autonomously executed all 4 steps of the domain testing framework via the `domain-testing` skill, reading both `srs.md` (FR-16 and FR-15 cross-reference) and `api_specification.md` (section 6.3 endpoint and body schema). Output produced in English in a single invocation. Committed as `0f518d7`.
+
+Deliverables written to disk:
+
+- `artifacts/tests/FR-16-csv-import/domain-testing.md`
+- `artifacts/tests/FR-16-csv-import/bva.md`
 
 #### (3) Verdict
 
-**[ ] VALID** — correct and accepted as-is  
-**[ ] INVALID** — wrong; rejected  
-**[ ] INCOMPLETE** — acceptable after edits
+**[ ] VALID**: correct and accepted as-is  
+**[ ] INVALID**: wrong; rejected  
+**[x] INCOMPLETE**: acceptable after edits
 
 #### (4) Reasoning (ISTQB / S04)
 
-_[2–5 sentences. Reference ISTQB FL §4.2 EP, atomic transaction invariant from SRS FR-16]_
+Per ISTQB FL section 4.2.1 and the S04 domain testing framework, the AI correctly
+identified the Spec Conflict (SRS: CSV file upload; API: JSON body), scoped testing
+to the JSON layer, and applied Must-Be, Range, and Splitting rules to produce 22 ECs
+across 7 groups and 16 base TCs. Gap-probe TCs were generated for 4 of 7 Implicit
+Gaps (TC-13 through TC-16). Two gaps were not actioned:
+
+**Deficiency 1: No gap-probe TC for Import Report response schema (Step 1 Gap #6)**
+
+- Step 3 selects TCs via EC minimization and Error Isolation; Gap #6 required a
+  schema-observation probe (valid input, observational assertion) that fits neither
+  track, so it was silently skipped when both tracks completed.
+
+**Deficiency 2: No gap-probe TC for all-rows-invalid rollback (Step 1 Gap #7)**
+
+- EC19 was already covered by TC-12, so EC minimization stopped. Gap #7 probes
+  behavior within EC19's class (early-exit vs. full-scan), not a new EC; without
+  a separate gap-completeness pass, TC-12's coverage was treated as sufficient.
+
+Both omissions are structural, not prompt-quality failures; the Step 1 observations
+were correct, but the pipeline has no back-reference pass confirming every Step 1 gap
+produced a Step 3 TC. Same root cause as FR-09 Artifact #2.
 
 #### (5) Student Fix
 
 | # | AI-generated item | Issue | Corrected item |
 | - | ----------------- | ----- | -------------- |
-| | | | |
+| 1 | Step 1 Implicit Gaps table, Gap #6: "Report response schema: SRS says 'clear report' but the API spec does not define the response body schema for this endpoint. Unknown which fields to verify: `imported`, `failed`, `errors[]`?" No gap-probe TC created. | The 4 other Step 1 gaps each received a gap-probe TC (TC-13 through TC-16). Gap #6 did not. As a result, every TC that asserts "report contains failed row count and reason" (TC-06 through TC-12) references field names that were never empirically confirmed to exist in the actual response. | Added **TC-17 [Gap Probe]: Import report response schema**: sends TC-01's valid input; records raw JSON response body verbatim; documents actual field names and types. TC-17 runs first and its output provides the verified schema for all subsequent report assertions. Multi-branch expected result: unknown fields documented, wrong schema flags update needed in TC-01 through TC-12, HTTP 500 is a bug. |
+| 2 | Step 1 Implicit Gaps table, Gap #7: "Rollback scope: behavior when all rows fail is not addressed separately." No gap-probe TC created. | TC-12 tests a mixed [valid, invalid, valid] batch and confirms rollback. But no TC probes the all-invalid scenario, leaving two behavioral questions open: (a) does the SUT early-exit after the first failure or process all rows before rolling back, and (b) does the report list per-row failure reasons for all N rows as SRS requires ("lý do từng dòng") or only for the first. | Added **TC-18 [Gap Probe]: All-rows-invalid batch**: sends 3 rows all with distinct price violations (price=0, price=-1, price="abc"); records whether the response report lists 1 or 3 failure entries. Multi-branch expected result: 3 entries confirms full-scan before rollback and SRS compliance; 1 entry reveals early-exit and incomplete report; no per-row detail is a bug. |
 
 ---
 

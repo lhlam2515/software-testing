@@ -585,4 +585,42 @@ AI executed the 4-step domain testing framework autonomously via the `domain-tes
 
 ---
 
+## Entry 008 | 21:31 27/06/2026
+
+**Tool:** Claude Code (claude-sonnet-4-6, domain-testing skill)
+**Feature:** FR-16
+**Step:** Full domain testing design via `/domain-testing` skill (Steps 1-4 in one invocation)
+
+### Prompt
+
+```
+Hãy áp dụng kỹ thuật /domain-testing để thực hiện thiết kế test case chi tiết cho FR-16 - CSV Import đã được document bên trong eshop-sut/srs.md và eshop-sut/api-specification.md
+```
+
+### AI Output
+
+AI executed the 4 steps of the domain testing framework autonomously via the `domain-testing` skill, reading both `srs.md` (FR-16 section and FR-15 cross-reference for the 255-char constraint) and `api_specification.md` (section 6.3 endpoint and body schema). Output produced in English in a single invocation.
+
+---
+
+#### `artifacts/tests/FR-16-csv-import/domain-testing.md`
+
+- **Step 1** — 10 variables (Input: `Authorization`, `products` array, `name`, `price`, `description`, `imageUrl`, `category_id`; System State: DB Category State; Output: Atomic Rollback behavior, Import Report) + 7 Implicit Gaps and Spec Conflicts (G1: SRS CSV vs API JSON layer conflict, G2: `category_id` validation not specified in FR-16, G3: `name` max 255 from FR-15 not repeated in FR-16, G4: empty `products` array behavior, G5: `price` type coercion from CSV string, G6: response schema not defined in API spec, G7: rollback scope when all rows fail)
+- **Step 2** — 22 ECs across 7 Groups: Group 1 (Authorization Must-Be: EC01-EC03), Group 2 (`products` key and size: EC04-EC06 Gap), Group 3 (`name` Must-Be + Range: EC07-EC10 Gap), Group 4 (`price` Range: EC11-EC15 + EC22 Gap), Group 5 (`category_id` Set: EC16-EC17 Gap), Group 6 (Atomicity Splitting: EC18-EC19), Group 7 (Report Splitting: EC20-EC21)
+- **Step 3** — **16 TCs**: 2 happy-path (TC-01 single product, TC-02 batch of 3), 2 auth TCs (TC-03, TC-04), 1 missing key TC (TC-05), 6 invalid-row TCs isolating name and price violations (TC-06 through TC-11), 1 atomicity multi-row TC (TC-12), 4 Gap Probe TCs (TC-13 through TC-16) + EC Coverage Matrix
+
+#### `artifacts/tests/FR-16-csv-import/bva.md`
+
+- **2 target variables**: `price` lower boundary at 0 (ON point + LB+1), `name` length upper boundary at 255 chars (UB-1 / UB / UB+1)
+- **5 BVA TCs** (TC-BVA-01 through TC-BVA-05) each naming the specific wrong operator exposed
+- Setup Protocol with Node.js `repeat()` string generation and post-response length verification
+
+**Note:** AI output at commit `0f518d7` (21:31 27/06/2026) contained 16 EP TCs and 5 BVA TCs. TC-17 (response schema probe) and TC-18 (all-rows-invalid batch) were added by the student after post-design human review, addressing Step 1 Gaps #6 and #7 that the AI identified but did not convert to TCs.
+
+### Used in
+
+- `[AI-02]_AI_Audit_Report.md`, Artifact 3
+
+---
+
 <!-- Duplicate an entry block above for each AI interaction -->

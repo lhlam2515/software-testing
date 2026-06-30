@@ -279,103 +279,114 @@ Full execution log: [`execution-log.md`](artifacts/tests/FR-09-coupon/execution-
 
 ---
 
-## 4. Feature C — FR-16: Import Sản phẩm từ CSV
+## 4. Feature C: FR-16 - Import Sản phẩm từ CSV
 
 > **Technique applied:** Domain Testing (Equivalence Partitioning) + Boundary Value Analysis  
 > **Detailed test cases:** [`artifacts/tests/FR-16-csv-import/`](artifacts/tests/FR-16-csv-import/)  
 > **Test data files:** [`artifacts/tests/FR-16-csv-import/test-data/`](artifacts/tests/FR-16-csv-import/test-data/)
 
-### 4.1 Domain Testing — Step-by-Step Application
+### 4.1 Domain Testing
 
-#### Step 1: Identify Input & Output Variables
+#### Step 1 - Identify Input/Output Variables
 
-_Based on `docs/eshop-sut/srs.md` §6 FR-16 — atomic transaction, RFC 4180._
+FR-16 allows Admin to import multiple products via a JSON API endpoint. A core Spec Conflict was identified at the start: SRS section 6 describes uploading a CSV file with RFC 4180 format, while the API spec accepts a JSON body `{"products": [...]}`, meaning CSV parsing occurs at the frontend; the backend only processes JSON. This conflict redefines the test scope to the JSON API layer and excludes CSV-specific constraints (file extension, header row format) from API-level testing.
 
-| Variable | Type | Description |
-| -------- | ---- | ----------- |
-| `file_extension` | Input | Đuôi file upload |
-| `file_header` | Input | Dòng header CSV |
-| `row.name` | Input | Tên sản phẩm mỗi dòng |
-| `row.price` | Input | Giá sản phẩm mỗi dòng |
-| `import_result` | Output | Báo cáo (success/fail count) |
-| `db_state` | Output | Committed hoặc rolled back |
+Ten variables were identified: three inputs under tester control (`products` array, `name` per row, `price` per row), three optional inputs (`description`, `imageUrl`, `category_id`), one system state precondition (DB category existence), and three outputs (Authorization gate, atomic rollback behavior, import report). Seven Implicit Gaps were flagged: the Spec Conflict itself (CSV vs JSON), `category_id` foreign key validation (FR-16 silent), `name` max 255-char enforcement (FR-15 cross-ref, not repeated in FR-16), empty `products: []` behavior (undefined), string-typed `price` coercion from CSV parsing, response body schema (API spec section 6.3 provides no example), and rollback scope when all rows fail.
 
-#### Step 2: Equivalence Classes
+Full variable table: [`domain-testing.md` - Step 1](artifacts/tests/FR-16-csv-import/domain-testing.md)
 
-| EC | Variable | Description | Type |
-| -- | -------- | ----------- | ---- |
-| EC1 | file_extension | `.csv` | Valid |
-| EC2 | file_extension | `.xlsx`, `.txt`, `.json` | Invalid |
-| EC3 | file_extension | No extension | Invalid |
-| EC4 | file_header | Đúng format | Valid |
-| EC5 | file_header | Thiếu cột bắt buộc | Invalid |
-| EC6 | file_header | Sai tên cột | Invalid |
-| EC7 | file_header | File rỗng | Invalid |
-| EC8 | file_header | Chỉ header, không có data | Valid (0 rows) |
-| EC9 | row.name | Có giá trị | Valid |
-| EC10 | row.name | Rỗng | Invalid → rollback |
-| EC11 | row.price | > 0 | Valid |
-| EC12 | row.price | = 0 | Invalid → rollback |
-| EC13 | row.price | < 0 | Invalid → rollback |
-| EC14 | row.price | Non-numeric | Invalid → rollback |
-| EC15 | atomicity | All rows valid | Valid → commit |
-| EC16 | atomicity | ≥1 row invalid | Invalid → full rollback |
+#### Step 2 - Identify Equivalence Classes
 
-#### Step 3 & 4: Test Cases
+Equivalence partitioning was applied across seven functional groups using Must-Be Rule, Range Rule, and Gap Rule, producing 22 ECs total (7 valid, 15 invalid).
 
-| TC ID | EC | Scenario | Expected |
-| ----- | -- | -------- | -------- |
-| TC-16-EP-01 | EC1,4,9,11,15 | Valid CSV, all rows OK | Import thành công |
-| TC-16-EP-02 | EC2 | Upload `.xlsx` | Error: sai định dạng |
-| TC-16-EP-03 | EC5 | Header thiếu `price` | Error: header sai |
-| TC-16-EP-04 | EC7 | File rỗng | Error: file rỗng |
-| TC-16-EP-05 | EC8 | Header only | Import 0 sản phẩm |
-| TC-16-EP-06 | EC10,16 | 1 row: name="" | Rollback; 0 sản phẩm |
-| TC-16-EP-07 | EC12,16 | 1 row: price=0 | Rollback; 0 sản phẩm |
-| TC-16-EP-08 | EC13,16 | 1 row: price=−100 | Rollback; 0 sản phẩm |
-| TC-16-EP-09 | EC14,16 | 1 row: price="abc" | Rollback; error on row |
-| TC-16-EP-10 | EC1,16 | 5 valid rows + 1 invalid | Rollback ALL 5 valid rows |
+**Must-Be Rule for Authorization and `products` key.** Both are binary gates: either the condition holds or it fails outright. EC01 (valid admin JWT), EC04 (products key present with ≥1 item), and their invalid counterparts are each assigned one TC to isolate the failure mode independently.
 
-### 4.2 Boundary Value Analysis — Step-by-Step Application
+**Range Rule for `price`.** The constraint is `price > 0`, creating exactly two regions: valid (positive numbers) and invalid (0, negative, non-numeric, absent). Six ECs were derived: EC11 through EC15 from spec-derived constraints, and EC22 (string-typed price, e.g. `"10000"`) as a Gap EC from the CSV-parsing coercion risk identified in Step 1.
 
-#### Boundaries Identified
+**Gap Rule for `category_id` and `name` length.** EC10 (name > 255 chars) and EC17 (non-existent `category_id`) cannot be derived from FR-16 spec text alone; they are Gap ECs targeting cross-reference constraints from FR-15. These receive gap-probe TCs with multi-branch expected results rather than a single definitive assertion.
 
-| Boundary | Variable | Rule |
-| -------- | -------- | ---- |
-| B1 | `row.price` | Must be > 0; boundary at 0 vs 1 |
-| B2 | `row.name` length | Must be ≥ 1 char; context: FR-15 max 255 |
+**Splitting Rule for Atomic Rollback and Import Report.** EC18 (all rows valid → commit) and EC19 (any row invalid → full rollback) are behaviorally distinct outputs each requiring a dedicated TC. Similarly, EC20 (success report) and EC21 (failure report with per-row reasons) are split to verify both report branches.
 
-#### BVA Test Cases
+| Group | Variable / Condition | Valid | Invalid | Total |
+| ----- | -------------------- | ----- | ------- | ----- |
+| 1 | Authorization | EC01 | EC02, EC03 | 3 |
+| 2 | `products` key + array size | EC04 | EC05, EC06 | 3 |
+| 3 | `name` per row | EC07 | EC08, EC09, EC10 | 4 |
+| 4 | `price` per row | EC11 | EC12, EC13, EC14, EC15, EC22 | 6 |
+| 5 | `category_id` per row | EC16 | EC17 | 2 |
+| 6 | Atomic Rollback behavior | EC18 | EC19 | 2 |
+| 7 | Import Report | EC20 | EC21 | 2 |
+| **Total** | | **7 Valid** | **15 Invalid** | **22** |
 
-| TC ID | Variable | Value | Point | Expected |
-| ----- | -------- | ----- | ----- | -------- |
-| TC-16-BVA-01 | price | −1 | Below invalid | Rollback |
-| TC-16-BVA-02 | price | 0 | UB invalid | Rollback |
-| TC-16-BVA-03 | price | 1 | LB valid | Import OK |
-| TC-16-BVA-04 | price | 2 | LB+1 nominal | Import OK |
-| TC-16-BVA-05 | name length | 0 (empty) | LB invalid | Rollback |
-| TC-16-BVA-06 | name length | 1 char | LB valid | Import OK |
-| TC-16-BVA-07 | name length | 255 chars | UB (FR-15) | Import OK |
-| TC-16-BVA-08 | name length | 256 chars | UB+1 | Error or truncate? |
+Full EC table: [`domain-testing.md` - Step 2](artifacts/tests/FR-16-csv-import/domain-testing.md)
+
+#### Step 3 - Minimum Test Case Set
+
+Eighteen test cases were derived in three layers: 12 base EP TCs using Error Isolation (1 happy-path combining all valid ECs, then 1 TC per triggerable invalid EC group), 4 AI-generated gap probes (TC-13 through TC-16, one per untested Implicit Gap), and 2 student-added gap probes (TC-17, TC-18) for the two gaps the AI identified in Step 1 but failed to convert into TCs.
+
+TC-01 combines all 7 valid ECs into a single happy-path test. TC-12 is the atomicity integration test: a mixed batch of [valid, invalid, valid] rows must result in 0 products committed, verifying that the SUT uses a batch transaction rollback rather than a row-by-row commit strategy.
+
+| TC | ECs Covered | Scenario | Expected Result |
+| -- | ----------- | -------- | --------------- |
+| TC-01 | EC01,04,07,11,16,18,20 | 1 valid product, admin JWT | HTTP 200; 1 row inserted; DB count +1 |
+| TC-02 | EC01,04,07,11,16,18,20 | Batch of 3 valid products | HTTP 200; 3 rows inserted; DB count +3 |
+| TC-03 | EC02 | No Authorization header | HTTP 401; DB unchanged |
+| TC-04 | EC03 | Regular user JWT (non-admin) | HTTP 403; DB unchanged |
+| TC-05 | EC05 | `products` key absent from body | HTTP 400 |
+| TC-06 | EC08,19,21 | `name = ""` (empty string) | Rollback; 0 products; report: reason |
+| TC-07 | EC09,19,21 | `name` field missing | Rollback; 0 products; report: reason |
+| TC-08 | EC12,19,21 | `price = 0` | Rollback; 0 products; price must be > 0 |
+| TC-09 | EC13,19,21 | `price = -1` | Rollback; 0 products |
+| TC-10 | EC14,19,21 | `price = "abc"` (non-numeric) | Rollback; 0 products |
+| TC-11 | EC15,19,21 | `price` field missing | Rollback; 0 products |
+| TC-12 | EC19,21 | Mixed batch: [valid, invalid, valid] | Full rollback; 0 of 3 committed |
+| TC-13 [Gap] | EC06 | `products: []` empty array | Gap probe: HTTP 400 or 200 with 0 imported |
+| TC-14 [Gap] | EC10 | `name` = 256 chars (FR-15 cross-ref) | Gap probe: error or accepted (enforcement check) |
+| TC-15 [Gap] | EC17 | Non-existent `category_id` | Gap probe: HTTP 400 or 200 with dangling FK |
+| TC-16 [Gap] | EC22 | `price = "10000"` (string type) | Gap probe: coerced to number or rejected |
+| TC-17 [Student Gap] | (none) | Valid product; record raw response verbatim | Discover actual response schema field names |
+| TC-18 [Student Gap] | EC19,21 | All 3 rows invalid (distinct price violations) | Gap probe: 1 or 3 failure entries in report |
+
+Full TC specifications: [`domain-testing.md` - Step 3](artifacts/tests/FR-16-csv-import/domain-testing.md)
+
+### 4.2 Boundary Value Analysis
+
+Two numeric variables were identified for BVA enhancement based on their role in triggering discrete behavioral transitions at explicit or cross-reference boundaries.
+
+**`price` lower boundary at 0.** FR-16 specifies `price > 0` (strictly positive), placing the turning point at 0: the ON boundary is 0 (last invalid value), and LB+1 = 1 is the minimum valid value. A potential off-by-one defect would implement `price >= 0`, incorrectly accepting zero-priced products and silently violating the FR-16 business constraint.
+
+**`name` length upper boundary at 255.** FR-15 caps `name` at 255 characters; FR-16 does not repeat this constraint. Three boundary points probe whether the import endpoint enforces this cross-reference limit: UB-1 at 254 chars (must always be accepted), UB at 255 chars (must be accepted if `<= 255` is implemented correctly), and UB+1 at 256 chars (reveals whether FR-16 import omits the FR-15 enforcement; if accepted, a Gap is confirmed).
+
+| TC | Variable | Boundary Point | State | Defect Targeted |
+| -- | -------- | -------------- | ----- | --------------- |
+| TC-BVA-01 | `price` | 0 (ON/turning point) | Invalid | `price >= 0` instead of `price > 0`, accepts zero-price product |
+| TC-BVA-02 | `price` | 1 (LB+1, min valid) | Valid | Confirms lower bound is correctly exclusive at 0 |
+| TC-BVA-03 | `name` length | 254 chars (UB-1) | Valid | Baseline: must be accepted regardless of enforcement |
+| TC-BVA-04 | `name` length | 255 chars (UB = ON) | Valid | Off-by-one `< 255` instead of `<= 255`, rejects valid 255-char name |
+| TC-BVA-05 | `name` length | 256 chars (UB+1) | Gap | If accepted: FR-16 does not enforce FR-15 255-char limit at import |
+
+Full BVA specifications and DB setup protocol: [`bva.md`](artifacts/tests/FR-16-csv-import/bva.md)
 
 ### 4.3 AI Gap Analysis
 
-_Điền sau khi chạy AI và review kết quả._
-
 | # | Missed test case | Root cause (why AI missed it) |
 | - | ---------------- | ----------------------------- |
-| | | |
+| 1 | No gap-probe TC for the Import Report response schema (Step 1 Gap #6). The domain testing framework requires every identified gap to produce a corresponding gap-probe TC. Gap #6 states: "API spec section 6.3 provides no response body example for POST /api/admin/import-products; unknown which fields to verify: `imported`, `failed`, `errors[]`?" Four other gaps each received a TC (TC-13 through TC-16). Gap #6 did not. Consequence: TC-06 through TC-12 assert "report contains failed row count and reason" against field names that were never empirically confirmed to exist in the actual response. Student fix: TC-17 sends TC-01's valid input and records the raw response body verbatim; its output becomes the verified schema for all subsequent report assertions. | Inference chain incomplete: the AI's TC selection in Step 3 applies Error Isolation to invalid ECs (one invalid input per TC). A schema observation probe uses a valid input and an observational assertion, which does not map to the Error Isolation pattern. The AI identified the risk but did not cross-check the framework's completeness requirement ("every Step 1 gap produces a gap-probe TC") before finalizing Step 3. This follows the same pattern as FR-09 Artifact #2, where the AI observed a constraint in Step 1 but did not convert it to a TC. |
+| 2 | No gap-probe TC for the all-rows-fail rollback scenario (Step 1 Gap #7). Gap #7 states: "Behavior when all rows fail is not addressed separately." TC-12 tests a mixed [valid, invalid, valid] 3-row batch and confirms full rollback. No TC tests an all-invalid batch, leaving two behavioral questions unanswered: (a) does the SUT early-exit after the first invalid row or process all rows before rolling back, and (b) does the report list per-row failure reasons for all N rows as SRS requires ("lý do từng dòng") or only for the first. Student fix: TC-18 sends 3 rows all with distinct price violations and records whether the response lists 1 or 3 failure entries. | EC minimization conflict: TC-12 already covers EC19 (any row invalid means rollback). In Step 3, the AI selected the minimum TC set by EC coverage. Since EC19 was already covered, no additional rollback TC was generated. However, Gap #7 requires a behaviorally-motivated probe beyond EC coverage, and the framework's completeness check ("every gap produces a gap-probe TC") was not applied as an independent pass after EC minimization. |
 
 ### 4.4 Execution Summary
 
 | Metric | Count |
 | ------ | ----- |
-| TC Designed (EP) | 10 |
-| TC Designed (BVA) | 8 |
-| TC Executed | — |
-| Passed | — |
-| Failed | — |
-| Bugs found | — |
+| TC Designed (EP) | 18 |
+| TC Designed (BVA) | 5 |
+| TC Executed | 23 / 23 |
+| Passed | 11 |
+| Pass with deviation | 3 (TC-14, TC-16, TC-BVA-05) |
+| Failed | 9 (TC-04, TC-08, TC-09, TC-10, TC-11, TC-12, TC-15, TC-18, TC-BVA-01) |
+| Bugs found | 3 (BUG-16-001, BUG-16-002, BUG-16-003) |
+
+Full execution log: [`execution-log.md`](artifacts/tests/FR-16-csv-import/execution-log.md)
 
 ---
 
