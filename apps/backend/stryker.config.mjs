@@ -1,15 +1,17 @@
 /** @type {import('@stryker-mutator/api/core').PartialStrykerOptions} */
 export default {
-  testRunner: 'jest',
+  testRunner: "jest",
   jest: {
-    configFile: 'jest.config.js',
+    configFile: "jest.config.js",
   },
-  mutate: ['server.js'],
-  coverageAnalysis: 'perTest',
-  reporters: ['html', 'clear-text', 'progress'],
+  mutate: ["server.js"],
+  coverageAnalysis: "perTest",
+  reporters: ["html", "clear-text", "progress"],
   htmlReporter: {
-    fileName: 'reports/mutation/mutation.html',
+    fileName: "reports/mutation/mutation.html",
   },
-  timeoutMS: 10000,
-  concurrency: 2,
+  timeoutMS: 60000,
+  timeoutFactor: 2,
+  concurrency: 1,
+  testRunnerNodeArgs: ["--jitless"],
 };

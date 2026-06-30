@@ -1,13 +1,19 @@
-const request = require('supertest');
 const app = require('../server');
 // Use cached db instance (required by server.js) — avoids re-seeding the database
 const db = require('../database');
+const { createApi } = require('./helpers/http');
+
+const api = createApi(app);
 
 function dbRun(sql, params = []) {
   return new Promise((resolve, reject) =>
     db.run(sql, params, err => (err ? reject(err) : resolve()))
   );
 }
+
+beforeAll(async () => {
+  await db.ready;
+});
 
 // Reset test account to clean state before every test
 beforeEach(async () => {
@@ -22,7 +28,7 @@ describe('POST /api/login — EP', () => {
 
   // TC-01 — happy path: correct credentials
   it('returns 200 and token when credentials are correct', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/login')
       .send({ email: 'test@eshop.com', password: 'Test1234!' });
 
@@ -33,7 +39,7 @@ describe('POST /api/login — EP', () => {
 
   // TC-04 — email not registered
   it('returns 401 when email is not registered', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/login')
       .send({ email: 'notfound@example.com', password: 'Test1234!' });
 
@@ -43,7 +49,7 @@ describe('POST /api/login — EP', () => {
 
   // TC-05 — empty password (sent as empty string, does not match stored password)
   it('returns 401 when password is empty', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/login')
       .send({ email: 'test@eshop.com', password: '' });
 
@@ -53,7 +59,7 @@ describe('POST /api/login — EP', () => {
 
   // TC-06 — wrong password
   it('returns 401 when password is wrong', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/login')
       .send({ email: 'test@eshop.com', password: 'WrongPass1!' });
 
@@ -75,7 +81,7 @@ describe('POST /api/login — EP', () => {
 
     // TC-07 — correct credentials but account is locked → 403
     it('returns 403 when account is locked even with correct credentials', async () => {
-      const res = await request(app)
+      const res = await api
         .post('/api/login')
         .send({ email: 'test@eshop.com', password: 'Test1234!' });
 
@@ -100,14 +106,14 @@ describe('POST /api/login — BVA', () => {
         "UPDATE users SET login_attempts=2 WHERE email='test@eshop.com'"
       );
 
-      const res = await request(app)
+      const res = await api
         .post('/api/login')
         .send({ email: 'test@eshop.com', password: 'Test1234!' });
 
       expect(res.status).toBe(200);
       expect(res.body.token).toBeTruthy();
       // Verify counter reset: one more wrong password should give 401 (not 403)
-      const afterRes = await request(app)
+      const afterRes = await api
         .post('/api/login')
         .send({ email: 'test@eshop.com', password: 'WrongPass1!' });
       expect(afterRes.status).toBe(401); // not 403 — counter was reset, not locked yet
@@ -120,13 +126,13 @@ describe('POST /api/login — BVA', () => {
       );
 
       // Submit wrong password — triggers lock (2+2=4 >= 3 due to BUG counter +2)
-      const failRes = await request(app)
+      const failRes = await api
         .post('/api/login')
         .send({ email: 'test@eshop.com', password: 'WrongPass1!' });
       expect(failRes.status).toBe(401);
 
       // Immediately try with correct credentials → must be locked now
-      const lockedRes = await request(app)
+      const lockedRes = await api
         .post('/api/login')
         .send({ email: 'test@eshop.com', password: 'Test1234!' });
       expect(lockedRes.status).toBe(403);
@@ -145,7 +151,7 @@ describe('POST /api/login — BVA', () => {
         [oneSecondAhead]
       );
 
-      const res = await request(app)
+      const res = await api
         .post('/api/login')
         .send({ email: 'test@eshop.com', password: 'Test1234!' });
 
@@ -163,7 +169,7 @@ describe('POST /api/login — BVA', () => {
 
       // Server checks: new Date() < new Date(locked_until)
       // At this point new Date() >= locked_until → unlocked
-      const res = await request(app)
+      const res = await api
         .post('/api/login')
         .send({ email: 'test@eshop.com', password: 'Test1234!' });
 
@@ -179,7 +185,7 @@ describe('POST /api/login — BVA', () => {
         [oneSecondAgo]
       );
 
-      const res = await request(app)
+      const res = await api
         .post('/api/login')
         .send({ email: 'test@eshop.com', password: 'Test1234!' });
 

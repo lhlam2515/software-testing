@@ -1,7 +1,9 @@
-const request = require('supertest');
 const app = require('../server');
 const db = require('../database');
 const { getAuthToken } = require('./helpers/auth');
+const { createApi } = require('./helpers/http');
+
+const api = createApi(app);
 
 function dbRun(sql, params = []) {
   return new Promise((resolve, reject) =>
@@ -18,6 +20,10 @@ function dbGet(sql, params = []) {
   );
 }
 
+beforeAll(async () => {
+  await db.ready;
+});
+
 describe('Cart and checkout routes - T3b baseline', () => {
   const userToken = getAuthToken(2);
   const authHeader = `Bearer ${userToken}`;
@@ -30,14 +36,14 @@ describe('Cart and checkout routes - T3b baseline', () => {
   });
 
   it('returns 401 when cart is requested without token', async () => {
-    const res = await request(app).get('/api/cart');
+    const res = await api.get('/api/cart');
 
     expect(res.status).toBe(401);
     expect(res.body.error).toMatch(/unauthorized/i);
   });
 
   it('returns 200 and an array when authenticated user requests cart', async () => {
-    const res = await request(app)
+    const res = await api
       .get('/api/cart')
       .set('Authorization', authHeader);
 
@@ -53,7 +59,7 @@ describe('Cart and checkout routes - T3b baseline', () => {
       quantity: 1,
     };
 
-    const addRes = await request(app)
+    const addRes = await api
       .post('/api/cart')
       .set('Authorization', authHeader)
       .send(item);
@@ -61,7 +67,7 @@ describe('Cart and checkout routes - T3b baseline', () => {
     expect(addRes.status).toBe(200);
     expect(addRes.body.message).toMatch(/added/i);
 
-    const listRes = await request(app)
+    const listRes = await api
       .get('/api/cart')
       .set('Authorization', authHeader);
 
@@ -79,7 +85,7 @@ describe('Cart and checkout routes - T3b baseline', () => {
   });
 
   it('returns 200 and creates pending order when checkout is authenticated', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/checkout')
       .set('Authorization', authHeader)
       .send({
@@ -100,7 +106,7 @@ describe('Cart and checkout routes - T3b baseline', () => {
   });
 
   it('returns 401 when checkout is requested without token', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/checkout')
       .send({
         total_amount: 45000000,

@@ -1,7 +1,9 @@
-const request = require('supertest');
 const app = require('../server');
 const db = require('../database');
 const { getAuthToken } = require('./helpers/auth');
+const { createApi } = require('./helpers/http');
+
+const api = createApi(app);
 
 function dbRun(sql, params = []) {
   return new Promise((resolve, reject) =>
@@ -30,6 +32,10 @@ async function deleteOrder(orderId) {
   await dbRun('DELETE FROM orders WHERE id = ?', [orderId]);
 }
 
+beforeAll(async () => {
+  await db.ready;
+});
+
 describe('PUT /api/admin/orders/:id/status - T3b baseline', () => {
   const adminToken = getAuthToken(1);
   const authHeader = `Bearer ${adminToken}`;
@@ -45,7 +51,7 @@ describe('PUT /api/admin/orders/:id/status - T3b baseline', () => {
     const orderId = await createOrder('pending');
     createdOrderIds.push(orderId);
 
-    const res = await request(app)
+    const res = await api
       .put(`/api/admin/orders/${orderId}/status`)
       .set('Authorization', authHeader)
       .send({ status: 'confirmed' });
@@ -61,7 +67,7 @@ describe('PUT /api/admin/orders/:id/status - T3b baseline', () => {
     const orderId = await createOrder('confirmed');
     createdOrderIds.push(orderId);
 
-    const res = await request(app)
+    const res = await api
       .put(`/api/admin/orders/${orderId}/status`)
       .set('Authorization', authHeader)
       .send({ status: 'shipping' });
@@ -77,7 +83,7 @@ describe('PUT /api/admin/orders/:id/status - T3b baseline', () => {
     const orderId = await createOrder('shipping');
     createdOrderIds.push(orderId);
 
-    const res = await request(app)
+    const res = await api
       .put(`/api/admin/orders/${orderId}/status`)
       .set('Authorization', authHeader)
       .send({ status: 'delivered' });
@@ -93,7 +99,7 @@ describe('PUT /api/admin/orders/:id/status - T3b baseline', () => {
     const orderId = await createOrder('pending');
     createdOrderIds.push(orderId);
 
-    const res = await request(app)
+    const res = await api
       .put(`/api/admin/orders/${orderId}/status`)
       .set('Authorization', authHeader)
       .send({ status: 'delivered' });
@@ -106,7 +112,7 @@ describe('PUT /api/admin/orders/:id/status - T3b baseline', () => {
   });
 
   it('returns 404 when order id does not exist', async () => {
-    const res = await request(app)
+    const res = await api
       .put('/api/admin/orders/999999/status')
       .set('Authorization', authHeader)
       .send({ status: 'confirmed' });

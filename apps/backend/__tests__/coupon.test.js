@@ -1,7 +1,9 @@
-const request = require('supertest');
 const app = require('../server');
 // Use cached db instance (required by server.js) — avoids re-seeding the database
 const db = require('../database');
+const { createApi } = require('./helpers/http');
+
+const api = createApi(app);
 
 // Promise helpers — keep setup code flat instead of nested callbacks
 function dbRun(sql, params = []) {
@@ -19,6 +21,8 @@ let save10Id;
 let vip100Id;
 
 beforeAll(async () => {
+  await db.ready;
+
   const today    = new Date().toISOString().split('T')[0];
   const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
@@ -84,7 +88,7 @@ describe('POST /api/apply-coupon — EP', () => {
 
   // TC-02 — fixed coupon: correct formula, assert exact amounts
   it('returns 200 with correct discount when valid fixed coupon meets min-order', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'BIGBUY', total_amount: 600000 });
 
@@ -96,7 +100,7 @@ describe('POST /api/apply-coupon — EP', () => {
 
   // TC-01 — percent coupon: BUG-09-001 formula wrong, assert presence only
   it('returns 200 when valid percent coupon meets min-order (formula output not asserted — BUG-09-001)', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'SAVE10', total_amount: 500000 });
 
@@ -106,7 +110,7 @@ describe('POST /api/apply-coupon — EP', () => {
 
   // TC-03 — code not found
   it('returns 404 when coupon code does not exist', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'NOTEXIST99', total_amount: 500000 });
 
@@ -116,7 +120,7 @@ describe('POST /api/apply-coupon — EP', () => {
 
   // TC-04 — inactive coupon (is_active=0)
   it('returns 404 when coupon is inactive', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'DEAD01', total_amount: 500000 });
 
@@ -126,7 +130,7 @@ describe('POST /api/apply-coupon — EP', () => {
 
   // TC-05 — case sensitivity gap
   it('returns 404 when coupon code has wrong case', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'save10', total_amount: 500000 });
 
@@ -136,7 +140,7 @@ describe('POST /api/apply-coupon — EP', () => {
 
   // TC-06 — expired coupon (EXPIRED is seeded with expired_at=2020-01-01)
   it('returns 400 when coupon is expired', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'EXPIRED', total_amount: 200000 });
 
@@ -146,7 +150,7 @@ describe('POST /api/apply-coupon — EP', () => {
 
   // TC-07 — below min-order threshold
   it('returns 400 when total_amount is below min-order threshold', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'SAVE10', total_amount: 200000 });
 
@@ -156,7 +160,7 @@ describe('POST /api/apply-coupon — EP', () => {
 
   // TC-10 — usage limit reached (user_id=2 has 1 use, max=1)
   it('returns 400 when user has reached the usage limit', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'SAVE10', total_amount: 500000, user_id: 2 });
 
@@ -166,7 +170,7 @@ describe('POST /api/apply-coupon — EP', () => {
 
   // TC-08 — no auth header: BUG-09-002, route has no authenticateToken middleware
   it('returns 200 when no Authorization header is sent (BUG-09-002: should be 401 per spec)', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'BIGBUY', total_amount: 600000 });
 
@@ -186,7 +190,7 @@ describe('POST /api/apply-coupon — BVA', () => {
 
   // TC-BVA-01 — OFF point: 299,999 < 300,000 → rejected (both spec and impl agree)
   it('returns 400 when total_amount is one unit below min-order (OFF point: 299,999)', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'SAVE10', total_amount: 299999 });
 
@@ -196,7 +200,7 @@ describe('POST /api/apply-coupon — BVA', () => {
 
   // TC-BVA-02 — ON point: 300,000 = min_order → spec: 200; impl: 400 (BUG-A)
   it('returns 400 when total_amount equals min-order (ON point: 300,000) (BUG-A: spec requires 200)', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'SAVE10', total_amount: 300000 });
 
@@ -207,7 +211,7 @@ describe('POST /api/apply-coupon — BVA', () => {
 
   // TC-BVA-03 — UB+1: 300,001 > 300,000 → accepted by both spec and impl
   it('returns 200 when total_amount is one unit above min-order (UB+1: 300,001)', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'SAVE10', total_amount: 300001 });
 
@@ -220,7 +224,7 @@ describe('POST /api/apply-coupon — BVA', () => {
 
   // TC-BVA-04 — UB-1: VIP100 uses=1, max=2 → last valid use, should be accepted
   it('returns 200 when uses_by_user is one below max (UB-1: VIP100 uses=1, max=2)', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'VIP100', total_amount: 400000, user_id: 1 });
 
@@ -232,7 +236,7 @@ describe('POST /api/apply-coupon — BVA', () => {
 
   // TC-BVA-05 — UB: SAVE10 uses=1, max=1 → limit reached (same root as TC-10 with explicit BVA framing)
   it('returns 400 when uses_by_user equals max (UB: SAVE10 uses=1, max=1)', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'SAVE10', total_amount: 500000, user_id: 2 });
 
@@ -242,7 +246,7 @@ describe('POST /api/apply-coupon — BVA', () => {
 
   // TC-BVA-06 — UB: VIP100 uses=2, max=2 → limit reached
   it('returns 400 when uses_by_user equals max (UB: VIP100 uses=2, max=2)', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'VIP100', total_amount: 400000, user_id: 2 });
 
@@ -254,7 +258,7 @@ describe('POST /api/apply-coupon — BVA', () => {
 
   // TC-BVA-07 — ON point: expired_at = today → spec: strict < means today is INVALID
   it('returns 400 when coupon expires today (ON point: expired_at = today)', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'TODAYEXP', total_amount: 200000 });
 
@@ -264,7 +268,7 @@ describe('POST /api/apply-coupon — BVA', () => {
 
   // TC-BVA-08 — UB+1: expired_at = tomorrow → still valid
   it('returns 200 when coupon expires tomorrow (UB+1: expired_at = tomorrow)', async () => {
-    const res = await request(app)
+    const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'TOMORROWEXP', total_amount: 200000 });
 
