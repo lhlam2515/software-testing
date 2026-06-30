@@ -17,6 +17,7 @@ This report summarizes confirmed and review-required issues found from the exist
 | BUG-FR18-01 | FR-18 - Admin Order Management | FR18-DT-01 | Critical | Confirmed by test result | `test_scripts/results/json/fr18_admin_order_api_results.json`, `test_scripts/results/html/fr18_admin_order_api_results.html` |
 | BUG-FR18-02 | FR-18 - Admin Order Management | FR18-DT-04, FR18-DT-05, FR18-DT-06, FR18-DT-07, FR18-DT-08, FR18-BVA-04 | Critical | Confirmed by test result | `test_scripts/results/json/fr18_admin_order_api_results.json`, `test_scripts/results/html/fr18_admin_order_api_results.html` |
 | BUG-FR18-03 | FR-18 - Admin Order Management | FR18-DT-09, FR18-DT-10, FR18-DT-11, FR18-BVA-05, FR18-BVA-06 | High | Confirmed by test result | `test_scripts/results/json/fr18_admin_order_api_results.json`, `test_scripts/results/html/fr18_admin_order_api_results.html` |
+| BUG-FR18-04 | FR-18 - Admin Order Management | FR18-DT-12 | Critical | Confirmed by screenshot evidence | [FR18-DT-12 checkout screenshot](evidence/screenshots/FR18-DT-12.png), [FR18-DT-12 admin UI screenshot](evidence/screenshots/FR18-DT-12-2.png) |
 
 ## 3. Confirmed Bugs
 
@@ -393,6 +394,49 @@ Ensure authorized admin requests reach state-machine validation and return clear
 #### Evidence
 
 `test_scripts/results/json/fr18_admin_order_api_results.json`, `test_scripts/results/html/fr18_admin_order_api_results.html`
+
+### BUG-FR18-04 - Admin Orders renders HTML shipping address instead of escaped text
+
+**Feature:** FR-18 - Admin Order Management  
+**Related Test Case:** FR18-DT-12  
+**Severity:** Critical  
+**Status:** Confirmed by screenshot evidence  
+
+#### Description
+
+The Admin Orders page rendered a submitted HTML shipping address as an element instead of displaying it as escaped text. The screenshot shows the address column rendering a broken image element after checkout accepted the HTML payload.
+
+#### Steps to Reproduce
+
+1. Log in as a regular user and copy the user token.
+2. Send `POST /api/checkout` with an HTML shipping address.
+3. Log in to the Admin Web interface.
+4. Open the Orders page.
+5. Observe the address column for the created order.
+
+#### Input Data
+
+`{"total_amount":100000,"shipping_address":"<img src=x onerror=alert('FR18-XSS')>"}`
+
+#### Expected Result
+
+The address is escaped and displayed as plain text; no HTML element is rendered and no script can execute.
+
+#### Actual Result
+
+The Admin Orders page rendered the submitted HTML as an image element in the address column.
+
+#### Impact
+
+User-controlled order data can be interpreted as HTML in the admin interface, creating an XSS risk for administrators.
+
+#### Suggested Fix
+
+Render shipping addresses as text instead of using unsafe HTML rendering. Sanitize existing stored address data before display if HTML rendering is unavoidable.
+
+#### Evidence
+
+[FR18-DT-12 checkout screenshot](evidence/screenshots/FR18-DT-12.png), [FR18-DT-12 admin UI screenshot](evidence/screenshots/FR18-DT-12-2.png)
 
 ## 4. Potential Bugs Requiring Review
 

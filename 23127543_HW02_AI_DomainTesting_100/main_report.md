@@ -36,15 +36,15 @@ No source code in `eshop-sut/` is modified by this submission package.
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | FR-04 Profile | 12 | 6 | 18 | 18 | 5 | 5 | 8 | 0 |
 | FR-08 Checkout | 12 | 13 | 25 | 25 | 11 | 5 | 9 | 0 |
-| FR-18 Admin Order Management | 12 | 6 | 18 | 14 | 2 | 12 | 0 | 4 |
+| FR-18 Admin Order Management | 12 | 6 | 18 | 18 | 5 | 13 | 0 | 0 |
 | FR-20 Mobile Checkout | 12 | 6 | 18 | 0 | 0 | 0 | 0 | 18 |
-| **Total** | **48** | **31** | **79** | **57** | **18** | **22** | **17** | **22** |
+| **Total** | **48** | **31** | **79** | **61** | **21** | **23** | **17** | **18** |
 
-Generated API logs exist in `test_scripts/results/json/` and `test_scripts/results/html/`. JSON logs were used as the primary API source for this update. Reviewed screenshots under `evidence/screenshots/` were used as visual evidence for FR-04 profile UI cases and FR-08 checkout UI cases.
+Generated API logs exist in `test_scripts/results/json/` and `test_scripts/results/html/`. JSON logs were used as the primary API source for this update. Reviewed screenshots under `evidence/screenshots/` were used as visual evidence for FR-04 profile UI cases, FR-08 checkout UI cases, and FR-18 admin order management cases.
 
 ## 6. Bug Summary
 
-The bug report is maintained in [bug_report.md](bug_report.md). Based on the generated result logs and reviewed screenshots, this update records 9 confirmed bug entries and 12 potential bugs requiring review. GitHub-Issue-ready text is prepared in [github_issue_bugs.txt](github_issue_bugs.txt).
+The bug report is maintained in [bug_report.md](bug_report.md). Based on the generated result logs and reviewed screenshots, this update records 10 confirmed bug entries and 12 potential bugs requiring review. GitHub-Issue-ready text is prepared in [github_issue_bugs.txt](github_issue_bugs.txt).
 
 ## 7. AI Usage Summary
 
