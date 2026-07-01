@@ -10,14 +10,20 @@ This report summarizes confirmed and review-required issues found from the exist
 |---|---|---|---|---|---|
 | BUG-FR04-01 | FR-04 - Personal Profile Management | FR04-DT-07 | Medium | Confirmed by test result | `test_scripts/results/json/fr04_profile_api_results.json`, `test_scripts/results/html/fr04_profile_api_results.html` |
 | BUG-FR04-02 | FR-04 - Personal Profile Management | FR04-DT-01, FR04-DT-03, FR04-DT-04, FR04-DT-05 | High | Confirmed by screenshot evidence | [FR04-DT-01 screenshot](evidence/screenshots/FR04-DT-01.png), [FR04-DT-03 screenshot](evidence/screenshots/FR04-DT-03.png), [FR04-DT-04 screenshot](evidence/screenshots/FR04-DT-04.png), [FR04-DT-05 screenshot](evidence/screenshots/FR04-DT-05.png) |
+| BUG-FR04-03 | FR-04 - Personal Profile Management | FR04-BVA-01, FR04-BVA-04, FR04-BVA-05 | High | Confirmed by source review | [JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html) |
 | BUG-FR08-01 | FR-08 - Checkout | FR08-BVA-08 | Critical | Confirmed by test result | `test_scripts/results/json/fr08_checkout_api_results.json`, `test_scripts/results/html/fr08_checkout_api_results.html` |
 | BUG-FR08-02 | FR-08 - Checkout | FR08-BVA-12 | High | Confirmed by test result | `test_scripts/results/json/fr08_checkout_api_results.json`, `test_scripts/results/html/fr08_checkout_api_results.html` |
 | BUG-FR08-03 | FR-08 - Checkout | FR08-DT-07, FR08-BVA-13 | High | Confirmed by screenshot evidence | [FR08-DT-07 screenshot](evidence/screenshots/FR08-DT-07.png), [FR08-DT-07 second screenshot](evidence/screenshots/FR08-DT-07-2.png), [FR08-BVA-13 screenshot](evidence/screenshots/FR08-BVA-13.png), [FR08-BVA-13 second screenshot](evidence/screenshots/FR08-BVA-13-2.png) |
 | BUG-FR08-04 | FR-08 - Checkout | FR08-BVA-04 | High | Confirmed by screenshot evidence | [FR08-BVA-04 screenshot](evidence/screenshots/FR08-BVA-04.png) |
+| BUG-FR08-05 | FR-08 - Checkout | FR08-BVA-10 | Medium | Confirmed by test result and source review | [JSON log](test_scripts/results/json/fr08_checkout_api_results.json), [HTML log](test_scripts/results/html/fr08_checkout_api_results.html) |
+| BUG-FR08-06 | FR-08 - Checkout | FR08-BVA-11 | High | Confirmed by test result and source review | [JSON log](test_scripts/results/json/fr08_checkout_api_results.json), [HTML log](test_scripts/results/html/fr08_checkout_api_results.html) |
 | BUG-FR18-01 | FR-18 - Admin Order Management | FR18-DT-01 | Critical | Confirmed by test result | `test_scripts/results/json/fr18_admin_order_api_results.json`, `test_scripts/results/html/fr18_admin_order_api_results.html` |
 | BUG-FR18-02 | FR-18 - Admin Order Management | FR18-DT-04, FR18-DT-05, FR18-DT-06, FR18-DT-07, FR18-DT-08, FR18-BVA-04 | Critical | Confirmed by test result | `test_scripts/results/json/fr18_admin_order_api_results.json`, `test_scripts/results/html/fr18_admin_order_api_results.html` |
 | BUG-FR18-03 | FR-18 - Admin Order Management | FR18-DT-09, FR18-DT-10, FR18-DT-11, FR18-BVA-05, FR18-BVA-06 | High | Confirmed by test result | `test_scripts/results/json/fr18_admin_order_api_results.json`, `test_scripts/results/html/fr18_admin_order_api_results.html` |
 | BUG-FR18-04 | FR-18 - Admin Order Management | FR18-DT-12 | Critical | Confirmed by screenshot evidence | [FR18-DT-12 checkout screenshot](evidence/screenshots/FR18-DT-12.png), [FR18-DT-12 admin UI screenshot](evidence/screenshots/FR18-DT-12-2.png) |
+| BUG-FR20-01 | FR-20 - Mobile Checkout | FR20-DT-06, FR20-BVA-03 | High | Confirmed by source review | [mobile source](../../eshop-sut/frontend-mobile/App.js), [backend source](../../eshop-sut/backend/server.js) |
+| BUG-FR20-02 | FR-20 - Mobile Checkout | FR20-DT-07, FR20-BVA-06 | Critical | Confirmed by source review | [backend source](../../eshop-sut/backend/server.js) |
+| BUG-FR20-03 | FR-20 - Mobile Checkout | FR20-DT-08 | High | Confirmed by screenshot evidence | [FR20-DT-08 screenshot](evidence/screenshots/FR20-DT-08.jpg) |
 
 ## 3. Confirmed Bugs
 
@@ -104,6 +110,47 @@ Align the web profile phone validation rule with the SRS: require a leading `0` 
 #### Evidence
 
 [FR04-DT-01 screenshot](evidence/screenshots/FR04-DT-01.png), [FR04-DT-03 screenshot](evidence/screenshots/FR04-DT-03.png), [FR04-DT-04 screenshot](evidence/screenshots/FR04-DT-04.png), [FR04-DT-05 screenshot](evidence/screenshots/FR04-DT-05.png)
+
+### BUG-FR04-03 - Backend profile update does not validate phone boundaries
+
+**Feature:** FR-04 - Personal Profile Management  
+**Related Test Case:** FR04-BVA-01, FR04-BVA-04, FR04-BVA-05  
+**Severity:** High  
+**Status:** Confirmed by source review  
+
+#### Description
+
+The backend profile update route accepts the `phone` field without checking the SRS rule that phone numbers must start with `0` and contain 10-11 digits.
+
+#### Steps to Reproduce
+
+1. Log in as a regular user and use a valid bearer token.
+2. Send `PUT /api/users/me` with a phone number below the minimum, above the maximum, or not starting with `0`.
+3. Observe that the route has no validation before updating the user row.
+
+#### Input Data
+
+`012345678`, `012345678901`, and `1123456789`.
+
+#### Expected Result
+
+Invalid phone boundaries are rejected.
+
+#### Actual Result
+
+Source review shows `PUT /api/users/me` directly updates `phone` with no format or length validation. The existing API log returned HTTP 403 before route behavior because authentication failed, so it is supporting context rather than proof of the validation path.
+
+#### Impact
+
+Invalid phone numbers can be stored through the backend API even when the UI blocks some invalid values.
+
+#### Suggested Fix
+
+Validate phone format on the backend using the SRS rule and return a clear validation error for invalid values.
+
+#### Evidence
+
+[JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html), `eshop-sut/backend/server.js`
 
 ### BUG-FR08-01 - Valid-token checkout boundary is rejected with Forbidden
 
@@ -272,6 +319,88 @@ Validate quantity on the product detail page, cart state, and checkout submissio
 
 [FR08-BVA-04 screenshot](evidence/screenshots/FR08-BVA-04.png)
 
+### BUG-FR08-05 - Coupon at exact minimum threshold is rejected
+
+**Feature:** FR-08 - Checkout  
+**Related Test Case:** FR08-BVA-10  
+**Severity:** Medium  
+**Status:** Confirmed by test result and source review  
+
+#### Description
+
+The `SAVE10` coupon is rejected when `total_amount` is exactly equal to its documented minimum order amount.
+
+#### Steps to Reproduce
+
+1. Send `POST /api/apply-coupon`.
+2. Use coupon `SAVE10`.
+3. Set `total_amount` to `300000`.
+
+#### Input Data
+
+`{"code":"SAVE10","total_amount":300000,"user_id":2}`
+
+#### Expected Result
+
+The coupon is accepted at the documented minimum threshold.
+
+#### Actual Result
+
+API returned HTTP 400 with the minimum-order error. Source review confirms the route uses `total_amount > coupon.min_order_amount`, excluding the exact boundary.
+
+#### Impact
+
+Users whose order exactly reaches the coupon minimum cannot apply the coupon.
+
+#### Suggested Fix
+
+Use an inclusive threshold check when the requirement states that the minimum amount is accepted.
+
+#### Evidence
+
+[JSON log](test_scripts/results/json/fr08_checkout_api_results.json), [HTML log](test_scripts/results/html/fr08_checkout_api_results.html), `eshop-sut/backend/server.js`
+
+### BUG-FR08-06 - Percent coupon calculation produces negative discount
+
+**Feature:** FR-08 - Checkout  
+**Related Test Case:** FR08-BVA-11  
+**Severity:** High  
+**Status:** Confirmed by test result and source review  
+
+#### Description
+
+The `SAVE10` percent coupon returned a negative discount and an inflated final amount when the total was above the minimum threshold.
+
+#### Steps to Reproduce
+
+1. Send `POST /api/apply-coupon`.
+2. Use coupon `SAVE10`.
+3. Set `total_amount` to `300001`.
+
+#### Input Data
+
+`{"code":"SAVE10","total_amount":300001,"user_id":2}`
+
+#### Expected Result
+
+The coupon applies a 10% discount and returns a final amount below the original total.
+
+#### Actual Result
+
+API returned HTTP 200, but `discount_amount` was `-2700009` and `final_amount` was `3000010`. Source review shows the route calculates percent discounts as `total_amount * (1 - coupon.discount_value)` instead of `total_amount * coupon.discount_value / 100`.
+
+#### Impact
+
+Percent coupons can increase the final checkout total instead of discounting it.
+
+#### Suggested Fix
+
+Calculate percent discounts as a percentage of the total and ensure the final amount is less than or equal to the original total.
+
+#### Evidence
+
+[JSON log](test_scripts/results/json/fr08_checkout_api_results.json), [HTML log](test_scripts/results/html/fr08_checkout_api_results.html), `eshop-sut/backend/server.js`
+
 ### BUG-FR18-01 - Admin token cannot view admin order list
 
 **Feature:** FR-18 - Admin Order Management  
@@ -438,19 +567,141 @@ Render shipping addresses as text instead of using unsafe HTML rendering. Saniti
 
 [FR18-DT-12 checkout screenshot](evidence/screenshots/FR18-DT-12.png), [FR18-DT-12 admin UI screenshot](evidence/screenshots/FR18-DT-12-2.png)
 
+### BUG-FR20-01 - Mobile checkout payload omits the last item
+
+**Feature:** FR-20 - Mobile Checkout  
+**Related Test Case:** FR20-DT-06, FR20-BVA-03  
+**Severity:** High  
+**Status:** Confirmed by source review  
+
+#### Description
+
+The mobile checkout request omits the last cart item whenever the cart contains more than one item. The mobile code sends `cart.slice(0, -1)` for multi-item carts.
+
+#### Steps to Reproduce
+
+1. Add two or more products to the mobile cart.
+2. Proceed to checkout.
+3. Inspect the request body sent by the mobile checkout handler.
+
+#### Input Data
+
+Any mobile cart with at least two items.
+
+#### Expected Result
+
+The checkout payload includes all cart items, and the backend validates the submitted items.
+
+#### Actual Result
+
+Source review shows the mobile payload removes the last item before sending checkout. Backend checkout stores only `total_amount` and does not validate line items.
+
+#### Impact
+
+The submitted checkout payload can differ from the visible cart, reducing traceability and making order contents unreliable.
+
+#### Suggested Fix
+
+Send the full `cart` array and validate each line item on the backend before creating the order.
+
+#### Evidence
+
+[mobile source](../../eshop-sut/frontend-mobile/App.js), [backend source](../../eshop-sut/backend/server.js)
+
+### BUG-FR20-02 - Backend checkout trusts client-supplied total amount
+
+**Feature:** FR-20 - Mobile Checkout  
+**Related Test Case:** FR20-DT-07, FR20-BVA-06  
+**Severity:** Critical  
+**Status:** Confirmed by source review  
+
+#### Description
+
+The backend checkout endpoint inserts the submitted `total_amount` directly into the `orders` table without recalculating from trusted product or cart data.
+
+#### Steps to Reproduce
+
+1. Log in as a user and obtain a token.
+2. Send `POST /api/checkout` with a manipulated `total_amount`.
+3. Review the backend checkout route behavior.
+
+#### Input Data
+
+Examples: `total_amount=1`, `sum-1`, or `sum+1`.
+
+#### Expected Result
+
+The backend recalculates the total from trusted product/cart data or rejects manipulated totals.
+
+#### Actual Result
+
+Source review shows the backend stores `total_amount` from the request body directly.
+
+#### Impact
+
+Users or clients can submit incorrect payable amounts if they can call the checkout API directly.
+
+#### Suggested Fix
+
+Recalculate totals on the backend from trusted product IDs, quantities, coupon rules, and authenticated user state.
+
+#### Evidence
+
+[backend source](../../eshop-sut/backend/server.js)
+
+### BUG-FR20-03 - Mobile valid coupon calculation increases final amount
+
+**Feature:** FR-20 - Mobile Checkout  
+**Related Test Case:** FR20-DT-08  
+**Severity:** High  
+**Status:** Confirmed by screenshot evidence  
+
+#### Description
+
+The mobile checkout screen showed `SAVE10` applied successfully, but the final amount increased from `103,000,000` to `1,030,000,000` instead of decreasing by 10%.
+
+#### Steps to Reproduce
+
+1. Log in to the mobile app.
+2. Add multiple products totaling `103,000,000`.
+3. Open checkout.
+4. Apply coupon `SAVE10`.
+5. Observe the displayed discount and final total.
+
+#### Input Data
+
+Coupon code: `SAVE10`; cart total: `103,000,000`.
+
+#### Expected Result
+
+The final amount decreases by the coupon discount.
+
+#### Actual Result
+
+The screenshot shows a successful coupon message but an inflated payable total of `1,030,000,000`.
+
+#### Impact
+
+Customers may be shown or charged an incorrect checkout amount after applying a valid coupon.
+
+#### Suggested Fix
+
+Correct percent-coupon calculation and add automated tests for percentage discounts on web and mobile checkout.
+
+#### Evidence
+
+[FR20-DT-08 screenshot](evidence/screenshots/FR20-DT-08.jpg)
+
 ## 4. Potential Bugs Requiring Review
 
 | Potential ID | Related Test Case | Feature | Reason | Next Step |
 |---|---|---|---|---|
-| PBUG-FR04-DT-09 | FR04-DT-09 | FR-04 | HTTP 403 was returned, but ownership impact and follow-up profile state are unclear. | Review JSON/HTML logs and rerun manually if needed. |
 | PBUG-FR04-DT-10 | FR04-DT-10 | FR-04 | API returned HTTP 403; UI rendering safety still requires visual/security review. | Execute UI review with evidence. |
 | PBUG-FR04-DT-12 | FR04-DT-12 | FR-04 | API returned HTTP 403; long-address storage behavior remains unclear. | Review logs and rerun manually if needed. |
-| PBUG-FR04-BVA-01 | FR04-BVA-01 | FR-04 | Boundary result returned HTTP 403 and needs validation against expected phone behavior. | Review logs and rerun manually if needed. |
-| PBUG-FR04-BVA-02 | FR04-BVA-02 | FR-04 | Boundary result returned HTTP 403 and needs validation against expected phone behavior. | Review logs and rerun manually if needed. |
-| PBUG-FR04-BVA-03 | FR04-BVA-03 | FR-04 | Boundary result returned HTTP 403 and needs validation against expected phone behavior. | Review logs and rerun manually if needed. |
-| PBUG-FR04-BVA-04 | FR04-BVA-04 | FR-04 | Boundary result returned HTTP 403 and needs validation against expected phone behavior. | Review logs and rerun manually if needed. |
-| PBUG-FR04-BVA-05 | FR04-BVA-05 | FR-04 | Boundary result returned HTTP 403 and needs validation against expected phone behavior. | Review logs and rerun manually if needed. |
-| PBUG-FR08-DT-10 | FR08-DT-10 | FR-08 | Missing shipping address returned HTTP 403; intended API behavior needs review. | Review requirement and rerun manually if needed. |
-| PBUG-FR08-BVA-09 | FR08-BVA-09 | FR-08 | Coupon below-minimum result needs threshold review. | Review coupon requirement and implementation. |
-| PBUG-FR08-BVA-10 | FR08-BVA-10 | FR-08 | Coupon exactly at minimum returned HTTP 400; inclusive/exclusive threshold needs review. | Review coupon requirement and implementation. |
-| PBUG-FR08-BVA-11 | FR08-BVA-11 | FR-08 | Coupon above minimum returned HTTP 200, but discount amount requires review. | Review calculation and currency formatting. |
+| PBUG-FR08-BVA-02 | FR08-BVA-02 | FR-08 | Screenshot shows one product on the checkout page but not post-confirmation success. | Confirm checkout and capture success/order evidence. |
+| PBUG-FR08-BVA-03 | FR08-BVA-03 | FR-08 | Screenshot shows two products and total on the checkout page but not post-confirmation success. | Confirm checkout and capture success/order evidence. |
+| PBUG-FR08-BVA-05 | FR08-BVA-05 | FR-08 | Screenshot shows quantity on product page only, not cart/checkout subtotal. | Capture cart or checkout subtotal evidence. |
+| PBUG-FR08-BVA-06 | FR08-BVA-06 | FR-08 | Screenshot shows quantity on product page only, not cart/checkout subtotal. | Capture cart or checkout subtotal evidence. |
+| PBUG-FR20-DT-11 | FR20-DT-11 | FR-20 | Screenshot shows cart empty after checkout, but does not prove order history reload. | Capture order history after successful mobile checkout. |
+| PBUG-FR20-DT-12-BVA-04 | FR20-DT-12, FR20-BVA-04 | FR-20 | Screenshots do not prove abnormal quantity normalization after add-to-cart and checkout. | Capture quantity `0`, `1`, and `2` after add-to-cart/cart update and checkout total calculation. |
+| PBUG-FR20-BVA-05 | FR20-BVA-05 | FR-20 | Coupon threshold below/on/above values have no execution evidence. | Execute mobile/API coupon threshold checks and save screenshots or logs. |

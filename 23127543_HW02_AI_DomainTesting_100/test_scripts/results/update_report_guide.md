@@ -41,7 +41,7 @@ Mobile cases are mainly manual. Save reviewed mobile screenshots and link them m
 Example screenshot link from a feature Markdown file:
 
 ```md
-[FR08-BVA-13-ui-after-checkout-cart.png](../../test_scripts/results/screenshots/FR08-BVA-13-ui-after-checkout-cart.png)
+[FR08-BVA-13 second screenshot](../../evidence/screenshots/FR08-BVA-13-2.png)
 ```
 
 Example JSON evidence link:

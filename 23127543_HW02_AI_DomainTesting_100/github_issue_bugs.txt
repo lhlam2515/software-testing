@@ -37,6 +37,305 @@ GitHub Issue Link:
 ============================================================
 
 ============================================================
+BUG ID: BUG-FR20-01
+Title: [FR-20] Mobile checkout payload omits the last cart item
+Feature: FR-20 - Mobile Checkout
+Related Test Case(s): FR20-DT-06, FR20-BVA-03
+Severity: High
+Status: Confirmed by source review
+
+Description:
+The mobile checkout request omits the last cart item whenever the cart contains more than one item. The mobile code sends `cart.slice(0, -1)` for multi-item carts.
+
+Steps to Reproduce:
+1. Add two or more products to the mobile cart.
+2. Proceed to checkout.
+3. Inspect the request body sent by the mobile checkout handler.
+
+Input Data:
+Any mobile cart with at least two items.
+
+Expected Result:
+The checkout payload includes all cart items, and the backend validates the submitted items.
+
+Actual Result:
+Source review shows the mobile payload removes the last item before sending checkout. Backend checkout stores only `total_amount` and does not validate line items.
+
+Impact:
+The submitted checkout payload can differ from the visible cart, reducing traceability and making order contents unreliable.
+
+Suggested Fix:
+Send the full `cart` array and validate each line item on the backend before creating the order.
+
+Evidence:
+`eshop-sut/frontend-mobile/App.js`, `eshop-sut/backend/server.js`
+
+GitHub Issue Link:
+[To be added]
+============================================================
+
+============================================================
+BUG ID: BUG-FR20-02
+Title: [FR-20] Backend checkout trusts client-supplied total amount
+Feature: FR-20 - Mobile Checkout
+Related Test Case(s): FR20-DT-07, FR20-BVA-06
+Severity: Critical
+Status: Confirmed by source review
+
+Description:
+The backend checkout endpoint inserts the submitted `total_amount` directly into the `orders` table without recalculating from trusted product or cart data.
+
+Steps to Reproduce:
+1. Log in as a user and obtain a token.
+2. Send `POST /api/checkout` with a manipulated `total_amount`.
+3. Review the backend checkout route behavior.
+
+Input Data:
+Examples: `total_amount=1`, `sum-1`, or `sum+1`.
+
+Expected Result:
+The backend recalculates the total from trusted product/cart data or rejects manipulated totals.
+
+Actual Result:
+Source review shows the backend stores `total_amount` from the request body directly.
+
+Impact:
+Users or clients can submit incorrect payable amounts if they can call the checkout API directly.
+
+Suggested Fix:
+Recalculate totals on the backend from trusted product IDs, quantities, coupon rules, and authenticated user state.
+
+Evidence:
+`eshop-sut/backend/server.js`
+
+GitHub Issue Link:
+[To be added]
+============================================================
+
+============================================================
+BUG ID: BUG-FR20-03
+Title: [FR-20] Mobile valid coupon calculation increases final amount
+Feature: FR-20 - Mobile Checkout
+Related Test Case(s): FR20-DT-08
+Severity: High
+Status: Confirmed by screenshot evidence
+
+Description:
+The mobile checkout screen showed `SAVE10` applied successfully, but the final amount increased from `103,000,000` to `1,030,000,000` instead of decreasing by 10%.
+
+Steps to Reproduce:
+1. Log in to the mobile app.
+2. Add multiple products totaling `103,000,000`.
+3. Open checkout.
+4. Apply coupon `SAVE10`.
+5. Observe the displayed discount and final total.
+
+Input Data:
+Coupon code: `SAVE10`; cart total: `103,000,000`.
+
+Expected Result:
+The final amount decreases by the coupon discount.
+
+Actual Result:
+The screenshot shows a successful coupon message but an inflated payable total of `1,030,000,000`.
+
+Impact:
+Customers may be shown or charged an incorrect checkout amount after applying a valid coupon.
+
+Suggested Fix:
+Correct percent-coupon calculation and add automated tests for percentage discounts on web and mobile checkout.
+
+Evidence:
+`evidence/screenshots/FR20-DT-08.jpg`
+
+GitHub Issue Link:
+[To be added]
+============================================================
+
+============================================================
+BUG ID: BUG-FR04-03
+Title: [FR-04] Backend profile update does not validate phone boundaries
+Feature: FR-04 - Personal Profile Management
+Related Test Case(s): FR04-BVA-01, FR04-BVA-04, FR04-BVA-05
+Severity: High
+Status: Confirmed by source review
+
+Description:
+The backend profile update route accepts the `phone` field without checking the SRS rule that phone numbers must start with `0` and contain 10-11 digits.
+
+Steps to Reproduce:
+1. Log in as a regular user and use a valid bearer token.
+2. Send `PUT /api/users/me` with a phone number below the minimum, above the maximum, or not starting with `0`.
+3. Observe that the route has no validation before updating the user row.
+
+Input Data:
+`012345678`, `012345678901`, and `1123456789`.
+
+Expected Result:
+Invalid phone boundaries are rejected.
+
+Actual Result:
+Source review shows `PUT /api/users/me` directly updates `phone` with no format or length validation.
+
+Impact:
+Invalid phone numbers can be stored through the backend API even when the UI blocks some invalid values.
+
+Suggested Fix:
+Validate phone format on the backend using the SRS rule and return a clear validation error for invalid values.
+
+Evidence:
+`test_scripts/results/json/fr04_profile_api_results.json`, `test_scripts/results/html/fr04_profile_api_results.html`, `eshop-sut/backend/server.js`
+
+GitHub Issue Link:
+[To be added]
+============================================================
+
+============================================================
+BUG ID: BUG-FR08-05
+Title: [FR-08] Coupon at exact minimum threshold is rejected
+Feature: FR-08 - Checkout
+Related Test Case(s): FR08-BVA-10
+Severity: Medium
+Status: Confirmed by test result and source review
+
+Description:
+The `SAVE10` coupon is rejected when `total_amount` is exactly equal to its documented minimum order amount.
+
+Steps to Reproduce:
+1. Send `POST /api/apply-coupon`.
+2. Use coupon `SAVE10`.
+3. Set `total_amount` to `300000`.
+
+Input Data:
+`{"code":"SAVE10","total_amount":300000,"user_id":2}`
+
+Expected Result:
+The coupon is accepted at the documented minimum threshold.
+
+Actual Result:
+API returned HTTP 400 with the minimum-order error. Source review confirms the route uses `total_amount > coupon.min_order_amount`, excluding the exact boundary.
+
+Impact:
+Users whose order exactly reaches the coupon minimum cannot apply the coupon.
+
+Suggested Fix:
+Use an inclusive threshold check when the requirement states that the minimum amount is accepted.
+
+Evidence:
+`test_scripts/results/json/fr08_checkout_api_results.json`, `test_scripts/results/html/fr08_checkout_api_results.html`, `eshop-sut/backend/server.js`
+
+GitHub Issue Link:
+[To be added]
+============================================================
+
+============================================================
+BUG ID: BUG-FR08-06
+Title: [FR-08] Percent coupon calculation produces negative discount
+Feature: FR-08 - Checkout
+Related Test Case(s): FR08-BVA-11
+Severity: High
+Status: Confirmed by test result and source review
+
+Description:
+The `SAVE10` percent coupon returned a negative discount and an inflated final amount when the total was above the minimum threshold.
+
+Steps to Reproduce:
+1. Send `POST /api/apply-coupon`.
+2. Use coupon `SAVE10`.
+3. Set `total_amount` to `300001`.
+
+Input Data:
+`{"code":"SAVE10","total_amount":300001,"user_id":2}`
+
+Expected Result:
+The coupon applies a 10% discount and returns a final amount below the original total.
+
+Actual Result:
+API returned HTTP 200, but `discount_amount` was `-2700009` and `final_amount` was `3000010`.
+
+Impact:
+Percent coupons can increase the final checkout total instead of discounting it.
+
+Suggested Fix:
+Calculate percent discounts as a percentage of the total and ensure the final amount is less than or equal to the original total.
+
+Evidence:
+`test_scripts/results/json/fr08_checkout_api_results.json`, `test_scripts/results/html/fr08_checkout_api_results.html`, `eshop-sut/backend/server.js`
+
+GitHub Issue Link:
+[To be added]
+============================================================
+
+============================================================
+BUG ID: BUG-FR18-04
+Title: [FR-18] Admin Orders renders HTML shipping address instead of escaped text
+Feature: FR-18 - Admin Order Management
+Related Test Case(s): FR18-DT-12
+Severity: Critical
+Status: Confirmed by screenshot evidence
+
+Description:
+The Admin Orders page rendered a submitted HTML shipping address as an element instead of displaying it as escaped text.
+
+Steps to Reproduce:
+1. Log in as a regular user and copy the user token.
+2. Send `POST /api/checkout` with an HTML shipping address.
+3. Log in to the Admin Web interface.
+4. Open the Orders page.
+5. Observe the address column for the created order.
+
+Input Data:
+`{"total_amount":100000,"shipping_address":"<img src=x onerror=alert('FR18-XSS')>"}`
+
+Expected Result:
+The address is escaped and displayed as plain text; no HTML element is rendered and no script can execute.
+
+Actual Result:
+The Admin Orders page rendered the submitted HTML as an image element in the address column.
+
+Impact:
+User-controlled order data can be interpreted as HTML in the admin interface, creating an XSS risk for administrators.
+
+Suggested Fix:
+Render shipping addresses as text instead of using unsafe HTML rendering. Sanitize existing stored address data before display if HTML rendering is unavoidable.
+
+Evidence:
+`evidence/screenshots/FR18-DT-12.png`, `evidence/screenshots/FR18-DT-12-2.png`
+
+GitHub Issue Link:
+[To be added]
+============================================================
+
+============================================================
+Potential Bugs Requiring Review
+============================================================
+
+PBUG-FR04-DT-10 - FR-04 - FR04-DT-10
+Reason: API returned HTTP 403; UI rendering safety for script-like shipping address still requires visual/security review.
+Next Step: Execute UI review with screenshots or manual security notes.
+
+PBUG-FR04-DT-12 - FR-04 - FR04-DT-12
+Reason: API returned HTTP 403; long-address storage and UI stability remain unclear.
+Next Step: Rerun with a valid token and capture profile reopen evidence.
+
+PBUG-FR08-BVA-02 - FR-08 - FR08-BVA-02
+Reason: Screenshot shows one product on the checkout page but not post-confirmation success.
+Next Step: Confirm checkout and capture success/order evidence.
+
+PBUG-FR08-BVA-03 - FR-08 - FR08-BVA-03
+Reason: Screenshot shows two products and total on the checkout page but not post-confirmation success.
+Next Step: Confirm checkout and capture success/order evidence.
+
+PBUG-FR08-BVA-05 - FR-08 - FR08-BVA-05
+Reason: Screenshot shows quantity on product page only, not cart/checkout subtotal.
+Next Step: Capture cart or checkout subtotal evidence.
+
+PBUG-FR08-BVA-06 - FR-08 - FR08-BVA-06
+Reason: Screenshot shows quantity on product page only, not cart/checkout subtotal.
+Next Step: Capture cart or checkout subtotal evidence.
+============================================================
+
+============================================================
 BUG ID: BUG-FR04-02
 Title: [FR04] Web profile phone validation conflicts with SRS
 Feature: FR04 - Personal Profile Management

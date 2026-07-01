@@ -20,7 +20,7 @@ Provide a reusable process for designing Boundary Value Analysis cases for featu
 5. Create the `Boundary Variables` table.
 6. Create BVA test cases with clear TC IDs, for example `FR08-BVA-01`.
 7. Review against the specification to ensure boundaries are correct and not assumption-based.
-8. If execution has not been performed, set `Actual Result` and `Verdict` to `Not Executed`.
+8. If execution has not been performed, set `Actual Result` and `Verdict` to `To be executed`.
 
 ## Checklist
 - Each feature has at least 6 BVA cases.

@@ -34,17 +34,17 @@ No source code in `eshop-sut/` is modified by this submission package.
 
 | Feature | Domain Testing Cases | BVA Cases | Designed | Executed and Reviewed | Pass | Fail | Needs Review | To be executed |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| FR-04 Profile | 12 | 6 | 18 | 18 | 5 | 5 | 8 | 0 |
-| FR-08 Checkout | 12 | 13 | 25 | 25 | 11 | 5 | 9 | 0 |
+| FR-04 Profile | 12 | 6 | 18 | 18 | 8 | 8 | 2 | 0 |
+| FR-08 Checkout | 12 | 13 | 25 | 25 | 14 | 7 | 4 | 0 |
 | FR-18 Admin Order Management | 12 | 6 | 18 | 18 | 5 | 13 | 0 | 0 |
-| FR-20 Mobile Checkout | 12 | 6 | 18 | 0 | 0 | 0 | 0 | 18 |
-| **Total** | **48** | **31** | **79** | **61** | **21** | **23** | **17** | **18** |
+| FR-20 Mobile Checkout | 12 | 6 | 18 | 17 | 9 | 5 | 3 | 1 |
+| **Total** | **48** | **31** | **79** | **78** | **36** | **33** | **9** | **1** |
 
-Generated API logs exist in `test_scripts/results/json/` and `test_scripts/results/html/`. JSON logs were used as the primary API source for this update. Reviewed screenshots under `evidence/screenshots/` were used as visual evidence for FR-04 profile UI cases, FR-08 checkout UI cases, and FR-18 admin order management cases.
+Generated API logs exist in `test_scripts/results/json/` and `test_scripts/results/html/`. JSON logs were used as the primary API source for this update. Reviewed screenshots under `evidence/screenshots/` were used as visual evidence for FR-04 profile UI cases, FR-08 checkout UI cases, FR-18 admin order management cases, and FR-20 mobile checkout cases.
 
 ## 6. Bug Summary
 
-The bug report is maintained in [bug_report.md](bug_report.md). Based on the generated result logs and reviewed screenshots, this update records 10 confirmed bug entries and 12 potential bugs requiring review. GitHub-Issue-ready text is prepared in [github_issue_bugs.txt](github_issue_bugs.txt).
+The bug report is maintained in [bug_report.md](bug_report.md). Based on the generated result logs, reviewed screenshots, and source review where evidence was incomplete, this update records 16 confirmed bug entries and 9 potential bugs requiring review. GitHub-Issue-ready text is prepared in [github_issue_bugs.txt](github_issue_bugs.txt).
 
 ## 7. AI Usage Summary
 
@@ -59,3 +59,4 @@ AI usage is documented in:
 - Evidence folders: [evidence/](evidence/) and [test_scripts/results/](test_scripts/results/)
 - GitHub Issues: create only for confirmed bugs after evidence review.
 - Demo videos: add links in [README.md](README.md) if available.
+- PDF export: Markdown reports are current; PDF versions must be regenerated manually because the current environment has no working PDF generator.

@@ -16,7 +16,7 @@ Provide a reusable process for designing Domain Testing test cases for an EShop 
    - UI/API mismatches, such as a UI-locked field that the API may still accept.
    - Security cases such as HTML/script input, role escalation, and manipulated amounts.
 6. For each test case, specify preconditions, input data, steps, expected result, actual result, verdict, and evidence.
-7. If execution has not been performed, always write `Not Executed`; do not guess results.
+7. If execution has not been performed, always write `To be executed`; do not guess results.
 8. Review AI gaps: identify what AI may have missed because the prompt was too general, code was not inspected, or backend/security behavior was overlooked.
 
 ## Checklist

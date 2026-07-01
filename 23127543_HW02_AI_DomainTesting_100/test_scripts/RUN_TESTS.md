@@ -272,7 +272,7 @@ Reserved HTML output folder:
 Use links like this in feature Markdown files:
 
 ```md
-[FR08-BVA-13-ui-after-checkout-cart.png](test_scripts/results/screenshots/FR08-BVA-13-ui-after-checkout-cart.png)
+[FR08-BVA-13 second screenshot](../evidence/screenshots/FR08-BVA-13-2.png)
 ```
 
 If the generated screenshot has a timestamp suffix, link the exact file name.

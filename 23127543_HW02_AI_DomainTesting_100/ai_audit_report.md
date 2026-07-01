@@ -11,8 +11,9 @@ I use AI tools for the following tasks: understanding assignment requirements, r
 | 1 | Codex | [Fill in exact date/time] | Test design prompts | Generate Domain Testing and BVA ideas for FR-04, FR-08, FR-18, and FR-20. | Drafted test cases, input variables, and boundary variables. | Reviewed against assignment requirements and source code. |
 | 2 | Codex | [Fill in exact date/time] | Source-code review prompts | Inspect EShop backend, web, admin, and mobile behavior for selected features. | Identified actual endpoints, request bodies, validation behavior, role checks, checkout behavior, coupon logic, and mobile local-state risks. | Corrected assumptions that came only from the SRS. |
 | 3 | Codex | [Fill in exact date/time] | Script-generation prompts | Create API and UI evidence scripts for selected features. | Produced Node.js API scripts, Playwright UI scripts, helper functions, and result writers. | Checked that generated logs are evidence suggestions, not final verdicts. |
-| 4 | Codex | [Fill in exact date/time] | Report-fixing prompts | Reorganize the HW02 folder and standardize all deliverables in English. | Updated README, main report, feature files, bug report, AI audit, critique, script guides, and checklist. | Reset unsupported verdicts to `To be executed` or potential-bug status. |
-| 5 | Codex | [Fill in exact date/time] | Human corrections | Review AI output for unsupported claims, broken paths, and inconsistent verdict wording. | Standardized result wording and evidence policy. | Final reviewer must execute or inspect evidence before assigning Pass/Fail. |
+| 4 | Codex | [Fill in exact date/time] | Evidence review prompts | Review existing screenshots, JSON logs, HTML logs, and source behavior before updating verdicts. | Updated verdicts where evidence was clear and kept unclear cases as `Needs Review` or `To be executed`. | Rejected unsupported Pass/Fail claims and preserved missing-evidence notes. |
+| 5 | Codex | [Fill in exact date/time] | Report-fixing prompts | Reorganize the HW02 folder and standardize all deliverables in English. | Updated README, main report, feature files, bug report, AI audit, critique, script guides, and checklist. | Reset unsupported verdicts to `To be executed` or potential-bug status. |
+| 6 | Codex | [Fill in exact date/time] | Final compliance and cleanup prompts | Check HW02 deliverables, bug alignment, GitHub issue text, PDF status, git log, and unnecessary files. | Prepared compliance checklist, refreshed git log, documented PDF export gap, and removed only clearly temporary/generated files. | Kept evidence, scripts, reports, and unclear items; did not invent links, screenshots, videos, or commit logs. |
 
 ## Test Design Prompts
 
@@ -32,4 +33,4 @@ AI was used to reorganize deliverables, standardize English wording, and make re
 
 ## Human Corrections
 
-Human review is required for final verdicts, GitHub Issues, screenshots, demo videos, and any PDF export.
+Human review is required for exact interaction timestamps, GitHub Issue creation, screenshots attached to GitHub Issues, demo videos, and final PDF export. Final verdicts in the reports are evidence-based: clear logs/screenshots/source behavior are marked `Pass` or `Fail`, unclear evidence remains `Needs Review`, and missing evidence remains `To be executed`.

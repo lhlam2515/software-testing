@@ -10,7 +10,7 @@ According to the SRS, only admins can view/update orders, order status must foll
 
 ## 3. Domain Testing
 
-### 3.1 Input Variables / Conditions
+### 3.1 Domain Variables and Conditions
 
 | Variable / Condition | Description | Valid Domain | Invalid Domain |
 |---|---|---|---|
@@ -140,7 +140,7 @@ Caption: FR18-DT-12 admin UI evidence. The address column rendered the submitted
 4. Include both valid and invalid boundaries.
 5. Review code: `canceled -> delivered` is marked valid in backend, which conflicts with the SRS.
 
-### 4.3 Boundary Value Analysis Test Cases
+### 4.2 BVA Test Cases
 
 > Execution reset note: Previous screenshot evidence was removed. Current results are reset to `To be executed`. API tests can generate JSON/HTML evidence under `test_scripts/results/`, while UI and mobile behavior require manual review before final verdicts are written.
 
@@ -168,25 +168,33 @@ Caption: FR18-BVA-03 evidence. The admin orders API returned two order objects a
 | FR18-BVA-05 | Boundary Value Analysis | Delivered final boundary | A delivered order exists or can be prepared. | Admin token: `<admin_token>`<br>Order ID: `<delivered_order_id>`<br>Endpoint: `PUT /api/admin/orders/<delivered_order_id>/status`<br>Body: `{"status":"canceled"}` | 1. Create a pending order.<br>2. Change `pending -> confirmed -> shipping -> delivered`.<br>3. Try `delivered -> canceled` with body `{"status":"canceled"}`.<br>4. Verify rejection and unchanged status by calling `GET /api/admin/orders`. | Rejected, and status remains `delivered`. | API returned HTTP 403 Forbidden for the admin order status operation; follow-up order status was not available. | Fail | Result log available in test_scripts/results/ |
 | FR18-BVA-06 | Boundary Value Analysis | Canceled final boundary | A canceled order exists or can be prepared. | Admin token: `<admin_token>`<br>Order ID: `<canceled_order_id>`<br>Endpoint: `PUT /api/admin/orders/<canceled_order_id>/status`<br>Body: `{"status":"delivered"}` | 1. Create a pending order.<br>2. Change `pending -> canceled`.<br>3. Try `canceled -> delivered` with body `{"status":"delivered"}`.<br>4. Verify rejection and unchanged status by calling `GET /api/admin/orders`. | Rejected, and status remains `canceled`. | API returned HTTP 403 Forbidden for the admin order status operation; follow-up order status was not available. | Fail | Result log available in test_scripts/results/ |
 
-## 5. AI Gap Analysis
+## 5. Execution Summary
 
-### 5.1 AI-Suggested Cases
+| Designed | Executed / Reviewed | Pass | Fail | Needs Review | To be executed |
+|---:|---:|---:|---:|---:|---:|
+| 18 | 18 | 5 | 13 | 0 | 0 |
+
+Execution evidence includes API result logs under `test_scripts/results/` and reviewed screenshots under `evidence/screenshots/`. FR18 failures are traceable to API status responses and the admin UI XSS rendering screenshot evidence.
+
+## 6. AI Gap Analysis
+
+### 6.1 AI-Suggested Cases
 
 AI commonly suggests admin viewing orders, non-admin users being blocked, and basic transitions such as pending->confirmed or shipping->delivered.
 
-### 5.2 Missing / Weak AI Cases
+### 6.2 Missing / Weak AI Cases
 
 AI may miss the actual API role-check behavior, final state `canceled`, shipping-address XSS in admin UI, non-existing orders, and skipped transitions such as pending->delivered.
 
-### 5.3 Why AI Might Miss Them
+### 6.3 Why AI Might Miss Them
 
 The state machine is more complex than simple CRUD. Without reading `server.js`, AI may trust the API document that says admin APIs check role, while the actual middleware only verifies token existence.
 
-### 5.4 Human Corrections
+### 6.4 Human Corrections
 
 Tests were corrected according to actual routes, with added role/user-token cases, final-state boundary tests, and XSS address cases because the admin UI uses `dangerouslySetInnerHTML`.
 
-## 6. Potential or Confirmed Bugs
+## 7. Potential or Confirmed Bugs
 
 Confirmed FR-18 bugs are listed in `bug_report.md`.
 
@@ -199,7 +207,11 @@ Confirmed FR-18 bugs are listed in `bug_report.md`.
 
 FR18-DT-02, FR18-DT-03, FR18-BVA-01, FR18-BVA-02, and FR18-BVA-03 are not listed as bugs because the result logs and reviewed screenshots show the expected access or list-size behavior.
 
-## 7. API Execution Helper
+## 8. Remaining Manual Review
+
+No FR-18 test cases remain `Needs Review` or `To be executed` in this report. GitHub Issue links still need to be added after real issues are created.
+
+### 8.1 API Execution Helper
 
 ### Login as Admin
 ```bash
