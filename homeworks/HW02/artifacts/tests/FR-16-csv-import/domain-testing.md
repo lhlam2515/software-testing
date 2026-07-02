@@ -10,7 +10,7 @@
 
 ## 1. Feature Overview
 
-FR-16 allows Admins to import multiple products at once. The SRS describes uploading a CSV file (`.csv` extension, header row `name,price,description,imageUrl,category_id`, RFC 4180 quoting), but the API spec accepts a **JSON body** `{"products": [...]}` — meaning CSV parsing happens at the **frontend layer**; the backend only receives JSON. This is a core Spec Conflict that affects the test scope at the API level.
+FR-16 allows Admins to import multiple products at once. The SRS describes uploading a CSV file (`.csv` extension, header row `name,price,description,imageUrl,category_id`, RFC 4180 quoting), but the API spec accepts a **JSON body** `{"products": [...]}` — meaning CSV parsing happens at the **frontend layer**; the backend only receives JSON. This Spec Conflict means pure API-level testing (TC-01 onward) only exercises the JSON body downstream of that conversion; the file-layer behavior itself (`.csv` extension enforcement, and confirmation that the browser actually sends JSON, not raw CSV) is only observable through the browser and is probed separately by TC-19 (Gap Probe).
 
 Pre-import validation: `name` must not be empty and `price` must be positive (`> 0`). If any row violates these rules, the entire batch must be **rolled back** (atomic all-or-nothing). The system returns a clear report: number of rows that succeeded, number that failed, and the reason for each failure.
 
@@ -32,12 +32,13 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **DB Category State** | System State | Whether the category exists in the DB | At least one valid category must exist as a pre-condition | Pre-condition for happy-path tests | N/A — setup condition |
 | **Atomic Rollback** | Output Behavior | If any row is invalid, the entire import is rolled back | All-or-nothing: 0 products committed if 1+ rows are invalid | This is the core invariant of FR-16 | No rollback → critical BUG |
 | **Import Report** | Output | Report: number of rows succeeded, number failed, and reasons | Must show both counts and the reason for each failed row | SRS requires "a clear report" | Report missing reasons is a defect |
+| **CSV file (client-side)** | Input (file) | The file selected via `Choose File` in the Admin UI import panel | SRS: `.csv` extension, header row `name,price,description,imageUrl,category_id`, RFC 4180 quoting; parsed into the `products` JSON array by the frontend before the API call | Selected via native file picker; only reaches the browser, never the backend directly | Unclear whether the UI enforces the `.csv` extension — **Spec Conflict / Gap**, probed by TC-19 |
 
 ### Implicit Gaps & Spec Conflicts
 
 | Variable | Gap / Conflict | Risk |
 |:---|:---|:---|
-| **Spec Conflict — Input layer** | SRS: "upload CSV file" with `.csv` extension, header row, RFC 4180. API Spec: accepts JSON body `{"products": [...]}`. Backend does not receive CSV — CSV parsing is a frontend concern. | Testing CSV-specific constraints (extension, header row, quoting) cannot be done at the API level; separate E2E frontend tests are required. |
+| **Spec Conflict — Input layer** | SRS: "upload CSV file" with `.csv` extension, header row, RFC 4180. API Spec: accepts JSON body `{"products": [...]}`. Backend does not receive CSV — CSV parsing is a frontend concern. | Testing CSV-specific constraints (extension, header row, quoting) cannot be done at the API level; separate E2E frontend tests are required. Probed by TC-19 (Gap Probe). |
 | **`category_id` validation** | FR-16 only validates `name` and `price`. FR-15 requires a valid category. It is unclear whether the import endpoint enforces this constraint. | If not validated, products with dangling foreign keys will be committed → corrupt data. |
 | **`name` max 255 chars** | FR-15 sets a 255-char limit. FR-16 does not repeat it. It is unclear whether the import enforces this. | Import may allow names > 255 chars → truncation or error depending on DB schema. |
 | **Empty `products` array** | Spec does not define behavior when `products: []`. | HTTP 400 or HTTP 200 with "0 imported"? Undefined. |
@@ -106,7 +107,13 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | Report — success | **EC20** | All rows succeeded | Valid | Report: `total_imported = N`, `total_failed = 0`, no error list |
 | Report — failure | **EC21** | One or more rows failed | Invalid | Report: `total_imported = 0`, `total_failed = M`, reason listed for each failed row |
 
-**Total: 22 ECs** (EC01–EC22, with 5 Invalid/Gap ECs: EC06, EC10, EC17, EC22, and the gap-context EC19).
+### Group 8: CSV File Format — Frontend-only layer (Gap Rule)
+
+| Variable / Condition | EC ID | Description | Type | Expected System Output |
+|:---|:---|:---|:---|:---|
+| File extension | **EC23** | File selected via `Choose File` does not have a `.csv` extension (e.g., `.txt` with identical CSV-formatted content) | Invalid/Gap | **Gap**: SRS requires a `.csv` extension, but it is unclear whether the Admin UI enforces this client-side before parsing |
+
+**Total: 23 ECs** (EC01–EC23, with 6 Invalid/Gap ECs: EC06, EC10, EC17, EC22, EC23, and the gap-context EC19).
 
 ---
 
@@ -457,6 +464,25 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 
 ---
 
+### TC-19 [Gap Probe] — CSV file extension enforcement and JSON translation at the input layer
+
+| Field | Content |
+|:---|:---|
+| **TC ID** | TC-19 |
+| **Test Case Name** | [Gap Probe] Does the Admin UI enforce the `.csv` extension, and is the resulting network request actually a JSON body? (Step 1 Spec Conflict — Input layer) |
+| **ECs Covered** | EC23 |
+| **ECs Verified Absent** | N/A — gap test, discover actual behavior |
+| **Pre-conditions** | Admin JWT (logged in via UI); category ID=1 exists; a file named `products.txt` (not `.csv`) containing valid CSV-formatted content (`name,price,description,imageUrl,category_id` header + one valid data row) is prepared alongside a normal `.csv` version of the exact same content |
+| **Input — endpoint** | `POST /api/admin/import-products` (observed via the browser Network panel, not sent directly) |
+| **Input — header** | `Authorization: Bearer <admin_token>` (attached automatically by the Admin UI) |
+| **Input — body** | Not applicable as a direct input — this TC observes whatever body the frontend actually constructs |
+| **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Open the browser DevTools Network panel, then click `Choose File` and select `products.txt` (non-`.csv` extension, valid CSV content inside); record whether the file picker/preview accepts or rejects it · 4. If accepted, click `Import 1 sản phẩm` (or equivalent) and inspect the captured `POST /api/admin/import-products` request in the Network panel: record its `Content-Type` header and the raw request payload · 5. Repeat steps 3-4 with the properly named `.csv` version of the same content and compare the two captured requests |
+| **Expected Result** | Record the actual behavior for both branches. API cross-check: _Multiple branches — record actual result:_ · If the `Choose File` dialog or the Admin UI rejects `products.txt` before any request is sent → UI enforces the `.csv` extension client-side; record as active constraint · If `products.txt` is accepted and produces the same successful import as the `.csv` version → **Gap confirmed**: UI does not enforce the `.csv` extension, contradicting the SRS requirement · In either accepted case, confirm via the Network panel that `Content-Type: application/json` and the request payload is `{"products": [...]}`, not raw CSV text or `multipart/form-data` → confirms the Spec Conflict described in Step 1 (frontend parses CSV into JSON before sending) |
+| **Verification Points** | 1. Record whether `products.txt` (wrong extension) is accepted or rejected by the Admin UI before any request is sent · 2. If accepted, confirm the import outcome (success/failure) matches the `.csv` version · 3. Network panel: confirm the `Content-Type` header of the captured request · 4. Network panel: confirm the raw request payload is JSON (`{"products": [...]}`), not CSV text · 5. Screenshot the Network panel entry as evidence for both the extension-enforcement result and the JSON-body confirmation |
+| **Status** | ⬜ Not yet executed |
+
+---
+
 ## 5. EC Coverage Matrix
 
 | EC ID | Description (summary) | TC | Mechanism |
@@ -483,12 +509,14 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | EC20 | Report: all success | TC-01, TC-02 | Observed |
 | EC21 | Report: failure with reasons | TC-06–TC-12 | Observed |
 | EC22 | `price` as string "10000" | TC-16 | Gap Probe |
+| EC23 | File extension not `.csv` | TC-19 | Gap Probe |
 
-**Student-added Gap Probes (Step 1 gaps not converted to TCs by AI — no new ECs defined):**
+**Student-added Gap Probes (Step 1 gaps not converted to TCs by AI — no new ECs defined unless noted):**
 
 | TC | Gap Probed | Step 1 Gap Source |
 |:---|:---|:---|
 | TC-17 | Response schema: records actual JSON field names returned by a successful import | Gap #6 — Report response schema not defined in API spec §6.3 |
 | TC-18 | All-rows-invalid batch: verifies whether report lists per-row reasons for all N failures or only the first | Gap #7 — Rollback scope when all rows fail not addressed in SRS |
+| TC-19 | CSV file extension enforcement and JSON translation at the input layer (new EC23 defined) | Gap #1 — Spec Conflict: Input layer (SRS `.csv` file vs API JSON body) never converted to a TC |
 
-**Total: 18 TCs** — 12 EP TCs + 4 AI-generated Gap Probes + 2 Student-added Gap Probes — covering 22/22 ECs.
+**Total: 19 TCs** — 12 EP TCs + 4 AI-generated Gap Probes + 3 Student-added Gap Probes — covering 23/23 ECs.
