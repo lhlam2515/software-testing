@@ -7,11 +7,12 @@ Agent skill hỗ trợ áp dụng **Domain Testing** (Equivalence Partitioning) 
 
 | Version | Trạng thái | Forge tại |
 |---------|-----------|-----------|
-| v0      | Scaffold (chỉ có README + CHANGELOG) | Phase 0 — 2026-06-23 |
-| v0.1    | _Chưa có_ | Phase 2 — FR-02 session |
-| v0.2    | _Chưa có_ | Phase 2 — FR-09 session |
-| v0.3    | _Chưa có_ | Phase 2 — FR-16 session |
-| v0.4    | _Chưa có_ | Phase 2 — FR-20 session |
+| v0      | ✅ Done (Scaffold: README + CHANGELOG) | Phase 0 — 2026-06-23 |
+| v0.1    | ✅ Done | Phase 2 — FR-02 session — 2026-06-24 |
+| v0.2    | ✅ Done | Phase 2 — FR-09 session — 2026-06-26 |
+| v0.3    | ✅ Done | Phase 2 — FR-16 session — 2026-06-30 |
+| v0.4    | ✅ Done | Retrospective — TA feedback + FR-02/09/16 audit — 2026-07-02 |
+| v0.5    | _Chưa có_ | Phase 2 — FR-20 session |
 
 ## Dự kiến khi v0.1 được forge
 

@@ -89,6 +89,15 @@ Both use the same table format.
 | Variable | Type | Description | Valid Domain / Boundaries | Dependencies & Constraints | Expected Error / Behavior |
 ```
 
+**Keep `Expected Error / Behavior` abstract, not transport-shaped.** State the business
+outcome, not the wire format that carries it — no literal HTTP status codes or raw JSON.
+If a cell already reads as a business outcome, leave it unchanged.
+
+```
+BEFORE: HTTP 401 if token is missing or invalid
+AFTER:  Rejected - authentication required or invalid
+```
+
 If there are gaps or conflicts, add a separate `### Implicit Gaps & Spec Conflicts` table
 after the main table: `| Variable | Gap / Conflict | Risk |`
 
@@ -121,6 +130,22 @@ that test case design in Step 3 has something to verify.
 | Variable / Condition | EC ID | Description | Type (Valid / Invalid / Invalid/Gap) | Expected System Output |
 ```
 
+**Same abstraction rule as Step 1:** classify the behavior, not the transport
+representation. No literal HTTP status/JSON in this column.
+
+```
+BEFORE: HTTP 4xx + error message (invalid code)
+AFTER:  Rejected - code not found
+
+BEFORE: Proceed to check C2-C5
+AFTER:  (unchanged - already abstract, no transport literal)
+```
+
+**Exception:** ECs that classify the response shape itself (e.g., an "Output — Response"
+group where the JSON/HTTP shape *is* the condition being partitioned) may keep literal
+HTTP/JSON wording — that's a legitimate classification target, not a leaked transport
+detail.
+
 **Output ECs matter too** — partition what the system returns (token vs no-token, generic
 error vs specific error, error position) as separate EC groups. These become the "verified
 absent" checks in Step 3.
@@ -132,6 +157,28 @@ absent" checks in Step 3.
 ## STEP 3 — Minimum Test Cases (EC Coverage)
 
 **Goal:** Cover 100% of ECs with the smallest possible test suite.
+
+### Step 3.0 — Survey the Real UI (mandatory, before drafting Steps)
+
+Before writing any TC's `Steps` cell, open the actual running SUT with `playwright-cli`
+and observe it directly — do not derive UI wording from the spec. Do this once per
+feature; the findings carry forward into Step 4 (BVA) without re-surveying.
+
+1. **Open the relevant frontend:** `playwright-cli open http://localhost:5173/...` for
+   customer-facing flows, `http://localhost:5174/...` for admin flows (see AGENTS.md for
+   exact ports). Navigate to every page this feature touches.
+2. **Snapshot each page** with `playwright-cli snapshot` to capture the exact page URL,
+   field labels, button labels, sidebar/nav item names, and rendered success/error text.
+3. **Reuse this exact vocabulary verbatim** when writing the `Steps` cell for every TC —
+   never invent or translate a label from the spec.
+4. **Setup and execution are separate concerns:** a TC's `Pre-conditions` may still be
+   reached via `test-db.cjs` or a direct API fixture call even when its `Steps` must
+   execute through the UI — surveying the UI does not mean every precondition needs a UI
+   path too.
+5. **Default to UI execution.** Write a TC's `Steps` as a direct API call only when a real
+   UI blocker prevents reaching that flow (e.g., a missing-Authorization-header case the
+   UI never lets you construct). When this happens, add a `UI Fallback Note` field to that
+   TC (see template below) stating exactly why no UI path exists.
 
 **Two rules, one firm:**
 
@@ -162,9 +209,10 @@ Input values must be literal. Verification points must name what to check and ho
 | **Pre-conditions** | [Exact system state — account, counter value, lock status, DB state] |
 | **Input — `field_name`** | `value` |
 | **Input — `field_name`** | `value` |
-| **Steps** | 1. [step] · 2. [step] · 3. [step] |
-| **Expected Result** | ✅/❌ [what should happen — be specific] |
-| **Verification Points** | 1. [what to check and how] · 2. ... |
+| **Steps** | 1. [UI action, using the exact labels/URLs from the Step 3.0 survey] · 2. [step] · 3. [step] |
+| **UI Fallback Note** | [Only present if Steps bypass the UI — state the exact UI blocker. Omit this row when Steps execute through the UI.] |
+| **Expected Result** | ✅/❌ UI: [what the tester should see on screen, using the same vocabulary as Steps]. API cross-check: [original literal HTTP/JSON assertion, verbatim]. |
+| **Verification Points** | 1. [UI-observable check] · 2. [UI-observable check] · 3. API cross-check: [API/DB-level check] |
 | **Status** | ⬜ Not yet executed |
 ```
 
@@ -180,10 +228,13 @@ from normal TCs in two important ways:
 1. `ECs Verified Absent` → write `N/A — gap test, discover actual behavior`
 2. `Expected Result` → list all plausible outcome branches rather than a single assertion.
    The reader needs to know what each outcome means, not just what you hope will happen.
-   For example:
-   - "If HTTP 4xx → system handles edge case correctly; record the error message"
-   - "If HTTP 200 with `final_amount = -40000` → BUG: discount exceeds total, report it"
-   - "If HTTP 200 with `final_amount = 0` → clamping behavior; document as undocumented feature"
+   Lead each branch with what the UI shows, then the API cross-check. For example:
+   - "If the UI shows a generic error message. API cross-check: HTTP 4xx → system handles
+     edge case correctly; record the error message"
+   - "If the UI shows a total larger than the order subtotal. API cross-check: HTTP 200
+     with `final_amount = -40000` → BUG: discount exceeds total, report it"
+   - "If the UI shows a total of exactly zero. API cross-check: HTTP 200 with
+     `final_amount = 0` → clamping behavior; document as undocumented feature"
 
 The value of a gap-probe TC is that it converts a spec silence into an observable,
 repeatable test target without manufacturing a fake expected result. The tester goes in
@@ -272,8 +323,9 @@ the reader (and you) an immediate mental model of what's being tested.
 | **Input — `field_name`** | `value` |
 | **Input — `field_name`** | `value` |
 | **Defect Target** | [Specific wrong operator this test exposes — be precise] |
-| **Expected Result** | ✅/❌ [what should happen at this exact boundary] |
-| **Verification Points** | [What to observe — especially the state transition] |
+| **UI Fallback Note** | [Only present if Steps bypass the UI — state the exact UI blocker. Omit this row when Steps execute through the UI.] |
+| **Expected Result** | ✅/❌ UI: [what the tester should see on screen at this exact boundary]. API cross-check: [original literal HTTP/JSON assertion, verbatim]. |
+| **Verification Points** | [What to observe — especially the state transition — UI-observable checks first, API cross-check checks last] |
 | **Status** | ⬜ Not yet executed |
 ```
 
@@ -410,3 +462,7 @@ Options:
 - [ ] Gap-probe TCs have a multi-branch Expected Result listing every plausible outcome, not a single assertion
 - [ ] BVA parameter variation applied wherever the boundary condition has a configurable parameter — at least 2 different parameter values tested at the ON point
 - [ ] Date/timestamp BVA TCs include a maintenance note stating the design date and instructing the executor to update boundary values to `current_date` before running
+- [ ] The real UI was surveyed via `playwright-cli` before any `Steps` cell was drafted; Steps use labels/URLs actually observed, not guessed from the spec
+- [ ] Step 1 `Expected Error / Behavior` and Step 2 `Expected System Output` contain no literal `HTTP <status>` wording (except ECs that classify the response shape itself) — verify with `grep -n "HTTP [0-9]"` restricted to the Step 1/Step 2 table regions
+- [ ] Every `Expected Result` and `Verification Points` entry has a UI-observable clause first and an explicit `API cross-check:` clause second, with the original literal HTTP/JSON content preserved intact
+- [ ] Every TC whose `Steps` bypass the UI has a `UI Fallback Note` explaining the exact blocker
