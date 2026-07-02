@@ -77,6 +77,10 @@ node test-db.cjs get <email>
 
 ### Step 3 — Browser execution
 
+**Every screenshot must use `playwright-cli screenshot --full-page`** — never the default
+viewport-only capture, never a custom-resized viewport. Full-page mode ensures the
+evidence shows the complete page state, not just what's visible above the fold.
+
 ```bash
 # Open the target page
 playwright-cli open http://localhost:5173/login
@@ -88,8 +92,8 @@ playwright-cli snapshot
 playwright-cli fill e<N> "<value>"
 playwright-cli click e<submit-btn>
 
-# Capture the result page
-playwright-cli screenshot --filename=homeworks/HW02/artifacts/tests/<feature>/screenshots/<name>.png
+# Capture the result page (always --full-page)
+playwright-cli screenshot --full-page --filename=homeworks/HW02/artifacts/tests/<feature>/screenshots/<name>.png
 
 # Inspect the network request (HTTP method + status)
 playwright-cli requests
@@ -110,7 +114,7 @@ Write the entry into `execution-log.md` immediately after each TC — don't batc
 | **Status** | ✅ PASS / ❌ FAIL — BUG-XX-NNN / ✅ PASS (with deviation) |
 | **Pre-condition setup** | `node test-db.cjs ...` → `field=value` confirmed |
 | **Executed at** | YYYY-MM-DD HH:MM |
-| **Actual result** | POST /api/<endpoint> → <status> · <UI behavior> · `<field>` <before>→<after> |
+| **Actual result** | UI: <what was observed on screen>. API cross-check: POST /api/<endpoint> → <status> · `<field>` <before>→<after> |
 | **Screenshot** | `artifacts/tests/<feature>/screenshots/<name>.png` |
 | **Bug ID** | BUG-XX-NNN or — |
 | **Notes** | EC<N> confirmed ✅. <Deviations or observations.> |
@@ -221,3 +225,13 @@ grep -n "login_attempts" apps/backend/server.js
 ```
 
 The increment may be hardcoded in the handler logic. Document what the code actually does, not what the network layer implies.
+
+### Gotcha 4 — No `§` or em dash `—` in execution-log.md prose
+
+Project formatting rule: never use the section-sign `§` or an em dash `—` in
+`execution-log.md` prose (Status, Actual result, Notes, etc.). Use "section" / "step" /
+"part" instead of `§`, and commas or colons instead of `—`. Grep before committing:
+
+```bash
+grep -n "§\|—" homeworks/HW02/artifacts/tests/<feature>/execution-log.md
+```
