@@ -124,7 +124,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Input — endpoint** | `POST /api/admin/import-products` |
 | **Input — header** | `Authorization: Bearer <admin_token>` |
 | **Input — body** | `{"products": [{"name": "Basic Men's T-Shirt", "price": 150000, "description": "100% cotton material", "imageUrl": "", "category_id": 1}]}` |
-| **Steps** | 1. Log in with admin credentials, obtain JWT token · 2. Record current product count via `GET /api/products` · 3. Send POST request with the body above · 4. Inspect response · 5. Call `GET /api/products` to find the imported product |
+| **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name="Basic Men's T-Shirt", price=150000, description="100% cotton material", category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` for the imported product |
 | **Expected Result** | ✅ HTTP 200; report shows 1 success, 0 failures; "Basic Men's T-Shirt" appears in `GET /api/products` after import |
 | **Verification Points** | 1. HTTP status = 200 · 2. Response body contains a field indicating rows succeeded = 1, rows failed = 0 · 3. `GET /api/products` returns the product with `name = "Basic Men's T-Shirt"` and `price = 150000` |
 | **Status** | ⬜ Not yet executed |
@@ -143,7 +143,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Input — endpoint** | `POST /api/admin/import-products` |
 | **Input — header** | `Authorization: Bearer <admin_token>` |
 | **Input — body** | `{"products": [{"name": "Product Alpha", "price": 100000, "description": "", "imageUrl": "", "category_id": 1}, {"name": "Product Beta", "price": 200000, "description": "Beta description", "imageUrl": "", "category_id": 1}, {"name": "Product Gamma", "price": 350000, "description": "", "imageUrl": "", "category_id": 1}]}` |
-| **Steps** | 1. Log in, obtain token · 2. Record current product count · 3. Send POST request · 4. Inspect response · 5. Call `GET /api/products` and count new products |
+| **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with 3 rows: Product Alpha (100000), Product Beta (200000), Product Gamma (350000), all `category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 3 sản phẩm` button appear · 4. Click `Import 3 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` for all 3 new products |
 | **Expected Result** | ✅ HTTP 200; all 3 products exist in DB after import; report: 3 succeeded, 0 failed |
 | **Verification Points** | 1. HTTP status = 200 · 2. Product count increases by exactly 3 compared to before import · 3. "Product Alpha", "Product Beta", "Product Gamma" all found in `GET /api/products` |
 | **Status** | ⬜ Not yet executed |
@@ -162,7 +162,8 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Input — endpoint** | `POST /api/admin/import-products` |
 | **Input — header** | _(no Authorization header)_ |
 | **Input — body** | `{"products": [{"name": "Test", "price": 10000, "description": "", "imageUrl": "", "category_id": 1}]}` |
-| **Steps** | 1. Send POST request without Authorization header |
+| **Steps** | 1. Send `POST /api/admin/import-products` directly without an Authorization header |
+| **UI Fallback Note** | API-level execution retained. Starting the Admin app without a JWT renders only the Login form; there is no UI path to submit an import request with no token attached. |
 | **Expected Result** | ❌ HTTP 401 Unauthorized; no products created in DB |
 | **Verification Points** | 1. HTTP status = 401 · 2. Response body contains error message indicating missing authentication |
 | **Status** | ⬜ Not yet executed |
@@ -181,7 +182,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Input — endpoint** | `POST /api/admin/import-products` |
 | **Input — header** | `Authorization: Bearer <regular_user_token>` |
 | **Input — body** | `{"products": [{"name": "Test", "price": 10000, "description": "", "imageUrl": "", "category_id": 1}]}` |
-| **Steps** | 1. Log in with regular user credentials, obtain token · 2. Send POST request using the regular user token |
+| **Steps** | 1. On `http://localhost:5173/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. Copy the storefront browser-storage key `token` into the Admin app as `adminToken`, reload `http://localhost:5174/`, and confirm the admin sidebar loads under that regular-user session · 3. In the left sidebar, click `Sản phẩm`, then in `📂 Import sản phẩm từ CSV` click `Choose File` to upload a CSV with one valid row (`name="Test", price=10000, category_id=1`) and confirm `Import 1 sản phẩm` appears · 4. Click `Import 1 sản phẩm` and inspect the rendered result |
 | **Expected Result** | ❌ HTTP 403 Forbidden; no products created |
 | **Verification Points** | 1. HTTP status = 403 · 2. Response body contains error message indicating insufficient permissions |
 | **Status** | ⬜ Not yet executed |
@@ -200,7 +201,8 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Input — endpoint** | `POST /api/admin/import-products` |
 | **Input — header** | `Authorization: Bearer <admin_token>` |
 | **Input — body** | `{}` _(no `products` key)_ |
-| **Steps** | 1. Log in, obtain token · 2. Send POST with body `{}` |
+| **Steps** | 1. Login as Admin via UI to obtain a token · 2. Send `POST /api/admin/import-products` directly with body `{}` |
+| **UI Fallback Note** | API-level execution retained. The rendered Import flow only accepts a CSV file and always constructs a request containing a `products` array; there is no UI control that can submit a body without the `products` key. |
 | **Expected Result** | ❌ HTTP 400 Bad Request |
 | **Verification Points** | 1. HTTP status = 400 · 2. Response body indicates invalid request body |
 | **Status** | ⬜ Not yet executed |
@@ -219,7 +221,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Input — endpoint** | `POST /api/admin/import-products` |
 | **Input — header** | `Authorization: Bearer <admin_token>` |
 | **Input — body** | `{"products": [{"name": "", "price": 50000, "description": "desc", "imageUrl": "", "category_id": 1}]}` |
-| **Steps** | 1. Log in, obtain token · 2. Record product count · 3. Send POST · 4. Inspect response · 5. Call `GET /api/products` and compare count |
+| **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: empty `name`, `price=50000`, `category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` count is unchanged |
 | **Expected Result** | ❌ HTTP 4xx or 200 with failure report; report: 0 succeeded, 1 failed with reason; product count in DB unchanged |
 | **Verification Points** | 1. HTTP status ≠ 200 (or 200 with error flag) · 2. Report contains failed row count = 1 and reason mentioning `name` · 3. `GET /api/products` count equals count before request (rollback confirmed) |
 | **Status** | ⬜ Not yet executed |
@@ -238,7 +240,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Input — endpoint** | `POST /api/admin/import-products` |
 | **Input — header** | `Authorization: Bearer <admin_token>` |
 | **Input — body** | `{"products": [{"price": 50000, "description": "desc", "imageUrl": "", "category_id": 1}]}` _(no `name` key)_ |
-| **Steps** | 1. Log in · 2. Record product count · 3. Send POST · 4. Inspect response and DB |
+| **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV file missing the `name` column header; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` count is unchanged |
 | **Expected Result** | ❌ HTTP 4xx or failure report; 0 new products in DB |
 | **Verification Points** | 1. Response contains error about `name` · 2. Product count does not increase |
 | **Status** | ⬜ Not yet executed |
@@ -257,7 +259,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Input — endpoint** | `POST /api/admin/import-products` |
 | **Input — header** | `Authorization: Bearer <admin_token>` |
 | **Input — body** | `{"products": [{"name": "Test zero price", "price": 0, "description": "", "imageUrl": "", "category_id": 1}]}` |
-| **Steps** | 1. Log in · 2. Record product count · 3. Send POST · 4. Inspect response and DB |
+| **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name="Test zero price", price=0, category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` count is unchanged |
 | **Expected Result** | ❌ HTTP 4xx or failure report with reason about price; 0 products committed |
 | **Verification Points** | 1. Error reason mentions `price must be positive` or equivalent · 2. Product count unchanged (rollback confirmed) |
 | **Status** | ⬜ Not yet executed |
@@ -276,7 +278,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Input — endpoint** | `POST /api/admin/import-products` |
 | **Input — header** | `Authorization: Bearer <admin_token>` |
 | **Input — body** | `{"products": [{"name": "Test negative price", "price": -1, "description": "", "imageUrl": "", "category_id": 1}]}` |
-| **Steps** | 1. Log in · 2. Record product count · 3. Send POST · 4. Inspect response and DB |
+| **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name="Test negative price", price=-1, category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` count is unchanged |
 | **Expected Result** | ❌ HTTP 4xx or failure report; 0 products committed |
 | **Verification Points** | 1. Error reason mentions `price` invalid · 2. Product count unchanged |
 | **Status** | ⬜ Not yet executed |
@@ -295,7 +297,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Input — endpoint** | `POST /api/admin/import-products` |
 | **Input — header** | `Authorization: Bearer <admin_token>` |
 | **Input — body** | `{"products": [{"name": "Test bad price", "price": "abc", "description": "", "imageUrl": "", "category_id": 1}]}` |
-| **Steps** | 1. Log in · 2. Record product count · 3. Send POST · 4. Inspect response and DB |
+| **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name="Test bad price", price=abc, category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` count is unchanged |
 | **Expected Result** | ❌ HTTP 4xx or failure report; 0 products committed |
 | **Verification Points** | 1. Error reason mentions `price` must be a number · 2. Product count unchanged |
 | **Status** | ⬜ Not yet executed |
@@ -314,7 +316,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Input — endpoint** | `POST /api/admin/import-products` |
 | **Input — header** | `Authorization: Bearer <admin_token>` |
 | **Input — body** | `{"products": [{"name": "Test no price", "description": "", "imageUrl": "", "category_id": 1}]}` _(no `price` key)_ |
-| **Steps** | 1. Log in · 2. Record product count · 3. Send POST · 4. Inspect response and DB |
+| **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV file missing the `price` column header for the row `name="Test no price"`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` count is unchanged |
 | **Expected Result** | ❌ HTTP 4xx or failure report; 0 products committed |
 | **Verification Points** | 1. Error reason mentions `price` is required or invalid · 2. Product count unchanged |
 | **Status** | ⬜ Not yet executed |
@@ -333,7 +335,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Input — endpoint** | `POST /api/admin/import-products` |
 | **Input — header** | `Authorization: Bearer <admin_token>` |
 | **Input — body** | `{"products": [{"name": "Valid Product 1", "price": 100000, "description": "", "imageUrl": "", "category_id": 1}, {"name": "Invalid Row", "price": 0, "description": "", "imageUrl": "", "category_id": 1}, {"name": "Valid Product 2", "price": 200000, "description": "", "imageUrl": "", "category_id": 1}]}` |
-| **Steps** | 1. Log in · 2. Record product count · 3. Send POST (3 rows: rows 1 & 3 valid, row 2 invalid `price=0`) · 4. Inspect response · 5. Call `GET /api/products` and search for "Valid Product 1" and "Valid Product 2" |
+| **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with 3 rows: "Valid Product 1" (100000), "Invalid Row" (price=0), "Valid Product 2" (200000), all `category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 3 sản phẩm` button appear · 4. Click `Import 3 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` and search for "Valid Product 1" and "Valid Product 2" |
 | **Expected Result** | ❌ Failure report; "Valid Product 1" and "Valid Product 2" do **not** appear in DB; product count unchanged |
 | **Verification Points** | 1. `GET /api/products` search "Valid Product 1" → 0 results · 2. `GET /api/products` search "Valid Product 2" → 0 results · 3. Product count equals count before request → full batch rollback confirmed |
 | **Status** | ⬜ Not yet executed |
@@ -352,7 +354,8 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Input — endpoint** | `POST /api/admin/import-products` |
 | **Input — header** | `Authorization: Bearer <admin_token>` |
 | **Input — body** | `{"products": []}` |
-| **Steps** | 1. Log in · 2. Send POST with empty array · 3. Record full response code and body |
+| **Steps** | 1. Login as Admin via UI to obtain a token · 2. Send `POST /api/admin/import-products` directly with body `{"products": []}` · 3. Record full response code and body |
+| **UI Fallback Note** | API-level execution retained. A header-only CSV is rendered as "Import 0 sản phẩm" with the Import button disabled — client-side validation prevents submission of an empty `products` array through the UI. |
 | **Expected Result** | _Multiple branches — record actual result:_ · If HTTP 400 → SUT correctly handles the "no products" edge case; record error message · If HTTP 200 with `imported=0` → SUT accepts empty batch; record as undocumented feature · If HTTP 500 → **BUG**: server crash on empty input |
 | **Verification Points** | HTTP status + response body + confirm no new products in DB |
 | **Status** | ⬜ Not yet executed |
@@ -371,7 +374,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Input — endpoint** | `POST /api/admin/import-products` |
 | **Input — header** | `Authorization: Bearer <admin_token>` |
 | **Input — body** | `{"products": [{"name": "<256-character string of 'x'>", "price": 50000, "description": "", "imageUrl": "", "category_id": 1}]}` _(name is 256 characters long)_ |
-| **Steps** | 1. Log in · 2. Send POST with 256-char name · 3. Record response and inspect DB |
+| **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name=<256-char string>, price=50000, category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` for the new product's `name` length |
 | **Expected Result** | _Multiple branches:_ · If HTTP 4xx and 0 products → FR-16 enforces 255-char limit; record constraint as active · If HTTP 200 and product with truncated name → **BUG**: data silently truncated · If HTTP 200 and product with full 256-char name → FR-16 does not enforce limit; record gap with FR-15 |
 | **Verification Points** | HTTP status + response + `GET /api/products` find the newly added product and check `name` length |
 | **Status** | ⬜ Not yet executed |
@@ -390,7 +393,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Input — endpoint** | `POST /api/admin/import-products` |
 | **Input — header** | `Authorization: Bearer <admin_token>` |
 | **Input — body** | `{"products": [{"name": "Test invalid category", "price": 50000, "description": "", "imageUrl": "", "category_id": 99999}]}` |
-| **Steps** | 1. Log in · 2. Confirm category 99999 does not exist · 3. Send POST · 4. Record response and inspect DB |
+| **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Danh mục` and confirm category `99999` is not listed, then click `Sản phẩm` to return to `Quản lý Sản phẩm` · 3. In `📂 Import sản phẩm từ CSV`, click `Choose File` to upload a CSV with one row: `name="Test invalid category", price=50000, category_id=99999`, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` |
 | **Expected Result** | _Multiple branches:_ · If HTTP 4xx and 0 products → SUT validates FK constraint; record constraint as active · If HTTP 200 and product with `category_id=99999` in DB → **CRITICAL BUG**: dangling FK, corrupt data · If HTTP 500 (DB FK violation) → **BUG**: unhandled exception |
 | **Verification Points** | HTTP status + response body + `GET /api/products` search for "Test invalid category" |
 | **Status** | ⬜ Not yet executed |
@@ -409,7 +412,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Input — endpoint** | `POST /api/admin/import-products` |
 | **Input — header** | `Authorization: Bearer <admin_token>` |
 | **Input — body** | `{"products": [{"name": "Test price as string", "price": "10000", "description": "", "imageUrl": "", "category_id": 1}]}` _(`price` is a JSON string, not a number)_ |
-| **Steps** | 1. Log in · 2. Send POST with `"price": "10000"` · 3. Record response and inspect DB |
+| **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name="Test price as string", price=10000, category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check the stored `price` via `GET /api/products` |
 | **Expected Result** | _Multiple branches:_ · If HTTP 200 and product in DB with price=10000 → SUT coerces string to number; lenient input accepted · If HTTP 4xx → SUT strict type checking; `"10000"` rejected · If HTTP 200 and price=0 or NaN → **BUG**: incorrect type coercion |
 | **Verification Points** | HTTP status + price value in DB if product was created |
 | **Status** | ⬜ Not yet executed |
@@ -428,7 +431,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Input — endpoint** | `POST /api/admin/import-products` |
 | **Input — header** | `Authorization: Bearer <admin_token>` |
 | **Input — body** | `{"products": [{"name": "Schema Probe Product", "price": 75000, "description": "", "imageUrl": "", "category_id": 1}]}` |
-| **Steps** | 1. Log in, obtain token · 2. Send POST · 3. Record raw response body verbatim — every key, type, and value |
+| **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name="Schema Probe Product", price=75000, category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the browser Network entry for `POST /api/admin/import-products` · 5. Record the raw JSON response body verbatim — every key, type, and value |
 | **Expected Result** | _Multiple branches — record actual result:_ · If response contains `{"imported": 1, "failed": 0, ...}` → document `imported` and `failed` as canonical field names · If response contains `{"success": 1}` or other schema → record actual field names and update Verification Points in TC-01, TC-02, TC-06 through TC-12 accordingly · If HTTP 500 → **BUG**: schema probe crashes the server on valid input |
 | **Verification Points** | 1. Record complete raw JSON response body · 2. List all top-level keys and their types · 3. Confirm "Schema Probe Product" appears in `GET /api/products` (validates import succeeded, not just response received) |
 | **Status** | ⬜ Not yet executed |
@@ -447,7 +450,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Input — endpoint** | `POST /api/admin/import-products` |
 | **Input — header** | `Authorization: Bearer <admin_token>` |
 | **Input — body** | `{"products": [{"name": "Invalid Row 1", "price": 0, "description": "", "imageUrl": "", "category_id": 1}, {"name": "Invalid Row 2", "price": -1, "description": "", "imageUrl": "", "category_id": 1}, {"name": "Invalid Row 3", "price": "abc", "description": "", "imageUrl": "", "category_id": 1}]}` _(3 rows, each with a distinct price violation)_ |
-| **Steps** | 1. Log in, obtain token · 2. Record product count · 3. Send POST · 4. Record full response body · 5. Call `GET /api/products` and verify count unchanged |
+| **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with 3 rows, each with a distinct price violation: "Invalid Row 1" (price=0), "Invalid Row 2" (price=-1), "Invalid Row 3" (price=abc); click `Choose File` to select it, then confirm the preview table and `Import 3 sản phẩm` button appear · 4. Click `Import 3 sản phẩm` and record the full rendered report · 5. Cross-check `GET /api/products` count is unchanged |
 | **Expected Result** | _Multiple branches — record actual result:_ · If response lists 3 separate failure entries (one per row, each with a distinct reason) → SUT processes all rows before rolling back; SRS "lý do từng dòng" requirement satisfied · If response lists only 1 failure entry → SUT early-exits after first invalid row; rows 2 and 3 unreported → **undocumented behavior**: report is incomplete per SRS · If HTTP 4xx with no per-row detail → **BUG**: batch rejected without per-row report; "lý do" requirement violated |
 | **Verification Points** | 1. Product count unchanged (full rollback confirmed) · 2. Number of failure entries in response body (1 vs 3?) · 3. Each failure entry identifies which row and what reason? |
 | **Status** | ⬜ Not yet executed |
