@@ -623,4 +623,170 @@ AI executed the 4 steps of the domain testing framework autonomously via the `do
 
 ---
 
+## Entry 009 | 15:42 02/07/2026
+
+**Tool:** Claude Code (claude-sonnet-4-6, domain-testing skill)
+**Feature:** FR-20
+**Step:** Full domain testing design via `/domain-testing` skill (Steps 1-4 in one invocation), grounded in a real `playwright-cli` UI survey
+
+### Prompt
+
+```
+Hãy áp dụng kỹ thuật /domain-testing để thực hiện thiết kế test case chi tiết cho FR-20 - Cancel order đã được document bên trong eshop-sut/srs.md, eshop-sut/api-specification.md, giao diện mobile của eshop-sut. Lần này, chúng ta sẽ thực hiện thiết kế để kiểm thử trên apps/frontend-mobile theo đúng black-box discipline thay vì giao diện web như các FR trước đó.
+```
+
+### Intermediate turns (procedural, same session)
+
+Between the prompt above and the AI Output below, two procedural exchanges occurred (environment startup — no design content produced): **15:48** the AI asked the student to manually start `apps/backend` and `apps/frontend-mobile` (`npx expo start --web`) because its own attempt to launch them was blocked; **15:48 (reply)** the student ran `npx expo install react-dom react-native-web` and `npx expo start --web` as instructed.
+
+### Prompt (continued, 15:51 02/07/2026)
+
+```
+Backend ở 3000 và Mobile ở 8081
+```
+
+### AI Output (verbatim, 15:51 02/07/2026)
+
+```
+Đã hoàn tất thiết kế Domain Testing + BVA cho FR-20 (Cancel Order — Mobile), viết vào:
+- `homeworks/HW02/artifacts/tests/FR-20-cancel-order-mobile/domain-testing.md` — 16 EC, 9 TC (6 EP thường + 3 gap-probe cho 3 gap/conflict phát hiện ở Step 1)
+- `homeworks/HW02/artifacts/tests/FR-20-cancel-order-mobile/bva.md` — 4 TC-BVA quanh ranh giới `confirmed`|`shipping` của chuỗi trạng thái đơn hàng
+
+Điểm đáng chú ý phát hiện qua khảo sát UI thật (playwright-cli):
+1. App mobile hardcode gọi API tới một IP LAN cũ (`192.168.10.13`) không khớp máy hiện tại — phải override route mới test được; execution phase cần biết điều này.
+2. Không có dialog xác nhận khi bấm "Hủy đơn" — một cú chạm là hủy vĩnh viễn, ghi nhận là UX gap (TC-09) so với quy ước FR-24.
+3. Xác nhận bằng UI: nút "Hủy đơn" bị ẩn đúng ở `shipping`/`delivered`/`canceled`, nhưng đây mới chỉ là bằng chứng UI — TC-07 (gap-probe) và TC-BVA-02 để lại việc xác minh backend có thực sự chặn `shipping` hay không (Spec Conflict giữa SRS và API spec) cho lúc thực thi.
+4. Token JWT chỉ lưu in-memory, không có trong localStorage/sessionStorage — quyết định TC-05 phải dùng API trực tiếp.
+
+Trạng thái môi trường còn lại: backend (`:3000`) và frontend-mobile (`:8081`) vẫn đang chạy nền; DB hiện có 4 đơn hàng test (`test@eshop.com`, id 1-4, trạng thái `canceled/confirmed→canceled/shipping/delivered`) từ quá trình khảo sát — execution phase sau này nên tạo đơn mới sạch cho từng TC theo đúng Pre-conditions đã viết, không phụ thuộc vào state hiện tại.
+
+Sẵn sàng chuyển sang thực thi (`fr-execution` skill) khi bạn muốn.
+```
+
+The full generated content (7 variables, 3 Implicit Gaps, 17 ECs, Step 3.0 UI survey table, 9 TCs, EC Coverage Matrix in `domain-testing.md`; 1 target variable, 4 BVA TCs, Defect Coverage Matrix, Setup Protocol in `bva.md`) is the file content itself — the skill wrote it directly to disk rather than printing it in the chat response above. The two files are submitted as-is under `artifacts/tests/FR-20-cancel-order-mobile/` and constitute the verbatim AI-generated artifact; the quoted response above is the verbatim natural-language summary the AI actually returned in the chat turn.
+
+**Note:** this design pass (commit `4b16343`, 16:36 02/07/2026) produced 9 EP TCs and 4 BVA TCs (13 total). TC-10 (FR-11 status-color cross-feature check, EC17) was added in a separate AI-assisted gap-analysis pass on the same day — see Entry 010 — bringing the final count to 10 EP TCs / 14 total, per commit `57e7975`.
+
+### Used in
+
+- `[AI-02]_AI_Audit_Report.md`, Artifact 4
+
+---
+
+## Entry 010 | 22:53 02/07/2026
+
+**Tool:** Claude Code (claude-sonnet-4-6)
+**Feature:** FR-20
+**Step:** Post-design gap-analysis review of `domain-testing.md` / `bva.md`, scoped down through negotiation, then applied
+
+### Prompt
+
+```
+Giúp tôi phân tích nội dung thực hiện phân tích và thiết kế các test case theo kỹ thuật Domain Testing và BVA cho FR-20 để tìm kiếm những điểm thiết kế còn thiếu sót hoặc chưa thực sự đầy đủ.
+```
+
+### AI Output (verbatim, 22:53 02/07/2026)
+
+```
+Tôi đã đọc kỹ `domain-testing.md`, `bva.md` của FR-20, đối chiếu với SRS (FR-10, FR-11, FR-20) và `api_specification.md` (§4.6, §6.2). Bộ thiết kế hiện tại khá vững (14 biến, 16 EC, 9 TC + 4 BVA, 3 gap-probe đã đóng đúng), nhưng vẫn có vài lỗ hổng thực sự đáng lưu ý:
+
+## Các điểm thiếu sót phát hiện được
+
+**1. Thiếu EC cho `order_id` dị dạng (malformed input)**
+- Bảng Step 1/Step 2 chỉ chia `order_id` thành "tồn tại" (EC10) / "không tồn tại" (EC11, TC-06 dùng `999999`).
+- Chưa có EC nào cho `order_id` không phải số, âm, `0`, hoặc chuỗi injection-shape (vd `abc`, `-1`, `1; DROP TABLE`).
+- Rủi ro: parser integer lỗi có thể trả 500 thay vì 404, hoặc lộ stack trace — vi phạm ngầm định "mọi lỗi phải có thông báo phù hợp" (FR-10). Đây là input mà UI không bao giờ tạo ra (giống lý do EC11 dùng UI Fallback), nhưng vẫn là một đường tấn công API hợp lệ cần domain testing phủ.
+
+**2. Intra-EC behavioral gap: race condition / double-cancel**
+- TC-01, TC-02 phủ EC01/EC02 (happy path) nhưng chỉ với một request tuần tự.
+- Không có TC nào kiểm tra 2 request `PUT /cancel` gửi gần như đồng thời cho cùng 1 order đang `pending`/`confirmed`. Theo checklist của skill, đây là loại gap "intra-EC" — EC đã có TC che phủ nhưng cơ chế nội bộ (backend có khóa transaction/optimistic lock không, hay xử lý request thứ 2 trên state đã `canceled`) vẫn chưa được xác định bằng spec. TC-09 chỉ kiểm tra double-tap từ UI (debounce phía client), không phải race thực sự ở tầng API.
+
+**3. Lý do "no UI path" của EC07 chưa chính xác hoàn toàn**
+- `domain-testing.md` khẳng định *toàn bộ* trường hợp token không hợp lệ đều buộc phải test qua API trực tiếp (TC-05), với lý do "JWT chỉ lưu in-memory, không thể can thiệp từ ngoài".
+- Nhưng đó chỉ đúng với token bị *thiếu/sai ngay từ đầu*. Có một nhánh UI-reachable thực sự: JWT hết hạn *trong khi phiên đang mở* (người dùng để app idle qua thời hạn token, nút `Hủy đơn` vẫn hiển thị vì UI không tự động biết token đã hết hạn) rồi tap `Hủy đơn`. Đây là một EC/TC còn thiếu — khác về bản chất với "chưa đăng nhập", vì nó test đường UI thật, không phải giả lập bằng gọi API trực tiếp.
+
+**4. Thiếu quan sát schema lỗi (observational gap)**
+- Step 3.0 chỉ xác nhận schema thành công: `{"message": "Order canceled successfully"}`.
+- Không có TC nào ghi lại nguyên văn body lỗi thực tế (khi status sai, khi không sở hữu, khi 401) — các TC hiện tại chỉ nói "ghi lại HTTP status" mà không yêu cầu ghi verbatim response body. Nếu không chốt được field name/schema lỗi từ TC đầu tiên chạm phải lỗi (vd TC-03), các TC sau (TC-04, TC-06, TC-07, TC-08) không có gì để so sánh nhất quán.
+
+**5. FR-11 "phân biệt màu sắc trạng thái" chưa được kéo vào EC của biến `result`**
+- FR-11 (được chính tài liệu này trích dẫn làm cross-reference) yêu cầu trạng thái phải "phân biệt màu sắc" ngoài dịch tiếng Việt. Nhóm EC14/EC15/EC16 (Output) chỉ kiểm tra nội dung text, không có ý nào kiểm tra màu sắc UI đổi theo trạng thái `canceled`. Đây là constraint hợp lệ cần gắn vào biến `result` đã có sẵn (đúng theo cross-reference filter của skill), không phải EC Group mới.
+
+## Không phải gap thực sự (đã cân nhắc rồi loại)
+- Race giữa 2 tab admin/user cùng đổi status — thuộc phạm vi FR-18, không phải FR-20.
+- Kiểm tra phân trang lịch sử đơn hàng — chi tiết UI, không liên quan bất biến nghiệp vụ của cancel.
+
+Bạn muốn tôi bổ sung 5 điểm trên vào `domain-testing.md`/`bva.md` (thêm EC + TC tương ứng) luôn không, hay để bạn tự quyết định điểm nào đáng thêm trước khi tôi sửa file?
+```
+
+### Follow-up prompt (22:58 02/07/2026)
+
+```
+Cần xác định lại scope chúng ta đang thực hiện function testing thông quan UI, API chỉ fallback khi không thể thực hiện trực tiếp thông qua UI (kiểm thử API là out scope)
+```
+
+### AI Output (verbatim, 22:58 02/07/2026)
+
+```
+Đúng, tôi rà lại 5 điểm đã nêu dưới đúng ràng buộc scope: **function testing đi qua UI là chính, API chỉ được dùng làm fallback cho một bước không thể thực hiện qua UI trong một luồng vẫn do UI dẫn dắt** — không tự tạo TC mà toàn bộ hành động chỉ là gọi API thuần túy.
+
+## Rà soát lại 5 điểm theo scope UI-first
+
+**❌ Loại bỏ — #1 (malformed `order_id`)**
+Không có bước UI nào trong TC này cả — không phải "UI dẫn dắt, API fallback 1 bước", mà là một lời gọi API thuần từ đầu đến cuối (không ai gõ `order_id` qua UI, kể cả để dựng pre-condition). Đây thực chất là robustness/security test ở tầng API, đúng như bạn xác định — out of scope.
+
+**⚠️ Thu hẹp — #2 (race condition)**
+Bản tôi đề xuất ban đầu (bắn 2 request `PUT /cancel` song song bằng script) là kỹ thuật concurrency-test thuần API, không dẫn xuất từ một thao tác người dùng thật — loại bỏ luôn phần đó.
+Phần còn giữ được trong scope: **double-tap thật trên UI** (người dùng tap `Hủy đơn` 2 lần liên tiếp thật nhanh, trước khi UI kịp ẩn nút/cập nhật `Trạng thái`) — đây là hành vi UI có thể tái hiện được bằng tay/playwright. Tuy nhiên TC-09 đã có verification point "exactly one `PUT` request sent (not two, from a double-submit)" — cần rà lại xem TC-09 có thực sự *thực hiện* double-tap hay chỉ *quan sát* single-tap. Nếu TC-09 hiện tại chỉ tap 1 lần, đây vẫn là một gap thật (thiếu kịch bản tap 2 lần liên tiếp), nhưng nó là biến thể của TC-09 chứ không phải TC mới độc lập.
+
+**✅ Giữ nguyên — #3 (token hết hạn giữa phiên đang mở)**
+Đây là đường UI thật: nút `Hủy đơn` vẫn hiển thị (session tưởng còn hợp lệ), user tap, request thất bại vì token đã hết hạn lúc gửi. Toàn bộ hành động là qua UI, API chỉ đóng vai trò cross-check ở tầng response — đúng scope.
+
+**✅ Giữ nguyên — #4 (ghi verbatim response lỗi)**
+Không phải TC mới, chỉ là bổ sung verification point vào các TC UI đã có sẵn (TC-03, TC-04, TC-07, TC-08) để chốt schema lỗi — không vi phạm scope vì API ở đây chỉ là cross-check của một hành động UI đã thực hiện.
+
+**✅ Giữ nguyên — #5 (màu sắc trạng thái theo FR-11)**
+Hoàn toàn quan sát qua UI (màu label `Trạng thái` sau khi hủy) — đúng scope, không đụng API.
+
+## Còn lại sau khi lọc theo scope
+
+| # | Gap | Loại bổ sung |
+|---|---|---|
+| 3 | EC07 tách thành 2 nhánh: (a) chưa đăng nhập/token sai từ đầu — API-only fallback (giữ như hiện tại) vs (b) token hết hạn giữa phiên đang mở, nút vẫn hiển thị — **UI-driven thật**, cần TC riêng | EC + TC mới |
+| 2 (thu hẹp) | TC-09 cần xác nhận có double-tap thật (2 lần tap liên tiếp) hay chỉ tap 1 lần | Sửa/bổ sung Steps trong TC-09 hiện có |
+| 4 | Verification point ghi verbatim response body lỗi | Bổ sung field vào TC-03/04/07/08 |
+| 5 | Kiểm tra màu sắc label "Đã hủy" theo FR-11 | Bổ sung verification point (có thể vào TC-01/02 hoặc TC riêng) |
+
+Bạn muốn tôi cập nhật trực tiếp `domain-testing.md` (EC mới cho #3, sửa TC-09 cho #2, thêm verification point cho #4 và #5) không?
+```
+
+### Follow-up prompt (23:14 02/07/2026)
+
+```
+Tôi sẽ chỉ bổ sung thêm #5 về màu sắc trạng thái theo FR-11 thôi; #4 không cần thiết vì srs hay api_specification không có document về schema lỗi, không cần phải tự tạo một oracle không chính xác; #3 tiềm năng nhưng thực tế khó test khi không biết rõ token có TTL là bao nhiêu trong spec; #2 TC-09 có mục tiêu kiểm tra có confirm dialog hay không, không phải là race-condition hay double tap;
+```
+
+### AI Output (verbatim, 23:14 02/07/2026)
+
+```
+Đã hoàn tất. Tóm tắt thay đổi:
+
+1. **Xác nhận lại scope**: chỉ bổ sung #5 (màu sắc trạng thái theo FR-11), loại bỏ #1–#4 theo lý do bạn đưa ra.
+2. **Verify thật qua UI** (không đoán màu): khởi động backend + mobile Expo web, đăng nhập `test@eshop.com`, dùng `getComputedStyle()` so sánh 5 trạng thái (`pending`, `confirmed`, `shipping`, `delivered`, `canceled`) — tất cả đều `rgb(0,0,0)`, nền trong suốt, không border/background phân biệt.
+3. **Cập nhật `domain-testing.md`**: thêm cross-feature constraint FR-11 vào biến `result`, EC17 (Must-Be Rule), TC-10, và dòng EC Coverage Matrix.
+4. **Cập nhật `execution-log.md`**: ghi kết quả TC-10 = FAIL, thêm **BUG-20-002** (severity Low — vi phạm trực tiếp FR-11, không phải gap), cập nhật Execution Summary (14/14 TC, 2 bug).
+5. **Cập nhật `bva.md`**: sửa Test Suite Summary từ 13 → 14 TC.
+
+Backend (`:3000`) và mobile Expo web (`:8081`) vẫn đang chạy nền — báo tôi nếu bạn muốn dừng.
+```
+- Updated `execution-log.md`: recorded TC-10 = FAIL, added **BUG-20-002** (severity Low — direct FR-11 violation, not a gap), updated Execution Summary to 14/14 TC, 2 bugs.
+
+**Note:** Final output committed at `57e7975` (23:52 02/07/2026). Points #1-#4 were AI-proposed but explicitly rejected by the student after scope negotiation — recorded here as an AI Audit example of over-generation followed by human scope filtering, not a silent AI decision.
+
+### Used in
+
+- `[AI-02]_AI_Audit_Report.md`, Artifact 4
+
+---
+
 <!-- Duplicate an entry block above for each AI interaction -->

@@ -390,77 +390,107 @@ Full execution log: [`execution-log.md`](artifacts/tests/FR-16-csv-import/execut
 
 ---
 
-## 5. Feature D — FR-20: Hủy Đơn Hàng (Mobile)
+## 5. Feature D - FR-20: Hủy Đơn Hàng (Mobile)
 
 > **Technique applied:** Domain Testing (Equivalence Partitioning) + Boundary Value Analysis  
 > **Detailed test cases:** [`artifacts/tests/FR-20-cancel-order-mobile/`](artifacts/tests/FR-20-cancel-order-mobile/)
 
-### 5.1 Domain Testing — Step-by-Step Application
+### 5.1 Domain Testing
 
-#### Step 1: Identify Input & Output Variables
+Unlike FR-02/FR-09/FR-16 (spec-only design), FR-20's design was grounded in a real UI survey performed with `playwright-cli` against `apps/frontend-mobile`'s Expo web build (`http://localhost:8081`), because the mobile app's `Hủy đơn` control, its conditional visibility per status, and the absence of any confirmation step could not be reliably inferred from `srs.md` prose alone.
 
-_Based on `docs/eshop-sut/srs.md` §7 FR-20 + §5 FR-10 State Machine._
+#### Step 1 - Identify Input/Output Variables
 
-| Variable | Type | Description |
-| -------- | ---- | ----------- |
-| `order.status` | Input | Trạng thái hiện tại của đơn |
-| `actor` | Input | User / Admin |
-| `cancel_action` | Input | Tap "Hủy đơn" trên mobile |
-| `result` | Output | `canceled` hoặc error message |
+FR-20 lets a user cancel their own order from the mobile app; per FR-10 (Order State Machine), cancellation is only allowed while `order.status` is `pending` or `confirmed`. Seven variables were identified: three inputs (`auth_token`, `order_id`, `cancel_action`), two system states (`order.status`, `order_owner_match`), one conditional input (`confirm_dialog_response`, present only if a confirm UI exists), and one output (`result`, the post-attempt `order.status` plus UI feedback). Three implicit gaps/conflicts were flagged: whether `PUT /api/orders/:id/cancel` checks order ownership at all (`order_owner_match`: FR-11 restricts *viewing* orders to the owner but is silent on *cancel*, an IDOR risk if unchecked); a **Spec Conflict** at `order.status = shipping` (SRS FR-20/FR-10 forbids user-cancel here, but API spec section 4.6 loosely describes the endpoint as usable "while not yet delivered," which implicitly permits `shipping` too); and whether a confirmation dialog exists before cancel (`confirm_dialog_response`: FR-24 mandates one for cart-item deletion, an equally destructive action, but FR-20 is silent).
 
-#### Step 2: Equivalence Classes
+Full variable table: [`domain-testing.md` - Step 1](artifacts/tests/FR-20-cancel-order-mobile/domain-testing.md)
 
-| EC | `order.status` | Actor | Can Cancel? | Type |
-| -- | -------------- | ----- | ----------- | ---- |
-| EC1 | `pending` | User (owner) | ✅ | Valid |
-| EC2 | `confirmed` | User (owner) | ✅ | Valid |
-| EC3 | `shipping` | User (owner) | ❌ | Invalid |
-| EC4 | `delivered` | User (owner) | ❌ (final) | Invalid |
-| EC5 | `canceled` | User (owner) | ❌ (final) | Invalid |
-| EC6 | `pending` | Unauthenticated | ❌ | Invalid |
-| EC7 | `pending` | User (not owner) | ❌ | Invalid |
+#### Step 2 - Identify Equivalence Classes
 
-#### Step 3 & 4: Test Cases
+Equivalence partitioning was applied across six groups using Set/Splitting Rule, Must-Be Rule, and Gap Rule, producing 17 ECs total (8 valid, 8 invalid, 1 dual-outcome Must-Be assertion).
 
-| TC ID | EC | Status | Actor | Expected |
-| ----- | -- | ------ | ----- | -------- |
-| TC-20-EP-01 | EC1 | `pending` | User (owner) | Order → `canceled` |
-| TC-20-EP-02 | EC2 | `confirmed` | User (owner) | Order → `canceled` |
-| TC-20-EP-03 | EC3 | `shipping` | User (owner) | Error: cannot cancel |
-| TC-20-EP-04 | EC4 | `delivered` | User (owner) | Error: final state |
-| TC-20-EP-05 | EC5 | `canceled` | User (owner) | Error: already canceled |
-| TC-20-EP-06 | EC6 | `pending` | Not logged in | Error 401 |
-| TC-20-EP-07 | EC7 | `pending` | Other user | Error 403 |
+**Splitting Rule isolates `shipping` as its own class (EC03).** Even though `shipping`, `delivered`, and `canceled` are all "cannot cancel" outcomes, `shipping` is split out separately because it is the exact Spec Conflict target identified in Step 1, collapsing it into a general "non-cancelable" class would mask the specific SRS-vs-API-spec disagreement behind an ordinary invalid-state assertion.
 
-### 5.2 Boundary Value Analysis — State Transition Boundary
+**Must-Be Rule for `auth_token`, `order_owner_match`, and `order_id`.** Each is a binary gate (present/valid or not) with no numeric range, yielding one valid and one invalid class per group (EC06/EC07, EC08/EC09, EC10/EC11). EC09 (order not owned by the caller) and EC03 (`shipping`) are both labeled Gap-type ECs since the spec does not state the expected system behavior in advance, both require a gap-probe TC rather than an assertion against a known expected result.
 
-#### Boundary: `confirmed` (last allowed) ↔ `shipping` (first forbidden)
+**Gap Rule for `confirm_dialog_response` (EC12, EC13).** The spec is silent on whether a confirm dialog exists at all, so both branches (Confirm, Dismiss) are provisional classes pending empirical discovery, not classes derived from a documented business rule.
 
-| TC ID | Status | Point | Expected |
-| ----- | ------ | ----- | -------- |
-| TC-20-BVA-01 | `pending` | First valid state | Cancel OK |
-| TC-20-BVA-02 | `confirmed` | Last allowed (UB) | Cancel OK |
-| TC-20-BVA-03 | `shipping` | First forbidden (LB forbidden) | Error: cannot cancel |
-| TC-20-BVA-04 | Admin: `confirmed→shipping`; user immediately cancels | Timing boundary | Error: already shipping |
+**Output group for `result` (EC14-EC17).** EC14-EC16 partition the output by response shape (success, business-rule error, auth error) and are verified as present/absent within the TCs that trigger the corresponding input EC, following the same output-space convention used in FR-02. EC17 is a single Must-Be assertion with two possible outcomes (status labels are color-distinguished vs. all render identically) rather than two separate ECs, because there is only one underlying test action, a visual comparison across existing orders, not two independently triggerable inputs. EC17 is a cross-feature constraint pulled from FR-11's explicit "phân biệt màu sắc" (color-distinguished) requirement on the same `result` output variable, not a newly invented rule.
+
+| Group | Variable | Valid | Invalid | Total |
+| ----- | -------- | ----- | ------- | ----- |
+| 1 | `order.status` (Splitting) | EC01, EC02 | EC03 (Gap), EC04, EC05 | 5 |
+| 2 | `auth_token` (Must-Be) | EC06 | EC07 | 2 |
+| 3 | `order_owner_match` (Must-Be) | EC08 | EC09 (Gap) | 2 |
+| 4 | `order_id` (Must-Be) | EC10 | EC11 | 2 |
+| 5 | `confirm_dialog_response` (Gap Rule) | none | EC12, EC13 (Gap) | 2 |
+| 6 | `result`: output (Splitting) | EC14, EC15, EC16 | none | 3 + EC17 (dual-outcome) |
+| **Total** | | **8 Valid** | **8 Invalid** | **17** |
+
+Full EC table: [`domain-testing.md` - Step 2](artifacts/tests/FR-20-cancel-order-mobile/domain-testing.md)
+
+#### Step 3 - Minimum Test Case Set
+
+Ten test cases were derived: two happy-path TCs (EC01/EC02, `pending`/`confirmed`), four negative TCs each isolating one triggerable invalid EC (EC04, EC05, EC07, EC11), three gap-probe TCs discovering actual behavior at each Step 1 gap (EC03, EC09, EC12/EC13), and one cross-feature check added after post-design gap analysis (EC17, FR-11 color distinction).
+
+TC-05, TC-06, TC-07, and TC-08 all carry a **UI Fallback Note**: the mobile app stores its JWT only in-memory (confirmed empty in `localStorage`/`sessionStorage` during the UI survey) and never exposes a free-typed `order_id` or another user's order in the UI, so these scenarios have no reachable UI path and are executed as direct API calls against a valid pre-condition state, consistent with the workspace's UI-first/API-fallback testing discipline. TC-07 and the parallel TC-BVA-02 (section 5.2) both target the same Spec Conflict at `shipping` from two angles (isolated EC vs. matched-boundary comparison against `confirmed`).
+
+| TC | ECs Covered | Scenario | Expected Result |
+| -- | ----------- | -------- | ---------------- |
+| TC-01 | EC01,06,08,10,14 | Tap `Hủy đơn` on a `pending` order (owner, valid token) | UI: status → "Đã hủy", button disappears. API: 200 OK |
+| TC-02 | EC02,06,08,10,14 | Tap `Hủy đơn` on a `confirmed` order | UI: status → "Đã hủy". API: 200 OK |
+| TC-03 | EC04,06,08,10 | `delivered` order: no button in UI; API cross-check direct call | No button; API: 4xx, cannot cancel (final state) |
+| TC-04 | EC05,06,08,10 | `canceled` order: no button; API cross-check direct call | No button; API: 4xx, already canceled |
+| TC-05 | EC07 | No `Authorization` header, then invalid token: direct API (UI fallback) | API: 401/4xx both cases; order status unchanged |
+| TC-06 | EC11 | `PUT /api/orders/999999/cancel`: direct API (UI fallback) | API: 404, order not found |
+| TC-07 [Gap-Probe] | EC03 | `shipping` order: no button in UI; direct API call (Spec Conflict target) | Multi-branch: 4xx confirms SRS wins over API-spec wording; 200 = state-machine bug |
+| TC-08 [Gap-Probe] | EC09 | `test2@eshop.com`'s token targets `test@eshop.com`'s order: direct API (UI fallback, IDOR probe) | Multi-branch: 403/404 = ownership enforced; 200 = IDOR bug |
+| TC-09 [Gap-Probe] | EC12,13 | Tap `Hủy đơn` once, observe immediately for a confirmation dialog | Empirical: no dialog exists (confirmed by UI survey); recorded as UX finding vs. FR-24 convention |
+| TC-10 [FR-11 cross-feature] | EC17 | Compare rendered text color of "Trạng thái" label across ≥3 different statuses | Each status color-distinguished; identical color across all = spec violation |
+
+Full TC specifications: [`domain-testing.md` - Step 3](artifacts/tests/FR-20-cancel-order-mobile/domain-testing.md)
+
+### 5.2 Boundary Value Analysis
+
+FR-20 has no numeric input (no counters, timers, or amounts govern the cancel decision), so classic range-based BVA does not apply to most variables. The one variable worth boundary analysis is `order.status`: FR-10 defines it as an ordered sequence (`pending → confirmed → shipping → delivered`), and the cancel rule draws a hard line partway through, allowed for the first two states, forbidden from the third onward. This is exactly the shape BVA targets, and it sits at the same Spec Conflict flagged in Step 1: SRS FR-20/FR-10 forbids `shipping`, while API spec section 4.6 loosely implies it may still be allowed. Domain Testing already covers each state as an isolated EC; BVA adds value by testing the **adjacent pair straddling the critical boundary** (`confirmed` vs. `shipping`) under matched conditions, naming the precise wrong-operator defect each TC targets.
+
+| TC | Variable | Boundary Point | Defect Targeted |
+| -- | -------- | --------------- | ---------------- |
+| TC-BVA-01 | `order.status` | UB = `confirmed` (last allowed) | Off-by-one implementation wrongly excluding `confirmed` from the allowed set |
+| TC-BVA-02 | `order.status` | UB+1 = `shipping` (first forbidden) | Wrong-operator deny-list (`!== 'delivered'`) instead of correct allow-list (`in ['pending','confirmed']`), the exact Spec Conflict bug |
+| TC-BVA-03 | `order.status` | LB = `pending` (first allowed) | Off-by-one implementation wrongly excluding `pending` from the allowed set |
+| TC-BVA-04 | `order.status` | UB+2 = `delivered` (second forbidden) | Deny check too narrow, only special-cases `shipping` and fails to generalize further along the chain |
+
+Setup uses the Admin API (`PUT /api/admin/orders/:id/status`) to drive each order sequentially through intermediate states, since the test DB helper script has no support for direct writes to the `orders` table. TC-BVA-01 and TC-BVA-02 use two separate sibling orders so both sides of the critical boundary can be verified independently.
+
+Full BVA specifications and setup protocol: [`bva.md`](artifacts/tests/FR-20-cancel-order-mobile/bva.md)
 
 ### 5.3 AI Gap Analysis
 
-_Điền sau khi chạy AI và review kết quả._
+Unlike FR-02/FR-09/FR-16, where gaps were surfaced only later, during execution or student review, FR-20's initial AI design pass (Entry 009) was followed by a dedicated **AI self-review pass** (Entry 010) in which the same AI was asked to audit its own `domain-testing.md`/`bva.md` output against the SRS and API spec. That pass proposed five candidate gaps; one (#5 below) was implemented and confirmed a real defect (BUG-20-002), the other four were explicitly descoped by the student after a scope-negotiation exchange.
 
-| # | Missed test case | Root cause (why AI missed it) |
-| - | ---------------- | ----------------------------- |
-| | | |
+| # | Missed item | Root cause (why AI missed it) |
+| - | ----------- | ------------------------------ |
+| 1 | Status label color distinction (FR-11) was absent from the first design pass entirely, no EC or TC checked whether `pending`/`confirmed`/`shipping`/`delivered`/`canceled` labels are visually distinguished by color. Added as EC17/TC-10 after self-review; execution confirmed **BUG-20-002** (all statuses render identical `rgb(0,0,0)` text with no border/background distinction). | Partial cross-reference: FR-20's Step 1 already cross-referenced FR-11 for the *text-content* half of the status label ("dịch sang tiếng Việt"), but the Must-Be Rule was not extended to the *visual* half of the same FR-11 sentence ("phân biệt màu sắc") in the first pass, the cross-reference filter caught only part of the sentence it was reading. |
+| 2 | No EC/TC for malformed `order_id` values (non-numeric, negative, zero, injection-shape strings like `1; DROP TABLE`). Raised by the AI in self-review, then explicitly excluded. | Not a miss in the traditional sense: this scenario has no UI-reachable path at all (no control lets a user type an `order_id`), unlike TC-05/06/08 which are UI-driven with a single API-fallback step. It is a pure API robustness/security probe, which violates the UI-first, API-fallback-for-one-step-only scope the student set for this feature; correctly excluded as out of scope rather than added. |
+| 3 | No EC/TC for a JWT that expires mid-session while the `Hủy đơn` button is still visible (distinct from TC-05's "no token / invalid token from the start", which is not UI-reachable at all). Raised in self-review as a genuinely UI-reachable scenario, then descoped. | Descoped for a spec-limitation reason, not an AI-quality one: neither `srs.md` nor `api_specification.md` documents the JWT's TTL, so any TC probing expiry-during-session would need to guess a wait duration, producing a flaky test with no spec-backed oracle for the wait time. |
+| 4 | No verification point requiring the *verbatim* error-response body (not just HTTP status) to be recorded for TC-03/04/07/08, so error schema/field names were never pinned down as a shared oracle. Raised in self-review as an "observational gap," then descoped. | Descoped because the spec provides no documented error-response schema; adding a strict body assertion would fabricate an oracle not backed by `srs.md`/`api_specification.md`, rather than test against a real requirement, consistent with the student's decision not to assert against undocumented behavior. |
+
+Point #1's disposition (kept, implemented, confirmed a bug) versus #2-4's disposition (raised, then rejected with a specific documented reason) is itself evidence against a "more AI-generated tests is always better" default: three of the five self-review candidates were over-generation relative to the feature's UI-first testing scope or the spec's actual documentation coverage, and only the scope-negotiation step (Entry 010, three turns) prevented them from silently inflating the test suite with unfalsifiable or out-of-scope assertions.
 
 ### 5.4 Execution Summary
 
 | Metric | Count |
 | ------ | ----- |
-| TC Designed (EP) | 7 |
+| TC Designed (EP) | 10 |
 | TC Designed (BVA) | 4 |
-| TC Executed | — |
-| Passed | — |
-| Failed | — |
-| Bugs found | — |
+| TC Executed | 14 / 14 |
+| Passed | 10 |
+| Pass with deviation | 1 (TC-09) |
+| Failed | 3 (TC-07, TC-BVA-02, TC-10) |
+| Bugs found | 2 (BUG-20-001, BUG-20-002) |
+
+Full execution log: [`execution-log.md`](artifacts/tests/FR-20-cancel-order-mobile/execution-log.md)
 
 ---
 

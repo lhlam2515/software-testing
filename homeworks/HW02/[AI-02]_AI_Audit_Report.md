@@ -196,36 +196,41 @@ produced a Step 3 TC. Same root cause as FR-09 Artifact #2.
 
 ---
 
-### Artifact #4 — FR-20 Domain Testing (State-Based EC + Cancel Boundary)
+### Artifact #4: FR-20 Domain Testing (Order-Status EC + Cancel Boundary)
 
-> **Requirement mapping:** FR-20 Cancel Order (Mobile) — state machine EC, BVA on `confirmed`↔`shipping`
+> **Requirement mapping:** FR-20 Cancel Order (Mobile): EP on `order.status` and related variables, BVA on `confirmed`↔`shipping`
 
 #### (1) Prompt + Tool
 
-**Tool:** Claude Code  
-**Time:** _**:**_ DD/MM/2026  
-**Prompt:**
-> _[Paste verbatim prompt here]_
+**Tool:** Claude Code (claude-sonnet-4-6, `domain-testing` skill)  
+**Time:** 15:42 to 23:14, 02/07/2026 (initial design pass, then a separate self-review / gap-analysis pass same day)  
+**Prompts:** See [Prompt Log](prompt_log.md), Entries 009-010, 02/07/2026
 
 #### (2) AI Output
 
-> See [Prompt Log](prompt_log.md) — entry **_**:**_ DD/MM/2026**.
+See [Prompt Log](prompt_log.md), Entries 009-010 (02/07/2026).
+
+Deliverables written to disk:
+
+- `artifacts/tests/FR-20-cancel-order-mobile/domain-testing.md`: 17 ECs across 6 groups, 10 EP TCs (grounded in a real `playwright-cli` UI survey of `apps/frontend-mobile`)
+- `artifacts/tests/FR-20-cancel-order-mobile/bva.md`: 4 BVA TCs around the `confirmed`↔`shipping` state-machine boundary
 
 #### (3) Verdict
 
-**[ ] VALID** — correct and accepted as-is  
-**[ ] INVALID** — wrong; rejected  
-**[ ] INCOMPLETE** — acceptable after edits
+**[ ] VALID**: correct and accepted as-is  
+**[ ] INVALID**: wrong; rejected  
+**[x] INCOMPLETE**: acceptable after edits
 
 #### (4) Reasoning (ISTQB / S04)
 
-_[2–5 sentences. Reference ISTQB FL §4.2.4 state transition, FR-10 state machine invariants]_
+Per ISTQB FL section 4.2 (Equivalence Partitioning) and the accompanying BVA technique, the AI treated `order.status` as an ordinal domain variable with four functional values (`pending`, `confirmed`, `shipping`, `delivered`) plus the `canceled` terminal value, and applied the Splitting Rule to isolate `shipping` as its own EC (EC03) rather than folding it into a generic "non-cancelable" class, correct because `shipping` is the specific Spec Conflict target (SRS forbids user-cancel here; API spec section 4.6 wording implicitly permits it), and collapsing it into a broader class would have masked that disagreement. The same ordinal treatment carried into BVA: `order.status` was ranked `pending`(LB) → `confirmed` → `shipping` → `delivered`(UB), and the AI correctly targeted the `confirmed`(UB of the cancelable partition)↔`shipping`(UB+1) transition as the critical boundary, naming the precise wrong-operator defect (deny-list vs. allow-list) each TC exposes. The gap-probe TC pattern was also correctly applied for genuinely undocumented behavior (order ownership on cancel, confirm-dialog existence). However, the first design pass (Entry 009) missed FR-11's "phân biệt màu sắc" (color-distinguished) requirement on the same `result` output variable it had already cross-referenced for the Vietnamese-translation half of the same FR-11 sentence, a partial cross-reference miss, only surfaced in a dedicated self-review pass (Entry 010). That same self-review pass then over-corrected: alongside the one legitimate FR-11 gap, it proposed four additional candidate ECs/TCs with no UI-reachable path or spec-backed oracle, requiring explicit student rejection. The same completeness-checking instinct that caught the color gap also produced false positives once run without a scope constraint.
 
 #### (5) Student Fix
 
 | # | AI-generated item | Issue | Corrected item |
 | - | ----------------- | ----- | -------------- |
-| | | | |
+| 1 | Step 2 output group (EC14-EC16) in the original design pass (Entry 009), no EC or TC checked whether order-status labels are color-distinguished. | FR-11 explicitly requires "trạng thái phải được dịch sang tiếng Việt rõ ràng **và phân biệt màu sắc**." The first design pass cross-referenced only the translation half; the color half was silently dropped. | Added EC17 (Must-Be Rule, dual-outcome) and TC-10 to `domain-testing.md` during the Entry 010 self-review pass. Execution confirmed **BUG-20-002** (Low): all five statuses render identical `rgb(0,0,0)` text with no distinguishing background/border. |
+| 2 | Entry 010's self-review (22:53 turn) proposed 4 additional candidate gaps: malformed `order_id` probes, a race-condition/double-cancel probe, JWT-expiry-mid-session, and verbatim error-response-body assertions. | Each either has no UI-reachable path (violates this feature's UI-first, API-fallback-for-one-step-only scope) or lacks a spec-backed oracle (no documented JWT TTL, no documented error schema); adding them would have inflated the suite with unfalsifiable or out-of-scope assertions. | Rejected via explicit scope-negotiation (22:58 and 23:14 turns); none of the 4 were added to `domain-testing.md`/`bva.md`. Documented in `REPORT.md` Section 5.3 as a negative example of AI over-generation, not under-generation: the opposite failure mode from FR-09/FR-16. |
 
 ---
 
