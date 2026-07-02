@@ -90,8 +90,8 @@ Constraint: `length ≤ 255` (FR-15 cross-ref; FR-16 silent). If FR-16 does not 
 | **Input — body** | `{"products": [{"name": "BVA price zero", "price": 0, "description": "", "imageUrl": "", "category_id": 1}]}` |
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name="BVA price zero", price=0, category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and record the rendered report (inserted/errors) · 5. Cross-check the underlying `POST /api/admin/import-products` response |
 | **Defect Target** | Catches bug `price >= 0` instead of `price > 0`: if the SUT uses `>= 0`, then `price = 0` is incorrectly accepted — a free product (price 0) gets imported when it should not be allowed |
-| **Expected Result** | ❌ HTTP 4xx or failure report; product count unchanged; "BVA price zero" does not exist in DB |
-| **Verification Points** | 1. Response contains error about invalid `price` · 2. `GET /api/products` finds no product named "BVA price zero" · 3. Product count does not increase |
+| **Expected Result** | ❌ After clicking `Import 1 sản phẩm`, the rendered report shows the row failed because `price=0` is invalid and no successful import is shown for "BVA price zero". API cross-check: HTTP 4xx or failure report; product count unchanged; "BVA price zero" does not exist in DB |
+| **Verification Points** | 1. After `Import 1 sản phẩm`, the rendered report shows the row failed · 2. No successful import is shown for "BVA price zero" in the rendered report · 3. API cross-check: Response contains error about invalid `price` · 4. API cross-check: `GET /api/products` finds no product named "BVA price zero" · 5. API cross-check: Product count does not increase |
 | **Status** | ⬜ Not yet executed |
 
 ---
@@ -111,8 +111,8 @@ Constraint: `length ≤ 255` (FR-15 cross-ref; FR-16 silent). If FR-16 does not 
 | **Input — body** | `{"products": [{"name": "BVA price one", "price": 1, "description": "", "imageUrl": "", "category_id": 1}]}` |
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name="BVA price one", price=1, category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and record the rendered report (inserted/errors) · 5. Cross-check the underlying `POST /api/admin/import-products` response |
 | **Defect Target** | Catches bug `price > 1` or `price >= 2` instead of `price > 0`: if the SUT uses `> 1`, then `price = 1` is incorrectly rejected — a product priced at 1 unit cannot be imported even though it is valid |
-| **Expected Result** | ✅ HTTP 200; product "BVA price one" exists in DB with `price = 1`; product count increases by 1 |
-| **Verification Points** | 1. HTTP status = 200 · 2. `GET /api/products` finds "BVA price one" with `price = 1` · 3. Product count increases by exactly 1 |
+| **Expected Result** | ✅ After clicking `Import 1 sản phẩm`, the rendered report shows "BVA price one" imported successfully. API cross-check: HTTP 200; product "BVA price one" exists in DB with `price = 1`; product count increases by 1 |
+| **Verification Points** | 1. After `Import 1 sản phẩm`, the rendered report shows the row succeeded · 2. The rendered report shows "BVA price one" was imported successfully · 3. API cross-check: HTTP status = 200 · 4. API cross-check: `GET /api/products` finds "BVA price one" with `price = 1` · 5. API cross-check: Product count increases by exactly 1 |
 | **Status** | ⬜ Not yet executed |
 
 ---
@@ -132,8 +132,8 @@ Constraint: `length ≤ 255` (FR-15 cross-ref; FR-16 silent). If FR-16 does not 
 | **Input — body** | `{"products": [{"name": "<254-character string of 'A'>", "price": 50000, "description": "", "imageUrl": "", "category_id": 1}]}` _(see Setup Protocol to generate)_ |
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name=<254-char 'A' string>, price=50000, category_id=1` (see Setup Protocol); click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and record the rendered report (inserted/errors) · 5. Cross-check the underlying `POST /api/admin/import-products` response |
 | **Defect Target** | Catches bug `length < 254` (enforcement too strict) — rejects a 254-char name even though it is within the limit. If FR-16 does not enforce the limit, an accepted result also confirms no enforcement. |
-| **Expected Result** | ✅ HTTP 200; product with a 254-character name is created successfully. _If HTTP 4xx → BUG: enforcement boundary too narrow_ |
-| **Verification Points** | 1. HTTP status = 200 · 2. Product exists in DB · 3. `product.name.length = 254` (not truncated) |
+| **Expected Result** | ✅ After clicking `Import 1 sản phẩm`, the rendered report should show the 254-character `name` row imported successfully. API cross-check: HTTP 200; product with a 254-character name is created successfully. _If HTTP 4xx → BUG: enforcement boundary too narrow_ |
+| **Verification Points** | 1. After `Import 1 sản phẩm`, record whether the rendered report shows success for the 254-character `name` row · 2. If the UI shows success, note that the row was accepted without an error in the rendered report · 3. API cross-check: HTTP status = 200 · 4. API cross-check: Product exists in DB · 5. API cross-check: `product.name.length = 254` (not truncated) |
 | **Status** | ⬜ Not yet executed |
 
 ---
@@ -153,8 +153,8 @@ Constraint: `length ≤ 255` (FR-15 cross-ref; FR-16 silent). If FR-16 does not 
 | **Input — body** | `{"products": [{"name": "<255-character string of 'B'>", "price": 50000, "description": "", "imageUrl": "", "category_id": 1}]}` _(see Setup Protocol to generate)_ |
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name=<255-char 'B' string>, price=50000, category_id=1` (see Setup Protocol); click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and record the rendered report (inserted/errors) · 5. Cross-check the underlying `POST /api/admin/import-products` response |
 | **Defect Target** | Catches bug `length < 255` (strict less-than) instead of `length <= 255`: if the SUT uses `< 255`, a name of exactly 255 chars is incorrectly rejected even though FR-15 states "maximum 255". Also confirms whether FR-16 enforces this cross-ref constraint at all. |
-| **Expected Result** | ✅ HTTP 200; product with a 255-character name is created successfully. _If HTTP 4xx → BUG: off-by-one — `< 255` instead of `<= 255`, or FR-16 enforces the 255-char limit with incorrect logic_ |
-| **Verification Points** | 1. HTTP status = 200 · 2. Product in DB has `name.length = 255` (not truncated) |
+| **Expected Result** | ✅ After clicking `Import 1 sản phẩm`, the rendered report should show the 255-character `name` row imported successfully. API cross-check: HTTP 200; product with a 255-character name is created successfully. _If HTTP 4xx → BUG: off-by-one — `< 255` instead of `<= 255`, or FR-16 enforces the 255-char limit with incorrect logic_ |
+| **Verification Points** | 1. After `Import 1 sản phẩm`, record whether the rendered report shows success for the 255-character `name` row · 2. If the UI shows success, note that the row was accepted without an error in the rendered report · 3. API cross-check: HTTP status = 200 · 4. API cross-check: Product in DB has `name.length = 255` (not truncated) |
 | **Status** | ⬜ Not yet executed |
 
 ---
@@ -174,8 +174,8 @@ Constraint: `length ≤ 255` (FR-15 cross-ref; FR-16 silent). If FR-16 does not 
 | **Input — body** | `{"products": [{"name": "<256-character string of 'C'>", "price": 50000, "description": "", "imageUrl": "", "category_id": 1}]}` _(see Setup Protocol to generate)_ |
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name=<256-char 'C' string>, price=50000, category_id=1` (see Setup Protocol); click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and record the rendered report (inserted/errors) · 5. Cross-check the underlying `POST /api/admin/import-products` response |
 | **Defect Target** | Catches bug `length <= 256` (off-by-one too wide) instead of `length <= 255`: if the SUT uses `<= 256`, a 256-char name is incorrectly accepted. Also reveals the Gap if FR-16 does not enforce the FR-15 constraint at all. |
-| **Expected Result** | _Gap TC — multiple branches:_ · If HTTP 4xx and 0 products → FR-16 correctly enforces `≤ 255` · If HTTP 200 and product with 256-char name → FR-16 does not enforce limit; Gap confirmed; record as undocumented behavior · If HTTP 200 and product with 255-char name (truncated) → **BUG**: data silently truncated at import |
-| **Verification Points** | 1. HTTP status + response body · 2. If product exists → read `name` field and check length (256, 255, or other?) |
+| **Expected Result** | After clicking `Import 1 sản phẩm`, record whether the rendered report shows the 256-character `name` row as a failure or a success. API cross-check: _Gap TC — multiple branches:_ · If HTTP 4xx and 0 products → FR-16 correctly enforces `≤ 255` · If HTTP 200 and product with 256-char name → FR-16 does not enforce limit; Gap confirmed; record as undocumented behavior · If HTTP 200 and product with 255-char name (truncated) → **BUG**: data silently truncated at import |
+| **Verification Points** | 1. Record whether the rendered report shows failure or success for the 256-character `name` row · 2. If the UI shows success, note that the row was accepted in the rendered report · 3. API cross-check: HTTP status + response body · 4. API cross-check: If product exists → read `name` field and check length (256, 255, or other?) |
 | **Status** | ⬜ Not yet executed |
 
 ---
