@@ -75,12 +75,12 @@ Condition: `uses_by_user < max_uses_per_user`
 ### Target 3: `expired_at` vs `current_date`
 
 Condition: `current_date < expired_at` (strict less-than — spec says "before")
-Test date: 2026-06-25 (date of test design)
+Test date: 2026-07-02 (date of test design)
 
 ```
    INVALID            INVALID (!)              VALID
       |                    |                      |
-2026-06-24──────2026-06-25 (TODAY)──────2026-06-26──...
+2026-07-01──────2026-07-02 (TODAY)──────2026-07-03──...
                             ^                      ^
                        ON point                  UB+1
                    (today < today = FALSE)   (today < tomorrow = TRUE)
@@ -89,8 +89,8 @@ Test date: 2026-06-25 (date of test design)
 
 | BVA Point | `expired_at` | State | TC |
 |:---|:---|:---|:---|
-| ON point (= today) | 2026-06-25 | INVALID | TC-BVA-07 |
-| UB+1 (= tomorrow) | 2026-06-26 | VALID | TC-BVA-08 |
+| ON point (= today) | 2026-07-02 | INVALID | TC-BVA-07 |
+| UB+1 (= tomorrow) | 2026-07-03 | VALID | TC-BVA-08 |
 
 ---
 
@@ -233,17 +233,17 @@ Test date: 2026-06-25 (date of test design)
 | Field | Content |
 |:---|:---|
 | **TC ID** | TC-BVA-07 |
-| **Test Case Name** | expired_at = 2026-06-25 (= today) is rejected as expired |
+| **Test Case Name** | expired_at = 2026-07-02 (= today) is rejected as expired |
 | **Target Variable** | `expired_at` |
 | **Boundary Point Type** | ON point (expiry date equals current date — the absolute boundary) |
-| **Target Variable State** | `expired_at = '2026-06-25'`, `current_date = 2026-06-25` |
-| **Pre-conditions** | Create coupon `TODAYEXP` via Admin API: `POST /api/admin/coupons` with `{"code":"TODAYEXP","type":"percent","discount_value":10,"min_order_amount":100000,"expired_at":"2026-06-25","max_uses_per_user":99}`; user has not used TODAYEXP; valid JWT |
+| **Target Variable State** | `expired_at = '2026-07-02'`, `current_date = 2026-07-02` |
+| **Pre-conditions** | Create coupon `TODAYEXP` via Admin API: `POST /api/admin/coupons` with `{"code":"TODAYEXP","type":"percent","discount_value":10,"min_order_amount":100000,"expired_at":"2026-07-02","max_uses_per_user":99}`; user has not used TODAYEXP; valid JWT |
 | **Input — `code`** | `"TODAYEXP"` |
 | **Input — `total_amount`** | `500000` |
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
 | **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `500000` · 4. Enter coupon code `TODAYEXP` in `Nhập mã giảm giá...`, then click `Áp dụng` · 5. Record the discount/error shown in the UI and the underlying `POST /api/apply-coupon` response |
-| **Defect Target** | Catches bug where system uses `current_date <= expired_at` instead of `current_date < expired_at` (strict less-than, per spec "current date must be before expired_at"). With `<=`: `2026-06-25 <= 2026-06-25` = TRUE → coupon expiring today is incorrectly accepted |
+| **Defect Target** | Catches bug where system uses `current_date <= expired_at` instead of `current_date < expired_at` (strict less-than, per spec "current date must be before expired_at"). With `<=`: `2026-07-02 <= 2026-07-02` = TRUE → coupon expiring today is incorrectly accepted |
 | **Expected Result** | ❌ On `/checkout`, after clicking `Áp dụng`, the UI shows an error and does not apply coupon `TODAYEXP` when `expired_at` equals today. API cross-check: HTTP 4xx — rejected as expired (today is not "before" today per spec) |
 | **Verification Points** | 1. On `/checkout`, an error is shown after `Áp dụng` · 2. No applied discount is shown in the UI · 3. API cross-check: HTTP status 4xx · 4. API cross-check: No `discount_amount` · 5. API cross-check: Confirm expired_at = today → INVALID (spec uses strict comparison) |
 | **Status** | ⬜ Not yet executed |
@@ -255,11 +255,11 @@ Test date: 2026-06-25 (date of test design)
 | Field | Content |
 |:---|:---|
 | **TC ID** | TC-BVA-08 |
-| **Test Case Name** | expired_at = 2026-06-26 (= tomorrow) is accepted |
+| **Test Case Name** | expired_at = 2026-07-03 (= tomorrow) is accepted |
 | **Target Variable** | `expired_at` |
 | **Boundary Point Type** | UB+1 (one day past the boundary, clearly in the valid range) |
-| **Target Variable State** | `expired_at = '2026-06-26'`, `current_date = 2026-06-25` |
-| **Pre-conditions** | Create coupon `TOMORROWEXP` via Admin API: `POST /api/admin/coupons` with `{"code":"TOMORROWEXP","type":"percent","discount_value":10,"min_order_amount":100000,"expired_at":"2026-06-26","max_uses_per_user":99}`; user has not used TOMORROWEXP; valid JWT |
+| **Target Variable State** | `expired_at = '2026-07-03'`, `current_date = 2026-07-02` |
+| **Pre-conditions** | Create coupon `TOMORROWEXP` via Admin API: `POST /api/admin/coupons` with `{"code":"TOMORROWEXP","type":"percent","discount_value":10,"min_order_amount":100000,"expired_at":"2026-07-03","max_uses_per_user":99}`; user has not used TOMORROWEXP; valid JWT |
 | **Input — `code`** | `"TOMORROWEXP"` |
 | **Input — `total_amount`** | `500000` |
 | **Input — `user_id`** | ID of `test@eshop.com` |
@@ -282,8 +282,8 @@ Test date: 2026-06-25 (date of test design)
 | TC-BVA-04 | `uses_by_user` | UB-1 = uses=1, max=2 (valid) | Catches `uses < max_uses_per_user - 1` instead of `uses < max_uses_per_user` — last valid use incorrectly rejected |
 | TC-BVA-05 | `uses_by_user` | UB = uses=1, max=1 (invalid) | Catches `uses <= max_uses_per_user` instead of `uses < max_uses_per_user` — allows exceeding the limit when max=1 |
 | TC-BVA-06 | `uses_by_user` | UB = uses=2, max=2 (invalid) | Same bug as TC-BVA-05 with max=2, rules out hardcoded max=1 |
-| TC-BVA-07 | `expired_at` | ON = today 2026-06-25 (invalid) | Catches `current_date <= expired_at` instead of `current_date < expired_at` — coupon expiring today incorrectly accepted |
-| TC-BVA-08 | `expired_at` | UB+1 = tomorrow 2026-06-26 (valid) | Confirms coupon expiring tomorrow is still valid; catches reverse off-by-one |
+| TC-BVA-07 | `expired_at` | ON = today 2026-07-02 (invalid) | Catches `current_date <= expired_at` instead of `current_date < expired_at` — coupon expiring today incorrectly accepted |
+| TC-BVA-08 | `expired_at` | UB+1 = tomorrow 2026-07-03 (valid) | Confirms coupon expiring tomorrow is still valid; catches reverse off-by-one |
 
 ---
 
@@ -319,17 +319,17 @@ curl -X POST http://localhost:3000/api/admin/coupons \
   -H "Authorization: Bearer $ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"code":"TODAYEXP","type":"percent","discount_value":10,
-       "min_order_amount":100000,"expired_at":"2026-06-25","max_uses_per_user":99}'
+       "min_order_amount":100000,"expired_at":"2026-07-02","max_uses_per_user":99}'
 
 # Create coupon expiring tomorrow (TC-BVA-08)
 curl -X POST http://localhost:3000/api/admin/coupons \
   -H "Authorization: Bearer $ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"code":"TOMORROWEXP","type":"percent","discount_value":10,
-       "min_order_amount":100000,"expired_at":"2026-06-26","max_uses_per_user":99}'
+       "min_order_amount":100000,"expired_at":"2026-07-03","max_uses_per_user":99}'
 ```
 
-**Important:** TC-BVA-07 and TC-BVA-08 are date-sensitive. If executed after 2026-06-25, update `expired_at` to `current_date` (TC-BVA-07) and `current_date + 1 day` (TC-BVA-08) accordingly.
+**Important:** TC-BVA-07 and TC-BVA-08 are date-sensitive. If executed after 2026-07-02, update `expired_at` to `current_date` (TC-BVA-07) and `current_date + 1 day` (TC-BVA-08) accordingly.
 
 ---
 
