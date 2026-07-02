@@ -122,7 +122,7 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `total_amount`** | `500000` |
 | **Input — `user_id`** | ID of `test@eshop.com` (retrieved from login response) |
 | **Input — Authorization** | `Bearer <valid_token_from_login>` |
-| **Steps** | 1. `POST /api/login` with `test@eshop.com`/`Test1234!` — save `token` and `user.id` · 2. `POST /api/apply-coupon` with body `{"code":"SAVE10","total_amount":500000,"user_id":<id>}` + header `Authorization: Bearer <token>` · 3. Inspect response |
+| **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `500000`, enter coupon code `SAVE10` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Inspect the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
 | **Expected Result** | ✅ HTTP 200 + JSON `{"discount_amount": 50000, "final_amount": 450000}` |
 | **Verification Points** | 1. HTTP status = 200 · 2. `discount_amount` = `500000 × 10 / 100` = `50000` · 3. `final_amount` = `500000 - 50000` = `450000` · 4. No error field in response |
 | **Status** | ⬜ Not yet executed |
@@ -142,7 +142,7 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `total_amount`** | `600000` |
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
-| **Steps** | 1. `POST /api/login` → save `token` · 2. `POST /api/apply-coupon` with body `{"code":"BIGBUY","total_amount":600000,"user_id":<id>}` + Auth header · 3. Inspect response |
+| **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `600000`, enter coupon code `BIGBUY` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Inspect the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
 | **Expected Result** | ✅ HTTP 200 + JSON `{"discount_amount": 50000, "final_amount": 550000}` |
 | **Verification Points** | 1. HTTP status = 200 · 2. `discount_amount` = `50000` (flat, independent of total) · 3. `final_amount` = `600000 - 50000` = `550000` · 4. No error field |
 | **Status** | ⬜ Not yet executed |
@@ -162,7 +162,7 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `total_amount`** | `500000` |
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
-| **Steps** | 1. Login to get token · 2. `POST /api/apply-coupon` with `{"code":"NOTEXIST99","total_amount":500000,"user_id":<id>}` + Auth header · 3. Inspect response |
+| **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `500000`, enter coupon code `NOTEXIST99` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Inspect the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
 | **Expected Result** | ❌ HTTP 4xx + error message (invalid or not found) |
 | **Verification Points** | 1. HTTP status is 4xx (400 or 404) · 2. Response body contains an error message · 3. No `discount_amount` or `final_amount` in response |
 | **Status** | ⬜ Not yet executed |
@@ -182,7 +182,7 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `total_amount`** | `500000` |
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
-| **Steps** | 1. Admin creates coupon + deactivates it (see Pre-conditions) · 2. Login as `test@eshop.com` to get token · 3. `POST /api/apply-coupon` · 4. Inspect response |
+| **Steps** | 1. (Setup) Admin creates coupon `DEAD01` then deactivates it directly in DB (see Pre-conditions) · 2. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 3. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 4. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `500000`, enter coupon code `DEAD01` in `Nhập mã giảm giá...`, then click `Áp dụng` · 5. Inspect the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
 | **Expected Result** | ❌ HTTP 4xx + error message (invalid or inactive code) |
 | **Verification Points** | 1. HTTP status 4xx · 2. Response contains error message · 3. No `discount_amount` in response |
 | **Status** | ⬜ Not yet executed |
@@ -202,7 +202,7 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `total_amount`** | `500000` |
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
-| **Steps** | 1. Login to get token · 2. `POST /api/apply-coupon` with `{"code":"save10","total_amount":500000,"user_id":<id>}` + Auth header · 3. Record HTTP status and full response body |
+| **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `500000`, enter coupon code `save10` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Record the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
 | **Expected Result** | ❌ HTTP 4xx (spec does not define — expected rejection since code does not match exactly) |
 | **Verification Points** | 1. Record HTTP status: 2xx = case-insensitive (potential risk); 4xx = case-sensitive · 2. If 2xx: document as undocumented behavior · 3. If 4xx: confirm error message is generic (does not reveal "correct code, wrong case") |
 | **Status** | ⬜ Not yet executed |
@@ -222,7 +222,7 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `total_amount`** | `200000` (>= 100000 min_order, satisfies C3 if not blocked by C2) |
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
-| **Steps** | 1. Login to get token · 2. `POST /api/apply-coupon` with `{"code":"EXPIRED","total_amount":200000,"user_id":<id>}` + Auth header · 3. Inspect response |
+| **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `200000`, enter coupon code `EXPIRED` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Inspect the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
 | **Expected Result** | ❌ HTTP 4xx + error message (coupon expired or invalid) |
 | **Verification Points** | 1. HTTP status 4xx · 2. Response contains error message · 3. No `discount_amount` |
 | **Status** | ⬜ Not yet executed |
@@ -242,7 +242,7 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `total_amount`** | `200000` (clearly below the 300,000₫ threshold) |
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
-| **Steps** | 1. Login to get token · 2. `POST /api/apply-coupon` with `{"code":"SAVE10","total_amount":200000,"user_id":<id>}` + Auth header · 3. Inspect response |
+| **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `200000`, enter coupon code `SAVE10` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Inspect the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
 | **Expected Result** | ❌ HTTP 4xx + error message (order total below minimum required) |
 | **Verification Points** | 1. HTTP status 4xx · 2. Response contains error message · 3. No `discount_amount` |
 | **Status** | ⬜ Not yet executed |
@@ -262,7 +262,7 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `total_amount`** | `500000` |
 | **Input — `user_id`** | `2` (assumed ID of test user) |
 | **Input — Authorization** | _(no Authorization header sent)_ |
-| **Steps** | 1. `POST /api/apply-coupon` with `{"code":"SAVE10","total_amount":500000,"user_id":2}` — **omit** Authorization header · 2. Inspect response |
+| **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In`; from `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 2. While remaining on `/checkout`, click `Thoát` so the `token` storage key is cleared and the header switches back to `Đăng nhập` / `Đăng ký` · 3. Overwrite `Tổng tiền thanh toán (VND)` with `500000`, enter coupon code `SAVE10` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Inspect the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
 | **Expected Result** | ❌ HTTP 401 Unauthorized |
 | **Verification Points** | 1. HTTP status = 401 · 2. No `discount_amount` in response · 3. Note: if API returns 200 → C4 is not enforced server-side (security bug) |
 | **Status** | ⬜ Not yet executed |
@@ -282,7 +282,7 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `total_amount`** | `500000` |
 | **Input — `user_id`** | `2` |
 | **Input — Authorization** | `Bearer invalidtokenstring123abc` |
-| **Steps** | 1. `POST /api/apply-coupon` with `{"code":"SAVE10","total_amount":500000,"user_id":2}` + header `Authorization: Bearer invalidtokenstring123abc` · 2. Inspect response |
+| **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In`; from `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 2. While remaining on `/checkout`, overwrite the browser storage key `token` with `invalidtokenstring123abc` · 3. Overwrite `Tổng tiền thanh toán (VND)` with `500000`, enter coupon code `SAVE10` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Inspect the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
 | **Expected Result** | ❌ HTTP 401 Unauthorized |
 | **Verification Points** | 1. HTTP status = 401 · 2. No `discount_amount` in response |
 | **Status** | ⬜ Not yet executed |
@@ -302,7 +302,7 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `total_amount`** | `500000` |
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
-| **Steps** | 1. (Setup) Ensure user has used SAVE10 once · 2. Login to get token · 3. `POST /api/apply-coupon` with `{"code":"SAVE10","total_amount":500000,"user_id":<id>}` + Auth header · 4. Inspect response |
+| **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. Complete one full checkout purchase using `SAVE10`: add any product from `/`, open `/cart` via `Giỏ hàng`, click `Tiến hành thanh toán`, overwrite `Tổng tiền thanh toán (VND)` with `500000`, enter `SAVE10`, click `Áp dụng`, then click `Xác Nhận Thanh Toán` to consume the coupon use · 3. Start a new order: add any product, open `/cart`, click `Tiến hành thanh toán`, overwrite `Tổng tiền thanh toán (VND)` with `500000`, enter `SAVE10`, then click `Áp dụng` again · 4. Inspect the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
 | **Expected Result** | ❌ HTTP 4xx + error message (usage limit reached for this coupon) |
 | **Verification Points** | 1. HTTP status 4xx · 2. Error message relates to usage limit · 3. No `discount_amount` |
 | **Status** | ⬜ Not yet executed |
@@ -322,7 +322,7 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `total_amount`** | `60000` (`>= min_order=50000` satisfies C3; but `< discount_value=100000`) |
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
-| **Steps** | 1. Admin creates coupon GAPTEST1 (see Pre-conditions) · 2. Login as `test@eshop.com` to get token · 3. `POST /api/apply-coupon` with `{"code":"GAPTEST1","total_amount":60000,"user_id":<id>}` + Auth header · 4. Record full response |
+| **Steps** | 1. (Setup) Admin creates coupon `GAPTEST1` via Admin API (see Pre-conditions) · 2. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 3. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán`; on `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `60000`, enter coupon code `GAPTEST1` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Record the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
 | **Expected Result** | ❌ HTTP 4xx + error (system rejects when discount exceeds total) OR if bug: HTTP 200 with `final_amount = -40000` |
 | **Verification Points** | 1. Record `final_amount` from response · 2. `final_amount < 0` → BUG, must be reported · 3. `final_amount = 0` → clamping behavior (acceptable, must be documented) · 4. HTTP 4xx → system handles correctly |
 | **Status** | ⬜ Not yet executed |
@@ -342,7 +342,7 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `total_amount`** | `0` |
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
-| **Steps** | 1. Admin creates `ZERO01` with `min_order_amount=0` (see Pre-conditions) · 2. Login as `test@eshop.com` to get token · 3. `POST /api/apply-coupon` with `{"code":"ZERO01","total_amount":0,"user_id":<id>}` + Auth header · 4. Record full response |
+| **Steps** | 1. (Setup) Admin creates coupon `ZERO01` with `min_order_amount=0` via Admin API (see Pre-conditions) · 2. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 3. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán`; on `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `0`, enter coupon code `ZERO01` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Record the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
 | **Expected Result** | Discover actual behavior — plausible outcomes: (1) HTTP 4xx → system guards against zero total (undocumented validation); (2) HTTP 200 with `discount_amount=0, final_amount=0` → correct degenerate result; (3) HTTP 200 with unexpected values → additional calculation bug |
 | **Verification Points** | 1. Record HTTP status · 2. If 200: record `discount_amount` and `final_amount` exact values · 3. If `final_amount < 0` → BUG (analogous to BUG-09-004 via zero-total path) · 4. Note: with `type=percent` and `total=0`, BUG-09-001 formula produces `0×10=0`, so buggy formula coincidentally yields correct result — document this masking effect if observed |
 | **Status** | ❌ FAIL — BUG-09-005 (degenerate case: `0 > 0 = FALSE`, error "tối thiểu 0₫ chưa đạt") |

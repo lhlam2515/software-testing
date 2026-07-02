@@ -110,6 +110,7 @@ Test date: 2026-06-25 (date of test design)
 | **Input — `total_amount`** | `299999` |
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
+| **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `299999` · 4. Enter coupon code `SAVE10` in `Nhập mã giảm giá...`, then click `Áp dụng` · 5. Record the discount/error shown in the UI and the underlying `POST /api/apply-coupon` response |
 | **Defect Target** | Catches bug where system uses `total_amount >= min_order_amount - 1` (off by 1) instead of `total_amount >= min_order_amount`, incorrectly accepting an order at 299,999₫ |
 | **Expected Result** | ❌ HTTP 4xx — rejected because order total is below the threshold (299,999 < 300,000) |
 | **Verification Points** | 1. HTTP status 4xx · 2. No `discount_amount` in response · 3. Confirm 299,999₫ does NOT pass C3 |
@@ -131,6 +132,7 @@ Test date: 2026-06-25 (date of test design)
 | **Input — `total_amount`** | `300000` |
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
+| **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `300000` · 4. Enter coupon code `SAVE10` in `Nhập mã giảm giá...`, then click `Áp dụng` · 5. Record the discount/error shown in the UI and the underlying `POST /api/apply-coupon` response |
 | **Defect Target** | Catches bug where system uses `total_amount > min_order_amount` (strict greater-than) instead of `total_amount >= min_order_amount` — causing an order of exactly 300,000₫ to be incorrectly rejected even though it satisfies the spec condition |
 | **Expected Result** | ✅ HTTP 200 + `{"discount_amount": 30000, "final_amount": 270000}` |
 | **Verification Points** | 1. HTTP status = 200 · 2. `discount_amount` = `300000 × 10 / 100` = `30000` · 3. `final_amount` = `300000 - 30000` = `270000` · 4. Confirm total = min_order PASSES C3 |
@@ -152,6 +154,7 @@ Test date: 2026-06-25 (date of test design)
 | **Input — `total_amount`** | `300001` |
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
+| **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `300001` · 4. Enter coupon code `SAVE10` in `Nhập mã giảm giá...`, then click `Áp dụng` · 5. Record the discount/error shown in the UI and the underlying `POST /api/apply-coupon` response |
 | **Defect Target** | Confirms no off-by-one in the other direction — the valid range genuinely starts at 300,000, not 300,001 |
 | **Expected Result** | ✅ HTTP 200 + `{"discount_amount": 30000, "final_amount": 270001}` |
 | **Verification Points** | 1. HTTP status = 200 · 2. `discount_amount` = `floor(300001 × 10 / 100)` = `30000` · 3. `final_amount` = `300001 - 30000` = `270001` |
@@ -173,6 +176,7 @@ Test date: 2026-06-25 (date of test design)
 | **Input — `total_amount`** | `400000` (>= 300000 min_order) |
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
+| **Steps** | 1. (Setup) Log in at `/login`, then complete one full checkout purchase using `VIP100`: add any product from `/`, open `/cart` via `Giỏ hàng`, click `Tiến hành thanh toán`, overwrite `Tổng tiền thanh toán (VND)` with `400000`, enter `VIP100`, click `Áp dụng`, then click `Xác Nhận Thanh Toán` to bring `uses_by_user` to 1 · 2. Start a new order by adding any product to the cart, opening `/cart`, and clicking `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `400000` · 4. Enter coupon code `VIP100` in `Nhập mã giảm giá...`, then click `Áp dụng` again · 5. Record the discount/error shown in the UI and the underlying `POST /api/apply-coupon` response |
 | **Defect Target** | Catches bug where system uses `uses_by_user < max_uses_per_user - 1` (off by 1 subtraction) instead of `uses_by_user < max_uses_per_user` — incorrectly rejecting the second use (uses=1) when max=2 |
 | **Expected Result** | ✅ HTTP 200 + `{"discount_amount": 100000, "final_amount": 300000}` |
 | **Verification Points** | 1. HTTP status = 200 · 2. `discount_amount` = `100000` (fixed) · 3. `final_amount` = `400000 - 100000` = `300000` · 4. Confirm uses=max-1 PASSES C5 |
@@ -194,6 +198,7 @@ Test date: 2026-06-25 (date of test design)
 | **Input — `total_amount`** | `500000` |
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
+| **Steps** | 1. (Setup) Log in at `/login`, then complete one full checkout purchase using `SAVE10`: add any product from `/`, open `/cart` via `Giỏ hàng`, click `Tiến hành thanh toán`, overwrite `Tổng tiền thanh toán (VND)` with `500000`, enter `SAVE10`, click `Áp dụng`, then click `Xác Nhận Thanh Toán` to bring `uses_by_user` to 1 (= `max_uses_per_user`) · 2. Start a new order by adding any product to the cart, opening `/cart`, and clicking `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `500000` · 4. Enter coupon code `SAVE10` in `Nhập mã giảm giá...`, then click `Áp dụng` again · 5. Record the discount/error shown in the UI and the underlying `POST /api/apply-coupon` response |
 | **Defect Target** | Catches bug where system uses `uses_by_user <= max_uses_per_user` instead of `uses_by_user < max_uses_per_user` — causing uses=1, max=1: `1 <= 1` = TRUE (incorrectly allowed), when correct check `1 < 1` = FALSE (must reject) |
 | **Expected Result** | ❌ HTTP 4xx — rejected because usage limit is reached (uses = max) |
 | **Verification Points** | 1. HTTP status 4xx · 2. No `discount_amount` · 3. Confirm uses=max does NOT pass C5 |
@@ -215,6 +220,7 @@ Test date: 2026-06-25 (date of test design)
 | **Input — `total_amount`** | `400000` |
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
+| **Steps** | 1. (Setup) Log in at `/login`, then complete two full checkout purchases using `VIP100`: for each purchase, add any product from `/`, open `/cart` via `Giỏ hàng`, click `Tiến hành thanh toán`, overwrite `Tổng tiền thanh toán (VND)` with `400000`, enter `VIP100`, click `Áp dụng`, then click `Xác Nhận Thanh Toán` to bring `uses_by_user` to 2 (= `max_uses_per_user`) · 2. Start a new order by adding any product to the cart, opening `/cart`, and clicking `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `400000` · 4. Enter coupon code `VIP100` in `Nhập mã giảm giá...`, then click `Áp dụng` again · 5. Record the discount/error shown in the UI and the underlying `POST /api/apply-coupon` response |
 | **Defect Target** | Catches the same `uses <= max` instead of `uses < max` bug as TC-BVA-05, but with max=2 to rule out the possibility that the bug is hardcoded for max=1 specifically |
 | **Expected Result** | ❌ HTTP 4xx — rejected because usage limit is reached (uses = max = 2) |
 | **Verification Points** | 1. HTTP status 4xx · 2. No `discount_amount` |
@@ -236,6 +242,7 @@ Test date: 2026-06-25 (date of test design)
 | **Input — `total_amount`** | `500000` |
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
+| **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `500000` · 4. Enter coupon code `TODAYEXP` in `Nhập mã giảm giá...`, then click `Áp dụng` · 5. Record the discount/error shown in the UI and the underlying `POST /api/apply-coupon` response |
 | **Defect Target** | Catches bug where system uses `current_date <= expired_at` instead of `current_date < expired_at` (strict less-than, per spec "current date must be before expired_at"). With `<=`: `2026-06-25 <= 2026-06-25` = TRUE → coupon expiring today is incorrectly accepted |
 | **Expected Result** | ❌ HTTP 4xx — rejected as expired (today is not "before" today per spec) |
 | **Verification Points** | 1. HTTP status 4xx · 2. No `discount_amount` · 3. Confirm expired_at = today → INVALID (spec uses strict comparison) |
@@ -257,6 +264,7 @@ Test date: 2026-06-25 (date of test design)
 | **Input — `total_amount`** | `500000` |
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
+| **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `500000` · 4. Enter coupon code `TOMORROWEXP` in `Nhập mã giảm giá...`, then click `Áp dụng` · 5. Record the discount/error shown in the UI and the underlying `POST /api/apply-coupon` response |
 | **Defect Target** | Confirms a coupon expiring tomorrow is still valid; catches an off-by-one in the other direction where tomorrow is incorrectly rejected |
 | **Expected Result** | ✅ HTTP 200 + `{"discount_amount": 50000, "final_amount": 450000}` |
 | **Verification Points** | 1. HTTP status = 200 · 2. `discount_amount` = `500000 × 10 / 100` = `50000` · 3. `final_amount` = `500000 - 50000` = `450000` · 4. Confirm expired_at = tomorrow → VALID |
