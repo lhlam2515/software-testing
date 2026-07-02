@@ -126,7 +126,7 @@ Format constraints sourced from:
 | **Pre-conditions** | Account `test@eshop.com` / `Test1234!` exists in DB · `login_attempts = 1` (one prior failure — to verify EC15 reset) · `locked_until IS NULL` |
 | **Input — `email`** | `test@eshop.com` |
 | **Input — `password`** | `Test1234!` |
-| **Steps** | 1. Ensure pre-conditions: set `login_attempts = 1` (perform one failed login beforehand) · 2. Open login page at `http://localhost:5173` · 3. Enter `test@eshop.com` in the Email field · 4. Enter `Test1234!` in the Password field · 5. Click "Login" |
+| **Steps** | 1. Ensure pre-conditions: set `login_attempts = 1` (perform one failed login beforehand) · 2. Open the login page at `http://localhost:5173/login` · 3. Enter `test@eshop.com` in the `Username` field · 4. Enter `Test1234!` in the `Mật khẩu` field · 5. Click `Sign In` |
 | **Expected Result** | ✅ HTTP 200 · Valid JWT Token returned and stored client-side · User redirected to home/dashboard · `login_attempts` reset to `0` |
 | **Verification Points** | 1. Response body contains `token` field · 2. No error message displayed · 3. `login_attempts` = 0 (verify via DB or by performing 2 more failures → should require a full 3 to lock, not 2) |
 | **Status** | ⬜ Not yet executed |
@@ -144,7 +144,7 @@ Format constraints sourced from:
 | **Pre-conditions** | No special pre-conditions required |
 | **Input — `email`** | `""` (empty string) |
 | **Input — `password`** | `Test1234!` (nominal valid) |
-| **Steps** | 1. Open login page at `http://localhost:5173` · 2. Leave the Email field **empty** · 3. Enter `Test1234!` in the Password field · 4. Click "Login" |
+| **Steps** | 1. Open the login page at `http://localhost:5173/login` · 2. Leave the `Username` field **empty** · 3. Enter `Test1234!` in the `Mật khẩu` field · 4. Click `Sign In` |
 | **Expected Result** | ❌ Browser displays HTML5 validation message (e.g., "Please fill in this field") · Form **not submitted** · No HTTP request sent to server · No JWT · `login_attempts` not incremented |
 | **Verification Points** | 1. No network request to `/api/auth/login` (check DevTools → Network) · 2. HTML5 error tooltip displayed on the email field |
 | **Status** | ⬜ Not yet executed |
@@ -162,7 +162,7 @@ Format constraints sourced from:
 | **Pre-conditions** | No special pre-conditions required |
 | **Input — `email`** | `"invalid_no_at_sign"` (missing `@`) |
 | **Input — `password`** | `Test1234!` (nominal valid) |
-| **Steps** | 1. Open login page · 2. Enter `invalid_no_at_sign` in the Email field · 3. Enter `Test1234!` in the Password field · 4. Click "Login" |
+| **Steps** | 1. Open the login page at `http://localhost:5173/login` · 2. Enter `invalid_no_at_sign` in the `Username` field · 3. Enter `Test1234!` in the `Mật khẩu` field · 4. Click `Sign In` |
 | **Expected Result** | ❌ Browser HTML5 `type="email"` validation blocks submission · HTML5 error tooltip displayed (e.g., "Please enter an email address") · No HTTP request sent to server · No JWT |
 | **Verification Points** | 1. No network request to `/api/auth/login` · 2. HTML5 tooltip appears on the email field with a format error · 3. Also test with: `test@`, `@domain.com`, `test @domain.com` |
 | **Status** | ⬜ Not yet executed |
@@ -181,7 +181,7 @@ Format constraints sourced from:
 | **Pre-conditions** | Email `notfound@example.com` does **not** exist in DB · `login_attempts` not applicable (email not in system) |
 | **Input — `email`** | `notfound@example.com` |
 | **Input — `password`** | `Test1234!` (nominal valid) |
-| **Steps** | 1. Open login page · 2. Enter `notfound@example.com` in the Email field · 3. Enter `Test1234!` in the Password field · 4. Click "Login" |
+| **Steps** | 1. Open the login page at `http://localhost:5173/login` · 2. Enter `notfound@example.com` in the `Username` field · 3. Enter `Test1234!` in the `Mật khẩu` field · 4. Click `Sign In` |
 | **Expected Result** | ❌ Server returns an error · Error message is **generic** — does not say "email not found" or "account not registered" · No JWT in response |
 | **Verification Points** | 1. Response contains no `token` field · 2. Error message does NOT reveal the reason (not "Email not found", "Account does not exist") · 3. Error message is present (not silent) |
 | **Status** | ⬜ Not yet executed |
@@ -200,7 +200,7 @@ Format constraints sourced from:
 | **Pre-conditions** | Account `test@eshop.com` exists · `login_attempts = 0` · `locked_until IS NULL` |
 | **Input — `email`** | `test@eshop.com` |
 | **Input — `password`** | `""` (empty string) |
-| **Steps** | 1. Open login page · 2. Enter `test@eshop.com` in the Email field · 3. Leave the Password field **empty** · 4. Click "Login" |
+| **Steps** | 1. Open the login page at `http://localhost:5173/login` · 2. Enter `test@eshop.com` in the `Username` field · 3. Leave the `Mật khẩu` field **empty** · 4. Click `Sign In` |
 | **Expected Result** | ❌ **Branch A (if `required` is present):** HTML5 blocks form submission; no request sent · **Branch B (if `required` is absent):** Request sent to server; server returns generic error; no JWT |
 | **Verification Points** | 1. ⚠️ **Gap:** SRS does not explicitly state `required` attribute for the password field at login — record actual behavior · 2. If Branch B: check `login_attempts` — does it increment? (empty password = wrong password?) · 3. No JWT in either case |
 | **Status** | ⬜ Not yet executed |
@@ -219,7 +219,7 @@ Format constraints sourced from:
 | **Pre-conditions** | Account `test@eshop.com` / `Test1234!` exists · `login_attempts = 0` (clean state) · `locked_until IS NULL` |
 | **Input — `email`** | `test@eshop.com` |
 | **Input — `password`** | `"WrongPass1!"` (wrong, non-empty) |
-| **Steps** | 1. Reset test account to `login_attempts = 0` (if needed) · 2. Open login page · 3. Enter `test@eshop.com` in the Email field · 4. Enter `WrongPass1!` in the Password field · 5. Click "Login" · 6. Observe response and verify counter |
+| **Steps** | 1. Reset test account to `login_attempts = 0` (if needed) · 2. Open the login page at `http://localhost:5173/login` · 3. Enter `test@eshop.com` in the `Username` field · 4. Enter `WrongPass1!` in the `Mật khẩu` field · 5. Click `Sign In` · 6. Observe response and verify counter |
 | **Expected Result** | ❌ Generic error message displayed · `login_attempts` increments from `0 → 1` (exactly 1 unit) · No JWT |
 | **Verification Points** | 1. Response contains no `token` · 2. Error message is generic (does not say "wrong password") · 3. Verify `login_attempts` = 1: perform one more failure → `login_attempts` = 2; third failure → `login_attempts` = 3 → lock triggers (indirect verification of EC13) |
 | **Status** | ⬜ Not yet executed |
@@ -238,7 +238,7 @@ Format constraints sourced from:
 | **Pre-conditions** | Account `test@eshop.com` exists · `login_attempts = 3` (threshold reached) · `locked_until = datetime('now', '+25 seconds')` (25s remaining in 30s window) |
 | **Input — `email`** | `test@eshop.com` |
 | **Input — `password`** | `"Test1234!"` *(correct credentials — to prove lock overrides even when correct)* |
-| **Steps** | 1. Perform 3 consecutive failed logins to lock the account · 2. Wait approximately 5 seconds (still within 30s window) · 3. Open login page · 4. Enter `test@eshop.com` in the Email field · 5. Enter `Test1234!` (correct) in the Password field · 6. Click "Login" |
+| **Steps** | 1. Perform 3 consecutive failed logins to lock the account · 2. Wait approximately 5 seconds (still within 30s window) · 3. Open the login page at `http://localhost:5173/login` · 4. Enter `test@eshop.com` in the `Username` field · 5. Enter `Test1234!` (correct) in the `Mật khẩu` field · 6. Click `Sign In` |
 | **Expected Result** | ❌ Login **rejected** despite completely correct credentials · Generic error (does not say "locked due to 3 failures" or "X seconds remaining") · No JWT |
 | **Verification Points** | 1. Response contains no `token` · 2. Error message is generic (does not reveal reason or remaining time) · 3. ⚠️ **Gap G2:** Record `login_attempts` after this attempt — does the counter increment to 4? |
 | **Note** | EC10 (`login_attempts ≥ 3` = state locked) and EC12 (`locked_until > NOW()` = window active) cannot be separated in practice — they always coexist when the account is locked. Error Isolation is not violated because this is a composite system-state, not two independent inputs. |
