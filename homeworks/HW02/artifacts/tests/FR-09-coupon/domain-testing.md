@@ -22,7 +22,7 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 |:---|:---|:---|:---|:---|:---|
 | `code` | Input (string) | Coupon code entered by the user | Must exist in DB and have `is_active = 1` (C1) | Must match exactly with a DB record | Error: code not found / inactive |
 | `total_amount` | Input (integer ₫) | Order total before discount | `>= min_order_amount` of the coupon (C3); practically > 0 | Per FR-08, backend should recompute; but API accepts client value | Error: order total below minimum threshold |
-| `user_id` | Input (integer) | User ID sent in request body | Valid ID + valid JWT Token (C4) | Requires `Authorization: Bearer <token>` header | HTTP 401 if token is missing or invalid |
+| `user_id` | Input (integer) | User ID sent in request body | Valid ID + valid JWT Token (C4) | Requires `Authorization: Bearer <token>` header | Error: authentication required or token invalid |
 | `is_active` | System State (boolean) | Whether the coupon is active | Must be `= 1` (C1) | Set by Admin at creation; user cannot control | If `= 0`: coupon is deactivated, request rejected |
 | `expired_at` | System State (date) | Coupon expiry date | `current_date < expired_at` (C2) | Compared against server date, not client | Error: coupon has expired |
 | `min_order_amount` | System State (integer ₫) | Minimum order value required | `>= 0` (per FR-17); `total_amount >= min_order_amount` (C3) | Bound to each coupon | Error: order below minimum |
@@ -52,8 +52,8 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | Variable / Condition | EC ID | Description | Type | Expected System Output |
 |:---|:---|:---|:---|:---|
 | `code` exists + `is_active = 1` | EC01 | Code exists in DB and `is_active = 1` | Valid | Proceed to check C2–C5 |
-| `code` exists + `is_active = 1` | EC02 | Code does not exist in DB | Invalid | HTTP 4xx + error message (invalid code) |
-| `code` exists + `is_active = 1` | EC03 | Code exists but `is_active = 0` | Invalid | HTTP 4xx + error message (code inactive) |
+| `code` exists + `is_active = 1` | EC02 | Code does not exist in DB | Invalid | Rejected - code not found |
+| `code` exists + `is_active = 1` | EC03 | Code exists but `is_active = 0` | Invalid | Rejected - code inactive |
 
 ### Group 2: `code` — Case Sensitivity (Implicit Gap)
 
@@ -66,29 +66,29 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | Variable / Condition | EC ID | Description | Type | Expected System Output |
 |:---|:---|:---|:---|:---|
 | `current_date < expired_at` | EC05 | Current date is before the expiry date (still valid) | Valid | Proceed to check C3–C5 |
-| `current_date < expired_at` | EC06 | Coupon has expired (`current_date >= expired_at`) | Invalid | HTTP 4xx + error message (coupon expired) |
+| `current_date < expired_at` | EC06 | Coupon has expired (`current_date >= expired_at`) | Invalid | Rejected - coupon expired |
 
 ### Group 4: `total_amount` — Meets Minimum Order Threshold (C3) | Range Rule
 
 | Variable / Condition | EC ID | Description | Type | Expected System Output |
 |:---|:---|:---|:---|:---|
 | `total_amount >= min_order_amount` | EC07 | `total_amount >= min_order_amount` | Valid | Proceed to check C4–C5 |
-| `total_amount >= min_order_amount` | EC08 | `total_amount < min_order_amount` | Invalid | HTTP 4xx + error message (order below minimum) |
+| `total_amount >= min_order_amount` | EC08 | `total_amount < min_order_amount` | Invalid | Rejected - order below minimum |
 
 ### Group 5: JWT Token — User Authenticated (C4) | Must-Be Rule
 
 | Variable / Condition | EC ID | Description | Type | Expected System Output |
 |:---|:---|:---|:---|:---|
 | Valid JWT Token | EC09 | Valid `Authorization: Bearer <token>` header present | Valid | Proceed to check C5 |
-| Valid JWT Token | EC10 | No Authorization header (guest request) | Invalid | HTTP 401 Unauthorized |
-| Valid JWT Token | EC11 | JWT Token is invalid or expired | Invalid | HTTP 401 Unauthorized |
+| Valid JWT Token | EC10 | No Authorization header (guest request) | Invalid | Rejected - authentication required |
+| Valid JWT Token | EC11 | JWT Token is invalid or expired | Invalid | Rejected - token invalid or expired |
 
 ### Group 6: `uses_by_user` — Usage Limit Not Reached (C5) | Range Rule
 
 | Variable / Condition | EC ID | Description | Type | Expected System Output |
 |:---|:---|:---|:---|:---|
 | `uses_by_user < max_uses_per_user` | EC12 | `uses_by_user < max_uses_per_user` (uses remaining) | Valid | Coupon applied successfully |
-| `uses_by_user < max_uses_per_user` | EC13 | `uses_by_user >= max_uses_per_user` (limit reached) | Invalid | HTTP 4xx + error message (usage limit exceeded) |
+| `uses_by_user < max_uses_per_user` | EC13 | `uses_by_user >= max_uses_per_user` (limit reached) | Invalid | Rejected - usage limit exceeded |
 
 ### Group 7: `type` — Discount Type | Splitting Rule
 
@@ -123,8 +123,8 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `user_id`** | ID of `test@eshop.com` (retrieved from login response) |
 | **Input — Authorization** | `Bearer <valid_token_from_login>` |
 | **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `500000`, enter coupon code `SAVE10` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Inspect the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
-| **Expected Result** | ✅ HTTP 200 + JSON `{"discount_amount": 50000, "final_amount": 450000}` |
-| **Verification Points** | 1. HTTP status = 200 · 2. `discount_amount` = `500000 × 10 / 100` = `50000` · 3. `final_amount` = `500000 - 50000` = `450000` · 4. No error field in response |
+| **Expected Result** | ✅ On `/checkout`, after clicking `Áp dụng`, the UI applies coupon `SAVE10`, shows the discount, and updates `Tổng tiền thanh toán (VND)` to `450000` without an error. API cross-check: HTTP 200 + JSON `{"discount_amount": 50000, "final_amount": 450000}` |
+| **Verification Points** | 1. On `/checkout`, a discount is shown after `Áp dụng` · 2. `Tổng tiền thanh toán (VND)` is updated to `450000` · 3. API cross-check: HTTP status = 200 · 4. API cross-check: `discount_amount` = `500000 × 10 / 100` = `50000` · 5. API cross-check: `final_amount` = `500000 - 50000` = `450000` · 6. API cross-check: No error field in response |
 | **Status** | ⬜ Not yet executed |
 
 ---
@@ -143,8 +143,8 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
 | **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `600000`, enter coupon code `BIGBUY` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Inspect the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
-| **Expected Result** | ✅ HTTP 200 + JSON `{"discount_amount": 50000, "final_amount": 550000}` |
-| **Verification Points** | 1. HTTP status = 200 · 2. `discount_amount` = `50000` (flat, independent of total) · 3. `final_amount` = `600000 - 50000` = `550000` · 4. No error field |
+| **Expected Result** | ✅ On `/checkout`, after clicking `Áp dụng`, the UI applies coupon `BIGBUY`, shows the discount, and updates `Tổng tiền thanh toán (VND)` to `550000` without an error. API cross-check: HTTP 200 + JSON `{"discount_amount": 50000, "final_amount": 550000}` |
+| **Verification Points** | 1. On `/checkout`, a discount is shown after `Áp dụng` · 2. `Tổng tiền thanh toán (VND)` is updated to `550000` · 3. API cross-check: HTTP status = 200 · 4. API cross-check: `discount_amount` = `50000` (flat, independent of total) · 5. API cross-check: `final_amount` = `600000 - 50000` = `550000` · 6. API cross-check: No error field |
 | **Status** | ⬜ Not yet executed |
 
 ---
@@ -163,8 +163,8 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
 | **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `500000`, enter coupon code `NOTEXIST99` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Inspect the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
-| **Expected Result** | ❌ HTTP 4xx + error message (invalid or not found) |
-| **Verification Points** | 1. HTTP status is 4xx (400 or 404) · 2. Response body contains an error message · 3. No `discount_amount` or `final_amount` in response |
+| **Expected Result** | ❌ On `/checkout`, after clicking `Áp dụng`, the UI shows an error for coupon code `NOTEXIST99` and does not show any applied discount. API cross-check: HTTP 4xx + error message (invalid or not found) |
+| **Verification Points** | 1. On `/checkout`, an error is shown after `Áp dụng` · 2. No applied discount is shown in the UI · 3. API cross-check: HTTP status is 4xx (400 or 404) · 4. API cross-check: Response body contains an error message · 5. API cross-check: No `discount_amount` or `final_amount` in response |
 | **Status** | ⬜ Not yet executed |
 
 ---
@@ -183,8 +183,8 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
 | **Steps** | 1. (Setup) Admin creates coupon `DEAD01` then deactivates it directly in DB (see Pre-conditions) · 2. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 3. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 4. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `500000`, enter coupon code `DEAD01` in `Nhập mã giảm giá...`, then click `Áp dụng` · 5. Inspect the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
-| **Expected Result** | ❌ HTTP 4xx + error message (invalid or inactive code) |
-| **Verification Points** | 1. HTTP status 4xx · 2. Response contains error message · 3. No `discount_amount` in response |
+| **Expected Result** | ❌ On `/checkout`, after clicking `Áp dụng`, the UI shows an error for coupon code `DEAD01` and does not show any applied discount. API cross-check: HTTP 4xx + error message (invalid or inactive code) |
+| **Verification Points** | 1. On `/checkout`, an error is shown after `Áp dụng` · 2. No applied discount is shown in the UI · 3. API cross-check: HTTP status 4xx · 4. API cross-check: Response contains error message · 5. API cross-check: No `discount_amount` in response |
 | **Status** | ⬜ Not yet executed |
 
 ---
@@ -203,8 +203,8 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
 | **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `500000`, enter coupon code `save10` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Record the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
-| **Expected Result** | ❌ HTTP 4xx (spec does not define — expected rejection since code does not match exactly) |
-| **Verification Points** | 1. Record HTTP status: 2xx = case-insensitive (potential risk); 4xx = case-sensitive · 2. If 2xx: document as undocumented behavior · 3. If 4xx: confirm error message is generic (does not reveal "correct code, wrong case") |
+| **Expected Result** | On `/checkout`, after clicking `Áp dụng`, the UI should either show an applied discount or show an error for coupon code `save10` so the case-sensitivity behavior can be recorded. API cross-check: ❌ HTTP 4xx (spec does not define — expected rejection since code does not match exactly) |
+| **Verification Points** | 1. Record whether `/checkout` shows an applied discount or an error after `Áp dụng` · 2. If the UI applies the coupon, document the behavior as undocumented · 3. API cross-check: Record HTTP status: 2xx = case-insensitive (potential risk); 4xx = case-sensitive · 4. API cross-check: If 2xx: document as undocumented behavior · 5. API cross-check: If 4xx: confirm error message is generic (does not reveal "correct code, wrong case") |
 | **Status** | ⬜ Not yet executed |
 
 ---
@@ -223,8 +223,8 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
 | **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `200000`, enter coupon code `EXPIRED` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Inspect the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
-| **Expected Result** | ❌ HTTP 4xx + error message (coupon expired or invalid) |
-| **Verification Points** | 1. HTTP status 4xx · 2. Response contains error message · 3. No `discount_amount` |
+| **Expected Result** | ❌ On `/checkout`, after clicking `Áp dụng`, the UI shows an error for coupon code `EXPIRED` and does not show any applied discount. API cross-check: HTTP 4xx + error message (coupon expired or invalid) |
+| **Verification Points** | 1. On `/checkout`, an error is shown after `Áp dụng` · 2. No applied discount is shown in the UI · 3. API cross-check: HTTP status 4xx · 4. API cross-check: Response contains error message · 5. API cross-check: No `discount_amount` |
 | **Status** | ⬜ Not yet executed |
 
 ---
@@ -243,8 +243,8 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
 | **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 3. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `200000`, enter coupon code `SAVE10` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Inspect the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
-| **Expected Result** | ❌ HTTP 4xx + error message (order total below minimum required) |
-| **Verification Points** | 1. HTTP status 4xx · 2. Response contains error message · 3. No `discount_amount` |
+| **Expected Result** | ❌ On `/checkout`, after clicking `Áp dụng`, the UI shows an error and does not apply coupon `SAVE10` because `Tổng tiền thanh toán (VND)` is below the required threshold. API cross-check: HTTP 4xx + error message (order total below minimum required) |
+| **Verification Points** | 1. On `/checkout`, an error is shown after `Áp dụng` · 2. No applied discount is shown in the UI · 3. API cross-check: HTTP status 4xx · 4. API cross-check: Response contains error message · 5. API cross-check: No `discount_amount` |
 | **Status** | ⬜ Not yet executed |
 
 ---
@@ -263,8 +263,8 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `user_id`** | `2` (assumed ID of test user) |
 | **Input — Authorization** | _(no Authorization header sent)_ |
 | **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In`; from `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 2. While remaining on `/checkout`, click `Thoát` so the `token` storage key is cleared and the header switches back to `Đăng nhập` / `Đăng ký` · 3. Overwrite `Tổng tiền thanh toán (VND)` with `500000`, enter coupon code `SAVE10` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Inspect the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
-| **Expected Result** | ❌ HTTP 401 Unauthorized |
-| **Verification Points** | 1. HTTP status = 401 · 2. No `discount_amount` in response · 3. Note: if API returns 200 → C4 is not enforced server-side (security bug) |
+| **Expected Result** | ❌ On `/checkout`, after clicking `Áp dụng`, the UI shows an error and does not show any applied discount after `Thoát` clears the authenticated session. API cross-check: HTTP 401 Unauthorized |
+| **Verification Points** | 1. On `/checkout`, an error is shown after `Áp dụng` · 2. No applied discount is shown in the UI · 3. API cross-check: HTTP status = 401 · 4. API cross-check: No `discount_amount` in response · 5. API cross-check: Note: if API returns 200 → C4 is not enforced server-side (security bug) |
 | **Status** | ⬜ Not yet executed |
 
 ---
@@ -283,8 +283,8 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `user_id`** | `2` |
 | **Input — Authorization** | `Bearer invalidtokenstring123abc` |
 | **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In`; from `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán` · 2. While remaining on `/checkout`, overwrite the browser storage key `token` with `invalidtokenstring123abc` · 3. Overwrite `Tổng tiền thanh toán (VND)` with `500000`, enter coupon code `SAVE10` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Inspect the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
-| **Expected Result** | ❌ HTTP 401 Unauthorized |
-| **Verification Points** | 1. HTTP status = 401 · 2. No `discount_amount` in response |
+| **Expected Result** | ❌ On `/checkout`, after clicking `Áp dụng`, the UI shows an error and does not show any applied discount when the browser storage `token` is invalid. API cross-check: HTTP 401 Unauthorized |
+| **Verification Points** | 1. On `/checkout`, an error is shown after `Áp dụng` · 2. No applied discount is shown in the UI · 3. API cross-check: HTTP status = 401 · 4. API cross-check: No `discount_amount` in response |
 | **Status** | ⬜ Not yet executed |
 
 ---
@@ -303,8 +303,8 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
 | **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. Complete one full checkout purchase using `SAVE10`: add any product from `/`, open `/cart` via `Giỏ hàng`, click `Tiến hành thanh toán`, overwrite `Tổng tiền thanh toán (VND)` with `500000`, enter `SAVE10`, click `Áp dụng`, then click `Xác Nhận Thanh Toán` to consume the coupon use · 3. Start a new order: add any product, open `/cart`, click `Tiến hành thanh toán`, overwrite `Tổng tiền thanh toán (VND)` with `500000`, enter `SAVE10`, then click `Áp dụng` again · 4. Inspect the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
-| **Expected Result** | ❌ HTTP 4xx + error message (usage limit reached for this coupon) |
-| **Verification Points** | 1. HTTP status 4xx · 2. Error message relates to usage limit · 3. No `discount_amount` |
+| **Expected Result** | ❌ On `/checkout`, after clicking `Áp dụng`, the UI shows an error for coupon `SAVE10` on the second order and does not show any applied discount. API cross-check: HTTP 4xx + error message (usage limit reached for this coupon) |
+| **Verification Points** | 1. On `/checkout`, an error is shown after `Áp dụng` on the second order · 2. No applied discount is shown in the UI · 3. API cross-check: HTTP status 4xx · 4. API cross-check: Error message relates to usage limit · 5. API cross-check: No `discount_amount` |
 | **Status** | ⬜ Not yet executed |
 
 ---
@@ -323,8 +323,8 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
 | **Steps** | 1. (Setup) Admin creates coupon `GAPTEST1` via Admin API (see Pre-conditions) · 2. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 3. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán`; on `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `60000`, enter coupon code `GAPTEST1` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Record the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
-| **Expected Result** | ❌ HTTP 4xx + error (system rejects when discount exceeds total) OR if bug: HTTP 200 with `final_amount = -40000` |
-| **Verification Points** | 1. Record `final_amount` from response · 2. `final_amount < 0` → BUG, must be reported · 3. `final_amount = 0` → clamping behavior (acceptable, must be documented) · 4. HTTP 4xx → system handles correctly |
+| **Expected Result** | On `/checkout`, after clicking `Áp dụng`, the UI should either show an error for `GAPTEST1` or show the resulting discount and updated `Tổng tiền thanh toán (VND)` so the negative-total branch can be recorded. API cross-check: ❌ HTTP 4xx + error (system rejects when discount exceeds total) OR if bug: HTTP 200 with `final_amount = -40000` |
+| **Verification Points** | 1. Record whether `/checkout` shows an error or shows an applied discount and updated total after `Áp dụng` · 2. If the UI shows an updated total, record the displayed total value · 3. API cross-check: Record `final_amount` from response · 4. API cross-check: `final_amount < 0` → BUG, must be reported · 5. API cross-check: `final_amount = 0` → clamping behavior (acceptable, must be documented) · 6. API cross-check: HTTP 4xx → system handles correctly |
 | **Status** | ⬜ Not yet executed |
 
 ---
@@ -343,8 +343,8 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | **Input — `user_id`** | ID of `test@eshop.com` |
 | **Input — Authorization** | `Bearer <valid_token>` |
 | **Steps** | 1. (Setup) Admin creates coupon `ZERO01` with `min_order_amount=0` via Admin API (see Pre-conditions) · 2. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 3. From `/`, add any product to the cart, open `/cart` via `Giỏ hàng`, and click `Tiến hành thanh toán`; on `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `0`, enter coupon code `ZERO01` in `Nhập mã giảm giá...`, then click `Áp dụng` · 4. Record the discount/error shown in the UI and cross-check the underlying `POST /api/apply-coupon` response |
-| **Expected Result** | Discover actual behavior — plausible outcomes: (1) HTTP 4xx → system guards against zero total (undocumented validation); (2) HTTP 200 with `discount_amount=0, final_amount=0` → correct degenerate result; (3) HTTP 200 with unexpected values → additional calculation bug |
-| **Verification Points** | 1. Record HTTP status · 2. If 200: record `discount_amount` and `final_amount` exact values · 3. If `final_amount < 0` → BUG (analogous to BUG-09-004 via zero-total path) · 4. Note: with `type=percent` and `total=0`, BUG-09-001 formula produces `0×10=0`, so buggy formula coincidentally yields correct result — document this masking effect if observed |
+| **Expected Result** | On `/checkout`, after clicking `Áp dụng`, record whether the UI shows an error or shows an applied discount with the resulting `Tổng tiền thanh toán (VND)` for the zero-amount case. API cross-check: Discover actual behavior — plausible outcomes: (1) HTTP 4xx → system guards against zero total (undocumented validation); (2) HTTP 200 with `discount_amount=0, final_amount=0` → correct degenerate result; (3) HTTP 200 with unexpected values → additional calculation bug |
+| **Verification Points** | 1. Record whether `/checkout` shows an error or an applied discount after `Áp dụng` · 2. If the UI shows an updated total, record the displayed total value · 3. API cross-check: Record HTTP status · 4. API cross-check: If 200: record `discount_amount` and `final_amount` exact values · 5. API cross-check: If `final_amount < 0` → BUG (analogous to BUG-09-004 via zero-total path) · 6. API cross-check: Note: with `type=percent` and `total=0`, BUG-09-001 formula produces `0×10=0`, so buggy formula coincidentally yields correct result — document this masking effect if observed |
 | **Status** | ❌ FAIL — BUG-09-005 (degenerate case: `0 > 0 = FALSE`, error "tối thiểu 0₫ chưa đạt") |
 
 ---
