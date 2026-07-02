@@ -27,7 +27,7 @@ Cross-feature note: FR-11 states a user may only *view* their own orders, but is
 | `order_id` | Input | Identifier of the order targeted for cancellation | Must reference an existing order | Selected via the mobile Order History screen, never free-typed by the user | Rejected - order not found |
 | `cancel_action` | Input | User taps the mobile app's cancel-order control | Triggered / not triggered | Only reachable when the UI shows the control (depends on `order.status`, confirmed via Step 3.0 survey) | Initiates the cancel API call when the UI permits it |
 | `confirm_dialog_response` | Input | User's response to a confirmation prompt shown before canceling, if any | `{Confirm, Dismiss}` (if a dialog exists) | FR-24 mandates a confirm dialog for destructive cart-item deletion; spec is silent on whether order cancellation (an equally destructive, irreversible action) needs the same UX pattern | (Implicit Gap) Undefined - see gap table |
-| `result` (order.status after) | Output | Final order status and UI feedback after the cancel attempt | `canceled` (success) or unchanged (failure) + message | Must reflect the FR-10 state machine | Success: transitions to `canceled` with confirmation. Failure: status unchanged with an appropriate error message |
+| `result` (order.status after) | Output | Final order status and UI feedback after the cancel attempt | `canceled` (success) or unchanged (failure) + message | Must reflect the FR-10 state machine. Cross-feature constraint: FR-11 requires the status label to be both translated to Vietnamese **and** color-distinguished (not spec-silent - this is an explicit, testable requirement on this same output variable) | Success: transitions to `canceled` with confirmation. Failure: status unchanged with an appropriate error message |
 
 ### Implicit Gaps & Spec Conflicts
 
@@ -86,6 +86,7 @@ Cross-feature note: FR-11 states a user may only *view* their own orders, but is
 | `result` | EC14 | Successful response (order transitions to `canceled`) | Valid (Output) | UI shows the success state, order list updates |
 | `result` | EC15 | Business-rule error response (wrong status, not the owner, not found) | Valid (Output) | UI shows the corresponding error message, order status unchanged |
 | `result` | EC16 | Authentication error response (not logged in / invalid token) | Valid (Output) | UI blocks the action / shows an authentication error |
+| `result` | EC17 | Status label color-distinction across different `order.status` values (Must-Be Rule — FR-11 cross-feature constraint) | Valid / Invalid | Valid: each status label is visually distinguished by color. Invalid: all statuses render with the same color - direct FR-11 violation, not a gap (spec is explicit here) |
 
 ---
 
@@ -258,6 +259,20 @@ Backend at `:3000`, frontend-mobile (Expo web export) at `:8081`. The app is har
 | **Verification Points** | 1. Observe immediately after the tap: dialog present or absent · 2. If absent: status changes after exactly one tap · 3. API cross-check: exactly one `PUT /api/orders/:id/cancel` request was sent (not two, from a double-submit) |
 | **Status** | ⬜ Not yet executed |
 
+### TC-10 — Status label color distinction across states (FR-11 cross-feature check)
+
+| Field | Content |
+| :--- | :--- |
+| **TC ID** | TC-10 |
+| **Test Case Name** | Order status labels are color-distinguished per FR-11, not just Vietnamese text |
+| **ECs Covered** | EC17 |
+| **ECs Verified Absent** | N/A |
+| **Pre-conditions** | `test@eshop.com` is logged in with multiple orders spanning at least 3 distinct `order.status` values visible under "Lịch sử đơn hàng" (reuse orders already created for TC-01 - TC-BVA-04, e.g. one `pending`, one `confirmed`/`shipping`, one `canceled`). |
+| **Steps** | 1. Open Hồ sơ, locate "Lịch sử đơn hàng" · 2. Visually compare the "Trạng thái: ..." text on cards showing different statuses (e.g. "Chờ xác nhận" vs "Đang giao" vs "Đã hủy") |
+| **Expected Result** | ✅ UI: each "Trạng thái" label uses a color that visually differentiates it from the other statuses (e.g. success/cancel in a distinct color from pending/shipping), per FR-11's explicit "phân biệt màu sắc" requirement. |
+| **Verification Points** | 1. Compare the rendered text color of "Trạng thái" across at least 3 different statuses · 2. If all statuses render with the identical color (e.g. plain black/default text with no accent), this is a BUG - FR-11 explicitly requires color differentiation, this is not a silent gap |
+| **Status** | ⬜ Not yet executed |
+
 ---
 
 ## 5. EC Coverage Matrix
@@ -280,5 +295,6 @@ Backend at `:3000`, frontend-mobile (Expo web export) at `:8081`. The app is har
 | EC14 | TC-01, TC-02 | Observed |
 | EC15 | TC-03, TC-04, TC-07 (branch), TC-08 (branch) | Verified absent / Observed |
 | EC16 | TC-05 | Observed |
+| EC17 | TC-10 | Direct trigger |
 
 **Gap Completeness Cross-Check:** `order_owner_match` → TC-08 ✓ · `order.status = shipping` Spec Conflict → TC-07 ✓ · `confirm_dialog_response` → TC-09 ✓ (all 3 Step 1 gaps each map to a dedicated gap-probe TC).

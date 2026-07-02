@@ -140,6 +140,6 @@ Parameter Variation does not apply — the boundary is a fixed state-machine tra
 
 | Category | Count |
 |:---|:---|
-| EP Test Cases (`domain-testing.md`) | 9 (TC-01 – TC-09, including 3 gap-probe TCs) |
+| EP Test Cases (`domain-testing.md`) | 10 (TC-01 – TC-10, including 3 gap-probe TCs + 1 FR-11 cross-feature check) |
 | BVA Test Cases (this file) | 4 (TC-BVA-01 – TC-BVA-04) |
-| **Total** | **13** |
+| **Total** | **14** |
