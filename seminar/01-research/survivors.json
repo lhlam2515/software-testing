@@ -1,0 +1,3591 @@
+[
+  {
+    "id": "17",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 12,
+        "line": 36
+      },
+      "start": {
+        "column": 9,
+        "line": 36
+      }
+    },
+    "original": "err",
+    "replacement": "false",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "17",
+      "18",
+      "19",
+      "20",
+      "21",
+      "22",
+      "23",
+      "24",
+      "25",
+      "26"
+    ],
+    "killedBy": [],
+    "testsCompleted": 10,
+    "sourceContext": [
+      {
+        "line": 34,
+        "text": ""
+      },
+      {
+        "line": 35,
+        "text": "  db.get(\"SELECT * FROM users WHERE email = ?\", [email], (err, user) => {"
+      },
+      {
+        "line": 36,
+        "text": "    if (err) return res.status(500).json({ error: err.message });"
+      },
+      {
+        "line": 37,
+        "text": "    if (!user)"
+      },
+      {
+        "line": 38,
+        "text": "      return res.status(401).json({ error: \"Invalid email or password\" });"
+      }
+    ],
+    "cluster": "FR-02 (login)"
+  },
+  {
+    "id": "22",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ObjectLiteral",
+    "location": {
+      "end": {
+        "column": 73,
+        "line": 38
+      },
+      "start": {
+        "column": 35,
+        "line": 38
+      }
+    },
+    "original": "{ error: \"Invalid email or password\" }",
+    "replacement": "{}",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "18"
+    ],
+    "killedBy": [],
+    "testsCompleted": 1,
+    "sourceContext": [
+      {
+        "line": 36,
+        "text": "    if (err) return res.status(500).json({ error: err.message });"
+      },
+      {
+        "line": 37,
+        "text": "    if (!user)"
+      },
+      {
+        "line": 38,
+        "text": "      return res.status(401).json({ error: \"Invalid email or password\" });"
+      },
+      {
+        "line": 39,
+        "text": ""
+      },
+      {
+        "line": 40,
+        "text": "    if (user.locked_until && new Date() < new Date(user.locked_until)) {"
+      }
+    ],
+    "cluster": "FR-02 (login)"
+  },
+  {
+    "id": "23",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 71,
+        "line": 38
+      },
+      "start": {
+        "column": 44,
+        "line": 38
+      }
+    },
+    "original": "\"Invalid email or password\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "18"
+    ],
+    "killedBy": [],
+    "testsCompleted": 1,
+    "sourceContext": [
+      {
+        "line": 36,
+        "text": "    if (err) return res.status(500).json({ error: err.message });"
+      },
+      {
+        "line": 37,
+        "text": "    if (!user)"
+      },
+      {
+        "line": 38,
+        "text": "      return res.status(401).json({ error: \"Invalid email or password\" });"
+      },
+      {
+        "line": 39,
+        "text": ""
+      },
+      {
+        "line": 40,
+        "text": "    if (user.locked_until && new Date() < new Date(user.locked_until)) {"
+      }
+    ],
+    "cluster": "FR-02 (login)"
+  },
+  {
+    "id": "28",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "EqualityOperator",
+    "location": {
+      "end": {
+        "column": 70,
+        "line": 40
+      },
+      "start": {
+        "column": 30,
+        "line": 40
+      }
+    },
+    "original": "new Date() < new Date(user.locked_until)",
+    "replacement": "new Date() <= new Date(user.locked_until)",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "21",
+      "23",
+      "24",
+      "25",
+      "26"
+    ],
+    "killedBy": [],
+    "testsCompleted": 5,
+    "sourceContext": [
+      {
+        "line": 38,
+        "text": "      return res.status(401).json({ error: \"Invalid email or password\" });"
+      },
+      {
+        "line": 39,
+        "text": ""
+      },
+      {
+        "line": 40,
+        "text": "    if (user.locked_until && new Date() < new Date(user.locked_until)) {"
+      },
+      {
+        "line": 41,
+        "text": "      return res"
+      },
+      {
+        "line": 42,
+        "text": "        .status(403)"
+      }
+    ],
+    "cluster": "FR-02 (login)"
+  },
+  {
+    "id": "38",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ArrayDeclaration",
+    "location": {
+      "end": {
+        "column": 18,
+        "line": 49
+      },
+      "start": {
+        "column": 9,
+        "line": 49
+      }
+    },
+    "original": "[user.id]",
+    "replacement": "[]",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "17",
+      "22",
+      "25",
+      "26"
+    ],
+    "killedBy": [],
+    "testsCompleted": 4,
+    "sourceContext": [
+      {
+        "line": 47,
+        "text": "      db.run("
+      },
+      {
+        "line": 48,
+        "text": "        \"UPDATE users SET login_attempts = 0, locked_until = NULL WHERE id = ?\","
+      },
+      {
+        "line": 49,
+        "text": "        [user.id],"
+      },
+      {
+        "line": 50,
+        "text": "      );"
+      },
+      {
+        "line": 51,
+        "text": "      const token = jwt.sign({ id: user.id, role: user.role }, SECRET_KEY);"
+      }
+    ],
+    "cluster": "FR-02 (login)"
+  },
+  {
+    "id": "39",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ObjectLiteral",
+    "location": {
+      "end": {
+        "column": 62,
+        "line": 51
+      },
+      "start": {
+        "column": 30,
+        "line": 51
+      }
+    },
+    "original": "{ id: user.id, role: user.role }",
+    "replacement": "{}",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "17",
+      "22",
+      "25",
+      "26"
+    ],
+    "killedBy": [],
+    "testsCompleted": 4,
+    "sourceContext": [
+      {
+        "line": 49,
+        "text": "        [user.id],"
+      },
+      {
+        "line": 50,
+        "text": "      );"
+      },
+      {
+        "line": 51,
+        "text": "      const token = jwt.sign({ id: user.id, role: user.role }, SECRET_KEY);"
+      },
+      {
+        "line": 52,
+        "text": "      res.json({ message: \"Login successful\", token, user });"
+      },
+      {
+        "line": 53,
+        "text": "    } else {"
+      }
+    ],
+    "cluster": "FR-02 (login)"
+  },
+  {
+    "id": "41",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 45,
+        "line": 52
+      },
+      "start": {
+        "column": 27,
+        "line": 52
+      }
+    },
+    "original": "\"Login successful\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "17",
+      "22",
+      "25",
+      "26"
+    ],
+    "killedBy": [],
+    "testsCompleted": 4,
+    "sourceContext": [
+      {
+        "line": 50,
+        "text": "      );"
+      },
+      {
+        "line": 51,
+        "text": "      const token = jwt.sign({ id: user.id, role: user.role }, SECRET_KEY);"
+      },
+      {
+        "line": 52,
+        "text": "      res.json({ message: \"Login successful\", token, user });"
+      },
+      {
+        "line": 53,
+        "text": "    } else {"
+      },
+      {
+        "line": 54,
+        "text": "      const newAttempts = user.login_attempts + 2;"
+      }
+    ],
+    "cluster": "FR-02 (login)"
+  },
+  {
+    "id": "44",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 27,
+        "line": 56
+      },
+      "start": {
+        "column": 11,
+        "line": 56
+      }
+    },
+    "original": "newAttempts >= 3",
+    "replacement": "true",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "19",
+      "20",
+      "22",
+      "23"
+    ],
+    "killedBy": [],
+    "testsCompleted": 4,
+    "sourceContext": [
+      {
+        "line": 54,
+        "text": "      const newAttempts = user.login_attempts + 2;"
+      },
+      {
+        "line": 55,
+        "text": "      let lockedUntil = null;"
+      },
+      {
+        "line": 56,
+        "text": "      if (newAttempts >= 3) {"
+      },
+      {
+        "line": 57,
+        "text": "        lockedUntil = new Date(Date.now() + 180000).toISOString();"
+      },
+      {
+        "line": 58,
+        "text": "      }"
+      }
+    ],
+    "cluster": "FR-02 (login)"
+  },
+  {
+    "id": "46",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "EqualityOperator",
+    "location": {
+      "end": {
+        "column": 27,
+        "line": 56
+      },
+      "start": {
+        "column": 11,
+        "line": 56
+      }
+    },
+    "original": "newAttempts >= 3",
+    "replacement": "newAttempts > 3",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "19",
+      "20",
+      "22",
+      "23"
+    ],
+    "killedBy": [],
+    "testsCompleted": 4,
+    "sourceContext": [
+      {
+        "line": 54,
+        "text": "      const newAttempts = user.login_attempts + 2;"
+      },
+      {
+        "line": 55,
+        "text": "      let lockedUntil = null;"
+      },
+      {
+        "line": 56,
+        "text": "      if (newAttempts >= 3) {"
+      },
+      {
+        "line": 57,
+        "text": "        lockedUntil = new Date(Date.now() + 180000).toISOString();"
+      },
+      {
+        "line": 58,
+        "text": "      }"
+      }
+    ],
+    "cluster": "FR-02 (login)"
+  },
+  {
+    "id": "264",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ArrayDeclaration",
+    "location": {
+      "end": {
+        "column": 49,
+        "line": 286
+      },
+      "start": {
+        "column": 47,
+        "line": 286
+      }
+    },
+    "original": "[]",
+    "replacement": "[\"Stryker was here\"]",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "33"
+    ],
+    "killedBy": [],
+    "testsCompleted": 1,
+    "sourceContext": [
+      {
+        "line": 284,
+        "text": "app.get(\"/api/cart\", authenticateToken, (req, res) => {"
+      },
+      {
+        "line": 285,
+        "text": "  const userId = req.user.id;"
+      },
+      {
+        "line": 286,
+        "text": "  if (!userCarts[userId]) userCarts[userId] = [];"
+      },
+      {
+        "line": 287,
+        "text": "  res.json(userCarts[userId]);"
+      },
+      {
+        "line": 288,
+        "text": "});"
+      }
+    ],
+    "cluster": "FR-08 (cart/checkout)"
+  },
+  {
+    "id": "268",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 25,
+        "line": 292
+      },
+      "start": {
+        "column": 7,
+        "line": 292
+      }
+    },
+    "original": "!userCarts[userId]",
+    "replacement": "true",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "34"
+    ],
+    "killedBy": [],
+    "testsCompleted": 1,
+    "sourceContext": [
+      {
+        "line": 290,
+        "text": "app.post(\"/api/cart\", authenticateToken, (req, res) => {"
+      },
+      {
+        "line": 291,
+        "text": "  const userId = req.user.id;"
+      },
+      {
+        "line": 292,
+        "text": "  if (!userCarts[userId]) userCarts[userId] = [];"
+      },
+      {
+        "line": 293,
+        "text": "  userCarts[userId].push(req.body);"
+      },
+      {
+        "line": 294,
+        "text": "  res.json({ message: \"Added to cart\" });"
+      }
+    ],
+    "cluster": "FR-08 (cart/checkout)"
+  },
+  {
+    "id": "280",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 14,
+        "line": 305
+      },
+      "start": {
+        "column": 11,
+        "line": 305
+      }
+    },
+    "original": "err",
+    "replacement": "false",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "35"
+    ],
+    "killedBy": [],
+    "testsCompleted": 1,
+    "sourceContext": [
+      {
+        "line": 303,
+        "text": "    [userId, total_amount, \"pending\", shipping_address],"
+      },
+      {
+        "line": 304,
+        "text": "    function (err) {"
+      },
+      {
+        "line": 305,
+        "text": "      if (err) return res.status(500).json({ error: err.message });"
+      },
+      {
+        "line": 306,
+        "text": "      res.json({ message: \"Checkout successful\", orderId: this.lastID });"
+      },
+      {
+        "line": 307,
+        "text": "    },"
+      }
+    ],
+    "cluster": "FR-08 (cart/checkout)"
+  },
+  {
+    "id": "284",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 32,
+        "line": 311
+      },
+      "start": {
+        "column": 9,
+        "line": 311
+      }
+    },
+    "original": "\"/api/orders/my-orders\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 309,
+        "text": "});"
+      },
+      {
+        "line": 310,
+        "text": ""
+      },
+      {
+        "line": 311,
+        "text": "app.get(\"/api/orders/my-orders\", authenticateToken, (req, res) => {"
+      },
+      {
+        "line": 312,
+        "text": "  db.all("
+      },
+      {
+        "line": 313,
+        "text": "    \"SELECT * FROM orders WHERE user_id = ? ORDER BY id DESC\","
+      }
+    ],
+    "cluster": "FR-08 (cart/checkout)"
+  },
+  {
+    "id": "289",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 33,
+        "line": 321
+      },
+      "start": {
+        "column": 9,
+        "line": 321
+      }
+    },
+    "original": "\"/api/orders/:id/cancel\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 319,
+        "text": "});"
+      },
+      {
+        "line": 320,
+        "text": ""
+      },
+      {
+        "line": 321,
+        "text": "app.put(\"/api/orders/:id/cancel\", authenticateToken, (req, res) => {"
+      },
+      {
+        "line": 322,
+        "text": "  db.get("
+      },
+      {
+        "line": 323,
+        "text": "    \"SELECT * FROM orders WHERE id = ? AND user_id = ?\","
+      }
+    ],
+    "cluster": "FR-08 (cart/checkout)"
+  },
+  {
+    "id": "336",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 12,
+        "line": 366
+      },
+      "start": {
+        "column": 7,
+        "line": 366
+      }
+    },
+    "original": "!code",
+    "replacement": "false",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16"
+    ],
+    "killedBy": [],
+    "testsCompleted": 17,
+    "sourceContext": [
+      {
+        "line": 364,
+        "text": "  const { code, total_amount, user_id } = req.body;"
+      },
+      {
+        "line": 365,
+        "text": ""
+      },
+      {
+        "line": 366,
+        "text": "  if (!code)"
+      },
+      {
+        "line": 367,
+        "text": "    return res.status(400).json({ error: \"Vui lòng nhập mã giảm giá\" });"
+      },
+      {
+        "line": 368,
+        "text": ""
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "355",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "EqualityOperator",
+    "location": {
+      "end": {
+        "column": 25,
+        "line": 382
+      },
+      "start": {
+        "column": 13,
+        "line": 382
+      }
+    },
+    "original": "expiry < now",
+    "replacement": "expiry <= now",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "0",
+      "1",
+      "5",
+      "7",
+      "8",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16"
+    ],
+    "killedBy": [],
+    "testsCompleted": 11,
+    "sourceContext": [
+      {
+        "line": 380,
+        "text": "        const now = new Date();"
+      },
+      {
+        "line": 381,
+        "text": "        const expiry = new Date(coupon.expired_at);"
+      },
+      {
+        "line": 382,
+        "text": "        if (expiry < now) {"
+      },
+      {
+        "line": 383,
+        "text": "          return res.status(400).json({ error: \"Mã giảm giá đã hết hạn\" });"
+      },
+      {
+        "line": 384,
+        "text": "        }"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "360",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 20,
+        "line": 386
+      },
+      "start": {
+        "column": 13,
+        "line": 386
+      }
+    },
+    "original": "user_id",
+    "replacement": "true",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "0",
+      "1",
+      "7",
+      "8",
+      "11",
+      "12",
+      "13",
+      "14",
+      "16"
+    ],
+    "killedBy": [],
+    "testsCompleted": 9,
+    "sourceContext": [
+      {
+        "line": 384,
+        "text": "        }"
+      },
+      {
+        "line": 385,
+        "text": ""
+      },
+      {
+        "line": 386,
+        "text": "        if (user_id) {"
+      },
+      {
+        "line": 387,
+        "text": "          db.get("
+      },
+      {
+        "line": 388,
+        "text": "            \"SELECT COUNT(*) as usage_count FROM coupon_usage WHERE coupon_id = ? AND user_id = ?\","
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "374",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 44,
+        "line": 398
+      },
+      "start": {
+        "column": 19,
+        "line": 398
+      }
+    },
+    "original": "coupon.type === \"percent\"",
+    "replacement": "false",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "12"
+    ],
+    "killedBy": [],
+    "testsCompleted": 1,
+    "sourceContext": [
+      {
+        "line": 396,
+        "text": ""
+      },
+      {
+        "line": 397,
+        "text": "              let discount_amount = 0;"
+      },
+      {
+        "line": 398,
+        "text": "              if (coupon.type === \"percent\") {"
+      },
+      {
+        "line": 399,
+        "text": "                discount_amount = Math.floor("
+      },
+      {
+        "line": 400,
+        "text": "                  total_amount * (1 - coupon.discount_value),"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "376",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 44,
+        "line": 398
+      },
+      "start": {
+        "column": 35,
+        "line": 398
+      }
+    },
+    "original": "\"percent\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "12"
+    ],
+    "killedBy": [],
+    "testsCompleted": 1,
+    "sourceContext": [
+      {
+        "line": 396,
+        "text": ""
+      },
+      {
+        "line": 397,
+        "text": "              let discount_amount = 0;"
+      },
+      {
+        "line": 398,
+        "text": "              if (coupon.type === \"percent\") {"
+      },
+      {
+        "line": 399,
+        "text": "                discount_amount = Math.floor("
+      },
+      {
+        "line": 400,
+        "text": "                  total_amount * (1 - coupon.discount_value),"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "384",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 159,
+        "line": 412
+      },
+      "start": {
+        "column": 26,
+        "line": 412
+      }
+    },
+    "original": "`Áp dụng thành công! Giảm ${coupon.type === \"percent\" ? coupon.discount_value + \"%\" : coupon.discount_value.toLocaleString() + \" ₫\"}`",
+    "replacement": "``",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "12"
+    ],
+    "killedBy": [],
+    "testsCompleted": 1,
+    "sourceContext": [
+      {
+        "line": 410,
+        "text": "                discount_amount,"
+      },
+      {
+        "line": 411,
+        "text": "                final_amount,"
+      },
+      {
+        "line": 412,
+        "text": "                message: `Áp dụng thành công! Giảm ${coupon.type === \"percent\" ? coupon.discount_value + \"%\" : coupon.discount_value.toLocaleString() + \" ₫\"}`,"
+      },
+      {
+        "line": 413,
+        "text": "              });"
+      },
+      {
+        "line": 414,
+        "text": "            },"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "385",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 79,
+        "line": 412
+      },
+      "start": {
+        "column": 54,
+        "line": 412
+      }
+    },
+    "original": "coupon.type === \"percent\"",
+    "replacement": "true",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "12"
+    ],
+    "killedBy": [],
+    "testsCompleted": 1,
+    "sourceContext": [
+      {
+        "line": 410,
+        "text": "                discount_amount,"
+      },
+      {
+        "line": 411,
+        "text": "                final_amount,"
+      },
+      {
+        "line": 412,
+        "text": "                message: `Áp dụng thành công! Giảm ${coupon.type === \"percent\" ? coupon.discount_value + \"%\" : coupon.discount_value.toLocaleString() + \" ₫\"}`,"
+      },
+      {
+        "line": 413,
+        "text": "              });"
+      },
+      {
+        "line": 414,
+        "text": "            },"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "386",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 79,
+        "line": 412
+      },
+      "start": {
+        "column": 54,
+        "line": 412
+      }
+    },
+    "original": "coupon.type === \"percent\"",
+    "replacement": "false",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "12"
+    ],
+    "killedBy": [],
+    "testsCompleted": 1,
+    "sourceContext": [
+      {
+        "line": 410,
+        "text": "                discount_amount,"
+      },
+      {
+        "line": 411,
+        "text": "                final_amount,"
+      },
+      {
+        "line": 412,
+        "text": "                message: `Áp dụng thành công! Giảm ${coupon.type === \"percent\" ? coupon.discount_value + \"%\" : coupon.discount_value.toLocaleString() + \" ₫\"}`,"
+      },
+      {
+        "line": 413,
+        "text": "              });"
+      },
+      {
+        "line": 414,
+        "text": "            },"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "387",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "EqualityOperator",
+    "location": {
+      "end": {
+        "column": 79,
+        "line": 412
+      },
+      "start": {
+        "column": 54,
+        "line": 412
+      }
+    },
+    "original": "coupon.type === \"percent\"",
+    "replacement": "coupon.type !== \"percent\"",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "12"
+    ],
+    "killedBy": [],
+    "testsCompleted": 1,
+    "sourceContext": [
+      {
+        "line": 410,
+        "text": "                discount_amount,"
+      },
+      {
+        "line": 411,
+        "text": "                final_amount,"
+      },
+      {
+        "line": 412,
+        "text": "                message: `Áp dụng thành công! Giảm ${coupon.type === \"percent\" ? coupon.discount_value + \"%\" : coupon.discount_value.toLocaleString() + \" ₫\"}`,"
+      },
+      {
+        "line": 413,
+        "text": "              });"
+      },
+      {
+        "line": 414,
+        "text": "            },"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "388",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 79,
+        "line": 412
+      },
+      "start": {
+        "column": 70,
+        "line": 412
+      }
+    },
+    "original": "\"percent\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "12"
+    ],
+    "killedBy": [],
+    "testsCompleted": 1,
+    "sourceContext": [
+      {
+        "line": 410,
+        "text": "                discount_amount,"
+      },
+      {
+        "line": 411,
+        "text": "                final_amount,"
+      },
+      {
+        "line": 412,
+        "text": "                message: `Áp dụng thành công! Giảm ${coupon.type === \"percent\" ? coupon.discount_value + \"%\" : coupon.discount_value.toLocaleString() + \" ₫\"}`,"
+      },
+      {
+        "line": 413,
+        "text": "              });"
+      },
+      {
+        "line": 414,
+        "text": "            },"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "390",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 157,
+        "line": 412
+      },
+      "start": {
+        "column": 153,
+        "line": 412
+      }
+    },
+    "original": "\" ₫\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "12"
+    ],
+    "killedBy": [],
+    "testsCompleted": 1,
+    "sourceContext": [
+      {
+        "line": 410,
+        "text": "                discount_amount,"
+      },
+      {
+        "line": 411,
+        "text": "                final_amount,"
+      },
+      {
+        "line": 412,
+        "text": "                message: `Áp dụng thành công! Giảm ${coupon.type === \"percent\" ? coupon.discount_value + \"%\" : coupon.discount_value.toLocaleString() + \" ₫\"}`,"
+      },
+      {
+        "line": 413,
+        "text": "              });"
+      },
+      {
+        "line": 414,
+        "text": "            },"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "393",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 40,
+        "line": 418
+      },
+      "start": {
+        "column": 15,
+        "line": 418
+      }
+    },
+    "original": "coupon.type === \"percent\"",
+    "replacement": "false",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "0",
+      "1",
+      "8",
+      "11",
+      "16"
+    ],
+    "killedBy": [],
+    "testsCompleted": 5,
+    "sourceContext": [
+      {
+        "line": 416,
+        "text": "        } else {"
+      },
+      {
+        "line": 417,
+        "text": "          let discount_amount = 0;"
+      },
+      {
+        "line": 418,
+        "text": "          if (coupon.type === \"percent\") {"
+      },
+      {
+        "line": 419,
+        "text": "            discount_amount = Math.floor("
+      },
+      {
+        "line": 420,
+        "text": "              total_amount * (1 - coupon.discount_value),"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "395",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 40,
+        "line": 418
+      },
+      "start": {
+        "column": 31,
+        "line": 418
+      }
+    },
+    "original": "\"percent\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "0",
+      "1",
+      "8",
+      "11",
+      "16"
+    ],
+    "killedBy": [],
+    "testsCompleted": 5,
+    "sourceContext": [
+      {
+        "line": 416,
+        "text": "        } else {"
+      },
+      {
+        "line": 417,
+        "text": "          let discount_amount = 0;"
+      },
+      {
+        "line": 418,
+        "text": "          if (coupon.type === \"percent\") {"
+      },
+      {
+        "line": 419,
+        "text": "            discount_amount = Math.floor("
+      },
+      {
+        "line": 420,
+        "text": "              total_amount * (1 - coupon.discount_value),"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "396",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "BlockStatement",
+    "location": {
+      "end": {
+        "column": 12,
+        "line": 422
+      },
+      "start": {
+        "column": 42,
+        "line": 418
+      }
+    },
+    "original": "{\n            discount_amount = Math.floor(\n              total_amount * (1 - coupon.discount_value),\n            );\n          }",
+    "replacement": "{}",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "1",
+      "11",
+      "16"
+    ],
+    "killedBy": [],
+    "testsCompleted": 3,
+    "sourceContext": [
+      {
+        "line": 416,
+        "text": "        } else {"
+      },
+      {
+        "line": 417,
+        "text": "          let discount_amount = 0;"
+      },
+      {
+        "line": 418,
+        "text": "          if (coupon.type === \"percent\") {"
+      },
+      {
+        "line": 419,
+        "text": "            discount_amount = Math.floor("
+      },
+      {
+        "line": 420,
+        "text": "              total_amount * (1 - coupon.discount_value),"
+      },
+      {
+        "line": 421,
+        "text": "            );"
+      },
+      {
+        "line": 422,
+        "text": "          } else {"
+      },
+      {
+        "line": 423,
+        "text": "            discount_amount = coupon.discount_value;"
+      },
+      {
+        "line": 424,
+        "text": "          }"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "397",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ArithmeticOperator",
+    "location": {
+      "end": {
+        "column": 57,
+        "line": 420
+      },
+      "start": {
+        "column": 15,
+        "line": 420
+      }
+    },
+    "original": "total_amount * (1 - coupon.discount_value)",
+    "replacement": "total_amount / (1 - coupon.discount_value)",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "1",
+      "11",
+      "16"
+    ],
+    "killedBy": [],
+    "testsCompleted": 3,
+    "sourceContext": [
+      {
+        "line": 418,
+        "text": "          if (coupon.type === \"percent\") {"
+      },
+      {
+        "line": 419,
+        "text": "            discount_amount = Math.floor("
+      },
+      {
+        "line": 420,
+        "text": "              total_amount * (1 - coupon.discount_value),"
+      },
+      {
+        "line": 421,
+        "text": "            );"
+      },
+      {
+        "line": 422,
+        "text": "          } else {"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "398",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ArithmeticOperator",
+    "location": {
+      "end": {
+        "column": 56,
+        "line": 420
+      },
+      "start": {
+        "column": 31,
+        "line": 420
+      }
+    },
+    "original": "1 - coupon.discount_value",
+    "replacement": "1 + coupon.discount_value",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "1",
+      "11",
+      "16"
+    ],
+    "killedBy": [],
+    "testsCompleted": 3,
+    "sourceContext": [
+      {
+        "line": 418,
+        "text": "          if (coupon.type === \"percent\") {"
+      },
+      {
+        "line": 419,
+        "text": "            discount_amount = Math.floor("
+      },
+      {
+        "line": 420,
+        "text": "              total_amount * (1 - coupon.discount_value),"
+      },
+      {
+        "line": 421,
+        "text": "            );"
+      },
+      {
+        "line": 422,
+        "text": "          } else {"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "403",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 155,
+        "line": 431
+      },
+      "start": {
+        "column": 22,
+        "line": 431
+      }
+    },
+    "original": "`Áp dụng thành công! Giảm ${coupon.type === \"percent\" ? coupon.discount_value + \"%\" : coupon.discount_value.toLocaleString() + \" ₫\"}`",
+    "replacement": "``",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "0",
+      "1",
+      "8",
+      "11",
+      "16"
+    ],
+    "killedBy": [],
+    "testsCompleted": 5,
+    "sourceContext": [
+      {
+        "line": 429,
+        "text": "            discount_amount,"
+      },
+      {
+        "line": 430,
+        "text": "            final_amount,"
+      },
+      {
+        "line": 431,
+        "text": "            message: `Áp dụng thành công! Giảm ${coupon.type === \"percent\" ? coupon.discount_value + \"%\" : coupon.discount_value.toLocaleString() + \" ₫\"}`,"
+      },
+      {
+        "line": 432,
+        "text": "          });"
+      },
+      {
+        "line": 433,
+        "text": "        }"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "404",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 75,
+        "line": 431
+      },
+      "start": {
+        "column": 50,
+        "line": 431
+      }
+    },
+    "original": "coupon.type === \"percent\"",
+    "replacement": "true",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "0",
+      "1",
+      "8",
+      "11",
+      "16"
+    ],
+    "killedBy": [],
+    "testsCompleted": 5,
+    "sourceContext": [
+      {
+        "line": 429,
+        "text": "            discount_amount,"
+      },
+      {
+        "line": 430,
+        "text": "            final_amount,"
+      },
+      {
+        "line": 431,
+        "text": "            message: `Áp dụng thành công! Giảm ${coupon.type === \"percent\" ? coupon.discount_value + \"%\" : coupon.discount_value.toLocaleString() + \" ₫\"}`,"
+      },
+      {
+        "line": 432,
+        "text": "          });"
+      },
+      {
+        "line": 433,
+        "text": "        }"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "405",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 75,
+        "line": 431
+      },
+      "start": {
+        "column": 50,
+        "line": 431
+      }
+    },
+    "original": "coupon.type === \"percent\"",
+    "replacement": "false",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "0",
+      "1",
+      "8",
+      "11",
+      "16"
+    ],
+    "killedBy": [],
+    "testsCompleted": 5,
+    "sourceContext": [
+      {
+        "line": 429,
+        "text": "            discount_amount,"
+      },
+      {
+        "line": 430,
+        "text": "            final_amount,"
+      },
+      {
+        "line": 431,
+        "text": "            message: `Áp dụng thành công! Giảm ${coupon.type === \"percent\" ? coupon.discount_value + \"%\" : coupon.discount_value.toLocaleString() + \" ₫\"}`,"
+      },
+      {
+        "line": 432,
+        "text": "          });"
+      },
+      {
+        "line": 433,
+        "text": "        }"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "406",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "EqualityOperator",
+    "location": {
+      "end": {
+        "column": 75,
+        "line": 431
+      },
+      "start": {
+        "column": 50,
+        "line": 431
+      }
+    },
+    "original": "coupon.type === \"percent\"",
+    "replacement": "coupon.type !== \"percent\"",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "0",
+      "1",
+      "8",
+      "11",
+      "16"
+    ],
+    "killedBy": [],
+    "testsCompleted": 5,
+    "sourceContext": [
+      {
+        "line": 429,
+        "text": "            discount_amount,"
+      },
+      {
+        "line": 430,
+        "text": "            final_amount,"
+      },
+      {
+        "line": 431,
+        "text": "            message: `Áp dụng thành công! Giảm ${coupon.type === \"percent\" ? coupon.discount_value + \"%\" : coupon.discount_value.toLocaleString() + \" ₫\"}`,"
+      },
+      {
+        "line": 432,
+        "text": "          });"
+      },
+      {
+        "line": 433,
+        "text": "        }"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "407",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 75,
+        "line": 431
+      },
+      "start": {
+        "column": 66,
+        "line": 431
+      }
+    },
+    "original": "\"percent\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "0",
+      "1",
+      "8",
+      "11",
+      "16"
+    ],
+    "killedBy": [],
+    "testsCompleted": 5,
+    "sourceContext": [
+      {
+        "line": 429,
+        "text": "            discount_amount,"
+      },
+      {
+        "line": 430,
+        "text": "            final_amount,"
+      },
+      {
+        "line": 431,
+        "text": "            message: `Áp dụng thành công! Giảm ${coupon.type === \"percent\" ? coupon.discount_value + \"%\" : coupon.discount_value.toLocaleString() + \" ₫\"}`,"
+      },
+      {
+        "line": 432,
+        "text": "          });"
+      },
+      {
+        "line": 433,
+        "text": "        }"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "408",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 105,
+        "line": 431
+      },
+      "start": {
+        "column": 102,
+        "line": 431
+      }
+    },
+    "original": "\"%\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "1",
+      "11",
+      "16"
+    ],
+    "killedBy": [],
+    "testsCompleted": 3,
+    "sourceContext": [
+      {
+        "line": 429,
+        "text": "            discount_amount,"
+      },
+      {
+        "line": 430,
+        "text": "            final_amount,"
+      },
+      {
+        "line": 431,
+        "text": "            message: `Áp dụng thành công! Giảm ${coupon.type === \"percent\" ? coupon.discount_value + \"%\" : coupon.discount_value.toLocaleString() + \" ₫\"}`,"
+      },
+      {
+        "line": 432,
+        "text": "          });"
+      },
+      {
+        "line": 433,
+        "text": "        }"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "409",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 153,
+        "line": 431
+      },
+      "start": {
+        "column": 149,
+        "line": 431
+      }
+    },
+    "original": "\" ₫\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "0",
+      "8"
+    ],
+    "killedBy": [],
+    "testsCompleted": 2,
+    "sourceContext": [
+      {
+        "line": 429,
+        "text": "            discount_amount,"
+      },
+      {
+        "line": 430,
+        "text": "            final_amount,"
+      },
+      {
+        "line": 431,
+        "text": "            message: `Áp dụng thành công! Giảm ${coupon.type === \"percent\" ? coupon.discount_value + \"%\" : coupon.discount_value.toLocaleString() + \" ₫\"}`,"
+      },
+      {
+        "line": 432,
+        "text": "          });"
+      },
+      {
+        "line": 433,
+        "text": "        }"
+      }
+    ],
+    "cluster": "FR-09 (apply-coupon)"
+  },
+  {
+    "id": "477",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 36,
+        "line": 538
+      },
+      "start": {
+        "column": 9,
+        "line": 538
+      }
+    },
+    "original": "currentStatus === \"pending\"",
+    "replacement": "true",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "27",
+      "28",
+      "29",
+      "30"
+    ],
+    "killedBy": [],
+    "testsCompleted": 4,
+    "sourceContext": [
+      {
+        "line": 536,
+        "text": ""
+      },
+      {
+        "line": 537,
+        "text": "      if ("
+      },
+      {
+        "line": 538,
+        "text": "        currentStatus === \"pending\" &&"
+      },
+      {
+        "line": 539,
+        "text": "        (status === \"confirmed\" || status === \"canceled\")"
+      },
+      {
+        "line": 540,
+        "text": "      )"
+      }
+    ],
+    "cluster": "FR-10 (order-status)"
+  },
+  {
+    "id": "485",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 57,
+        "line": 539
+      },
+      "start": {
+        "column": 36,
+        "line": 539
+      }
+    },
+    "original": "status === \"canceled\"",
+    "replacement": "false",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "30"
+    ],
+    "killedBy": [],
+    "testsCompleted": 1,
+    "sourceContext": [
+      {
+        "line": 537,
+        "text": "      if ("
+      },
+      {
+        "line": 538,
+        "text": "        currentStatus === \"pending\" &&"
+      },
+      {
+        "line": 539,
+        "text": "        (status === \"confirmed\" || status === \"canceled\")"
+      },
+      {
+        "line": 540,
+        "text": "      )"
+      },
+      {
+        "line": 541,
+        "text": "        isValidTransition = true;"
+      }
+    ],
+    "cluster": "FR-10 (order-status)"
+  },
+  {
+    "id": "487",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 57,
+        "line": 539
+      },
+      "start": {
+        "column": 47,
+        "line": 539
+      }
+    },
+    "original": "\"canceled\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "30"
+    ],
+    "killedBy": [],
+    "testsCompleted": 1,
+    "sourceContext": [
+      {
+        "line": 537,
+        "text": "      if ("
+      },
+      {
+        "line": 538,
+        "text": "        currentStatus === \"pending\" &&"
+      },
+      {
+        "line": 539,
+        "text": "        (status === \"confirmed\" || status === \"canceled\")"
+      },
+      {
+        "line": 540,
+        "text": "      )"
+      },
+      {
+        "line": 541,
+        "text": "        isValidTransition = true;"
+      }
+    ],
+    "cluster": "FR-10 (order-status)"
+  },
+  {
+    "id": "491",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "LogicalOperator",
+    "location": {
+      "end": {
+        "column": 57,
+        "line": 544
+      },
+      "start": {
+        "column": 9,
+        "line": 543
+      }
+    },
+    "original": "currentStatus === \"confirmed\" &&\n        (status === \"shipping\" || status === \"canceled\")",
+    "replacement": "currentStatus === \"confirmed\" || status === \"shipping\" || status === \"canceled\"",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "27",
+      "28",
+      "29",
+      "30"
+    ],
+    "killedBy": [],
+    "testsCompleted": 4,
+    "sourceContext": [
+      {
+        "line": 541,
+        "text": "        isValidTransition = true;"
+      },
+      {
+        "line": 542,
+        "text": "      if ("
+      },
+      {
+        "line": 543,
+        "text": "        currentStatus === \"confirmed\" &&"
+      },
+      {
+        "line": 544,
+        "text": "        (status === \"shipping\" || status === \"canceled\")"
+      },
+      {
+        "line": 545,
+        "text": "      )"
+      },
+      {
+        "line": 546,
+        "text": "        isValidTransition = true;"
+      }
+    ],
+    "cluster": "FR-10 (order-status)"
+  },
+  {
+    "id": "492",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 38,
+        "line": 543
+      },
+      "start": {
+        "column": 9,
+        "line": 543
+      }
+    },
+    "original": "currentStatus === \"confirmed\"",
+    "replacement": "true",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "27",
+      "28",
+      "29",
+      "30"
+    ],
+    "killedBy": [],
+    "testsCompleted": 4,
+    "sourceContext": [
+      {
+        "line": 541,
+        "text": "        isValidTransition = true;"
+      },
+      {
+        "line": 542,
+        "text": "      if ("
+      },
+      {
+        "line": 543,
+        "text": "        currentStatus === \"confirmed\" &&"
+      },
+      {
+        "line": 544,
+        "text": "        (status === \"shipping\" || status === \"canceled\")"
+      },
+      {
+        "line": 545,
+        "text": "      )"
+      }
+    ],
+    "cluster": "FR-10 (order-status)"
+  },
+  {
+    "id": "495",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 56,
+        "line": 544
+      },
+      "start": {
+        "column": 10,
+        "line": 544
+      }
+    },
+    "original": "status === \"shipping\" || status === \"canceled\"",
+    "replacement": "true",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "28"
+    ],
+    "killedBy": [],
+    "testsCompleted": 1,
+    "sourceContext": [
+      {
+        "line": 542,
+        "text": "      if ("
+      },
+      {
+        "line": 543,
+        "text": "        currentStatus === \"confirmed\" &&"
+      },
+      {
+        "line": 544,
+        "text": "        (status === \"shipping\" || status === \"canceled\")"
+      },
+      {
+        "line": 545,
+        "text": "      )"
+      },
+      {
+        "line": 546,
+        "text": "        isValidTransition = true;"
+      }
+    ],
+    "cluster": "FR-10 (order-status)"
+  },
+  {
+    "id": "510",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 65,
+        "line": 547
+      },
+      "start": {
+        "column": 43,
+        "line": 547
+      }
+    },
+    "original": "status === \"delivered\"",
+    "replacement": "true",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "29"
+    ],
+    "killedBy": [],
+    "testsCompleted": 1,
+    "sourceContext": [
+      {
+        "line": 545,
+        "text": "      )"
+      },
+      {
+        "line": 546,
+        "text": "        isValidTransition = true;"
+      },
+      {
+        "line": 547,
+        "text": "      if (currentStatus === \"shipping\" && status === \"delivered\")"
+      },
+      {
+        "line": 548,
+        "text": "        isValidTransition = true;"
+      },
+      {
+        "line": 549,
+        "text": ""
+      }
+    ],
+    "cluster": "FR-10 (order-status)"
+  },
+  {
+    "id": "515",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 65,
+        "line": 550
+      },
+      "start": {
+        "column": 11,
+        "line": 550
+      }
+    },
+    "original": "currentStatus === \"canceled\" && status === \"delivered\"",
+    "replacement": "false",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "27",
+      "28",
+      "29",
+      "30"
+    ],
+    "killedBy": [],
+    "testsCompleted": 4,
+    "sourceContext": [
+      {
+        "line": 548,
+        "text": "        isValidTransition = true;"
+      },
+      {
+        "line": 549,
+        "text": ""
+      },
+      {
+        "line": 550,
+        "text": "      if (currentStatus === \"canceled\" && status === \"delivered\")"
+      },
+      {
+        "line": 551,
+        "text": "        isValidTransition = true;"
+      },
+      {
+        "line": 552,
+        "text": ""
+      }
+    ],
+    "cluster": "FR-10 (order-status)"
+  },
+  {
+    "id": "519",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 39,
+        "line": 550
+      },
+      "start": {
+        "column": 29,
+        "line": 550
+      }
+    },
+    "original": "\"canceled\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "27",
+      "28",
+      "29",
+      "30"
+    ],
+    "killedBy": [],
+    "testsCompleted": 4,
+    "sourceContext": [
+      {
+        "line": 548,
+        "text": "        isValidTransition = true;"
+      },
+      {
+        "line": 549,
+        "text": ""
+      },
+      {
+        "line": 550,
+        "text": "      if (currentStatus === \"canceled\" && status === \"delivered\")"
+      },
+      {
+        "line": 551,
+        "text": "        isValidTransition = true;"
+      },
+      {
+        "line": 552,
+        "text": ""
+      }
+    ],
+    "cluster": "FR-10 (order-status)"
+  },
+  {
+    "id": "535",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 28,
+        "line": 570
+      },
+      "start": {
+        "column": 5,
+        "line": 570
+      }
+    },
+    "original": "require.main === module",
+    "replacement": "true",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 568,
+        "text": "});"
+      },
+      {
+        "line": 569,
+        "text": ""
+      },
+      {
+        "line": 570,
+        "text": "if (require.main === module) {"
+      },
+      {
+        "line": 571,
+        "text": "  app.listen(PORT, () => {"
+      },
+      {
+        "line": 572,
+        "text": "    console.log(`Server is running on http://localhost:${PORT}`);"
+      }
+    ],
+    "cluster": "FR-10 (order-status)"
+  },
+  {
+    "id": "536",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 28,
+        "line": 570
+      },
+      "start": {
+        "column": 5,
+        "line": 570
+      }
+    },
+    "original": "require.main === module",
+    "replacement": "false",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 568,
+        "text": "});"
+      },
+      {
+        "line": 569,
+        "text": ""
+      },
+      {
+        "line": 570,
+        "text": "if (require.main === module) {"
+      },
+      {
+        "line": 571,
+        "text": "  app.listen(PORT, () => {"
+      },
+      {
+        "line": 572,
+        "text": "    console.log(`Server is running on http://localhost:${PORT}`);"
+      }
+    ],
+    "cluster": "FR-10 (order-status)"
+  },
+  {
+    "id": "537",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "EqualityOperator",
+    "location": {
+      "end": {
+        "column": 28,
+        "line": 570
+      },
+      "start": {
+        "column": 5,
+        "line": 570
+      }
+    },
+    "original": "require.main === module",
+    "replacement": "require.main !== module",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 568,
+        "text": "});"
+      },
+      {
+        "line": 569,
+        "text": ""
+      },
+      {
+        "line": 570,
+        "text": "if (require.main === module) {"
+      },
+      {
+        "line": 571,
+        "text": "  app.listen(PORT, () => {"
+      },
+      {
+        "line": 572,
+        "text": "    console.log(`Server is running on http://localhost:${PORT}`);"
+      }
+    ],
+    "cluster": "FR-10 (order-status)"
+  },
+  {
+    "id": "1",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 25,
+        "line": 20
+      },
+      "start": {
+        "column": 10,
+        "line": 20
+      }
+    },
+    "original": "\"/api/register\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 18,
+        "text": "// =========================================="
+      },
+      {
+        "line": 19,
+        "text": ""
+      },
+      {
+        "line": 20,
+        "text": "app.post(\"/api/register\", (req, res) => {"
+      },
+      {
+        "line": 21,
+        "text": "  const { name, email, password } = req.body;"
+      },
+      {
+        "line": 22,
+        "text": "  db.run("
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "54",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 32,
+        "line": 68
+      },
+      "start": {
+        "column": 10,
+        "line": 68
+      }
+    },
+    "original": "\"/api/forgot-password\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 66,
+        "text": "});"
+      },
+      {
+        "line": 67,
+        "text": ""
+      },
+      {
+        "line": 68,
+        "text": "app.post(\"/api/forgot-password\", (req, res) => {"
+      },
+      {
+        "line": 69,
+        "text": "  const { email } = req.body;"
+      },
+      {
+        "line": 70,
+        "text": "  db.get(\"SELECT * FROM users WHERE email = ?\", [email], (err, user) => {"
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "74",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 31,
+        "line": 87
+      },
+      "start": {
+        "column": 10,
+        "line": 87
+      }
+    },
+    "original": "\"/api/reset-password\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 85,
+        "text": "});"
+      },
+      {
+        "line": 86,
+        "text": ""
+      },
+      {
+        "line": 87,
+        "text": "app.post(\"/api/reset-password\", (req, res) => {"
+      },
+      {
+        "line": 88,
+        "text": "  const { email, resetToken, newPassword } = req.body;"
+      },
+      {
+        "line": 89,
+        "text": "  db.run("
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "99",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "ConditionalExpression",
+    "location": {
+      "end": {
+        "column": 12,
+        "line": 106
+      },
+      "start": {
+        "column": 9,
+        "line": 106
+      }
+    },
+    "original": "err",
+    "replacement": "false",
+    "statusReason": null,
+    "static": false,
+    "coveredBy": [
+      "27",
+      "28",
+      "29",
+      "30",
+      "31",
+      "33",
+      "34",
+      "35"
+    ],
+    "killedBy": [],
+    "testsCompleted": 8,
+    "sourceContext": [
+      {
+        "line": 104,
+        "text": ""
+      },
+      {
+        "line": 105,
+        "text": "  jwt.verify(token, SECRET_KEY, (err, user) => {"
+      },
+      {
+        "line": 106,
+        "text": "    if (err) return res.status(403).json({ error: \"Forbidden\" });"
+      },
+      {
+        "line": 107,
+        "text": "    req.user = user;"
+      },
+      {
+        "line": 108,
+        "text": "    next();"
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "102",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 24,
+        "line": 112
+      },
+      "start": {
+        "column": 9,
+        "line": 112
+      }
+    },
+    "original": "\"/api/users/me\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 110,
+        "text": "};"
+      },
+      {
+        "line": 111,
+        "text": ""
+      },
+      {
+        "line": 112,
+        "text": "app.get(\"/api/users/me\", authenticateToken, (req, res) => {"
+      },
+      {
+        "line": 113,
+        "text": "  db.get(\"SELECT * FROM users WHERE id = ?\", [req.user.id], (err, user) => {"
+      },
+      {
+        "line": 114,
+        "text": "    res.json(user);"
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "107",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 24,
+        "line": 118
+      },
+      "start": {
+        "column": 9,
+        "line": 118
+      }
+    },
+    "original": "\"/api/users/me\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 116,
+        "text": "});"
+      },
+      {
+        "line": 117,
+        "text": ""
+      },
+      {
+        "line": 118,
+        "text": "app.put(\"/api/users/me\", authenticateToken, (req, res) => {"
+      },
+      {
+        "line": 119,
+        "text": "  const { name, shipping_address, phone, role } = req.body;"
+      },
+      {
+        "line": 120,
+        "text": ""
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "122",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 24,
+        "line": 141
+      },
+      "start": {
+        "column": 9,
+        "line": 141
+      }
+    },
+    "original": "\"/api/products\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 139,
+        "text": "// =========================================="
+      },
+      {
+        "line": 140,
+        "text": ""
+      },
+      {
+        "line": 141,
+        "text": "app.get(\"/api/products\", (req, res) => {"
+      },
+      {
+        "line": 142,
+        "text": "  const searchQuery = req.query.search;"
+      },
+      {
+        "line": 143,
+        "text": "  if (searchQuery) {"
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "137",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 28,
+        "line": 159
+      },
+      "start": {
+        "column": 9,
+        "line": 159
+      }
+    },
+    "original": "\"/api/products/:id\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 157,
+        "text": "});"
+      },
+      {
+        "line": 158,
+        "text": ""
+      },
+      {
+        "line": 159,
+        "text": "app.get(\"/api/products/:id\", (req, res) => {"
+      },
+      {
+        "line": 160,
+        "text": "  db.get(\"SELECT * FROM products WHERE id = ?\", [req.params.id], (err, row) => {"
+      },
+      {
+        "line": 161,
+        "text": "    if (!row) return res.status(200).json({});"
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "149",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 25,
+        "line": 167
+      },
+      "start": {
+        "column": 10,
+        "line": 167
+      }
+    },
+    "original": "\"/api/products\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 165,
+        "text": "});"
+      },
+      {
+        "line": 166,
+        "text": ""
+      },
+      {
+        "line": 167,
+        "text": "app.post(\"/api/products\", (req, res) => {"
+      },
+      {
+        "line": 168,
+        "text": "  const { name, price, description, imageUrl, category_id } = req.body;"
+      },
+      {
+        "line": 169,
+        "text": "  db.run("
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "159",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 28,
+        "line": 179
+      },
+      "start": {
+        "column": 9,
+        "line": 179
+      }
+    },
+    "original": "\"/api/products/:id\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 177,
+        "text": "});"
+      },
+      {
+        "line": 178,
+        "text": ""
+      },
+      {
+        "line": 179,
+        "text": "app.put(\"/api/products/:id\", (req, res) => {"
+      },
+      {
+        "line": 180,
+        "text": "  const { name, price, description, imageUrl, category_id } = req.body;"
+      },
+      {
+        "line": 181,
+        "text": "  db.run("
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "169",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 31,
+        "line": 191
+      },
+      "start": {
+        "column": 12,
+        "line": 191
+      }
+    },
+    "original": "\"/api/products/:id\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 189,
+        "text": "});"
+      },
+      {
+        "line": 190,
+        "text": ""
+      },
+      {
+        "line": 191,
+        "text": "app.delete(\"/api/products/:id\", (req, res) => {"
+      },
+      {
+        "line": 192,
+        "text": "  db.run(\"DELETE FROM products WHERE id = ?\", [req.params.id], function (err) {"
+      },
+      {
+        "line": 193,
+        "text": "    if (err) return res.status(500).json({ error: err.message });"
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "179",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 38,
+        "line": 199
+      },
+      "start": {
+        "column": 10,
+        "line": 199
+      }
+    },
+    "original": "\"/api/admin/import-products\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 197,
+        "text": ""
+      },
+      {
+        "line": 198,
+        "text": "// Import products from CSV (parsed on frontend, sent as JSON array)"
+      },
+      {
+        "line": 199,
+        "text": "app.post(\"/api/admin/import-products\", authenticateToken, (req, res) => {"
+      },
+      {
+        "line": 200,
+        "text": "  const { products: rows } = req.body;"
+      },
+      {
+        "line": 201,
+        "text": ""
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "224",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 26,
+        "line": 243
+      },
+      "start": {
+        "column": 9,
+        "line": 243
+      }
+    },
+    "original": "\"/api/categories\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 241,
+        "text": "});"
+      },
+      {
+        "line": 242,
+        "text": ""
+      },
+      {
+        "line": 243,
+        "text": "app.get(\"/api/categories\", (req, res) => {"
+      },
+      {
+        "line": 244,
+        "text": "  db.all(\"SELECT * FROM categories\", [], (err, rows) => {"
+      },
+      {
+        "line": 245,
+        "text": "    res.json(rows);"
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "229",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 27,
+        "line": 249
+      },
+      "start": {
+        "column": 10,
+        "line": 249
+      }
+    },
+    "original": "\"/api/categories\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 247,
+        "text": "});"
+      },
+      {
+        "line": 248,
+        "text": ""
+      },
+      {
+        "line": 249,
+        "text": "app.post(\"/api/categories\", authenticateToken, (req, res) => {"
+      },
+      {
+        "line": 250,
+        "text": "  const { name } = req.body;"
+      },
+      {
+        "line": 251,
+        "text": "  db.run(\"INSERT INTO categories (name) VALUES (?)\", [name], function (err) {"
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "239",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 30,
+        "line": 257
+      },
+      "start": {
+        "column": 9,
+        "line": 257
+      }
+    },
+    "original": "\"/api/categories/:id\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 255,
+        "text": "});"
+      },
+      {
+        "line": 256,
+        "text": ""
+      },
+      {
+        "line": 257,
+        "text": "app.put(\"/api/categories/:id\", authenticateToken, (req, res) => {"
+      },
+      {
+        "line": 258,
+        "text": "  const { name } = req.body;"
+      },
+      {
+        "line": 259,
+        "text": "  db.run("
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "249",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 33,
+        "line": 269
+      },
+      "start": {
+        "column": 12,
+        "line": 269
+      }
+    },
+    "original": "\"/api/categories/:id\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 267,
+        "text": "});"
+      },
+      {
+        "line": 268,
+        "text": ""
+      },
+      {
+        "line": 269,
+        "text": "app.delete(\"/api/categories/:id\", authenticateToken, (req, res) => {"
+      },
+      {
+        "line": 270,
+        "text": "  db.run("
+      },
+      {
+        "line": 271,
+        "text": "    \"DELETE FROM categories WHERE id = ?\","
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "317",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 26,
+        "line": 344
+      },
+      "start": {
+        "column": 9,
+        "line": 344
+      }
+    },
+    "original": "\"/api/orders/:id\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 342,
+        "text": "});"
+      },
+      {
+        "line": 343,
+        "text": ""
+      },
+      {
+        "line": 344,
+        "text": "app.get(\"/api/orders/:id\", (req, res) => {"
+      },
+      {
+        "line": 345,
+        "text": "  db.get(\"SELECT * FROM orders WHERE id = ?\", [req.params.id], (err, order) => {"
+      },
+      {
+        "line": 346,
+        "text": "    if (!order) return res.status(404).json({ error: \"Order not found\" });"
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "327",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 23,
+        "line": 356
+      },
+      "start": {
+        "column": 9,
+        "line": 356
+      }
+    },
+    "original": "\"/api/coupons\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 354,
+        "text": ""
+      },
+      {
+        "line": 355,
+        "text": "// GET all coupons (public - for admin display)"
+      },
+      {
+        "line": 356,
+        "text": "app.get(\"/api/coupons\", authenticateToken, (req, res) => {"
+      },
+      {
+        "line": 357,
+        "text": "  db.all(\"SELECT * FROM coupons\", [], (err, rows) => {"
+      },
+      {
+        "line": 358,
+        "text": "    res.json(rows);"
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "413",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 29,
+        "line": 444
+      },
+      "start": {
+        "column": 10,
+        "line": 444
+      }
+    },
+    "original": "\"/api/coupon-usage\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 442,
+        "text": ""
+      },
+      {
+        "line": 443,
+        "text": "// POST save coupon usage (called after successful checkout)"
+      },
+      {
+        "line": 444,
+        "text": "app.post(\"/api/coupon-usage\", authenticateToken, (req, res) => {"
+      },
+      {
+        "line": 445,
+        "text": "  const { coupon_id } = req.body;"
+      },
+      {
+        "line": 446,
+        "text": "  db.run("
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "423",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 30,
+        "line": 457
+      },
+      "start": {
+        "column": 10,
+        "line": 457
+      }
+    },
+    "original": "\"/api/admin/coupons\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 455,
+        "text": ""
+      },
+      {
+        "line": 456,
+        "text": "// ADMIN: CRUD Coupons"
+      },
+      {
+        "line": 457,
+        "text": "app.post(\"/api/admin/coupons\", authenticateToken, (req, res) => {"
+      },
+      {
+        "line": 458,
+        "text": "  const {"
+      },
+      {
+        "line": 459,
+        "text": "    code,"
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "436",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 36,
+        "line": 483
+      },
+      "start": {
+        "column": 12,
+        "line": 483
+      }
+    },
+    "original": "\"/api/admin/coupons/:id\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 481,
+        "text": "});"
+      },
+      {
+        "line": 482,
+        "text": ""
+      },
+      {
+        "line": 483,
+        "text": "app.delete(\"/api/admin/coupons/:id\", authenticateToken, (req, res) => {"
+      },
+      {
+        "line": 484,
+        "text": "  db.run(\"DELETE FROM coupons WHERE id = ?\", [req.params.id], function (err) {"
+      },
+      {
+        "line": 485,
+        "text": "    if (err) return res.status(500).json({ error: err.message });"
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "446",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 27,
+        "line": 494
+      },
+      "start": {
+        "column": 9,
+        "line": 494
+      }
+    },
+    "original": "\"/api/admin/users\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 492,
+        "text": "// =========================================="
+      },
+      {
+        "line": 493,
+        "text": ""
+      },
+      {
+        "line": 494,
+        "text": "app.get(\"/api/admin/users\", authenticateToken, (req, res) => {"
+      },
+      {
+        "line": 495,
+        "text": "  db.all("
+      },
+      {
+        "line": 496,
+        "text": "    \"SELECT id, name, email, role, login_attempts, locked_until, shipping_address FROM users\","
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "451",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 34,
+        "line": 504
+      },
+      "start": {
+        "column": 12,
+        "line": 504
+      }
+    },
+    "original": "\"/api/admin/users/:id\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 502,
+        "text": "});"
+      },
+      {
+        "line": 503,
+        "text": ""
+      },
+      {
+        "line": 504,
+        "text": "app.delete(\"/api/admin/users/:id\", authenticateToken, (req, res) => {"
+      },
+      {
+        "line": 505,
+        "text": "  db.run(\"DELETE FROM users WHERE id = ?\", [req.params.id], function (err) {"
+      },
+      {
+        "line": 506,
+        "text": "    res.json({ message: \"User deleted\" });"
+      }
+    ],
+    "cluster": "out-of-scope"
+  },
+  {
+    "id": "458",
+    "file": "server.js",
+    "status": "Survived",
+    "mutatorName": "StringLiteral",
+    "location": {
+      "end": {
+        "column": 28,
+        "line": 510
+      },
+      "start": {
+        "column": 9,
+        "line": 510
+      }
+    },
+    "original": "\"/api/admin/orders\"",
+    "replacement": "\"\"",
+    "statusReason": null,
+    "static": true,
+    "coveredBy": [],
+    "killedBy": [],
+    "testsCompleted": 37,
+    "sourceContext": [
+      {
+        "line": 508,
+        "text": "});"
+      },
+      {
+        "line": 509,
+        "text": ""
+      },
+      {
+        "line": 510,
+        "text": "app.get(\"/api/admin/orders\", authenticateToken, (req, res) => {"
+      },
+      {
+        "line": 511,
+        "text": "  db.all("
+      },
+      {
+        "line": 512,
+        "text": "    `"
+      }
+    ],
+    "cluster": "out-of-scope"
+  }
+]
