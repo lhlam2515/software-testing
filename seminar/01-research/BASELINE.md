@@ -1,4 +1,4 @@
-# BASELINE — Mutation Score & Coverage (EShop SUT)
+# BASELINE - Mutation Score & Coverage (EShop SUT)
 
 > **Đã đo thực tế ngày 2026-06-30.** Owner: M1 (Lâm) chạy full run · M2 (Vũ) review.
 > Nguồn lệnh: `stryker.config.mjs` (`mutate: ['server.js']`, `testRunner: 'jest'`, `coverageAnalysis: 'perTest'`).
@@ -24,9 +24,9 @@
 
 ## 2. Coverage baseline (gate 28/06)
 
-> Đo bằng `npm run test:coverage` (Jest + lcov). Code toàn bộ nằm trong `server.js` — per-section coverage tính từ lcov.info.
+> Đo bằng `npm run test:coverage` (Jest + lcov). Code toàn bộ nằm trong `server.js` - per-section coverage tính từ lcov.info.
 
-| Cụm | Route (FR) | Line % | Branch % |
+| Group | Route (FR) | Line % | Branch % |
 |-----|-----------|--------|----------|
 | A | `POST /api/apply-coupon` (FR-09) | **93%** (27/29) | **85%** (17/20) |
 | A | `POST /api/login` (FR-02) | **100%** (18/18) | **92%** (11/12) |
@@ -49,7 +49,7 @@
 
 > **Overall denominator:** 541 mutants hợp lệ, không có mutant bị loại bởi lỗi runtime/compile.
 > **Covered-code denominator:** 541 − 293 (NoCoverage) = **248 mutants được test**.
-> **Insight:** 293/541 = **54% mutants không có test nào reach** — tương ứng với các route chưa được test (register, forgot-password, admin products, categories, ...).
+> **Insight:** 293/541 = **54% mutants không có test nào reach** - tương ứng với các route chưa được test (register, forgot-password, admin products, categories, ...).
 >
 > **Coverage vs Mutation Score:** Server.js line coverage 51% ↔ overall Mutation Score **32.35%**.
 > Trên phần đã được test (248 mutants), kill rate = **70.56%** và **29.44%** vẫn sống sót → **bằng chứng "coverage lies"**:
@@ -67,7 +67,7 @@
 | Vùng | Mutants | Ghi chú |
 |------|---------|---------|
 | Trong 4 routes được test | **260** | FR-02 (L32-L67) + FR-09 (L363-L443) + FR-08 (L284-L342) + FR-10 (L525-L580) |
-| Ngoài 4 routes | 281 | Không thuộc phạm vi cam kết — luôn là NoCoverage/Survived |
+| Ngoài 4 routes | 281 | Không thuộc phạm vi cam kết - luôn là NoCoverage/Survived |
 
 ### Scoped mutation score
 
@@ -82,7 +82,7 @@
 | **Score Stryker (K/K+S+T)** | **70.56%** | **76.67%** | +6.11% |
 
 > **Con số đại diện cho test effectiveness của team = 76.67%**, không phải 32.35%.
-> 32.35% bị kéo thấp vì bao gồm 281 mutants ở code chưa được test — nên dùng để minh họa hậu quả của "partial testing", không dùng để đánh giá chất lượng test trong scope cam kết.
+> 32.35% bị kéo thấp vì bao gồm 281 mutants ở code chưa được test - nên dùng để minh họa hậu quả của "partial testing", không dùng để đánh giá chất lượng test trong scope cam kết.
 
 ### Per-route breakdown
 
@@ -94,13 +94,13 @@
 | FR-10 `PUT /api/admin/orders/:id/status` | 78 | 56 | 12 | 10 | 68 | **82.4%** ← tốt nhất |
 | **Tổng 4 routes** | **260** | **161** | **49** | **50** | **210** | **76.67%** |
 
-> **Lưu ý FR-08:** 33/58 mutants (57%) là NoCoverage — checkout route có nhiều nhánh DB callback chưa có test reach. Kill rate 80% trên phần covered, nhưng coverage bản thân đã thấp.
+> **Lưu ý FR-08:** 33/58 mutants (57%) là NoCoverage - checkout route có nhiều nhánh DB callback chưa có test reach. Kill rate 80% trên phần covered, nhưng coverage bản thân đã thấp.
 
 ### Survivor mutators trong 4 routes được test (49 survivors)
 
 | Mutator | Count | Ý nghĩa |
 |---------|-------|---------|
-| `ConditionalExpression` | 20 | Logic điều kiện — test chưa cover đủ path |
+| `ConditionalExpression` | 20 | Logic điều kiện - test chưa cover đủ path |
 | `StringLiteral` | 15 | Error message / field name bị đổi nhưng test không verify |
 | `EqualityOperator` | 6 | Boundary condition (ON-point thiếu) |
 | `ObjectLiteral` | 2 | Response shape không được assert |
@@ -113,59 +113,167 @@
 
 ## 4. Survivor mutants đã phân tích (≥3)
 
-### Survivor #1 — Coupon Expiry Boundary (EqualityOperator)
+> Nguồn: `reports/mutation/mutation.html` + `apps/backend/__tests__/{auth,coupon}.test.js`.
+> Phân loại theo **2 trục độc lập** (nguồn: `seminar/01-research/clips/2026-07-03_gemini_survivor-classification.md`):
+>
+> - **Root-Cause Classification**: Equivalent Mutant / Assertion Gap (Weak Assertion) / Boundary Value Blindness / Dead Code / **Missing Test Case** (nhãn mở rộng của team, cho gap về untested path/sequence không khớp 4 nhãn gốc).
+> - **Propagation Level** (mô hình PIE): No Coverage / Weakly Survived / Strongly Survived.
+>
+> ⚠️ **Không nhầm với "Failure Modes"** (`seminar/03-deliverables/User_Guide.md` §6) - đó là hành vi của **bản thân Stryker/AI workflow** đánh lừa người dùng (equivalent-mutant skew score, timeout misclassify, coverage-filter blind spot, AI oracle hallucination...), một khái niệm hoàn toàn khác, vẫn đang **chưa hoàn thành** riêng ở User_Guide.
 
-| Field | Value |
-|-------|-------|
-| ID | 355 |
+### 4a. Group A - Coupon + Auth (T5a, owner: Lâm)
+
+#### Survivor A1 - Account Lockout ON-Point bị "trôi" vì timing (Mutant 28, Group A, FR-02)
+
+| Trường | Giá trị |
+|---|---|
+| Mutant ID | 28 |
 | Mutator | `EqualityOperator` |
-| Vị trí | `server.js:L382` |
-| Tests covering | 11 tests |
+| Vị trí | `server.js:L40` |
+| Route / FR | `POST /api/login` (FR-02) |
+| Tests covering | 5 tests |
 
 **Original code:**
+
 ```javascript
-if (expiry < now) {
-  return res.status(400).json({ error: "Mã giảm giá đã hết hạn" });
+if (user.locked_until && new Date() < new Date(user.locked_until)) {
+  return res.status(403).json({ error: "Tài khoản đã bị khóa. Vui lòng thử lại sau." });
 }
 ```
 
 **Mutant (survived):**
+
 ```javascript
-if (expiry <= now) {
-  return res.status(400).json({ error: "Mã giảm giá đã hết hạn" });
-}
+if (user.locked_until && new Date() <= new Date(user.locked_until)) {
 ```
 
-**Vì sao sống sót:** 11 tests cover đường dẫn này nhưng không có test nào kiểm tra coupon với `expired_at = now` chính xác (ON-point). Tất cả tests chỉ test: (a) coupon hết hạn rõ ràng (quá khứ) và (b) coupon còn hạn (tương lai). Mutation đổi `<` thành `<=` — thay đổi hành vi duy nhất khi `expiry === now`, nhưng case này không có trong test suite.
+**Classification:**
 
-**AI assertion đề xuất:**
+- **Root-Cause Classification:** Boundary Value Blindness
+- **Propagation Level:** Weakly Survived - no divergence observed
+
+Test suite thực ra **đã nhắm đúng** ON-point cần kiểm (`locked_until = now`) - đây không phải trường hợp team quên viết boundary test. Vấn đề nằm ở tính **non-deterministic** của môi trường: giữa thời điểm gán giá trị và thời điểm server thực sự evaluate điều kiện, đồng hồ đã trôi qua một khoảng do độ trễ round-trip qua HTTP. Đây không phải một "Equivalent Mutant" thật sự - phép thử với đồng hồ bị đóng băng (frozen clock) cho thấy rõ hai nhánh code (gốc và mutant) có phân kỳ hành vi khi loại bỏ được yếu tố trôi thời gian.
+
+**Vì sao sống sót:** `auth.test.js:162-178` (case `TC-BVA-04`) capture giá trị `now = new Date().toISOString()` ở phía client, ghi xuống DB, rồi mới gửi HTTP request. Trong khoảng giữa lúc capture và lúc `server.js:40` thực sự evaluate `new Date()`, đã trôi qua vài mili-giây do thao tác ghi DB và độ trễ mạng - nên tại thời điểm server kiểm tra, `new Date()` phía server đã lớn hơn `locked_until` đã capture trước đó, không còn bằng nhau. Hệ quả: nhánh `now < locked_until` đã trả `false` từ trước khi mutant kịp đổi `<` thành `<=` - nên cả code gốc lẫn mutant đều trả cùng kết quả `200`.
+
+**Kill assertion (đã triển khai):**
+
 ```javascript
-it('returns 200 when coupon expires exactly now (ON-point)', async () => {
-  // Set expired_at = current timestamp (edge: expiry === now)
-  const exactNow = new Date().toISOString();
-  // With original code: expiry < now is FALSE → coupon valid
-  // With mutant: expiry <= now is TRUE → coupon rejected
-  const res = await request(app)
-    .post('/api/apply-coupon')
-    .send({ coupon_code: 'EXPIRING_NOW', total_amount: 500000, user_id: 1 });
-  expect(res.status).toBe(200); // kills mutant #355
+it('returns 200 when locked_until exactly equals the server clock (UB: locked_until = now)', async () => {
+  const frozen = new Date('2026-07-03T10:00:00.000Z');
+  const RealDate = Date;
+  class FrozenDate extends RealDate {
+    constructor(value) {
+      if (arguments.length === 0) {
+        return new RealDate(frozen);
+      }
+      return new RealDate(value);
+    }
+
+    static now() {
+      return frozen.getTime();
+    }
+  }
+  FrozenDate.parse = RealDate.parse;
+  FrozenDate.UTC = RealDate.UTC;
+
+  try {
+    global.Date = FrozenDate;
+    await dbRun(
+      "UPDATE users SET login_attempts=3, locked_until=? WHERE email='test@eshop.com'",
+      [frozen.toISOString()]
+    );
+
+    const res = await api
+      .post('/api/login')
+      .send({ email: 'test@eshop.com', password: 'Test1234!' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.token).toBeTruthy();
+  } finally {
+    global.Date = RealDate;
+  }
 });
 ```
 
+**Validation Gate:**
+
+| Check | Kết quả | Bằng chứng |
+|---|---|---|
+| PASS trên code gốc | ✅ | `npm test` → 27/27 pass |
+| FAIL trên mutant (Killed) | ✅ | Mutant 28: `Survived` (`mutation_baseline.html`) → `Killed` (`mutation.html`) |
+
+**Action Item:** Đã kill mutant bằng cách thay `new Date()` runtime bằng một `Date` override giúp đóng băng đồng hồ (`global.Date = FrozenDate`), qua đó loại bỏ hoàn toàn độ trôi thời gian giữa lúc set fixture và lúc server evaluate.
+
 ---
 
-### Survivor #2 — Discount Block Bypass (BlockStatement)
+#### Survivor A2 - Percent Discount Formula sai (Mutant 397/398, Group A, FR-09)
 
-| Field | Value |
-|-------|-------|
-| ID | 396 |
-| Mutator | `BlockStatement` |
-| Vị trí | `server.js:L418–L422` |
-| Tests covering | 3 tests |
+| Trường | Giá trị |
+|---|---|
+| Mutant ID | 397, 398 |
+| Mutator | `ArithmeticOperator` |
+| Vị trí | `server.js:L420` |
+| Route / FR | `POST /api/apply-coupon` (FR-09) |
+| Tests covering | 3 tests (#1, #11, #16 - nhánh **không có** `user_id`) |
 
 **Original code:**
+
 ```javascript
-let discount_amount = 0;
+discount_amount = Math.floor(total_amount * (1 - coupon.discount_value));
+```
+
+**Mutant 397 (survived):** `total_amount / (1 - coupon.discount_value)`
+**Mutant 398 (survived):** `1 + coupon.discount_value` (thay cho `1 - coupon.discount_value`)
+
+**Classification:**
+
+- **Root-Cause Classification:** Assertion Gap (Weak Assertion)
+- **Propagation Level:** Strongly Survived
+
+Mutant khiến code thực thi ra giá trị `discount_amount`/`final_amount` khác đi thật sự, và sai lệch này đã lan truyền đến tận response body - nhưng test chỉ assert `status` và `success`, không hề kiểm tra giá trị cụ thể. Đây không phải Equivalent Mutant (vì giá trị **có** thay đổi thật), cũng không phải Boundary Value Blindness (vì không liên quan đến lỗi ở giá trị biên).
+
+**Vì sao sống sót:** Đây chính là `BUG-09-001` mà team đã biết từ trước (`coupon.test.js:101,218,275`). Với coupon loại `percent`, trường `discount_value` được lưu dưới dạng **số nguyên phần trăm** (ví dụ `10` cho mã `SAVE10`) thay vì phân số (`0.1`), trong khi công thức `total_amount * (1 - discount_value)` lại giả định `discount_value` là một phân số → hệ số nhân thực tế trở thành `(1 - 10) = -9`. Giá trị pin thực tế trong test xác nhận điều này: với `total_amount: 500000`, kết quả ra `discount_amount: -4500000` và `final_amount: 5000000` - gấp khoảng **10 lần** tổng tiền gốc, nghiêm trọng hơn nhiều so với mô tả "sai gấp đôi" trước đây (vốn chỉ là suy đoán, chưa đối chiếu giá trị thực tế). Vì bug này đã biết trước, 3 test chạm vào nhánh percent trước T6a chỉ dừng ở `expect(res.status).toBe(200)` và `success: true` - cố tình không assert giá trị cụ thể để tránh làm fail chính bug đã biết.
+
+**Kill assertion (đã triển khai - pin giá trị hiện tại, không sửa SUT):**
+
+```javascript
+it('returns 200 with the current percent-coupon arithmetic when valid percent coupon meets min-order (BUG-09-001 pinned)', async () => {
+  const res = await api
+    .post('/api/apply-coupon')
+    .send({ code: 'SAVE10', total_amount: 500000 });
+
+  expect(res.status).toBe(200);
+  expect(res.body.success).toBe(true);
+  expect(res.body.discount_amount).toBe(-4500000);
+  expect(res.body.final_amount).toBe(5000000);
+});
+```
+
+**Validation Gate:**
+
+| Check | Kết quả | Bằng chứng |
+|---|---|---|
+| PASS trên code gốc | ✅ | `npm test` → 27/27 pass |
+| FAIL trên mutant (Killed) | ✅ | Mutant 397, 398: `Survived` → `Killed` trong `mutation.html` |
+
+**Action Item:** Đã kill mutant theo hướng (a): assert giá trị thực tế hiện tại, kèm comment `pinned - regression guard, not fix` để làm rõ đây là regression guard chứ không phải fix. Không sửa lại công thức vì SUT hiện đang sai theo đúng spec; việc sửa root cause nằm ngoài phạm vi T5a/T6a và cần bàn bạc thêm với M2 vì có đụng đến code dùng chung.
+
+---
+
+#### Survivor A3 - Percent Discount Block Bypass, nhánh unauthenticated (Mutant 396, Group A, FR-09)
+
+| Trường | Giá trị |
+|---|---|
+| Mutant ID | 396 |
+| Mutator | `BlockStatement` |
+| Vị trí | `server.js:L418–L422` |
+| Route / FR | `POST /api/apply-coupon` (FR-09), nhánh unauthenticated (không gửi `user_id`) |
+| Tests covering | 3 tests (#1, #11, #16) |
+
+**Original code:**
+
+```javascript
 if (coupon.type === "percent") {
   discount_amount = Math.floor(total_amount * (1 - coupon.discount_value));
 } else {
@@ -174,137 +282,192 @@ if (coupon.type === "percent") {
 ```
 
 **Mutant (survived):**
+
 ```javascript
-let discount_amount = 0;
 if (coupon.type === "percent") {} // block replaced with {}
 else {
   discount_amount = coupon.discount_value;
 }
 ```
 
-**Vì sao sống sót:** Nhánh unauthenticated (không có `user_id`) với coupon `type === "percent"`. 3 tests cover path này nhưng chỉ assert `res.status === 200` và `success === true`, không assert `discount_amount` có giá trị > 0. Khi block bị empty, `discount_amount = 0`, `final_amount = total_amount` (không giảm) nhưng response vẫn `success: true` với status 200 → test vẫn pass.
+**Classification**
 
-**AI assertion đề xuất:**
+- **Root-Cause Classification:** Assertion Gap (Weak Assertion)
+- **Propagation Level:** Strongly Survived
+
+Khi block bị thay bằng rỗng, `discount_amount` trở thành `0` thay vì giá trị (dù sai) mà công thức gốc tính ra - sự khác biệt này **có** lan truyền ra tới response body, nhưng vì response vẫn trả `200` và `success: true`, nên bộ test cũ (chỉ kiểm tra status) không hề phát hiện ra.
+
+**Vì sao sống sót:** `coupon.test.js:270-278` (case `TC-BVA-08`, dùng coupon `TOMORROWEXP`, không gửi kèm `user_id`) trước T6a chỉ dừng ở `expect(res.status).toBe(200)` và `success: true`, không assert `discount_amount`. Khi block bị rỗng, `discount_amount = 0`, `final_amount = total_amount` (không giảm giá gì cả) nhưng response vẫn `200/success: true` → test vẫn pass bình thường.
+
+**Kill assertion (đã triển khai):**
+
 ```javascript
-it('returns correct discount_amount for percent coupon (unauthenticated)', async () => {
-  const res = await request(app)
+it('returns 200 with the current percent-coupon arithmetic when coupon expires tomorrow (UB+1: expired_at = tomorrow)', async () => {
+  const res = await api
     .post('/api/apply-coupon')
-    .send({ coupon_code: 'PERCENT10', total_amount: 1000000 });
+    .send({ code: 'TOMORROWEXP', total_amount: 200000 });
+
   expect(res.status).toBe(200);
-  expect(res.body.discount_amount).toBeGreaterThan(0); // kills mutant #396
-  expect(res.body.final_amount).toBeLessThan(1000000); // double-confirm
+  expect(res.body.success).toBe(true);
+  expect(res.body.discount_amount).toBe(-1800000);
+  expect(res.body.final_amount).toBe(2000000);
 });
 ```
 
+**Validation Gate:**
+
+| Check | Kết quả | Bằng chứng |
+|---|---|---|
+| PASS trên code gốc | ✅ | `npm test` → 27/27 pass |
+| FAIL trên mutant (Killed) | ✅ | Mutant 396: `Survived` → `Killed` trong `mutation.html` (bonus: mutant 393, 395 cùng vùng code cũng bị kill) |
+
+**Action Item:** Đã kill mutant bằng cách assert `discount_amount` khác `0` (pin theo giá trị cụ thể của bug hiện tại), nhờ đó block rỗng do mutant tạo ra bị phát hiện ngay lập tức.
+
 ---
 
-### Survivor #3 — Canceled→Delivered Transition (ConditionalExpression)
+### 4b. Group B - Order-status + Cart (T5b, owner: Vũ)
 
-| Field | Value |
-|-------|-------|
-| ID | 515 |
-| Mutator | `ConditionalExpression` |
-| Vị trí | `server.js:L550` |
-| Tests covering | 4 tests |
+> ⚠️ **Chưa hoàn thành (owner: Vũ)** - nội dung phân tích cũ đã được gỡ để tránh dùng taxonomy lỗi thời (`Real test gap`/`Equivalent`/`Trivial-redundant`/`Timeout`). Điền lại theo template dưới đây (2 trục Root-Cause × Propagation Level) khi T5b/T6b/T7b hoàn tất. Xác nhận từ `mutation.html`: mutant 515 và 268 vẫn **Survived** tính đến 2026-07-03.
+
+#### Survivor [X] - [Tên ngắn, mô tả hành vi sai] (Mutant <mutant-id>, Group B, <FR>)
+
+| Trường | Giá trị |
+|---|---|
+| Mutant ID(s) | ... |
+| Mutator | ... |
+| Vị trí | `server.js:Lxx` |
+| Route / FR | ... |
+| Tests covering (coveredBy) | n tests |
 
 **Original code:**
+
 ```javascript
-if (currentStatus === "canceled" && status === "delivered")
-  isValidTransition = true;
+...
 ```
 
 **Mutant (survived):**
+
 ```javascript
-if (false) // entire condition replaced with false
-  isValidTransition = true;
+...
 ```
 
-**Vì sao sống sót:** Không có test nào cover `canceled → delivered` transition path. 4 tests cover order-status route nhưng chỉ test: `pending→confirmed`, `confirmed→shipping`, `shipping→delivered`, và invalid transitions. Mutant chuyển condition thành `false` (loại bỏ `canceled→delivered` path) — không có test nào verify path này tồn tại, nên tất cả 4 tests vẫn pass.
+**Classification**
 
-**AI assertion đề xuất:**
+- **Root-Cause Classification:** Equivalent Mutant / Assertion Gap / Boundary Value Blindness / Dead Code / Missing Test Case (mở rộng)
+- **Propagation Level:** No Coverage / Weakly Survived / Strongly Survived
+
+(1–2 câu giải thích ngắn vì sao chọn đúng nhãn này)
+
+**Vì sao sống sót:** ...
+
+**Kill assertion (AI-synthesized):**
+
 ```javascript
-it('allows canceled→delivered transition', async () => {
-  // Set up: create order with status "canceled"
-  const orderId = await createOrderWithStatus('canceled');
-  const res = await request(app)
-    .put(`/api/admin/orders/${orderId}/status`)
-    .set('Authorization', `Bearer ${adminToken}`)
-    .send({ status: 'delivered' });
-  expect(res.status).toBe(200); // kills mutant #515
-});
+...
 ```
+
+**Validation Gate:**
+
+| Check | Kết quả | Bằng chứng |
+|---|---|---|
+| PASS trên code gốc | ✅/❌ | ... |
+| FAIL trên mutant (Killed sau khi thêm assertion) | ✅/❌ | ... |
+
+**Action Item:** ...
 
 ---
 
-### Survivor #4 — Cart Reset on Every Add (ConditionalExpression)
+#### Survivor [X] - [Tên ngắn, mô tả hành vi sai] (Mutant <mutant-id>, Group B, <FR>)
 
-| Field | Value |
-|-------|-------|
-| ID | 268 |
-| Mutator | `ConditionalExpression` |
-| Vị trí | `server.js:L292` |
-| Tests covering | 1 test |
+| Trường | Giá trị |
+|---|---|
+| Mutant ID(s) | ... |
+| Mutator | ... |
+| Vị trí | `server.js:Lxx` |
+| Route / FR | ... |
+| Tests covering (coveredBy) | n tests |
 
 **Original code:**
+
 ```javascript
-if (!userCarts[userId]) userCarts[userId] = [];
-userCarts[userId].push(req.body);
+...
 ```
 
 **Mutant (survived):**
+
 ```javascript
-if (true) userCarts[userId] = []; // always resets cart!
-userCarts[userId].push(req.body);
+...
 ```
 
-**Vì sao sống sót:** Chỉ 1 test cover POST /api/cart. Test này thêm 1 item vào cart trống → kết quả giống nhau dù cart reset hay không. Mutant luôn reset cart trước mỗi push, nhưng nếu test chỉ add 1 item từ trạng thái trống, không phát hiện được hành vi sai.
+**Classification**
 
-**AI assertion đề xuất:**
+- **Root-Cause Classification:** Equivalent Mutant / Assertion Gap / Boundary Value Blindness / Dead Code / Missing Test Case (mở rộng)
+- **Propagation Level:** No Coverage / Weakly Survived / Strongly Survived
+
+(1–2 câu giải thích ngắn vì sao chọn đúng nhãn này)
+
+**Vì sao sống sót:** ...
+
+**Kill assertion (AI-synthesized):**
+
 ```javascript
-it('cart retains items across multiple adds', async () => {
-  const token = await getAuthToken();
-  await request(app).post('/api/cart').set('Authorization', `Bearer ${token}`).send({ id: 1 });
-  await request(app).post('/api/cart').set('Authorization', `Bearer ${token}`).send({ id: 2 });
-  const cart = await request(app).get('/api/cart').set('Authorization', `Bearer ${token}`);
-  expect(cart.body).toHaveLength(2); // kills mutant #268 — mutant resets, leaves only 1 item
-});
+...
 ```
+
+**Validation Gate:**
+
+| Check | Kết quả | Bằng chứng |
+|---|---|---|
+| PASS trên code gốc | ✅/❌ | ... |
+| FAIL trên mutant (Killed sau khi thêm assertion) | ✅/❌ | ... |
+
+**Action Item:** ...
 
 ---
 
-## 5. Failure modes ghi nhận (≥3)
+## 5. Survivor Root-Cause Patterns (Test Gap Taxonomy, ≥3)
 
-### Mode 1 — BOUNDARY_CONDITION_MISSED
+> **Lưu ý phân biệt:** đây là taxonomy phân loại *nguyên nhân sống sót của mutant* (test gap trong test suite EShop, theo `mutation-testing-reference.md` §1.5), phục vụ Learning Objective #2 ("Identify surviving mutants; explain why each survived"). Đây **không phải** mục "Failure Modes" mà rubric §9 (`topic-t10.md`) yêu cầu - mục đó nói về cách *bản thân công cụ/AI đánh lừa người dùng*, đã được viết riêng ở `User_Guide.md` §6 (FM1–FM4). Không dùng 2 khái niệm này thay thế cho nhau.
+
+### Mode 1 - BOUNDARY_CONDITION_MISSED
+
 Tests cover "clearly expired" and "clearly valid" cases nhưng không test ON-point của ranh giới.
+
 - **Ví dụ:** Coupon `expired_at = now` (L382): 11 tests cover expiry check nhưng không ai test timestamp chính xác = now.
 - **Pattern:** `EqualityOperator` mutations từ `<` sang `<=` (và ngược lại) sống sót.
-- **Survivor IDs:** #355
+- **Survivor IDs:** 355
 
-### Mode 2 — RETURN_VALUE_UNCHECKED
+### Mode 2 - RETURN_VALUE_UNCHECKED
+
 Tests assert status code 200 và `success: true` nhưng không assert giá trị số liệu trong response body.
+
 - **Ví dụ:** Coupon percent discount (L418-L422): 3 tests confirm `200 OK` nhưng không verify `discount_amount > 0` hay `final_amount < total_amount`.
 - **Pattern:** `BlockStatement` mutations (empty block) sống sót vì tests chỉ check status.
-- **Survivor IDs:** #396, #405
+- **Survivor IDs:** 396, 405
 
-### Mode 3 — TRANSITION_PATH_UNTESTED
+### Mode 3 - TRANSITION_PATH_UNTESTED
+
 State machine có nhiều valid transitions nhưng không phải tất cả đều được test.
+
 - **Ví dụ:** `canceled → delivered` (L550): Transition này hợp lệ theo code nhưng không có test nào verify nó. 4 tests cover order-status route nhưng bỏ sót path này.
 - **Pattern:** `ConditionalExpression` mutations sống sót khi path bị loại bỏ hoàn toàn mà không có test detect.
-- **Survivor IDs:** #515, #510
+- **Survivor IDs:** 515, 510
 
-### Mode 4 — SEQUENTIAL_STATE_ASSUMPTION
+### Mode 4 - SEQUENTIAL_STATE_ASSUMPTION
+
 Tests giả định initial state và không test behavior trong multi-step sequences.
+
 - **Ví dụ:** Cart accumulation (L292): Test chỉ add 1 item, không verify rằng adding nhiều items không reset cart.
 - **Pattern:** Mutations đổi lazy-init thành unconditional-reset sống sót.
-- **Survivor IDs:** #268, #264
+- **Survivor IDs:** 268, 264
 
 ---
 
 ## 6. Delta sau khi thêm AI assertion
 
-> Chưa thực hiện — planned cho Stage S2 (Tuần 2, sau Gate 05/07).
+> Chưa thực hiện - planned cho Stage S2 (Tuần 2, sau Gate 05/07).
 
 | Metric | Trước | Sau | Δ |
 |--------|-------|-----|---|
-| Mutation score % | 32.35% | _TBD_ | _TBD_ |
-| Survivor count | 73 | _TBD_ | _TBD_ |
+| Mutation score % | 32.35% | *TBD* | *TBD* |
+| Survivor count | 73 | *TBD* | *TBD* |
