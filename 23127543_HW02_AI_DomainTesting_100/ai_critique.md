@@ -1,5 +1,17 @@
 # AI Critique
 
-During this assignment, AI was useful for generating an initial list of domain testing and boundary value analysis cases, but it was incomplete when it relied only on the requirement text. The most important weakness was that AI often assumed the backend followed the SRS. After source-code inspection, several mismatches appeared, such as frontend-only validation, backend APIs trusting client-provided values, and admin routes that required authentication but did not clearly enforce the expected role rule. AI also tended to produce broad test ideas without enough executable input data, such as exact endpoints, request bodies, tokens, and follow-up verification steps. This made some early test cases difficult to execute until they were corrected manually.
+## What AI Helped With
 
-Another limitation was evidence interpretation. AI could suggest a verdict from a screenshot or API response, but some cases required human judgment, especially UI rendering, XSS behavior, mobile behavior, and whether a response actually changed stored data. AI also treated source-code risks too confidently at first, even when the current folder did not contain reviewed screenshots or manual notes. Because of this, I learned that AI should be treated as a disciplined assistant rather than a black-box tester. The best workflow is to guide AI step by step, inspect the source code, run the test manually or with scripts, and only then record the final result. Human review remains necessary because the student is responsible for the correctness of the submitted report.
+AI was helpful at the beginning of this assignment. It helped me list possible Domain Testing and Boundary Value Analysis cases, and it also helped me organize the report in a clearer format. This saved time, especially when I needed a starting point for the selected features.
+
+## What AI Missed
+
+However, the AI was not always correct. When it only used the requirement text, it sometimes assumed that the backend followed the SRS exactly. After checking the source code, I found some differences, such as validation only happening on the frontend, backend APIs trusting values sent by the client, and admin routes where the role checking was not as clear as expected.
+
+AI also gave some test ideas that were too general. Some early cases did not include enough details, such as the exact endpoint, request body, token, or follow-up check. Because of that, those cases had to be fixed manually before they could be used.
+
+## What I Learned
+
+Another problem was evidence review. AI could suggest a result from a screenshot or an API response, but some cases still needed human judgment. This was especially true for UI rendering, XSS behavior, mobile behavior, and checking whether the data was really changed.
+
+From this assignment, I learned that AI is useful as an assistant, but it cannot replace manual checking. The better workflow is to guide AI step by step, inspect the source code, run the tests, review the evidence, and only then write the final result. In the end, the student still has to take responsibility for the correctness of the report.

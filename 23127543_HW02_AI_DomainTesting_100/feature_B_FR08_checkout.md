@@ -10,7 +10,7 @@ According to the SRS, only logged-in users can checkout. Checkout total must be 
 
 ### Valid Coupon Codes Found from Source Code
 
-After reading `eshop-sut/backend/database.js` and `eshop-sut/backend/server.js`, the following seeded coupons can be used for checkout-related tests:
+After source review of the local EShop backend, the following seeded coupons can be used for checkout-related tests:
 
 | Coupon Code | Type | Discount Value | Minimum Order Amount | Expired At | Is Active | Max Uses/User | Testing Purpose |
 |---|---|---:|---:|---|---:|---:|---|
@@ -151,7 +151,7 @@ Without source inspection, AI may assume the backend follows the SRS and recalcu
 
 Test cases were corrected to use actual route `POST /api/checkout`, actual token behavior, actual web cart behavior, seeded coupon codes, and actual request body fields. Execution results were reset and require new evidence before final verdicts are written.
 
-## 7. Potential or Confirmed Bugs
+## 7. Bugs or Remaining Review
 
 Confirmed FR-08 bugs are listed in `bug_report.md`.
 
@@ -180,12 +180,12 @@ Rows still marked `To be executed` are not listed as confirmed or potential bugs
 
 | TC ID | Previous Status | Final Judgment | Reason | Evidence |
 |---|---|---|---|---|
-| FR08-DT-01 | Needs Review | Pass | Screenshot shows checkout success; source review shows successful checkout creates a pending order with the submitted total. | [FR08-DT-01 screenshot](evidence/screenshots/FR08-DT-01.png), `eshop-sut/backend/server.js` |
-| FR08-DT-10 | Needs Review | Pass | Source review confirms missing `shipping_address` is not validated by `POST /api/checkout`; the existing API log did not exercise the route because auth failed. | [JSON log](test_scripts/results/json/fr08_checkout_api_results.json), [HTML log](test_scripts/results/html/fr08_checkout_api_results.html), `eshop-sut/backend/server.js` |
+| FR08-DT-01 | Needs Review | Pass | Screenshot shows checkout success; source review shows successful checkout creates a pending order with the submitted total. | [FR08-DT-01 screenshot](evidence/screenshots/FR08-DT-01.png) |
+| FR08-DT-10 | Needs Review | Pass | Source review confirms missing `shipping_address` is not validated by `POST /api/checkout`; the existing API log did not exercise the route because auth failed. | [JSON log](test_scripts/results/json/fr08_checkout_api_results.json), [HTML log](test_scripts/results/html/fr08_checkout_api_results.html) |
 | FR08-BVA-02 | Needs Review | Needs Review | Screenshot proves one product is displayed on the checkout page, but does not prove checkout success after confirmation. | [FR08-BVA-02 screenshot](evidence/screenshots/FR08-BVA-02.png) |
 | FR08-BVA-03 | Needs Review | Needs Review | Screenshot proves two products and the total on the checkout page, but does not prove checkout success after confirmation. | [FR08-BVA-03 screenshot](evidence/screenshots/FR08-BVA-03.png) |
 | FR08-BVA-05 | Needs Review | Needs Review | Screenshot shows quantity 1 on the product page only; it does not show cart/checkout subtotal. | [FR08-BVA-05 screenshot](evidence/screenshots/FR08-BVA-05.png) |
 | FR08-BVA-06 | Needs Review | Needs Review | Screenshot shows quantity 2 on the product page only; it does not show cart/checkout subtotal. | [FR08-BVA-06 screenshot](evidence/screenshots/FR08-BVA-06.png) |
 | FR08-BVA-09 | Needs Review | Pass | API log and source confirm below-minimum `SAVE10` is rejected. | [JSON log](test_scripts/results/json/fr08_checkout_api_results.json), [HTML log](test_scripts/results/html/fr08_checkout_api_results.html) |
-| FR08-BVA-10 | Needs Review | Fail | API log and source confirm the exact-minimum coupon boundary is rejected despite the expected inclusive threshold. | [JSON log](test_scripts/results/json/fr08_checkout_api_results.json), [HTML log](test_scripts/results/html/fr08_checkout_api_results.html), `eshop-sut/backend/server.js` |
-| FR08-BVA-11 | Needs Review | Fail | API log shows the above-minimum coupon is accepted but produces an incorrect negative discount and inflated final amount. | [JSON log](test_scripts/results/json/fr08_checkout_api_results.json), [HTML log](test_scripts/results/html/fr08_checkout_api_results.html), `eshop-sut/backend/server.js` |
+| FR08-BVA-10 | Needs Review | Fail | API log and source confirm the exact-minimum coupon boundary is rejected despite the expected inclusive threshold. | [JSON log](test_scripts/results/json/fr08_checkout_api_results.json), [HTML log](test_scripts/results/html/fr08_checkout_api_results.html) |
+| FR08-BVA-11 | Needs Review | Fail | API log shows the above-minimum coupon is accepted but produces an incorrect negative discount and inflated final amount. | [JSON log](test_scripts/results/json/fr08_checkout_api_results.json), [HTML log](test_scripts/results/html/fr08_checkout_api_results.html) |

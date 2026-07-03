@@ -1,0 +1,288 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R 7 0 R 9 0 R] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Length 3967 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+(ai_audit_report.md - Page 1) Tj
+0 -18 Td
+(# AI Audit Report) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(## AI Declaration) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(I use AI tools for the following tasks: understanding HW02 requirements, creating Codex ) Tj
+0 -14 Td
+(prompts, drafting Domain Testing and Boundary Value Analysis test ideas, reviewing evidence,) Tj
+0 -14 Td
+( preparing GitHub Issue workflow instructions, checking final submission regulations, and ) Tj
+0 -14 Td
+(generating this audit appendix.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(The dates below are estimated from the conversation order and the project working period. ) Tj
+0 -14 Td
+(Exact message times were not available in the exported interaction log.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(## Interaction Log) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(| No. | AI Tool | Date/Time | Your Prompt | The AI Output | Human Review / Use |) Tj
+0 -14 Td
+(|---|---|---|---|---|---|) Tj
+0 -14 Td
+(| 1 | ChatGPT | Estimated 29/06/2026, exact time unavailable | `can this be tested by ) Tj
+0 -14 Td
+(script, or manually` with `2026.HW02.Domain Testing_En.pdf` attached. | Inspected the HW02 ) Tj
+0 -14 Td
+(PDF and explained that scripts can be used for API evidence, while UI, mobile, security, and) Tj
+0 -14 Td
+( visual behavior still require manual review. | Used as guidance for combining automated ) Tj
+0 -14 Td
+(scripts with manual evidence review. |) Tj
+0 -14 Td
+(| 2 | ChatGPT | Estimated 29/06/2026, exact time unavailable | `in folder software-testing, ) Tj
+0 -14 Td
+(prompt for codex to read testing results and write report, use English` | Produced a Codex-) Tj
+0 -14 Td
+(ready prompt instructing Codex to read existing result files and update reports in English ) Tj
+0 -14 Td
+(without inventing results. | Used to guide report-writing workflow and evidence-based ) Tj
+0 -14 Td
+(wording. |) Tj
+0 -14 Td
+(| 3 | ChatGPT | Estimated 29/06/2026, exact time unavailable | `prompt for codex to use ) Tj
+0 -14 Td
+(these pictures and update report` with a screenshot of FR04 evidence files. | Produced a ) Tj
+0 -14 Td
+(prompt telling Codex to use screenshots inside the evidence folder, review them visually, ) Tj
+0 -14 Td
+(and update reports in English. | Used to integrate screenshot evidence into feature and bug ) Tj
+0 -14 Td
+(reports. |) Tj
+0 -14 Td
+(| 4 | ChatGPT | Estimated 29/06/2026, exact time unavailable | `I have just added some ) Tj
+0 -14 Td
+(pictures for FR08, prompt for codex to use these pictures and update report` | Produced a ) Tj
+0 -14 Td
+(prompt for updating the FR08 report and related summary files from new FR08 screenshots. | ) Tj
+0 -14 Td
+(Used to update FR08 evidence and verdict notes. |) Tj
+0 -14 Td
+(| 5 | ChatGPT | Estimated 30/06/2026, exact time unavailable | `prompt for codex to read ) Tj
+0 -14 Td
+(source code in folder eshop-sut, read all files in folder seminar, then create test cases` |) Tj
+0 -14 Td
+( Produced a Codex prompt to inspect the SUT source code and seminar materials, then create ) Tj
+0 -14 Td
+(implementation-aware test cases. | Used for planning source-aware test design. Final reports) Tj
+0 -14 Td
+( were still reviewed manually. |) Tj
+0 -14 Td
+(| 6 | ChatGPT | Estimated 30/06/2026, exact time unavailable | `prompt for codex to read all) Tj
+0 -14 Td
+( files in folder software-testing, then create test cases and put in folder deliverables` | ) Tj
+0 -14 Td
+(Produced a prompt to read the software-testing folder and create deliverables in a specified) Tj
+0 -14 Td
+( output folder. | Used as a workflow draft for organizing test case deliverables. |) Tj
+0 -14 Td
+(| 7 | ChatGPT | Estimated 30/06/2026, exact time unavailable | `prompt for codex to review ) Tj
+0 -14 Td
+(all features that have "Need review" and give judgement, then update report` | Produced a ) Tj
+0 -14 Td
+(prompt requiring Codex to review `Needs Review` cases using available evidence, source ) Tj
+0 -14 Td
+(behavior, logs, and screenshots without inventing results. | Used to refine uncertain ) Tj
+0 -14 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 4844 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+(ai_audit_report.md - Page 2) Tj
+0 -18 Td
+(verdicts while keeping unsupported cases marked as review-required. |) Tj
+0 -14 Td
+(| 8 | ChatGPT | Estimated 30/06/2026, exact time unavailable | `I have just added some new ) Tj
+0 -14 Td
+(screenshots, promtp for codex to use them to rewrite feature_D.md file` | Produced a prompt ) Tj
+0 -14 Td
+(for rewriting and updating the Feature D report using new screenshot evidence. | Used to ) Tj
+0 -14 Td
+(update the mobile checkout feature report. |) Tj
+0 -14 Td
+(| 9 | ChatGPT | Estimated 01/07/2026, exact time unavailable | `prompt for codex to complete) Tj
+0 -14 Td
+( everything it can in folders \(follow HW02 file\), and remove unnecessary files or dirs that ) Tj
+0 -14 Td
+(don't follow the HW02 file` with HW02 PDF and folder screenshot attached. | Produced a ) Tj
+0 -14 Td
+(comprehensive Codex prompt to complete the HW02 folder, follow assignment requirements, ) Tj
+0 -14 Td
+(preserve evidence, and remove only unnecessary files. | Used for final folder cleanup and ) Tj
+0 -14 Td
+(compliance planning. |) Tj
+0 -14 Td
+(| 10 | ChatGPT | Estimated 01/07/2026, exact time unavailable | `prompt for codex to remove ) Tj
+0 -14 Td
+(test cases that have evidence: "mobile source, backend source, needs review "` | Produced a ) Tj
+0 -14 Td
+(prompt to remove or revise cases whose evidence was only placeholder/source wording and not ) Tj
+0 -14 Td
+(real execution evidence. | Used to avoid unsupported evidence claims in final reports. |) Tj
+0 -14 Td
+(| 11 | ChatGPT | Estimated 01/07/2026, exact time unavailable | `prompt for codex to use all) Tj
+0 -14 Td
+( the bugs and make github issues for them, push to git so they're visible for taking ) Tj
+0 -14 Td
+(screenshots` | Produced a prompt to create GitHub Issues from confirmed bugs, update report ) Tj
+0 -14 Td
+(links, commit, and push. | Used as workflow guidance. Issue creation was later limited to ) Tj
+0 -14 Td
+(available confirmed issue bodies and real URLs. |) Tj
+0 -14 Td
+(| 12 | ChatGPT | Estimated 01/07/2026, exact time unavailable | User reported `gh auth ) Tj
+0 -14 Td
+(status failed because gh is not installed/on PATH` and asked how to fix. | Explained how to ) Tj
+0 -14 Td
+(install GitHub CLI with `winget`, verify `gh --version`, authenticate with `gh auth login`, ) Tj
+0 -14 Td
+(and rerun Codex. | Used to unblock GitHub Issue creation. |) Tj
+0 -14 Td
+(| 13 | ChatGPT | Estimated 02/07/2026, exact time unavailable | `oke log in, now prompt for ) Tj
+0 -14 Td
+(codex to use that and create github issues by using bugs` | Produced a prompt instructing ) Tj
+0 -14 Td
+(Codex to use authenticated GitHub CLI, create issues from `github_issue_bugs.txt`, update ) Tj
+0 -14 Td
+(reports, commit, and push. | Used before actual GitHub Issue creation in the workspace. |) Tj
+0 -14 Td
+(| 14 | ChatGPT | Estimated 02/07/2026, exact time unavailable | `command to take git commit ) Tj
+0 -14 Td
+(log of current branch` | Returned `git log --oneline --decorate` and commands for saving the) Tj
+0 -14 Td
+( log to `git_commit_log.txt`. | Used to refresh the required commit log text file. |) Tj
+0 -14 Td
+(| 15 | ChatGPT | Estimated 02/07/2026, exact time unavailable | Prompt describing HW02 ) Tj
+0 -14 Td
+(Section 14 submission regulations and asking for a Codex prompt for final report ) Tj
+0 -14 Td
+(modification. | Produced a detailed final-compliance prompt covering README, main report, ) Tj
+0 -14 Td
+(bug report, AI reports, PDFs, checklist, cleanup, zip creation, and final consistency ) Tj
+0 -14 Td
+(checks. | Used for final submission packaging and report consistency checks. |) Tj
+0 -14 Td
+(| 16 | ChatGPT | Estimated 02/07/2026, exact time unavailable | `Create a complete ) Tj
+0 -14 Td
+(interaction log for this ChatGPT conversation...` | Created `chatgpt_interaction_log.md` ) Tj
+0 -14 Td
+(with chronological entries, attached files, tool actions, important outputs, and summary ) Tj
+0 -14 Td
+(sections. | Used as the source file for this AI Audit Report. |) Tj
+0 -14 Td
+(| 17 | ChatGPT | Estimated 03/07/2026, exact time unavailable | `I already install gh, use ) Tj
+0 -14 Td
+(that to create Github issues by using bugs listed` | Inspected the workspace, found the bug ) Tj
+0 -14 Td
+(list, checked GitHub CLI authentication, created six GitHub Issues after authentication was ) Tj
+0 -14 Td
+(fixed, and updated issue links. | Human/user provided GitHub authentication. Created issue ) Tj
+0 -14 Td
+(links were used in `github_issue_bugs.txt`, `bug_report.md`, and screenshot evidence. |) Tj
+0 -14 Td
+(| 18 | ChatGPT | Estimated 03/07/2026, exact time unavailable | Final Section 14 packaging ) Tj
+0 -14 Td
+(request for `23127543_HW02_AI_DomainTesting_100/`. | Updated README, main report, bug ) Tj
+0 -14 Td
+(report, checklist, issue summary, PDFs, git log, and final zip package. Marked missing demo ) Tj
+0 -14 Td
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Length 1067 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+(ai_audit_report.md - Page 3) Tj
+0 -18 Td
+(videos and incomplete issue screenshots clearly. | Used for final submission readiness. User) Tj
+0 -14 Td
+( still needs to review the zip before Moodle upload. |) Tj
+0 -14 Td
+(| 19 | ChatGPT | Estimated 03/07/2026, exact time unavailable | `use ) Tj
+0 -14 Td
+(chatgpt_interaction_log.md to write ai_audit_report.md` | Rewrote this AI Audit Report from ) Tj
+0 -14 Td
+(the interaction log, preserving unavailable timestamps and avoiding fabricated details. | ) Tj
+0 -14 Td
+(This current report should be reviewed by the student before submission. |) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(## Human Review Statement) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(All AI output was treated as draft assistance. The student remains responsible for checking ) Tj
+0 -14 Td
+(assignment requirements, reviewing screenshots and logs, confirming GitHub Issue links, ) Tj
+0 -14 Td
+(verifying generated PDFs, and ensuring that missing evidence remains clearly marked instead ) Tj
+0 -14 Td
+(of being presented as completed work.) Tj
+0 -14 Td
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 8 0 R >>
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000133 00000 n 
+0000000203 00000 n 
+0000004222 00000 n 
+0000004348 00000 n 
+0000009244 00000 n 
+0000009370 00000 n 
+0000010489 00000 n 
+trailer
+<< /Size 10 /Root 1 0 R >>
+startxref
+10615
+%%EOF

@@ -33,7 +33,7 @@ Evidence:
 `23127543_HW02_AI_DomainTesting_100/test_scripts/results/json/fr04_profile_api_results.json`, `23127543_HW02_AI_DomainTesting_100/test_scripts/results/html/fr04_profile_api_results.html`
 
 GitHub Issue Link:
-[To be added]
+https://github.com/lhlam2515/software-testing/issues/7
 ============================================================
 
 ============================================================
@@ -71,7 +71,7 @@ Evidence:
 `23127543_HW02_AI_DomainTesting_100/test_scripts/results/json/fr08_checkout_api_results.json`, `23127543_HW02_AI_DomainTesting_100/test_scripts/results/html/fr08_checkout_api_results.html`
 
 GitHub Issue Link:
-[To be added]
+https://github.com/lhlam2515/software-testing/issues/8
 ============================================================
 
 ============================================================
@@ -109,7 +109,7 @@ Evidence:
 `23127543_HW02_AI_DomainTesting_100/test_scripts/results/json/fr08_checkout_api_results.json`, `23127543_HW02_AI_DomainTesting_100/test_scripts/results/html/fr08_checkout_api_results.html`
 
 GitHub Issue Link:
-[To be added]
+https://github.com/lhlam2515/software-testing/issues/9
 ============================================================
 
 ============================================================
@@ -147,7 +147,7 @@ Evidence:
 `23127543_HW02_AI_DomainTesting_100/test_scripts/results/json/fr18_admin_order_api_results.json`, `23127543_HW02_AI_DomainTesting_100/test_scripts/results/html/fr18_admin_order_api_results.html`
 
 GitHub Issue Link:
-[To be added]
+https://github.com/lhlam2515/software-testing/issues/10
 ============================================================
 
 ============================================================
@@ -185,7 +185,7 @@ Evidence:
 `23127543_HW02_AI_DomainTesting_100/test_scripts/results/json/fr18_admin_order_api_results.json`, `23127543_HW02_AI_DomainTesting_100/test_scripts/results/html/fr18_admin_order_api_results.html`
 
 GitHub Issue Link:
-[To be added]
+https://github.com/lhlam2515/software-testing/issues/11
 ============================================================
 
 ============================================================
@@ -223,5 +223,5 @@ Evidence:
 `23127543_HW02_AI_DomainTesting_100/test_scripts/results/json/fr18_admin_order_api_results.json`, `23127543_HW02_AI_DomainTesting_100/test_scripts/results/html/fr18_admin_order_api_results.html`
 
 GitHub Issue Link:
-[To be added]
+https://github.com/lhlam2515/software-testing/issues/12
 ============================================================

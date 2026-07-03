@@ -1,0 +1,100 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Length 2109 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+(ai_critique.md - Page 1) Tj
+0 -18 Td
+(# AI Critique) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(## What AI Helped With) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(AI was helpful at the beginning of this assignment. It helped me list possible Domain ) Tj
+0 -14 Td
+(Testing and Boundary Value Analysis cases, and it also helped me organize the report in a ) Tj
+0 -14 Td
+(clearer format. This saved time, especially when I needed a starting point for the selected ) Tj
+0 -14 Td
+(features.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(## What AI Missed) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(However, the AI was not always correct. When it only used the requirement text, it sometimes) Tj
+0 -14 Td
+( assumed that the backend followed the SRS exactly. After checking the source code, I found ) Tj
+0 -14 Td
+(some differences, such as validation only happening on the frontend, backend APIs trusting ) Tj
+0 -14 Td
+(values sent by the client, and admin routes where the role checking was not as clear as ) Tj
+0 -14 Td
+(expected.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(AI also gave some test ideas that were too general. Some early cases did not include enough ) Tj
+0 -14 Td
+(details, such as the exact endpoint, request body, token, or follow-up check. Because of ) Tj
+0 -14 Td
+(that, those cases had to be fixed manually before they could be used.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(## What I Learned) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Another problem was evidence review. AI could suggest a result from a screenshot or an API ) Tj
+0 -14 Td
+(response, but some cases still needed human judgment. This was especially true for UI ) Tj
+0 -14 Td
+(rendering, XSS behavior, mobile behavior, and checking whether the data was really changed.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(From this assignment, I learned that AI is useful as an assistant, but it cannot replace ) Tj
+0 -14 Td
+(manual checking. The better workflow is to guide AI step by step, inspect the source code, ) Tj
+0 -14 Td
+(run the tests, review the evidence, and only then write the final result. In the end, the ) Tj
+0 -14 Td
+(student still has to take responsibility for the correctness of the report.) Tj
+0 -14 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000121 00000 n 
+0000000191 00000 n 
+0000002352 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+2478
+%%EOF

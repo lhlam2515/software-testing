@@ -4,6 +4,23 @@
 
 This report summarizes confirmed and review-required issues found from the existing result files under `test_scripts/results/` and reviewed screenshots under `evidence/screenshots/`. JSON files were used as the primary API evidence source, HTML files are listed as supporting evidence, and screenshots are used only where they visibly prove the observed UI result.
 
+GitHub Issue links are available for six confirmed bugs. Other confirmed bugs remain documented here, but no GitHub Issue links were provided for them.
+
+## GitHub Issue Screenshot Evidence
+
+Screenshots of the GitHub Issues page and each confirmed bug issue page should be stored under:
+
+`evidence/github_issues/`
+
+| Bug ID | GitHub Issue | Screenshot Evidence |
+|---|---|---|
+| BUG-FR04-01 | https://github.com/lhlam2515/software-testing/issues/7 | [evidence/github_issues/1.png](evidence/github_issues/1.png) |
+| BUG-FR08-01 | https://github.com/lhlam2515/software-testing/issues/8 | [evidence/github_issues/2.png](evidence/github_issues/2.png) |
+| BUG-FR08-02 | https://github.com/lhlam2515/software-testing/issues/9 | [evidence/github_issues/3.png](evidence/github_issues/3.png) |
+| BUG-FR18-01 | https://github.com/lhlam2515/software-testing/issues/10 | [evidence/github_issues/4.png](evidence/github_issues/4.png) |
+| BUG-FR18-02 | https://github.com/lhlam2515/software-testing/issues/11 | [evidence/github_issues/5.png](evidence/github_issues/5.png) |
+| BUG-FR18-03 | https://github.com/lhlam2515/software-testing/issues/12 | [evidence/github_issues/6.png](evidence/github_issues/6.png) |
+
 ## 2. Confirmed Bug Summary
 
 | Bug ID | Feature | Related Test Case | Severity | Status | Evidence |
@@ -21,8 +38,8 @@ This report summarizes confirmed and review-required issues found from the exist
 | BUG-FR18-02 | FR-18 - Admin Order Management | FR18-DT-04, FR18-DT-05, FR18-DT-06, FR18-DT-07, FR18-DT-08, FR18-BVA-04 | Critical | Confirmed by test result | `test_scripts/results/json/fr18_admin_order_api_results.json`, `test_scripts/results/html/fr18_admin_order_api_results.html` |
 | BUG-FR18-03 | FR-18 - Admin Order Management | FR18-DT-09, FR18-DT-10, FR18-DT-11, FR18-BVA-05, FR18-BVA-06 | High | Confirmed by test result | `test_scripts/results/json/fr18_admin_order_api_results.json`, `test_scripts/results/html/fr18_admin_order_api_results.html` |
 | BUG-FR18-04 | FR-18 - Admin Order Management | FR18-DT-12 | Critical | Confirmed by screenshot evidence | [FR18-DT-12 checkout screenshot](evidence/screenshots/FR18-DT-12.png), [FR18-DT-12 admin UI screenshot](evidence/screenshots/FR18-DT-12-2.png) |
-| BUG-FR20-01 | FR-20 - Mobile Checkout | FR20-DT-06, FR20-BVA-03 | High | Confirmed by source review | [mobile source](../../eshop-sut/frontend-mobile/App.js), [backend source](../../eshop-sut/backend/server.js) |
-| BUG-FR20-02 | FR-20 - Mobile Checkout | FR20-DT-07, FR20-BVA-06 | Critical | Confirmed by source review | [backend source](../../eshop-sut/backend/server.js) |
+| BUG-FR20-01 | FR-20 - Mobile Checkout | FR20-DT-06, FR20-BVA-03 | High | Confirmed by source review; execution evidence still recommended | Source review note in feature report; GitHub Issue not provided |
+| BUG-FR20-02 | FR-20 - Mobile Checkout | FR20-DT-07, FR20-BVA-06 | Critical | Confirmed by source review; execution evidence still recommended | Source review note in feature report; GitHub Issue not provided |
 | BUG-FR20-03 | FR-20 - Mobile Checkout | FR20-DT-08 | High | Confirmed by screenshot evidence | [FR20-DT-08 screenshot](evidence/screenshots/FR20-DT-08.jpg) |
 
 ## 3. Confirmed Bugs
@@ -33,6 +50,7 @@ This report summarizes confirmed and review-required issues found from the exist
 **Related Test Case:** FR04-DT-07  
 **Severity:** Medium  
 **Status:** Confirmed by test result  
+**GitHub Issue:** https://github.com/lhlam2515/software-testing/issues/7  
 
 #### Description
 
@@ -150,7 +168,7 @@ Validate phone format on the backend using the SRS rule and return a clear valid
 
 #### Evidence
 
-[JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html), `eshop-sut/backend/server.js`
+[JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html)
 
 ### BUG-FR08-01 - Valid-token checkout boundary is rejected with Forbidden
 
@@ -158,6 +176,7 @@ Validate phone format on the backend using the SRS rule and return a clear valid
 **Related Test Case:** FR08-BVA-08  
 **Severity:** Critical  
 **Status:** Confirmed by test result  
+**GitHub Issue:** https://github.com/lhlam2515/software-testing/issues/8  
 
 #### Description
 
@@ -199,6 +218,7 @@ Review checkout authentication/authorization handling and ensure valid user toke
 **Related Test Case:** FR08-BVA-12  
 **Severity:** High  
 **Status:** Confirmed by test result  
+**GitHub Issue:** https://github.com/lhlam2515/software-testing/issues/9  
 
 #### Description
 
@@ -358,7 +378,7 @@ Use an inclusive threshold check when the requirement states that the minimum am
 
 #### Evidence
 
-[JSON log](test_scripts/results/json/fr08_checkout_api_results.json), [HTML log](test_scripts/results/html/fr08_checkout_api_results.html), `eshop-sut/backend/server.js`
+[JSON log](test_scripts/results/json/fr08_checkout_api_results.json), [HTML log](test_scripts/results/html/fr08_checkout_api_results.html)
 
 ### BUG-FR08-06 - Percent coupon calculation produces negative discount
 
@@ -399,7 +419,7 @@ Calculate percent discounts as a percentage of the total and ensure the final am
 
 #### Evidence
 
-[JSON log](test_scripts/results/json/fr08_checkout_api_results.json), [HTML log](test_scripts/results/html/fr08_checkout_api_results.html), `eshop-sut/backend/server.js`
+[JSON log](test_scripts/results/json/fr08_checkout_api_results.json), [HTML log](test_scripts/results/html/fr08_checkout_api_results.html)
 
 ### BUG-FR18-01 - Admin token cannot view admin order list
 
@@ -407,6 +427,7 @@ Calculate percent discounts as a percentage of the total and ensure the final am
 **Related Test Case:** FR18-DT-01  
 **Severity:** Critical  
 **Status:** Confirmed by test result  
+**GitHub Issue:** https://github.com/lhlam2515/software-testing/issues/10  
 
 #### Description
 
@@ -448,6 +469,7 @@ Review admin login token generation, role claims, and admin order authorization 
 **Related Test Case:** FR18-DT-04, FR18-DT-05, FR18-DT-06, FR18-DT-07, FR18-DT-08, FR18-BVA-04  
 **Severity:** Critical  
 **Status:** Confirmed by test result  
+**GitHub Issue:** https://github.com/lhlam2515/software-testing/issues/11  
 
 #### Description
 
@@ -489,6 +511,7 @@ Review authorization and state-transition handling for admin status update route
 **Related Test Case:** FR18-DT-09, FR18-DT-10, FR18-DT-11, FR18-BVA-05, FR18-BVA-06  
 **Severity:** High  
 **Status:** Confirmed by test result  
+**GitHub Issue:** https://github.com/lhlam2515/software-testing/issues/12  
 
 #### Description
 
@@ -606,7 +629,7 @@ Send the full `cart` array and validate each line item on the backend before cre
 
 #### Evidence
 
-[mobile source](../../eshop-sut/frontend-mobile/App.js), [backend source](../../eshop-sut/backend/server.js)
+Source review note in [feature_D_mobile_selected.md](feature_D_mobile_selected.md). Additional request/response execution evidence should be captured before creating a separate GitHub Issue.
 
 ### BUG-FR20-02 - Backend checkout trusts client-supplied total amount
 
@@ -647,7 +670,7 @@ Recalculate totals on the backend from trusted product IDs, quantities, coupon r
 
 #### Evidence
 
-[backend source](../../eshop-sut/backend/server.js)
+Source review note in [feature_D_mobile_selected.md](feature_D_mobile_selected.md). Additional request/response execution evidence should be captured before creating a separate GitHub Issue.
 
 ### BUG-FR20-03 - Mobile valid coupon calculation increases final amount
 

@@ -112,7 +112,7 @@ The causes include a general prompt, not inspecting source code, validation bein
 
 After reading the code, tests were corrected to use `/api/users/me` and request body fields `name`, `phone`, and `shipping_address`. Role, email, token, HTML/script, and phone UI/SRS mismatch cases were added. FR-04 execution results were reset and require new evidence before final verdicts are written.
 
-## 7. Potential or Confirmed Bugs
+## 7. Bugs or Remaining Review
 
 Confirmed FR-04 bugs are listed in `bug_report.md`.
 
@@ -120,7 +120,7 @@ Confirmed FR-04 bugs are listed in `bug_report.md`.
 |---|---|---|---|
 | FR04-DT-01, FR04-DT-03, FR04-DT-04, FR04-DT-05 | Fail | Web UI phone validation conflicts with the SRS: valid `0`-starting phone numbers are rejected, while a non-`0` phone number is accepted. | [FR04-DT-01 screenshot](evidence/screenshots/FR04-DT-01.png), [FR04-DT-03 screenshot](evidence/screenshots/FR04-DT-03.png), [FR04-DT-04 screenshot](evidence/screenshots/FR04-DT-04.png), [FR04-DT-05 screenshot](evidence/screenshots/FR04-DT-05.png) |
 | FR04-DT-07 | Fail | Profile update with email field returned HTTP 403 instead of a clear protected-field behavior. | `test_scripts/results/json/fr04_profile_api_results.json`, `test_scripts/results/html/fr04_profile_api_results.html` |
-| FR04-BVA-01, FR04-BVA-04, FR04-BVA-05 | Fail | Source review confirms the backend profile update route has no phone validation, so invalid API phone boundaries would be accepted with a valid token. | [JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html), `eshop-sut/backend/server.js` |
+| FR04-BVA-01, FR04-BVA-04, FR04-BVA-05 | Fail | Source review confirms the backend profile update route has no phone validation, so invalid API phone boundaries would be accepted with a valid token. | [JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html) |
 | FR04-DT-10, FR04-DT-12 | Needs Review | Automated API results returned HTTP 403, and the expected rendering/storage behavior cannot be fully judged from the result log alone. | [JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html) |
 
 FR04-DT-08, FR04-DT-09, FR04-BVA-02, and FR04-BVA-03 are not listed as bugs because the reviewed result or source behavior matches the expected result.
@@ -136,11 +136,11 @@ FR04-DT-08, FR04-DT-09, FR04-BVA-02, and FR04-BVA-03 are not listed as bugs beca
 
 | TC ID | Previous Status | Final Judgment | Reason | Evidence |
 |---|---|---|---|---|
-| FR04-DT-09 | Needs Review | Pass | Source review shows `/api/users/me` ignores payload `id` and updates only `req.user.id`; the existing API log still needs rerun with a valid token for execution evidence. | [JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html), `eshop-sut/backend/server.js` |
+| FR04-DT-09 | Needs Review | Pass | Source review shows `/api/users/me` ignores payload `id` and updates only `req.user.id`; the existing API log still needs rerun with a valid token for execution evidence. | [JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html) |
 | FR04-DT-10 | Needs Review | Needs Review | The API log returned 403 and does not prove whether script-like address text is safely rendered in Profile, Checkout, or Admin pages. | [JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html) |
 | FR04-DT-12 | Needs Review | Needs Review | The API log returned 403 and does not prove long-address storage or UI stability after reopening the profile. | [JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html) |
-| FR04-BVA-01 | Needs Review | Fail | Source review shows no backend phone validation, so a below-minimum phone would be stored when authentication succeeds. | [JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html), `eshop-sut/backend/server.js` |
-| FR04-BVA-02 | Needs Review | Pass | Source review shows the backend would accept this SRS-valid 10-digit phone value when authentication succeeds. | [JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html), `eshop-sut/backend/server.js` |
-| FR04-BVA-03 | Needs Review | Pass | Source review shows the backend would accept this SRS-valid 11-digit phone value when authentication succeeds. | [JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html), `eshop-sut/backend/server.js` |
-| FR04-BVA-04 | Needs Review | Fail | Source review shows no backend maximum-length validation for phone values. | [JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html), `eshop-sut/backend/server.js` |
-| FR04-BVA-05 | Needs Review | Fail | Source review shows no backend leading-zero validation for phone values. | [JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html), `eshop-sut/backend/server.js` |
+| FR04-BVA-01 | Needs Review | Fail | Source review shows no backend phone validation, so a below-minimum phone would be stored when authentication succeeds. | [JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html) |
+| FR04-BVA-02 | Needs Review | Pass | Source review shows the backend would accept this SRS-valid 10-digit phone value when authentication succeeds. | [JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html) |
+| FR04-BVA-03 | Needs Review | Pass | Source review shows the backend would accept this SRS-valid 11-digit phone value when authentication succeeds. | [JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html) |
+| FR04-BVA-04 | Needs Review | Fail | Source review shows no backend maximum-length validation for phone values. | [JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html) |
+| FR04-BVA-05 | Needs Review | Fail | Source review shows no backend leading-zero validation for phone values. | [JSON log](test_scripts/results/json/fr04_profile_api_results.json), [HTML log](test_scripts/results/html/fr04_profile_api_results.html) |

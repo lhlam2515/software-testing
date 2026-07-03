@@ -2,35 +2,31 @@
 
 ## AI Declaration
 
-I use AI tools for the following tasks: understanding assignment requirements, reviewing EShop source-code behavior, drafting Domain Testing and Boundary Value Analysis cases, generating helper scripts, standardizing report wording, and checking the final submission structure. AI output is reviewed manually before being used in the report.
+I use AI tools for the following tasks: understanding HW02 requirements, creating Codex prompts, drafting Domain Testing and Boundary Value Analysis test ideas, reviewing evidence, preparing GitHub Issue workflow instructions, checking final submission regulations, and generating this audit appendix.
 
 ## Interaction Log
 
-| No. | AI Tool | Date/Time | Purpose | Prompt Summary | Output Summary | Human Review / Correction |
-|---|---|---|---|---|---|---|
-| 1 | Codex | [Fill in exact date/time] | Test design prompts | Generate Domain Testing and BVA ideas for FR-04, FR-08, FR-18, and FR-20. | Drafted test cases, input variables, and boundary variables. | Reviewed against assignment requirements and source code. |
-| 2 | Codex | [Fill in exact date/time] | Source-code review prompts | Inspect EShop backend, web, admin, and mobile behavior for selected features. | Identified actual endpoints, request bodies, validation behavior, role checks, checkout behavior, coupon logic, and mobile local-state risks. | Corrected assumptions that came only from the SRS. |
-| 3 | Codex | [Fill in exact date/time] | Script-generation prompts | Create API and UI evidence scripts for selected features. | Produced Node.js API scripts, Playwright UI scripts, helper functions, and result writers. | Checked that generated logs are evidence suggestions, not final verdicts. |
-| 4 | Codex | [Fill in exact date/time] | Evidence review prompts | Review existing screenshots, JSON logs, HTML logs, and source behavior before updating verdicts. | Updated verdicts where evidence was clear and kept unclear cases as `Needs Review` or `To be executed`. | Rejected unsupported Pass/Fail claims and preserved missing-evidence notes. |
-| 5 | Codex | [Fill in exact date/time] | Report-fixing prompts | Reorganize the HW02 folder and standardize all deliverables in English. | Updated README, main report, feature files, bug report, AI audit, critique, script guides, and checklist. | Reset unsupported verdicts to `To be executed` or potential-bug status. |
-| 6 | Codex | [Fill in exact date/time] | Final compliance and cleanup prompts | Check HW02 deliverables, bug alignment, GitHub issue text, PDF status, git log, and unnecessary files. | Prepared compliance checklist, refreshed git log, documented PDF export gap, and removed only clearly temporary/generated files. | Kept evidence, scripts, reports, and unclear items; did not invent links, screenshots, videos, or commit logs. |
+| No. | AI Tool | Date/Time | Your Prompt | The AI Output | Human Review / Use |
+|---|---|---|---|---|---|
+| 1 | ChatGPT | 29/06/2026, 13:05 | `can this be tested by script, or manually` with `2026.HW02.Domain Testing_En.pdf` attached. | Inspected the HW02 PDF and explained that scripts can be used for API evidence, while UI, mobile, security, and visual behavior still require manual review. | Used as guidance for combining automated scripts with manual evidence review. |
+| 2 | ChatGPT | 29/06/2026, 13:23 | `in folder software-testing, prompt for codex to read testing results and write report, use English` | Produced a Codex-ready prompt instructing Codex to read existing result files and update reports in English without inventing results. | Used to guide report-writing workflow and evidence-based wording. |
+| 3 | ChatGPT | 29/06/2026, 14:20 | `prompt for codex to use these pictures and update report` with a screenshot of FR04 evidence files. | Produced a prompt telling Codex to use screenshots inside the evidence folder, review them visually, and update reports in English. | Used to integrate screenshot evidence into feature and bug reports. |
+| 4 | ChatGPT | 29/06/2026, 15:33 | `I have just added some pictures for FR08, prompt for codex to use these pictures and update report` | Produced a prompt for updating the FR08 report and related summary files from new FR08 screenshots. | Used to update FR08 evidence and verdict notes. |
+| 5 | ChatGPT | 30/06/2026, 20:05 | `prompt for codex to read source code in folder eshop-sut, read all files in folder seminar, then create test cases` | Produced a Codex prompt to inspect the SUT source code and seminar materials, then create implementation-aware test cases. | Used for planning source-aware test design. Final reports were still reviewed manually. |
+| 6 | ChatGPT | 30/06/2026, 20:23 | `prompt for codex to read all files in folder software-testing, then create test cases and put in folder deliverables` | Produced a prompt to read the software-testing folder and create deliverables in a specified output folder. | Used as a workflow draft for organizing test case deliverables. |
+| 7 | ChatGPT | 30/06/2026, 21:06 | `prompt for codex to review all features that have "Need review" and give judgement, then update report` | Produced a prompt requiring Codex to review `Needs Review` cases using available evidence, source behavior, logs, and screenshots without inventing results. | Used to refine uncertain verdicts while keeping unsupported cases marked as review-required. |
+| 8 | ChatGPT | 30/06/2026, 21:23 | `I have just added some new screenshots, promtp for codex to use them to rewrite feature_D.md file` | Produced a prompt for rewriting and updating the Feature D report using new screenshot evidence. | Used to update the mobile checkout feature report. |
+| 9 | ChatGPT | 01/07/2026, 09:03 | `prompt for codex to complete everything it can in folders (follow HW02 file), and remove unnecessary files or dirs that don't follow the HW02 file` with HW02 PDF and folder screenshot attached. | Produced a comprehensive Codex prompt to complete the HW02 folder, follow assignment requirements, preserve evidence, and remove only unnecessary files. | Used for final folder cleanup and compliance planning. |
+| 10 | ChatGPT | 01/07/2026, 09:23 | `prompt for codex to remove test cases that have evidence: "mobile source, backend source, needs review "` | Produced a prompt to remove or revise cases whose evidence was only placeholder/source wording and not real execution evidence. | Used to avoid unsupported evidence claims in final reports. |
+| 11 | ChatGPT | 01/07/2026, 09:38 | `prompt for codex to use all the bugs and make github issues for them, push to git so they're visible for taking screenshots` | Produced a prompt to create GitHub Issues from confirmed bugs, update report links, commit, and push. | Used as workflow guidance. Issue creation was later limited to available confirmed issue bodies and real URLs. |
+| 12 | ChatGPT | 01/07/2026, 09:52 | User reported `gh auth status failed because gh is not installed/on PATH` and asked how to fix. | Explained how to install GitHub CLI with `winget`, verify `gh --version`, authenticate with `gh auth login`, and rerun Codex. | Used to unblock GitHub Issue creation. |
+| 13 | ChatGPT | 02/07/2026, 11:02 | `oke log in, now prompt for codex to use that and create github issues by using bugs` | Produced a prompt instructing Codex to use authenticated GitHub CLI, create issues from `github_issue_bugs.txt`, update reports, commit, and push. | Used before actual GitHub Issue creation in the workspace. |
+| 14 | ChatGPT | 02/07/2026, 11:36| `command to take git commit log of current branch` | Returned `git log --oneline --decorate` and commands for saving the log to `git_commit_log.txt`. | Used to refresh the required commit log text file. |
+| 15 | ChatGPT | 02/07/2026, 11:58 | Prompt describing HW02 Section 14 submission regulations and asking for a Codex prompt for final report modification. | Produced a detailed final-compliance prompt covering README, main report, bug report, AI reports, PDFs, checklist, cleanup, zip creation, and final consistency checks. | Used for final submission packaging and report consistency checks. |
+| 16 | ChatGPT | 02/07/2026, 12:39 | `Create a complete interaction log for this ChatGPT conversation...` | Created `chatgpt_interaction_log.md` with chronological entries, attached files, tool actions, important outputs, and summary sections. | Used as the source file for this AI Audit Report. |
+| 17 | ChatGPT | 03/07/2026, 14:02 | `I already install gh, use that to create Github issues by using bugs listed` | Inspected the workspace, found the bug list, checked GitHub CLI authentication, created six GitHub Issues after authentication was fixed, and updated issue links. | Human/user provided GitHub authentication. Created issue links were used in `github_issue_bugs.txt`, `bug_report.md`, and screenshot evidence. |
+| 18 | ChatGPT | 03/07/2026, 15:23 | Final Section 14 packaging request for `23127543_HW02_AI_DomainTesting_100/`. | Updated README, main report, bug report, checklist, issue summary, PDFs, git log, and final zip package. Marked missing demo videos and incomplete issue screenshots clearly. | Used for final submission readiness. User still needs to review the zip before Moodle upload. |
 
-## Test Design Prompts
+## Human Review Statement
 
-AI was used to draft equivalence classes, invalid domains, boundary values, and executable test-case tables. The human reviewer must confirm that each test maps to actual EShop behavior.
-
-## Source-Code Review Prompts
-
-AI was used to inspect source behavior such as `/api/users/me`, `/api/checkout`, `/api/apply-coupon`, `/api/admin/orders`, `/api/admin/orders/:id/status`, and mobile checkout state. Any source-code-derived risk remains a test target until execution evidence confirms it.
-
-## Script-Generation Prompts
-
-AI helped create scripts that save JSON logs, HTML summaries, and screenshots under `test_scripts/results/`. These scripts mask JWT tokens and mark their output as requiring human review.
-
-## Report-Fixing Prompts
-
-AI was used to reorganize deliverables, standardize English wording, and make reports evidence-based. Exact prompts and timestamps should be pasted into the interaction log before final submission.
-
-## Human Corrections
-
-Human review is required for exact interaction timestamps, GitHub Issue creation, screenshots attached to GitHub Issues, demo videos, and final PDF export. Final verdicts in the reports are evidence-based: clear logs/screenshots/source behavior are marked `Pass` or `Fail`, unclear evidence remains `Needs Review`, and missing evidence remains `To be executed`.
+All AI output was treated as draft assistance. The student remains responsible for checking assignment requirements, reviewing screenshots and logs, confirming GitHub Issue links, verifying generated PDFs, and ensuring that missing evidence remains clearly marked instead of being presented as completed work.
