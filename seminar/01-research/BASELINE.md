@@ -127,11 +127,11 @@
 
 | Trường | Giá trị |
 |---|---|
-| Mutant ID | 28 |
+| Mutant ID(s) | 28 |
 | Mutator | `EqualityOperator` |
 | Vị trí | `server.js:L40` |
 | Route / FR | `POST /api/login` (FR-02) |
-| Tests covering | 5 tests |
+| Tests covering (coveredBy) | 5 tests |
 
 **Original code:**
 
@@ -211,11 +211,11 @@ it('returns 200 when locked_until exactly equals the server clock (UB: locked_un
 
 | Trường | Giá trị |
 |---|---|
-| Mutant ID | 397, 398 |
+| Mutant ID(s) | 397, 398 |
 | Mutator | `ArithmeticOperator` |
 | Vị trí | `server.js:L420` |
 | Route / FR | `POST /api/apply-coupon` (FR-09) |
-| Tests covering | 3 tests (#1, #11, #16 - nhánh **không có** `user_id`) |
+| Tests covering (coveredBy) | 3 tests (#1, #11, #16 - nhánh **không có** `user_id`) |
 
 **Original code:**
 
@@ -265,11 +265,11 @@ it('returns 200 with the current percent-coupon arithmetic when valid percent co
 
 | Trường | Giá trị |
 |---|---|
-| Mutant ID | 396 |
+| Mutant ID(s) | 396 |
 | Mutator | `BlockStatement` |
 | Vị trí | `server.js:L418–L422` |
 | Route / FR | `POST /api/apply-coupon` (FR-09), nhánh unauthenticated (không gửi `user_id`) |
-| Tests covering | 3 tests (#1, #11, #16) |
+| Tests covering (coveredBy) | 3 tests (#1, #11, #16) |
 
 **Original code:**
 
@@ -290,7 +290,7 @@ else {
 }
 ```
 
-**Classification**
+**Classification:**
 
 - **Root-Cause Classification:** Assertion Gap (Weak Assertion)
 - **Propagation Level:** Strongly Survived
@@ -329,11 +329,11 @@ it('returns 200 with the current percent-coupon arithmetic when coupon expires t
 
 > **Đã hoàn thành phần phân tích T5b/T6b/T7b/T8 ở mức tài liệu.** Xác nhận từ `survivors.json` và `mutation.html`: Mutant 515 và Mutant 268 vẫn **Survived** tính đến baseline 2026-07-03. Chưa có bằng chứng chạy lại `npm test` / `npm run stryker` sau khi thêm assertion, nên Validation Gate được ghi là **Blocked**, không tự suy diễn kết quả.
 
-#### Survivor B1 - Mất transition `canceled -> delivered` (Mutant 515, Group B, FR-10)
+#### Survivor B1 - Mất transition `canceled → delivered` (Mutant 515, Group B, FR-10)
 
 | Trường | Giá trị |
 |---|---|
-| Mutant ID(s) | Mutant 515 |
+| Mutant ID(s) | 515 |
 | Mutator | `ConditionalExpression` |
 | Vị trí | `server.js:L550` |
 | Route / FR | `PUT /api/admin/orders/:id/status` / FR-10 |
@@ -353,7 +353,7 @@ if (false)
   isValidTransition = true;
 ```
 
-**Classification**
+**Classification:**
 
 - **Root-Cause Classification:** Missing Test Case (`TRANSITION_PATH_UNTESTED`)
 - **Propagation Level:** Strongly Survived
@@ -391,7 +391,7 @@ it('returns 200 and persists delivered when current status is canceled', async (
 | Check | Kết quả | Bằng chứng |
 |---|---|---|
 | PASS trên code gốc | ⚠️ Blocked | Cần thêm assertion vào test và chạy `npm test`; chưa có output trong repo |
-| FAIL trên mutant (Killed sau khi thêm assertion) | ⚠️ Blocked | Cần chạy lại `npm run stryker` và xác nhận Mutant 515: `Survived` -> `Killed` trong `mutation.html` |
+| FAIL trên mutant (Killed) | ⚠️ Blocked | Cần chạy lại `npm run stryker` và xác nhận Mutant 515: `Survived` → `Killed` trong `mutation.html` |
 
 **Action Item:** Thêm test transition `canceled -> delivered`; assert cả response lẫn trạng thái lưu cuối cùng. Cần fixture ổn định cho order có status ban đầu là `canceled`.
 
@@ -401,7 +401,7 @@ it('returns 200 and persists delivered when current status is canceled', async (
 
 | Trường | Giá trị |
 |---|---|
-| Mutant ID(s) | Mutant 268 |
+| Mutant ID(s) | 268 |
 | Mutator | `ConditionalExpression` |
 | Vị trí | `server.js:L292` |
 | Route / FR | `POST /api/cart` / FR-08 |
@@ -421,7 +421,7 @@ if (true) userCarts[userId] = [];
 userCarts[userId].push(req.body);
 ```
 
-**Classification**
+**Classification:**
 
 - **Root-Cause Classification:** Missing Test Case (`SEQUENTIAL_STATE_ASSUMPTION`)
 - **Propagation Level:** Strongly Survived
@@ -468,7 +468,7 @@ it('keeps existing cart items when the same user adds another item', async () =>
 | Check | Kết quả | Bằng chứng |
 |---|---|---|
 | PASS trên code gốc | ⚠️ Blocked | Cần thêm assertion vào test và chạy `npm test`; chưa có output trong repo |
-| FAIL trên mutant (Killed sau khi thêm assertion) | ⚠️ Blocked | Cần chạy lại `npm run stryker` và xác nhận Mutant 268: `Survived` -> `Killed` trong `mutation.html` |
+| FAIL trên mutant (Killed) | ⚠️ Blocked | Cần chạy lại `npm run stryker` và xác nhận Mutant 268: `Survived` → `Killed` trong `mutation.html` |
 
 **Action Item:** Thêm test sequence: add item A, add item B, gọi `GET /api/cart`, assert cả hai item còn tồn tại. Cần cô lập state `userCarts` hoặc dùng user riêng cho test này.
 
