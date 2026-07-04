@@ -327,101 +327,182 @@ it('returns 200 with the current percent-coupon arithmetic when coupon expires t
 
 ### 4b. Group B - Order-status + Cart (T5b, owner: Vũ)
 
-> ⚠️ **Chưa hoàn thành (owner: Vũ)** - nội dung phân tích cũ đã được gỡ để tránh dùng taxonomy lỗi thời (`Real test gap`/`Equivalent`/`Trivial-redundant`/`Timeout`). Điền lại theo template dưới đây (2 trục Root-Cause × Propagation Level) khi T5b/T6b/T7b hoàn tất. Xác nhận từ `mutation.html`: mutant 515 và 268 vẫn **Survived** tính đến 2026-07-03.
+> **Đã hoàn thành phần phân tích T5b/T6b/T7b/T8 ở mức tài liệu.** Xác nhận từ `survivors.json` và `mutation.html`: Mutant 515 và Mutant 268 vẫn **Survived** tính đến baseline 2026-07-03. Chưa có bằng chứng chạy lại `npm test` / `npm run stryker` sau khi thêm assertion, nên Validation Gate được ghi là **Blocked**, không tự suy diễn kết quả.
 
-#### Survivor [X] - [Tên ngắn, mô tả hành vi sai] (Mutant <mutant-id>, Group B, <FR>)
+#### Survivor B1 - Mất transition `canceled -> delivered` (Mutant 515, Group B, FR-10)
 
 | Trường | Giá trị |
 |---|---|
-| Mutant ID(s) | ... |
-| Mutator | ... |
-| Vị trí | `server.js:Lxx` |
-| Route / FR | ... |
-| Tests covering (coveredBy) | n tests |
+| Mutant ID(s) | Mutant 515 |
+| Mutator | `ConditionalExpression` |
+| Vị trí | `server.js:L550` |
+| Route / FR | `PUT /api/admin/orders/:id/status` / FR-10 |
+| Tests covering (coveredBy) | 4 tests |
 
 **Original code:**
 
 ```javascript
-...
+if (currentStatus === "canceled" && status === "delivered")
+  isValidTransition = true;
 ```
 
 **Mutant (survived):**
 
 ```javascript
-...
+if (false)
+  isValidTransition = true;
 ```
 
 **Classification**
 
-- **Root-Cause Classification:** Equivalent Mutant / Assertion Gap / Boundary Value Blindness / Dead Code / Missing Test Case (mở rộng)
-- **Propagation Level:** No Coverage / Weakly Survived / Strongly Survived
+- **Root-Cause Classification:** Missing Test Case (`TRANSITION_PATH_UNTESTED`)
+- **Propagation Level:** Strongly Survived
 
-(1–2 câu giải thích ngắn vì sao chọn đúng nhãn này)
+Route order-status đã được cover, nhưng test suite chưa đi đúng cạnh transition `canceled -> delivered`. Mutant này tạo khác biệt hành vi quan sát được: code gốc cho phép transition, còn mutant loại bỏ nhánh này nên transition sẽ bị từ chối.
 
-**Vì sao sống sót:** ...
+**Vì sao sống sót:** Các test hiện tại cover route và một số transition khác, nhưng chưa tạo order đang ở trạng thái `canceled` rồi cập nhật sang `delivered`.
 
 **Kill assertion (AI-synthesized):**
 
 ```javascript
-...
+it('returns 200 and persists delivered when current status is canceled', async () => {
+  const token = getAuthToken();
+  const orderId = 1; // cần fixture/order seeded có status = "canceled"
+
+  const res = await request(app)
+    .put(`/api/admin/orders/${orderId}/status`)
+    .set('Authorization', `Bearer ${token}`)
+    .send({ status: 'delivered' });
+
+  expect(res.status).toBe(200);
+  expect(res.body.message).toMatch(/status/i);
+
+  const verify = await request(app)
+    .get(`/api/orders/${orderId}`)
+    .set('Authorization', `Bearer ${token}`);
+
+  expect(verify.status).toBe(200);
+  expect(verify.body.status).toBe('delivered');
+});
 ```
 
 **Validation Gate:**
 
 | Check | Kết quả | Bằng chứng |
 |---|---|---|
-| PASS trên code gốc | ✅/❌ | ... |
-| FAIL trên mutant (Killed sau khi thêm assertion) | ✅/❌ | ... |
+| PASS trên code gốc | ⚠️ Blocked | Cần thêm assertion vào test và chạy `npm test`; chưa có output trong repo |
+| FAIL trên mutant (Killed sau khi thêm assertion) | ⚠️ Blocked | Cần chạy lại `npm run stryker` và xác nhận Mutant 515: `Survived` -> `Killed` trong `mutation.html` |
 
-**Action Item:** ...
+**Action Item:** Thêm test transition `canceled -> delivered`; assert cả response lẫn trạng thái lưu cuối cùng. Cần fixture ổn định cho order có status ban đầu là `canceled`.
 
 ---
 
-#### Survivor [X] - [Tên ngắn, mô tả hành vi sai] (Mutant <mutant-id>, Group B, <FR>)
+#### Survivor B2 - Giỏ hàng bị reset khi thêm item thứ hai (Mutant 268, Group B, FR-08)
 
 | Trường | Giá trị |
 |---|---|
-| Mutant ID(s) | ... |
-| Mutator | ... |
-| Vị trí | `server.js:Lxx` |
-| Route / FR | ... |
-| Tests covering (coveredBy) | n tests |
+| Mutant ID(s) | Mutant 268 |
+| Mutator | `ConditionalExpression` |
+| Vị trí | `server.js:L292` |
+| Route / FR | `POST /api/cart` / FR-08 |
+| Tests covering (coveredBy) | 1 test |
 
 **Original code:**
 
 ```javascript
-...
+if (!userCarts[userId]) userCarts[userId] = [];
+userCarts[userId].push(req.body);
 ```
 
 **Mutant (survived):**
 
 ```javascript
-...
+if (true) userCarts[userId] = [];
+userCarts[userId].push(req.body);
 ```
 
 **Classification**
 
-- **Root-Cause Classification:** Equivalent Mutant / Assertion Gap / Boundary Value Blindness / Dead Code / Missing Test Case (mở rộng)
-- **Propagation Level:** No Coverage / Weakly Survived / Strongly Survived
+- **Root-Cause Classification:** Missing Test Case (`SEQUENTIAL_STATE_ASSUMPTION`)
+- **Propagation Level:** Strongly Survived
 
-(1–2 câu giải thích ngắn vì sao chọn đúng nhãn này)
+Route `POST /api/cart` đã được cover, nhưng chỉ bằng case thêm một item. Mutant chỉ lộ ra khi cùng một user thêm nhiều item liên tiếp, vì nó reset `userCarts[userId]` trước mỗi lần `push`.
 
-**Vì sao sống sót:** ...
+**Vì sao sống sót:** Test hiện tại chứng minh một item có thể được thêm vào giỏ hàng, nhưng không assert state sau chuỗi nhiều thao tác.
 
 **Kill assertion (AI-synthesized):**
 
 ```javascript
-...
+it('keeps existing cart items when the same user adds another item', async () => {
+  const token = getAuthToken();
+
+  await request(app)
+    .post('/api/cart')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ product_id: 101, name: 'Item A', price: 10000, quantity: 1 })
+    .expect(200);
+
+  await request(app)
+    .post('/api/cart')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ product_id: 102, name: 'Item B', price: 20000, quantity: 2 })
+    .expect(200);
+
+  const res = await request(app)
+    .get('/api/cart')
+    .set('Authorization', `Bearer ${token}`);
+
+  expect(res.status).toBe(200);
+  expect(res.body).toHaveLength(2);
+  expect(res.body).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ product_id: 101, quantity: 1 }),
+      expect.objectContaining({ product_id: 102, quantity: 2 }),
+    ]),
+  );
+});
 ```
 
 **Validation Gate:**
 
 | Check | Kết quả | Bằng chứng |
 |---|---|---|
-| PASS trên code gốc | ✅/❌ | ... |
-| FAIL trên mutant (Killed sau khi thêm assertion) | ✅/❌ | ... |
+| PASS trên code gốc | ⚠️ Blocked | Cần thêm assertion vào test và chạy `npm test`; chưa có output trong repo |
+| FAIL trên mutant (Killed sau khi thêm assertion) | ⚠️ Blocked | Cần chạy lại `npm run stryker` và xác nhận Mutant 268: `Survived` -> `Killed` trong `mutation.html` |
 
-**Action Item:** ...
+**Action Item:** Thêm test sequence: add item A, add item B, gọi `GET /api/cart`, assert cả hai item còn tồn tại. Cần cô lập state `userCarts` hoặc dùng user riêng cho test này.
+
+---
+
+#### Equivalent / Dead-code triage - startup guard (Mutant 535/536/537, Group B)
+
+| Mutant | Mutator | Vị trí | Original | Replacement | coveredBy |
+|---|---|---:|---|---|---:|
+| Mutant 535 | `ConditionalExpression` | `server.js:L570` | `require.main === module` | `true` | 0 |
+| Mutant 536 | `ConditionalExpression` | `server.js:L570` | `require.main === module` | `false` | 0 |
+| Mutant 537 | `EqualityOperator` | `server.js:L570` | `require.main === module` | `require.main !== module` | 0 |
+
+**Context:**
+
+```javascript
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
+```
+
+**AI triage result:** Nhóm mutant này là ứng viên **Equivalent Mutant / Dead Code** trong phạm vi Week 2 Group B, vì chỉ ảnh hưởng hành vi startup khi chạy trực tiếp `node server.js`. Nó không kiểm tra logic nghiệp vụ FR-08/FR-10 khi Jest/supertest import `app`.
+
+**Human review note:** Không tự động trừ khỏi denominator. Reviewer cần ký duyệt rõ nếu muốn loại khỏi phân tích, hoặc giữ chúng trong danh sách survivor nhưng không ưu tiên viết assertion để "kill".
+
+---
+
+#### Assumptions / Missing Information
+
+- `survivors.json` chỉ cung cấp số lượng/ID `coveredBy`, không có tên test Jest dạng người đọc hiểu ngay.
+- Chưa có output chạy lại `npm test` hoặc `npm run stryker` sau khi thêm assertion, nên không ghi ✅ cho Validation Gate.
+- Thời gian setup Stryker và thời gian full run chưa được ghi trong `seminar/`, nên phần T8 chỉ có baseline metrics và mục blocked.
 
 ---
 
@@ -465,9 +546,45 @@ Tests giả định initial state và không test behavior trong multi-step sequ
 
 ## 6. Delta sau khi thêm AI assertion
 
-> Chưa thực hiện - planned cho Stage S2 (Tuần 2, sau Gate 05/07).
+> Cập nhật cho Group B (owner: Vũ). Phần assertion đã được thiết kế cho Mutant 515 và Mutant 268, nhưng chưa có bằng chứng chạy lại `npm test` / `npm run stryker`, nên các số liệu "Sau" vẫn để blocked/TBD thay vì tự suy diễn.
 
-| Metric | Trước | Sau | Δ |
-|--------|-------|-----|---|
-| Mutation score % | 32.35% | *TBD* | *TBD* |
-| Survivor count | 73 | *TBD* | *TBD* |
+| Metric | Trước | Sau | Δ | Trạng thái |
+|--------|-------|-----|---|---|
+| Mutation score % (`server.js`) | 32.35% | *TBD* | *TBD* | Blocked - cần chạy lại Stryker sau khi thêm assertion |
+| Survivor count (`server.js`) | 73 | *TBD* | *TBD* | Blocked - cần mutation report mới |
+| Mutant 515 status | `Survived` | Expected `Killed` | *TBD* | Blocked - cần Validation Gate |
+| Mutant 268 status | `Survived` | Expected `Killed` | *TBD* | Blocked - cần Validation Gate |
+| AI assertions proposed | 0 | 2 | +2 | Đã có assertion design cho Mutant 515 và Mutant 268 |
+| AI assertions used unchanged | 0 | *TBD* | *TBD* | Cần chạy test thật để biết có phải sửa fixture/assertion không |
+| AI assertions requiring manual edits | 0 | *TBD* | *TBD* | Cần fixture và test execution evidence |
+| Setup time Stryker lần đầu | *Chưa ghi* | *Chưa ghi* | *N/A* | Missing information |
+| Full `npm run stryker` time | *Chưa ghi* | *Chưa ghi* | *N/A* | Missing information |
+
+### T8 - Metrics hiện có từ baseline
+
+| Metric | Giá trị |
+|---|---:|
+| StrykerJS version | 9.6.1 |
+| Test runner | Jest 30.4.2 + supertest 7.2.2 |
+| Node version | v24.11.1 |
+| Full `server.js` mutants | 541 |
+| Full `server.js` killed | 175 |
+| Full `server.js` survived | 73 |
+| Full `server.js` NoCoverage | 293 |
+| Full `server.js` mutation score | 32.35% |
+| Covered-code kill rate | 70.56% |
+| Four tested routes scoped score | 76.67% |
+| FR-08 covered kill rate | 80.0% |
+| FR-10 covered kill rate | 82.4% |
+| RuntimeError / Timeout / CompileError | 0 / 0 / 0 |
+
+### T8 - AI triage equivalent-mutant
+
+Ví dụ triage: Mutant 535/536/537 ở `server.js:L570` mutate guard `require.main === module`. AI hỗ trợ phân biệt rằng đây là startup guard, không phải logic nghiệp vụ `order-status` hoặc `cart/checkout`. Kết luận thực dụng: xếp vào nhóm **Equivalent Mutant / Dead Code candidate** cho phạm vi Week 2 Group B, cần reviewer ký duyệt trước khi loại khỏi denominator.
+
+### Assumptions / Missing Information
+
+- Chưa có thời gian setup Stryker lần đầu.
+- Chưa có thời gian một lượt `npm run stryker` full run sau khi thêm assertion.
+- Chưa có mutation report mới để xác nhận Mutant 515 và Mutant 268 đã `Killed`.
+- Cần fixture ổn định cho order `canceled` và cô lập state `userCarts` trước khi chạy Validation Gate.
