@@ -3,7 +3,7 @@
 **Tester:** Le Hoang Lam (23127216)
 **SUT:** EShop, [github.com/ttbhanh/eshop-sut](https://github.com/ttbhanh/eshop-sut)
 **GitHub Issues:** [github.com/lhlam2515/software-testing/issues](https://github.com/lhlam2515/software-testing/issues)
-**Total bugs found:** 17
+**Total bugs found:** 18
 
 ---
 
@@ -21,6 +21,7 @@
 | BUG-09-004 | FR-09, Coupon (Discount Code) | High | TC-11 | Open | [#20](https://github.com/lhlam2515/software-testing/issues/20) |
 | BUG-09-005 | FR-09, Coupon (Discount Code) | Medium | TC-12, TC-BVA-02 | Open | [#21](https://github.com/lhlam2515/software-testing/issues/21) |
 | BUG-09-006 | FR-09, Coupon (Discount Code) | Medium | TC-05 | Open | [#22](https://github.com/lhlam2515/software-testing/issues/22) |
+| BUG-09-007 | FR-09, Coupon (Discount Code) | High | TC-13 | Open | [#30](https://github.com/lhlam2515/software-testing/issues/30) |
 | BUG-16-001 | FR-16, CSV Product Import | High | TC-04 | Open | [#23](https://github.com/lhlam2515/software-testing/issues/23) |
 | BUG-16-002 | FR-16, CSV Product Import | High | TC-08 to TC-12, TC-18, TC-BVA-01 | Open | [#24](https://github.com/lhlam2515/software-testing/issues/24) |
 | BUG-16-003 | FR-16, CSV Product Import | High | TC-15 | Open | [#25](https://github.com/lhlam2515/software-testing/issues/25) |
@@ -29,7 +30,7 @@
 | BUG-20-001 | FR-20, Cancel Order (Mobile) | High | TC-07, TC-BVA-02 | Open | [#28](https://github.com/lhlam2515/software-testing/issues/28) |
 | BUG-20-002 | FR-20, Cancel Order (Mobile) | Low | TC-10 | Open | [#29](https://github.com/lhlam2515/software-testing/issues/29) |
 
-**Severity distribution:** High: 9, Medium: 5, Low: 3
+**Severity distribution:** High: 10, Medium: 5, Low: 3
 
 ---
 
@@ -331,6 +332,39 @@ Typing the coupon code in lowercase (`save10`) is accepted and matched to the se
 
 ---
 
+### BUG-09-007 - Checkout trusts a client-derived `total_amount` instead of recomputing it from the cart
+
+**Feature:** FR-09, Coupon (Discount Code)
+**TC that found it:** TC-13
+**Severity:** High
+**GitHub Issue:** [#30](https://github.com/lhlam2515/software-testing/issues/30)
+
+#### Description
+
+`POST /api/apply-coupon` accepts `total_amount` exactly as supplied by the client instead of independently recomputing it from the real cart contents, which conflicts with FR-08's mandate that the backend recompute the order total server-side. With a cart containing exactly 1x `Bàn phím cơ Keychron Q1` (real unit price and subtotal `4,000,000₫`), overwriting the checkout page's `Tổng tiền thanh toán (VND)` field to `500000` before applying `SAVE10` (`min_order_amount=300000`) makes the manipulated value clear the minimum-order threshold. The API accepts it and returns `final_amount=5000000` (further inflated by BUG-09-001's percent formula bug). Confirming the order via `Xác Nhận Thanh Toán` then persists the order with `total_amount=5000000` in the `orders` table, the value derived entirely from the manipulated client input, not from the real `4,000,000₫` cart subtotal. This is not just a UI preview glitch, the wrong amount is actually committed to the database, so a customer can set their own charged total by editing a client-controlled field before checkout.
+
+#### Steps to Reproduce
+
+1. Log in as `test@eshop.com`, add exactly 1x `Bàn phím cơ Keychron Q1` to the cart, and confirm `/cart` shows the real subtotal `4,000,000₫`.
+2. Proceed to `/checkout`.
+3. Overwrite the `Tổng tiền thanh toán (VND)` field with `500000` (below the real subtotal, but still `>= min_order_amount=300000` for `SAVE10`).
+4. Enter `SAVE10` in the coupon field and click `Áp dụng`.
+5. Click `Xác Nhận Thanh Toán` to complete the order.
+6. Query the persisted order, e.g. `sqlite3 apps/backend/database.sqlite "SELECT * FROM orders ORDER BY id DESC LIMIT 1"`.
+
+#### Expected vs Actual Result
+
+| | Result |
+| -- | ------ |
+| **Expected** | The backend should independently recompute `total_amount` from the real cart contents (`4,000,000₫`) per FR-08, ignoring or rejecting any client-supplied `total_amount` that disagrees with it, so the persisted order total reflects the real cart value. |
+| **Actual** | `POST /api/apply-coupon` accepts the manipulated `total_amount=500000` and returns `final_amount=5000000`; the confirmed order then persists `total_amount=5000000` in the database, a value derived entirely from client input rather than the real `4,000,000₫` cart subtotal. |
+
+#### Screenshot
+
+![BUG-09-007](artifacts/tests/FR-09-coupon/screenshots/BUG-09-007-client-total-trusted.png)
+
+---
+
 ### BUG-16-001 - Admin-only CSV import route accepts a regular user's token
 
 **Feature:** FR-16, CSV Product Import
@@ -538,22 +572,5 @@ FR-11 explicitly requires that order status text be "translated to Vietnamese an
 #### Screenshot
 
 ![BUG-20-002](artifacts/tests/FR-20-cancel-order-mobile/screenshots/BUG-20-002-status-labels-same-color.png)
-
----
-
-## Untested Spec Conflicts
-
-The following spec conflicts were identified during test design (domain-testing.md), but were never converted into an executable test case and therefore never confirmed against the running system. They are documented here for transparency about test coverage, not counted among the 17 bugs above.
-
-### SC-09-001 - Client-supplied `total_amount` may bypass FR-08's backend recomputation rule
-
-**Feature:** FR-09, Coupon (Discount Code)
-**Source:** `artifacts/tests/FR-09-coupon/domain-testing.md`, Implicit Gaps section
-
-**Conflict description:** The API specification allows the client to send `total_amount` as part of the `POST /api/apply-coupon` request body. FR-08, however, mandates that the backend independently recompute the order total from server-side data (cart contents, prices) rather than trusting a client-supplied value. If the coupon endpoint actually uses the client-provided `total_amount` when evaluating `min_order_amount` and computing `discount_amount`/`final_amount`, a user could manipulate the request to unlock discounts they should not qualify for, or to distort the discount calculation entirely.
-
-**Why it was not tested:** This gap was flagged during Step 1 (variable/constraint identification) but was never assigned an Equivalence Class ID or a dedicated test case, and it does not appear anywhere in `execution-log.md`. No request was ever sent with a `total_amount` value that intentionally diverges from the real order total, so it remains an open question whether the backend actually recomputes the total or blindly trusts the client.
-
-**Recommended follow-up:** Add a dedicated test case that sends `POST /api/apply-coupon` with a `total_amount` deliberately different from the real cart/order total (e.g. inflated to clear the `min_order_amount` threshold, or deflated to minimize a percent-based discount) and verify whether the server's response reflects the manipulated value or the true, independently computed total.
 
 ---
