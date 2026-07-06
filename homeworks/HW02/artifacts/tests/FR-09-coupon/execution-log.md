@@ -10,7 +10,7 @@ Screenshots: `homeworks/HW02/artifacts/tests/FR-09-coupon/screenshots/`
 
 ---
 
-## Domain Testing (EP) - TC-01 to TC-12
+## Domain Testing (EP) - TC-01 to TC-13
 
 ### TC-01 - Apply valid `percent` coupon
 
@@ -160,6 +160,18 @@ Fallback Reason: the invalid-token branch cannot be produced through the visible
 | **Bug ID** | BUG-09-005 |
 | **Notes** | Degenerate boundary defect: `0 >= 0` should pass, but the implementation behaves as if the rule were strict greater-than. |
 
+### TC-13 - Gap: client-manipulated `total_amount` differs from cart subtotal
+
+| Field | Value |
+| :---- | :---- |
+| **Status** | ❌ FAIL - BUG-09-007 |
+| **Pre-condition setup** | `SAVE10` active with `discount_value=10`, `min_order_amount=300000`, expiry `2099-12-31`; no usage row for user; cart contained exactly 1 x Keychron Q1 at `4000000` |
+| **Executed at** | 2026-07-06 20:30 |
+| **Actual result** | UI cart subtotal was `4000000`; after changing the checkout field to `500000`, `POST /api/apply-coupon` accepted the value and returned `discount_amount=-4500000`, `final_amount=5000000`. `POST /api/checkout` then sent the real item priced at `4000000` together with client-derived `total_amount=5000000`; order 1 persisted `total_amount=5000000` instead of recomputing it from the cart. |
+| **Screenshot** | `artifacts/tests/FR-09-coupon/screenshots/BUG-09-007-client-total-trusted.png` |
+| **Bug ID** | BUG-09-007 |
+| **Notes** | EC07, EC01, EC05, EC09, EC12, and EC14 exercised. The backend trusts the checkout total even when it conflicts with item prices. BUG-09-001 also affects the observed amount, but does not explain the missing FR-08 recomputation. |
+
 ---
 
 ## Boundary Value Analysis (BVA) - TC-BVA-01 to TC-BVA-08
@@ -266,13 +278,13 @@ Fallback Reason: the invalid-token branch cannot be produced through the visible
 
 | Metric | Count |
 | :----- | :---- |
-| TC Designed (EP) | 12 |
+| TC Designed (EP) | 13 |
 | TC Designed (BVA) | 8 |
-| TC Executed | 20 / 20 |
+| TC Executed | 21 / 21 |
 | Passed | 11 |
-| Failed | 7, TC-01, TC-05, TC-08, TC-09, TC-11, TC-12, TC-BVA-02 |
+| Failed | 8, TC-01, TC-05, TC-08, TC-09, TC-11, TC-12, TC-13, TC-BVA-02 |
 | Pass with deviation | 2, TC-BVA-03, TC-BVA-08 |
-| Bugs found | 6, BUG-09-001 to BUG-09-006 |
+| Bugs found | 7, BUG-09-001 to BUG-09-007 |
 
 ## Bugs Discovered
 
@@ -284,3 +296,4 @@ Fallback Reason: the invalid-token branch cannot be produced through the visible
 | BUG-09-004 | TC-11 | Fixed coupon discount is not capped at the order total, allowing negative `final_amount` | High |
 | BUG-09-005 | TC-12, TC-BVA-02 | Minimum-order rule behaves as strict greater-than instead of greater-than-or-equal | Medium |
 | BUG-09-006 | TC-05 | Coupon code lookup is case-insensitive, so lowercase `save10` incorrectly matches `SAVE10` | Medium |
+| BUG-09-007 | TC-13 | Checkout trusts a client-derived `total_amount` even when it conflicts with the submitted cart item prices | High |

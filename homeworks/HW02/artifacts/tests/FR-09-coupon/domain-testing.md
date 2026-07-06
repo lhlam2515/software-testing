@@ -349,6 +349,26 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 
 ---
 
+### TC-13 — Gap: `total_amount` manipulated below actual cart subtotal (spec conflict with FR-08)
+
+| Field | Content |
+|:---|:---|
+| **TC ID** | TC-13 |
+| **Test Case Name** | Gap probe: client-manipulated `total_amount` diverges from real cart subtotal — does the backend trust the client value through to the final charged order (FR-08 spec conflict)? |
+| **ECs Covered** | EC07 (C3 satisfied via manipulated value), EC01, EC05, EC09, EC12, EC14 |
+| **ECs Verified Absent** | N/A — gap test, discover actual behavior |
+| **Pre-conditions** | Coupon `SAVE10` (`type=percent`, `discount_value=10`, `min_order_amount=300000`, `expired_at=2099-12-31`) active; user `test@eshop.com` has not used `SAVE10`; valid JWT; cart contains exactly 1× `Bàn phím cơ Keychron Q1` (real unit price `4,000,000₫`, so real cart subtotal = `4,000,000₫`) |
+| **Input — `code`** | `"SAVE10"` |
+| **Input — `total_amount`** | `500000` (manipulated — far below the real cart subtotal of `4,000,000₫`, but still `>= min_order_amount=300000` so C3 passes on the fake value) |
+| **Input — `user_id`** | ID of `test@eshop.com` |
+| **Input — Authorization** | `Bearer <valid_token>` |
+| **Steps** | 1. Open `/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. From `/`, add exactly 1× `Bàn phím cơ Keychron Q1` to the cart, open `/cart` via `Giỏ hàng`, and record the displayed subtotal (expected `4,000,000₫`) · 3. Click `Tiến hành thanh toán` · 4. On `/checkout`, overwrite `Tổng tiền thanh toán (VND)` with `500000`, enter coupon code `SAVE10` in `Nhập mã giảm giá...`, then click `Áp dụng` and record the discount/error and the resulting `Tổng tiền thanh toán (VND)` shown · 5. Click `Xác Nhận Thanh Toán` to complete the order · 6. Cross-check the actual persisted order (via Admin panel order detail or `sqlite3 apps/backend/database.sqlite "SELECT * FROM orders ORDER BY id DESC LIMIT 1"`) for the real `total_amount`/`final_amount` charged |
+| **Expected Result** | Discover actual behavior — plausible outcomes: (1) `Áp dụng` accepts the manipulated `500000` and computes `discount_amount=50000, final_amount=450000` (based on the fake value) — this alone confirms C3 is checked against the client value, not the real cart subtotal; (2) after `Xác Nhận Thanh Toán`, if the persisted order's total reflects `~450000` (or any value derived from the manipulated `500000`) instead of the real cart subtotal (`~4,000,000` minus a correctly-recomputed discount) → **BUG**: the client can pay a fraction of the real order value by manipulating `total_amount` at the apply-coupon step; (3) if the persisted order total is independently recomputed from the real cart contents (per FR-08), record whether the discount shown during `Áp dụng` was honored, ignored, or caused an inconsistency/error at the final step |
+| **Verification Points** | 1. Record the real cart subtotal shown on `/cart` before checkout (expected `4,000,000₫`) · 2. Record whether `Áp dụng` accepts `SAVE10` against the manipulated `500000` and what `Tổng tiền thanh toán (VND)` it displays afterward · 3. API cross-check: record `discount_amount` and `final_amount` from the `POST /api/apply-coupon` response · 4. API cross-check: after `Xác Nhận Thanh Toán`, query the persisted order's actual charged amount · 5. **BUG condition**: persisted order total is at or near `450000` (derived from the manipulated value) instead of a value derived from the real `4,000,000₫` subtotal → confirms the FR-08/FR-09 spec conflict is exploitable, not just theoretical · 6. If the backend instead recomputes independently and rejects/ignores the manipulated `total_amount`, document the actual final charged amount and whether the earlier `Áp dụng` discount preview was misleading (UI/logic inconsistency, lower severity than the exploit case) |
+| **Status** | ❌ FAIL — BUG-09-007 |
+
+---
+
 ## 5. EC Coverage Matrix
 
 | EC ID | Description | TC Cover | Mechanism |
@@ -372,5 +392,6 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 | EC17 | HTTP 4xx error response | TC-03 → TC-10 | Verified present (cross-check) |
 | EC18 | `final_amount < 0` (gap: fixed > total) | TC-11 | Direct trigger (gap test) |
 | EC07 (zero path) | C3 passes with `total=0`, `min=0` — degenerate intersection | TC-12 | Direct trigger (gap probe) |
+| `total_amount` spec conflict | Client-manipulated `total_amount` diverges from real cart subtotal (FR-08 vs FR-09 conflict) | TC-13 | Direct trigger (gap probe) |
 
-**Total: 12 TCs covering 18 ECs — 100% EP coverage + 1 additional gap probe (TC-12, added after human review).**
+**Total: 13 TCs covering 18 ECs — 100% EP coverage + 2 additional gap probes (TC-12, TC-13, added after human review).**
