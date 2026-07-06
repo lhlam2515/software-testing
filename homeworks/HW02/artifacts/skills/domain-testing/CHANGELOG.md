@@ -1,5 +1,44 @@
 # CHANGELOG — domain-testing
 
+## v0.5 — 2026-07-06
+
+**Source: retrospective ISTQB CTFL Ch.4 / Slide S04 audit of the skill itself (not a
+per-FR session).** The audit compared Step 4 against the course's own 9-point boundary
+model (Slide 26: LB-1/LB/LB+1, midpoint, UB-1/UB/UB+1, plus explicit extreme points
+`8*`/`9*` — "smallest/largest possible values via UI"). Finding: the skill's 3-point model
+correctly implements ISTQB's "3-value BVA" for *defined* boundaries, but had no counterpart
+for variables the skill itself already flags as having *no* defined upper bound (Gap Rule,
+Step 1/2 — e.g., FR-02's G4: "No explicit length limit for email and password"). Those
+gaps were left as dangling Implicit Gaps with no Step 4 test ever created for them —
+confirmed empirically: FR-02's `domain-testing.md` G4 has zero corresponding TC in either
+`domain-testing.md` or `bva.md`.
+
+**Changes made in response:**
+
+- Added **Extreme/Overflow Value Check** to Step 4: for every variable flagged as an
+  unbounded `Invalid/Gap` EC in Step 1/2, add exactly one Extreme Value TC instead of
+  leaving the gap uncovered by BVA
+- Defined a 3-tier priority for picking the extreme value: (1) DB column length from the
+  observed schema, (2) HTML `maxlength`/client cap observed during the Step 3.0 UI survey
+  — tested both through the UI (blocked) and via direct API call at the same length
+  (server-side enforcement), (3) a stated, reasoned stress value (e.g., 10,000-character
+  string, `2^31`) when neither constraint is known
+- Required `Defect Target` on Extreme TCs to name the specific failure mode: truncation,
+  DB/buffer overflow, unhandled exception/crash, performance degradation, or a
+  client/server boundary mismatch (client blocks it, server has no matching check) —
+  the last of these is only reachable via the direct-API variant, since the UI survey
+  alone hides it
+- Extended the `Boundary Point Type` enum in the TC-BVA-XX template with
+  `Extreme (Practical Max)` / `Extreme (Practical Min)`
+- Clarified the Step 4 scope statement: the 3-point model targets variables with a
+  *defined* boundary; unbounded variables (Gap Rule) route to Extreme/Overflow Value
+  Check instead — the two are no longer conflated under one instruction
+- Extended Quality Checklist from 16 to 17 items: every unbounded `Invalid/Gap` EC must
+  map to an Extreme/Overflow Value TC in Step 4
+- Known follow-up: FR-02's `bva.md` predates this version and does not yet have an
+  Extreme Value TC for G4 — needs a re-audit pass against v0.5, same pattern as the v0.3
+  gap-completeness retrofit
+
 ## v0.4 — 2026-07-02
 
 **TA feedback (verbatim, received 2026-07-02, 08:02):**

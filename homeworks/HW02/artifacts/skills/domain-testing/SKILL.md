@@ -275,9 +275,11 @@ before proceeding.
 **Goal:** Add high-value test cases that catch off-by-one defects at the exact turning
 points. These are additive — don't duplicate Step 3's midpoint cases.
 
-**Only target numeric/range variables with a defined boundary.** String format conditions
-(email pattern, etc.) are nominal — BVA doesn't apply. Timer values, counters, quantities,
-and amounts are BVA targets.
+**Only target numeric/range variables with a defined boundary** for the 3-point model below.
+String format conditions (email pattern, etc.) are nominal — BVA doesn't apply. Timer values,
+counters, quantities, and amounts are BVA targets. **Variables with no defined upper bound**
+(flagged via the Gap Rule in Step 1/2 — e.g., "no explicit length limit") are not a 3-point
+model target — route them to Extreme/Overflow Value Check below instead.
 
 **For each boundary, apply the 3-point model:**
 - `UB-1`: one unit before the upper boundary (should be in the valid/active state)
@@ -295,6 +297,33 @@ A single ON-point test with `max=1` passes both the correct and the hardcoded ve
 it can't tell them apart. A second ON-point test with `max=2` fails the hardcoded version
 and surfaces the bug. Name both TCs so the parameter difference is visible:
 e.g., `TC-BVA-05 (COUPON_A, max=1)` and `TC-BVA-06 (COUPON_B, max=2)`.
+
+**Extreme/Overflow Value Check (for variables with no defined upper bound)**
+
+Some variables have no spec-stated maximum (e.g., "no explicit length limit for
+email/password") — this is not a range with a defined boundary, so the 3-point model above
+does not apply. When Step 1/2 flagged this as an `Invalid/Gap` EC (Gap Rule), don't let it
+sit as a dangling gap with no BVA coverage — add exactly one Extreme Value TC per unbounded
+variable.
+
+**Pick the extreme value from the most reachable real constraint, in this priority order:**
+1. A DB column length observed in the schema (e.g., `VARCHAR(255)`) → test at `length + 1`.
+2. An HTML `maxlength` (or equivalent client cap) observed during the Step 3.0 UI survey →
+   test at `maxlength + 1` through the UI (should be blocked) **and** via a direct API call
+   at the same length (bypasses the client cap — tests server-side enforcement).
+3. If neither is known, pick a value that stresses the specific failure mode you're
+   targeting (e.g., a 10,000-character string, `2^31` for a 32-bit integer field) and state
+   that reasoning in `Target Variable State` — don't pick an arbitrary large number without
+   justification.
+
+**Name the specific failure mode in `Defect Target`**, same discipline as a normal boundary:
+truncation, DB/buffer overflow, unhandled exception or crash, timeout/performance
+degradation, or "client caps it but server has no matching check" (a client/server boundary
+mismatch — the UI survey alone won't catch this, since the UI silently prevents the case
+client-side; the direct-API variant is what surfaces it).
+
+**Use the same TC-BVA-XX format** as other BVA cases, with `Boundary Point Type` set to
+`Extreme (Practical Max)` or `Extreme (Practical Min)`.
 
 **For date/timestamp boundaries**, note the test design date in the TC and add a
 maintenance warning: "If executed after [design date], update `expired_at` to
@@ -317,7 +346,7 @@ the reader (and you) an immediate mental model of what's being tested.
 | **TC ID** | TC-BVA-XX |
 | **Test Case Name** | [What boundary moment this captures] |
 | **Target Variable** | `variable_name` |
-| **Boundary Point Type** | [UB / UB-1 / UB+1 / ON Point / OFF Point / Transition] |
+| **Boundary Point Type** | [UB / UB-1 / UB+1 / ON Point / OFF Point / Transition / Extreme (Practical Max) / Extreme (Practical Min)] |
 | **Target Variable State** | [Exact value at boundary — e.g., `count = 3`, `time_since_lock = 30s`] |
 | **Pre-conditions** | [How to set up this exact state] |
 | **Input — `field_name`** | `value` |
@@ -461,6 +490,7 @@ Options:
 - [ ] Every Implicit Gap and Spec Conflict from Step 1 maps to a gap-probe TC that specifically answers its behavioral question — verify row by row against the Step 1 gap table; EC coverage of the same class is not sufficient; observational gaps and intra-EC behavioral gaps each require their own TC even when all ECs are already covered
 - [ ] Gap-probe TCs have a multi-branch Expected Result listing every plausible outcome, not a single assertion
 - [ ] BVA parameter variation applied wherever the boundary condition has a configurable parameter — at least 2 different parameter values tested at the ON point
+- [ ] Every variable flagged as an unbounded `Invalid/Gap` EC (no explicit max, Gap Rule) in Step 1/2 has a corresponding Extreme/Overflow Value TC in Step 4 — not left as a dangling gap with no boundary coverage
 - [ ] Date/timestamp BVA TCs include a maintenance note stating the design date and instructing the executor to update boundary values to `current_date` before running
 - [ ] The real UI was surveyed via `playwright-cli` before any `Steps` cell was drafted; Steps use labels/URLs actually observed, not guessed from the spec
 - [ ] Step 1 `Expected Error / Behavior` and Step 2 `Expected System Output` contain no literal `HTTP <status>` wording (except ECs that classify the response shape itself) — verify with `grep -n "HTTP [0-9]"` restricted to the Step 1/Step 2 table regions
