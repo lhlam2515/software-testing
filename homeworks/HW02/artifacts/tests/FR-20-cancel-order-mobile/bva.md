@@ -56,7 +56,7 @@ Parameter Variation does not apply — the boundary is a fixed state-machine tra
 | **Steps** | 1. Open Hồ sơ, locate the card showing "Trạng thái: Đã xác nhận" · 2. Tap `Hủy đơn` |
 | **Expected Result** | ✅ UI: "Trạng thái" transitions to "Đã hủy", `Hủy đơn` button disappears. API cross-check: `PUT /api/orders/:id/cancel` → HTTP 200 + `{"message": "Order canceled successfully"}`. |
 | **Verification Points** | 1. UI shows "Trạng thái: Đã hủy" immediately after the tap (this is the state transition being verified — confirms the last allowed value is not mistakenly rejected) · 2. API cross-check: HTTP 200 with the expected body · 3. API cross-check: `GET /api/orders/my-orders` confirms `status = "canceled"` |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ### TC-BVA-02 — `order.status = shipping` (UB+1, first forbidden state)
 
@@ -74,7 +74,7 @@ Parameter Variation does not apply — the boundary is a fixed state-machine tra
 | **Steps** | 1. Open Hồ sơ, confirm the "Đang giao" card shows no `Hủy đơn` button · 2. Call `PUT /api/orders/:id/cancel` directly with a valid token for `test@eshop.com` |
 | **Expected Result** | ❌/BUG — two plausible outcomes at this exact turning point: · If HTTP 4xx + an error refusing the cancel → the deny-list/allow-list boundary is implemented correctly per SRS FR-20/FR-10; the UB+1 point correctly falls outside the allowed region. · If HTTP 200 and the order transitions to `canceled` → **confirms the Defect Target bug**: the boundary check treats `shipping` as still allowed, exactly the wrong-operator mistake this TC targets. |
 | **Verification Points** | 1. UI: no `Hủy đơn` button at `shipping` · 2. API cross-check: record the actual HTTP status of the direct call — this is the load-bearing check for this boundary · 3. API cross-check: if 200, re-check `order.status` via `GET /api/orders/my-orders` to confirm the unintended transition |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ❌ FAIL — BUG-20-001 |
 
 ### TC-BVA-03 — `order.status = pending` (LB, first allowed state)
 
@@ -91,7 +91,7 @@ Parameter Variation does not apply — the boundary is a fixed state-machine tra
 | **Steps** | 1. Open Hồ sơ, locate the card showing "Trạng thái: Chờ xác nhận" · 2. Tap `Hủy đơn` |
 | **Expected Result** | ✅ UI: "Trạng thái" transitions to "Đã hủy", `Hủy đơn` button disappears. API cross-check: HTTP 200 + `{"message": "Order canceled successfully"}`. |
 | **Verification Points** | 1. UI shows "Trạng thái: Đã hủy" immediately · 2. API cross-check: HTTP 200 with the expected body · 3. API cross-check: `GET /api/orders/my-orders` confirms `status = "canceled"` |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ### TC-BVA-04 — `order.status = delivered` (UB+2, second forbidden state)
 
@@ -109,7 +109,7 @@ Parameter Variation does not apply — the boundary is a fixed state-machine tra
 | **Steps** | 1. Open Hồ sơ, confirm the "Đã giao" card shows no `Hủy đơn` button · 2. Call `PUT /api/orders/:id/cancel` directly with a valid token for `test@eshop.com` |
 | **Expected Result** | ❌ UI: no `Hủy đơn` button at `delivered`. API cross-check: HTTP 4xx + an error (order already delivered, cannot be canceled). |
 | **Verification Points** | 1. UI: no `Hủy đơn` button at `delivered` · 2. API cross-check: record the actual HTTP status of the direct call · 3. If 200: BUG — confirms the narrow-deny-check defect target |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 

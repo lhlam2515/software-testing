@@ -134,7 +134,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name="Basic Men's T-Shirt", price=150000, description="100% cotton material", category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` for the imported product |
 | **Expected Result** | ✅ After clicking `Import 1 sản phẩm`, the rendered report shows 1 success, 0 failures, and the imported row for "Basic Men's T-Shirt" is accepted. API cross-check: HTTP 200; report shows 1 success, 0 failures; "Basic Men's T-Shirt" appears in `GET /api/products` after import |
 | **Verification Points** | 1. After `Import 1 sản phẩm`, the rendered report shows the import succeeded · 2. The rendered report shows 1 success and 0 failures · 3. API cross-check: HTTP status = 200 · 4. API cross-check: Response body contains a field indicating rows succeeded = 1, rows failed = 0 · 5. API cross-check: `GET /api/products` returns the product with `name = "Basic Men's T-Shirt"` and `price = 150000` |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 
@@ -153,7 +153,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with 3 rows: Product Alpha (100000), Product Beta (200000), Product Gamma (350000), all `category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 3 sản phẩm` button appear · 4. Click `Import 3 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` for all 3 new products |
 | **Expected Result** | ✅ After clicking `Import 3 sản phẩm`, the rendered report shows 3 succeeded and 0 failed for Product Alpha, Product Beta, and Product Gamma. API cross-check: HTTP 200; all 3 products exist in DB after import; report: 3 succeeded, 0 failed |
 | **Verification Points** | 1. After `Import 3 sản phẩm`, the rendered report shows the batch import succeeded · 2. The rendered report shows 3 succeeded and 0 failed · 3. API cross-check: HTTP status = 200 · 4. API cross-check: Product count increases by exactly 3 compared to before import · 5. API cross-check: "Product Alpha", "Product Beta", "Product Gamma" all found in `GET /api/products` |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 
@@ -173,7 +173,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **UI Fallback Note** | API-level execution retained. Starting the Admin app without a JWT renders only the Login form; there is no UI path to submit an import request with no token attached. |
 | **Expected Result** | ❌ No import result is shown in the Admin UI because the request is sent directly without an Authorization header and is rejected before any rendered report can appear. API cross-check: HTTP 401 Unauthorized; no products created in DB |
 | **Verification Points** | 1. No rendered import report is shown in the UI for this direct request path · 2. API cross-check: HTTP status = 401 · 3. API cross-check: Response body contains error message indicating missing authentication |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 
@@ -192,7 +192,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Steps** | 1. On `http://localhost:5173/login`, fill `Username` = `test@eshop.com` and `Mật khẩu` = `Test1234!`, then click `Sign In` · 2. Copy the storefront browser-storage key `token` into the Admin app as `adminToken`, reload `http://localhost:5174/`, and confirm the admin sidebar loads under that regular-user session · 3. In the left sidebar, click `Sản phẩm`, then in `📂 Import sản phẩm từ CSV` click `Choose File` to upload a CSV with one valid row (`name="Test", price=10000, category_id=1`) and confirm `Import 1 sản phẩm` appears · 4. Click `Import 1 sản phẩm` and inspect the rendered result |
 | **Expected Result** | ❌ After clicking `Import 1 sản phẩm`, the rendered result shows the regular-user session cannot complete the import and no success report is shown. API cross-check: HTTP 403 Forbidden; no products created |
 | **Verification Points** | 1. After `Import 1 sản phẩm`, the UI does not show a success import report · 2. The rendered result indicates the import was not allowed for that session · 3. API cross-check: HTTP status = 403 · 4. API cross-check: Response body contains error message indicating insufficient permissions |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ❌ FAIL — BUG-16-001 |
 
 ---
 
@@ -212,7 +212,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **UI Fallback Note** | API-level execution retained. The rendered Import flow only accepts a CSV file and always constructs a request containing a `products` array; there is no UI control that can submit a body without the `products` key. |
 | **Expected Result** | ❌ No import result is shown in the Admin UI because the request body is sent directly as `{}` and is rejected before any rendered report can appear. API cross-check: HTTP 400 Bad Request |
 | **Verification Points** | 1. No rendered import report is shown in the UI for this direct request path · 2. API cross-check: HTTP status = 400 · 3. API cross-check: Response body indicates invalid request body |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 
@@ -231,7 +231,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: empty `name`, `price=50000`, `category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` count is unchanged |
 | **Expected Result** | ❌ After clicking `Import 1 sản phẩm`, the rendered report shows 0 succeeded, 1 failed, and a reason for the empty `name`; no successful import is shown. API cross-check: HTTP 4xx or 200 with failure report; report: 0 succeeded, 1 failed with reason; product count in DB unchanged |
 | **Verification Points** | 1. After `Import 1 sản phẩm`, the rendered report shows the row failed · 2. The rendered report shows 0 succeeded, 1 failed, and a reason mentioning `name` · 3. API cross-check: HTTP status ≠ 200 (or 200 with error flag) · 4. API cross-check: Report contains failed row count = 1 and reason mentioning `name` · 5. API cross-check: `GET /api/products` count equals count before request (rollback confirmed) |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 
@@ -250,7 +250,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV file missing the `name` column header; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` count is unchanged |
 | **Expected Result** | ❌ After clicking `Import 1 sản phẩm`, the rendered report shows the row failed because the `name` field is absent and no successful import is shown. API cross-check: HTTP 4xx or failure report; 0 new products in DB |
 | **Verification Points** | 1. After `Import 1 sản phẩm`, the rendered report shows the row failed · 2. No successful import is shown in the rendered report · 3. API cross-check: Response contains error about `name` · 4. API cross-check: Product count does not increase |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 
@@ -269,7 +269,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name="Test zero price", price=0, category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` count is unchanged |
 | **Expected Result** | ❌ After clicking `Import 1 sản phẩm`, the rendered report shows the row failed because `price=0` is invalid and no successful import is shown. API cross-check: HTTP 4xx or failure report with reason about price; 0 products committed |
 | **Verification Points** | 1. After `Import 1 sản phẩm`, the rendered report shows the row failed · 2. The rendered report mentions an invalid `price` or shows no success for the row · 3. API cross-check: Error reason mentions `price must be positive` or equivalent · 4. API cross-check: Product count unchanged (rollback confirmed) |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ❌ FAIL — BUG-16-002 |
 
 ---
 
@@ -288,7 +288,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name="Test negative price", price=-1, category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` count is unchanged |
 | **Expected Result** | ❌ After clicking `Import 1 sản phẩm`, the rendered report shows the row failed because `price=-1` is invalid and no successful import is shown. API cross-check: HTTP 4xx or failure report; 0 products committed |
 | **Verification Points** | 1. After `Import 1 sản phẩm`, the rendered report shows the row failed · 2. No successful import is shown in the rendered report · 3. API cross-check: Error reason mentions `price` invalid · 4. API cross-check: Product count unchanged |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ❌ FAIL — BUG-16-002 |
 
 ---
 
@@ -307,7 +307,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name="Test bad price", price=abc, category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` count is unchanged |
 | **Expected Result** | ❌ After clicking `Import 1 sản phẩm`, the rendered report shows the row failed because `price=abc` is invalid and no successful import is shown. API cross-check: HTTP 4xx or failure report; 0 products committed |
 | **Verification Points** | 1. After `Import 1 sản phẩm`, the rendered report shows the row failed · 2. No successful import is shown in the rendered report · 3. API cross-check: Error reason mentions `price` must be a number · 4. API cross-check: Product count unchanged |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ❌ FAIL — BUG-16-002 |
 
 ---
 
@@ -326,7 +326,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV file missing the `price` column header for the row `name="Test no price"`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` count is unchanged |
 | **Expected Result** | ❌ After clicking `Import 1 sản phẩm`, the rendered report shows the row failed because the `price` field is absent and no successful import is shown. API cross-check: HTTP 4xx or failure report; 0 products committed |
 | **Verification Points** | 1. After `Import 1 sản phẩm`, the rendered report shows the row failed · 2. No successful import is shown in the rendered report · 3. API cross-check: Error reason mentions `price` is required or invalid · 4. API cross-check: Product count unchanged |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ❌ FAIL — BUG-16-002 |
 
 ---
 
@@ -345,7 +345,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with 3 rows: "Valid Product 1" (100000), "Invalid Row" (price=0), "Valid Product 2" (200000), all `category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 3 sản phẩm` button appear · 4. Click `Import 3 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` and search for "Valid Product 1" and "Valid Product 2" |
 | **Expected Result** | ❌ After clicking `Import 3 sản phẩm`, the rendered report shows the batch failed and no successful import is shown for "Valid Product 1" or "Valid Product 2". API cross-check: Failure report; "Valid Product 1" and "Valid Product 2" do **not** appear in DB; product count unchanged |
 | **Verification Points** | 1. After `Import 3 sản phẩm`, the rendered report shows the batch failed · 2. The rendered report does not show a successful import for "Valid Product 1" or "Valid Product 2" · 3. API cross-check: `GET /api/products` search "Valid Product 1" → 0 results · 4. API cross-check: `GET /api/products` search "Valid Product 2" → 0 results · 5. API cross-check: Product count equals count before request → full batch rollback confirmed |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ❌ FAIL — BUG-16-002 |
 
 ---
 
@@ -365,7 +365,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **UI Fallback Note** | API-level execution retained. A header-only CSV is rendered as "Import 0 sản phẩm" with the Import button disabled — client-side validation prevents submission of an empty `products` array through the UI. |
 | **Expected Result** | No rendered import report appears in the UI for this direct empty-array request; record the observed branch for the empty `products` case. API cross-check: _Multiple branches — record actual result:_ · If HTTP 400 → SUT correctly handles the "no products" edge case; record error message · If HTTP 200 with `imported=0` → SUT accepts empty batch; record as undocumented feature · If HTTP 500 → **BUG**: server crash on empty input |
 | **Verification Points** | 1. No rendered import report is shown in the UI for this direct request path · 2. API cross-check: HTTP status + response body + confirm no new products in DB |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 
@@ -384,7 +384,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name=<256-char string>, price=50000, category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` for the new product's `name` length |
 | **Expected Result** | After clicking `Import 1 sản phẩm`, record whether the rendered report shows a failed row or a successful import for the 256-character `name`. API cross-check: _Multiple branches:_ · If HTTP 4xx and 0 products → FR-16 enforces 255-char limit; record constraint as active · If HTTP 200 and product with truncated name → **BUG**: data silently truncated · If HTTP 200 and product with full 256-char name → FR-16 does not enforce limit; record gap with FR-15 |
 | **Verification Points** | 1. Record whether the rendered report shows failure or success after `Import 1 sản phẩm` · 2. If the UI shows success, note that the long-name row was accepted in the rendered report · 3. API cross-check: HTTP status + response + `GET /api/products` find the newly added product and check `name` length |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ❌ FAIL — BUG-16-004 |
 
 ---
 
@@ -403,7 +403,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Danh mục` and confirm category `99999` is not listed, then click `Sản phẩm` to return to `Quản lý Sản phẩm` · 3. In `📂 Import sản phẩm từ CSV`, click `Choose File` to upload a CSV with one row: `name="Test invalid category", price=50000, category_id=99999`, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check `GET /api/products` |
 | **Expected Result** | After clicking `Import 1 sản phẩm`, record whether the rendered report shows a failed row or a successful import for "Test invalid category". API cross-check: _Multiple branches:_ · If HTTP 4xx and 0 products → SUT validates FK constraint; record constraint as active · If HTTP 200 and product with `category_id=99999` in DB → **CRITICAL BUG**: dangling FK, corrupt data · If HTTP 500 (DB FK violation) → **BUG**: unhandled exception |
 | **Verification Points** | 1. Record whether the rendered report shows failure or success after `Import 1 sản phẩm` · 2. If the UI shows success, note that "Test invalid category" was accepted in the rendered report · 3. API cross-check: HTTP status + response body + `GET /api/products` search for "Test invalid category" |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ❌ FAIL — BUG-16-003 |
 
 ---
 
@@ -422,7 +422,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name="Test price as string", price=10000, category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the rendered report · 5. Cross-check the stored `price` via `GET /api/products` |
 | **Expected Result** | After clicking `Import 1 sản phẩm`, record whether the rendered report shows a failed row or a successful import for "Test price as string". API cross-check: _Multiple branches:_ · If HTTP 200 and product in DB with price=10000 → SUT coerces string to number; lenient input accepted · If HTTP 4xx → SUT strict type checking; `"10000"` rejected · If HTTP 200 and price=0 or NaN → **BUG**: incorrect type coercion |
 | **Verification Points** | 1. Record whether the rendered report shows failure or success after `Import 1 sản phẩm` · 2. If the UI shows success, note that "Test price as string" was accepted in the rendered report · 3. API cross-check: HTTP status + price value in DB if product was created |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS (with deviation) |
 
 ---
 
@@ -441,7 +441,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with one row: `name="Schema Probe Product", price=75000, category_id=1`; click `Choose File` to select it, then confirm the preview table and `Import 1 sản phẩm` button appear · 4. Click `Import 1 sản phẩm` and inspect the browser Network entry for `POST /api/admin/import-products` · 5. Record the raw JSON response body verbatim — every key, type, and value |
 | **Expected Result** | After clicking `Import 1 sản phẩm`, the rendered report should show the outcome for "Schema Probe Product"; record the visible success/failure details before inspecting Network. API cross-check: _Multiple branches — record actual result:_ · If response contains `{"imported": 1, "failed": 0, ...}` → document `imported` and `failed` as canonical field names · If response contains `{"success": 1}` or other schema → record actual field names and update Verification Points in TC-01, TC-02, TC-06 through TC-12 accordingly · If HTTP 500 → **BUG**: schema probe crashes the server on valid input |
 | **Verification Points** | 1. Record what the rendered report shows after `Import 1 sản phẩm` · 2. Note whether the UI presents the import as a success or failure before opening Network · 3. API cross-check: Record complete raw JSON response body · 4. API cross-check: List all top-level keys and their types · 5. API cross-check: Confirm "Schema Probe Product" appears in `GET /api/products` (validates import succeeded, not just response received) |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 
@@ -460,7 +460,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Prepare a CSV with 3 rows, each with a distinct price violation: "Invalid Row 1" (price=0), "Invalid Row 2" (price=-1), "Invalid Row 3" (price=abc); click `Choose File` to select it, then confirm the preview table and `Import 3 sản phẩm` button appear · 4. Click `Import 3 sản phẩm` and record the full rendered report · 5. Cross-check `GET /api/products` count is unchanged |
 | **Expected Result** | After clicking `Import 3 sản phẩm`, record whether the rendered report lists failure reasons for all three invalid rows or only part of the batch. API cross-check: _Multiple branches — record actual result:_ · If response lists 3 separate failure entries (one per row, each with a distinct reason) → SUT processes all rows before rolling back; SRS "lý do từng dòng" requirement satisfied · If response lists only 1 failure entry → SUT early-exits after first invalid row; rows 2 and 3 unreported → **undocumented behavior**: report is incomplete per SRS · If HTTP 4xx with no per-row detail → **BUG**: batch rejected without per-row report; "lý do" requirement violated |
 | **Verification Points** | 1. Record how many failed rows the rendered report shows after `Import 3 sản phẩm` · 2. Note whether the rendered report gives a distinct reason for each invalid row · 3. API cross-check: Product count unchanged (full rollback confirmed) · 4. API cross-check: Number of failure entries in response body (1 vs 3?) · 5. API cross-check: Each failure entry identifies which row and what reason? |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ❌ FAIL — BUG-16-002 |
 
 ---
 
@@ -479,7 +479,7 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 | **Steps** | 1. Open `http://localhost:5174/`, fill `Email` = `admin@eshop.com` and `Password` = `Admin123!`, then click `Login` · 2. In the left sidebar, click `Sản phẩm` to open `Quản lý Sản phẩm` and locate the `📂 Import sản phẩm từ CSV` panel · 3. Open the browser DevTools Network panel, then click `Choose File` and select `products.txt` (non-`.csv` extension, valid CSV content inside); record whether the file picker/preview accepts or rejects it · 4. If accepted, click `Import 1 sản phẩm` (or equivalent) and inspect the captured `POST /api/admin/import-products` request in the Network panel: record its `Content-Type` header and the raw request payload · 5. Repeat steps 3-4 with the properly named `.csv` version of the same content and compare the two captured requests |
 | **Expected Result** | Record the actual behavior for both branches. API cross-check: _Multiple branches — record actual result:_ · If the `Choose File` dialog or the Admin UI rejects `products.txt` before any request is sent → UI enforces the `.csv` extension client-side; record as active constraint · If `products.txt` is accepted and produces the same successful import as the `.csv` version → **Gap confirmed**: UI does not enforce the `.csv` extension, contradicting the SRS requirement · In either accepted case, confirm via the Network panel that `Content-Type: application/json` and the request payload is `{"products": [...]}`, not raw CSV text or `multipart/form-data` → confirms the Spec Conflict described in Step 1 (frontend parses CSV into JSON before sending) |
 | **Verification Points** | 1. Record whether `products.txt` (wrong extension) is accepted or rejected by the Admin UI before any request is sent · 2. If accepted, confirm the import outcome (success/failure) matches the `.csv` version · 3. Network panel: confirm the `Content-Type` header of the captured request · 4. Network panel: confirm the raw request payload is JSON (`{"products": [...]}`), not CSV text · 5. Screenshot the Network panel entry as evidence for both the extension-enforcement result and the JSON-body confirmation |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ❌ FAIL — BUG-16-005 |
 
 ---
 

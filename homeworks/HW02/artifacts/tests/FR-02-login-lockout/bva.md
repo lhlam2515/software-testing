@@ -98,7 +98,7 @@ Potential defects:
 | **Defect Target** | Catches wrong operator: if system uses `> 3` instead of `>= 3`, the 3rd failure will NOT lock → account still accepts the next attempt (test FAILS). If system correctly uses `>= 3`, the 3rd failure = LOCK immediately. |
 | **Expected Result** | ❌ After clicking `Sign In`, the login page shows a generic error message above the submit button, and the very next login attempt with the same `Username` becomes blocked. API cross-check: `login_attempts: 2 → 3` · **Account LOCKED immediately after this failure** (`locked_until` set to `datetime('now', '+30 seconds')`) · Next attempt (even with correct credentials) must be rejected while `locked_until > datetime('now')` |
 | **Verification Points** | 1. A generic error message is shown above the submit button after the 3rd failed `Sign In` · 2. The next login attempt from the same login page flow is rejected even with correct credentials · 3. API cross-check: Counter transitions from 2 → 3 (exactly 1 unit) · 4. API cross-check: After 30s (`locked_until` expired): retry with correct credentials → must succeed |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 
@@ -118,7 +118,7 @@ Potential defects:
 | **Defect Target** | Catches reset logic defect at UB: if the counter does not reset after success when `login_attempts=2`, the next failure would be counted as "3rd failure" (not the 1st of a new sequence) → lockout logic broken. |
 | **Expected Result** | ✅ After clicking `Sign In`, the user leaves the login page successfully, no error message is shown, and the next fresh failed login sequence starts from a clean state. API cross-check: JWT Token returned · `login_attempts: 2 → 0` (fully reset) · `locked_until` remains NULL · Afterwards: 1 new failure = `login_attempts = 1` (not 3) |
 | **Verification Points** | 1. No error message is shown after the successful `Sign In` · 2. The login page transitions away on success · 3. API cross-check: JWT returned in response · 4. API cross-check: To verify counter = 0: perform 1 failure → `login_attempts` must be 1 (not 3, no lock) · 5. API cross-check: If system is broken: 1 failure after → `login_attempts = 3` → lock → bug! |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 
@@ -139,7 +139,7 @@ Potential defects:
 | **Expected Result** | ❌ After clicking `Sign In`, the login page still shows a generic error message above the submit button because the lock window has not expired yet. API cross-check: Login **still rejected** (1 second remaining) · No JWT · `locked_until > datetime('now')` |
 | **Verification Points** | 1. A generic error message is shown above the submit button after `Sign In` · 2. The login page does not allow successful access while 1 second remains · 3. API cross-check: Response contains no `token` · 4. API cross-check: After `locked_until` passes (≥ 1 more second): retry — must succeed (confirms boundary is at `locked_until`) · 5. API cross-check: Record actual DB value of `locked_until` to confirm timing |
 | **Setup Note** | Precision timing is critical: use DB direct manipulation (`UPDATE users SET locked_until = datetime('now', '+1 seconds') WHERE email = 'test@eshop.com'`) rather than manual waiting for exactness. |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 
@@ -160,7 +160,7 @@ Potential defects:
 | **Expected Result** | ✅ After clicking `Sign In`, the user is allowed past the login page at the exact expiry boundary and no error message is shown. API cross-check: JWT Token returned · Account unlocked · ⚠️ **Gap G1:** Record `login_attempts` after unlock — does it auto-reset to 0? Or remain = 3? |
 | **Verification Points** | 1. No error message is shown after `Sign In` at the expiry boundary · 2. The login page transitions away successfully · 3. API cross-check: JWT returned · 4. API cross-check: Record `login_attempts` value after successful login: if = 3 (not reset), one more failure → re-locks immediately · 5. API cross-check: If = 0 (reset), behavior returns to normal |
 | **Setup Note** | This is the most important BVA test for `locked_until`. Use DB direct manipulation: `UPDATE users SET login_attempts = 3, locked_until = datetime('now') WHERE email = 'test@eshop.com'` — then submit the form immediately (within ~1 second) to stay at the boundary. |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 
@@ -180,7 +180,7 @@ Potential defects:
 | **Defect Target** | Baseline confirmation past the boundary: confirms account is fully accessible when `locked_until` is in the past. Catches race conditions or timer drift in the implementation. |
 | **Expected Result** | ✅ After clicking `Sign In`, the user is allowed past the login page because the lock window is already expired and no error message is shown. API cross-check: JWT Token returned · ⚠️ **Gap G1 (continued):** If `login_attempts` remains = 3 after unlock (not reset), one more failure → re-locks immediately (since `login_attempts ≥ 3`). This behavior must be documented as either a bug or expected behavior. |
 | **Verification Points** | 1. No error message is shown after `Sign In` past expiry · 2. The login page transitions away successfully · 3. API cross-check: JWT returned · 4. API cross-check: Record `login_attempts` after success: if reset = 0 → OK. If still = 3 → potential logic defect · 5. API cross-check: Perform 1 failure immediately after → observe counter behavior (verify Gap G1) |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 

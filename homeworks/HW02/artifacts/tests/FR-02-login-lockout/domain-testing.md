@@ -129,7 +129,7 @@ Format constraints sourced from:
 | **Steps** | 1. Ensure pre-conditions: set `login_attempts = 1` (perform one failed login beforehand) · 2. Open the login page at `http://localhost:5173/login` · 3. Enter `test@eshop.com` in the `Username` field · 4. Enter `Test1234!` in the `Mật khẩu` field · 5. Click `Sign In` |
 | **Expected Result** | ✅ After clicking `Sign In`, the user is redirected away from the login page to home/dashboard, no error message is shown, and the successful login resets `login_attempts` to `0`. API cross-check: HTTP 200 · Valid JWT Token returned and stored client-side · User redirected to home/dashboard · `login_attempts` reset to `0` |
 | **Verification Points** | 1. No error message displayed · 2. The login page transitions to home/dashboard after `Sign In` · 3. `login_attempts` = 0 (verify via DB or by performing 2 more failures → should require a full 3 to lock, not 2) · 4. API cross-check: Response body contains `token` field |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 
@@ -147,7 +147,7 @@ Format constraints sourced from:
 | **Steps** | 1. Open the login page at `http://localhost:5173/login` · 2. Leave the `Username` field **empty** · 3. Enter `Test1234!` in the `Mật khẩu` field · 4. Click `Sign In` |
 | **Expected Result** | ❌ After clicking `Sign In`, the `Username` field shows the browser validation message and the login form is not submitted. API cross-check: No HTTP request sent to `/api/auth/login`; no JWT; `login_attempts` not incremented |
 | **Verification Points** | 1. The `Username` field shows the HTML5 error tooltip after `Sign In` · 2. The login page stays on the form without submitting · 3. API cross-check: No network request to `/api/auth/login` (check DevTools → Network) |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 
@@ -165,7 +165,7 @@ Format constraints sourced from:
 | **Steps** | 1. Open the login page at `http://localhost:5173/login` · 2. Enter `invalid_no_at_sign` in the `Username` field · 3. Enter `Test1234!` in the `Mật khẩu` field · 4. Click `Sign In` |
 | **Expected Result** | ❌ After clicking `Sign In`, the `Username` field shows the browser email-format validation message and the login form is not submitted. API cross-check: No HTTP request sent to `/api/auth/login`; no JWT |
 | **Verification Points** | 1. The `Username` field shows the HTML5 format-error tooltip after `Sign In` · 2. The login page stays on the form without submitting · 3. API cross-check: No network request to `/api/auth/login` · 4. Also test with: `test@`, `@domain.com`, `test @domain.com` |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ❌ FAIL — BUG-02-001 |
 
 ---
 
@@ -184,7 +184,7 @@ Format constraints sourced from:
 | **Steps** | 1. Open the login page at `http://localhost:5173/login` · 2. Enter `notfound@example.com` in the `Username` field · 3. Enter `Test1234!` in the `Mật khẩu` field · 4. Click `Sign In` |
 | **Expected Result** | ❌ After clicking `Sign In`, the login page shows a generic error message above the submit button and does not log the user in. API cross-check: Server returns an error · Error message is **generic** — does not say "email not found" or "account not registered" · No JWT in response |
 | **Verification Points** | 1. A generic error message is shown above the submit button after `Sign In` · 2. The error does not reveal that the `Username` is not registered · 3. API cross-check: Response contains no `token` field · 4. API cross-check: Error message is present (not silent) |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 
@@ -203,7 +203,7 @@ Format constraints sourced from:
 | **Steps** | 1. Open the login page at `http://localhost:5173/login` · 2. Enter `test@eshop.com` in the `Username` field · 3. Leave the `Mật khẩu` field **empty** · 4. Click `Sign In` |
 | **Expected Result** | ❌ **Branch A:** After clicking `Sign In`, the `Mật khẩu` field is blocked by browser validation and the login form is not submitted. **Branch B:** After clicking `Sign In`, the login page shows a generic error message above the submit button and does not log the user in. API cross-check: **Branch A:** no request sent. **Branch B:** Request sent to server; server returns generic error; no JWT |
 | **Verification Points** | 1. ⚠️ **Gap:** SRS does not explicitly state `required` attribute for the password field at login — record actual behavior · 2. If Branch A, confirm the `Mật khẩu` field is blocked before submission · 3. If Branch B, confirm a generic error message is shown above the submit button · 4. API cross-check: If Branch B: check `login_attempts` — does it increment? (empty password = wrong password?) · 5. API cross-check: No JWT in either case |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 
@@ -222,7 +222,7 @@ Format constraints sourced from:
 | **Steps** | 1. Reset test account to `login_attempts = 0` (if needed) · 2. Open the login page at `http://localhost:5173/login` · 3. Enter `test@eshop.com` in the `Username` field · 4. Enter `WrongPass1!` in the `Mật khẩu` field · 5. Click `Sign In` · 6. Observe response and verify counter |
 | **Expected Result** | ❌ After clicking `Sign In`, the login page shows a generic error message above the submit button and does not log the user in. API cross-check: `login_attempts` increments from `0 → 1` (exactly 1 unit) · No JWT |
 | **Verification Points** | 1. A generic error message is shown above the submit button after `Sign In` · 2. The error does not say the `Mật khẩu` is wrong · 3. API cross-check: Response contains no `token` · 4. API cross-check: Verify `login_attempts` = 1: perform one more failure → `login_attempts` = 2; third failure → `login_attempts` = 3 → lock triggers (indirect verification of EC13) |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ❌ FAIL — BUG-02-003 |
 
 ---
 
@@ -242,7 +242,7 @@ Format constraints sourced from:
 | **Expected Result** | ❌ After clicking `Sign In`, the login page shows a generic error message above the submit button and does not log the user in even though the `Username` and `Mật khẩu` are correct. API cross-check: Login **rejected** despite completely correct credentials · No JWT |
 | **Verification Points** | 1. A generic error message is shown above the submit button after `Sign In` · 2. The error does not reveal that the account is locked or how much time remains · 3. API cross-check: Response contains no `token` · 4. API cross-check: ⚠️ **Gap G2:** Record `login_attempts` after this attempt — does the counter increment to 4? |
 | **Note** | EC10 (`login_attempts ≥ 3` = state locked) and EC12 (`locked_until > NOW()` = window active) cannot be separated in practice — they always coexist when the account is locked. Error Isolation is not violated because this is a composite system-state, not two independent inputs. |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ---
 

@@ -133,7 +133,7 @@ Backend at `:3000`, frontend-mobile (Expo web export) at `:8081`. The app is har
 | **Steps** | 1. Tap `Chào, Test User` on the nav bar to open the Hồ sơ screen · 2. Under "Lịch sử đơn hàng", locate the card showing "Trạng thái: Chờ xác nhận" · 3. Tap `Hủy đơn` on that card |
 | **Expected Result** | ✅ UI: the card's "Trạng thái" line updates in place to "Đã hủy", the `Hủy đơn` button disappears, no other toast/message appears. API cross-check: `PUT /api/orders/:id/cancel` → HTTP 200 + `{"message": "Order canceled successfully"}`. |
 | **Verification Points** | 1. UI shows "Trạng thái: Đã hủy" immediately, no reload needed · 2. UI: `Hủy đơn` button no longer present on this card · 3. API cross-check: response is HTTP 200 with body exactly `{"message": "Order canceled successfully"}` · 4. API cross-check: subsequent `GET /api/orders/my-orders` returns `status = "canceled"` for this order |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ### TC-02 — Cancel order from `confirmed` status (happy path)
 
@@ -148,7 +148,7 @@ Backend at `:3000`, frontend-mobile (Expo web export) at `:8081`. The app is har
 | **Steps** | 1. Tap `Chào, Test User` to open Hồ sơ · 2. Locate the card showing "Trạng thái: Đã xác nhận" · 3. Tap `Hủy đơn` |
 | **Expected Result** | ✅ UI: "Trạng thái" updates to "Đã hủy", `Hủy đơn` button disappears. API cross-check: HTTP 200 + `{"message": "Order canceled successfully"}`. |
 | **Verification Points** | 1. UI shows "Trạng thái: Đã hủy" immediately · 2. `Hủy đơn` button disappears · 3. API cross-check: HTTP 200 with the expected body · 4. API cross-check: `GET /api/orders/my-orders` confirms `status = "canceled"` |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ### TC-03 — Cancel order already `delivered`
 
@@ -164,7 +164,7 @@ Backend at `:3000`, frontend-mobile (Expo web export) at `:8081`. The app is har
 | **UI Fallback Note** | The API cross-check verification point requires calling `PUT /api/orders/:id/cancel` directly, since there is no button to tap at this status - this confirms server-side enforcement, not just UI hiding. |
 | **Expected Result** | ❌ UI: no `Hủy đơn` button shown on the "Đã giao" order. API cross-check: a direct call to `PUT /api/orders/:id/cancel` is expected to return HTTP 4xx + an error (order already delivered, cannot be canceled). |
 | **Verification Points** | 1. UI: no `Hủy đơn` button exists on the "Đã giao" card · 2. API cross-check: record the actual HTTP status of the direct call · 3. API cross-check: if not 4xx, this is a BUG (backend does not enforce it, only the UI hides it) |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ### TC-04 — Cancel order already `canceled`
 
@@ -180,7 +180,7 @@ Backend at `:3000`, frontend-mobile (Expo web export) at `:8081`. The app is har
 | **UI Fallback Note** | The API cross-check verification point requires calling `PUT /api/orders/:id/cancel` directly, since there is no button to tap - confirms the backend rejects re-canceling a final-state order, not just the UI. |
 | **Expected Result** | ❌ UI: no `Hủy đơn` button on the "Đã hủy" order. API cross-check: a direct call is expected to return HTTP 4xx + an error (order already canceled). |
 | **Verification Points** | 1. UI: no `Hủy đơn` button exists · 2. API cross-check: record the actual HTTP status of the direct call · 3. If 200: BUG - an already-canceled order can be re-canceled |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ### TC-05 — Cancel without valid authentication
 
@@ -196,7 +196,7 @@ Backend at `:3000`, frontend-mobile (Expo web export) at `:8081`. The app is har
 | **Steps** | 1. Call `PUT /api/orders/:id/cancel` (id of a valid `pending`/`confirmed` order) with no `Authorization` header · 2. Repeat with `Authorization: Bearer invalid.token.value` |
 | **Expected Result** | ❌ API cross-check: both cases return HTTP 401 (or equivalent 4xx) + an error requiring login / rejecting the invalid token; the order's status is unchanged. |
 | **Verification Points** | 1. API cross-check: HTTP status = 401 (or 4xx) for both cases · 2. API cross-check: `GET /api/orders/my-orders` (with a different, valid token) confirms the status did not change |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ### TC-06 — Cancel a non-existent order
 
@@ -211,7 +211,7 @@ Backend at `:3000`, frontend-mobile (Expo web export) at `:8081`. The app is har
 | **Steps** | 1. Call `PUT /api/orders/999999/cancel` with a valid token for `test@eshop.com` |
 | **Expected Result** | ❌ API cross-check: HTTP 4xx (404 expected) + an error indicating the order was not found. |
 | **Verification Points** | 1. API cross-check: HTTP status is in the 4xx range · 2. API cross-check: body contains a "not found"-type error message |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ### TC-07 — Cancel order in `shipping` status (Gap-Probe — Spec Conflict)
 
@@ -227,7 +227,7 @@ Backend at `:3000`, frontend-mobile (Expo web export) at `:8081`. The app is har
 | **UI Fallback Note** | Step 2 must use a direct API call since the UI has no button to tap at this status - this is precisely the gap being probed: SRS FR-20/FR-10 forbids user-cancel from `shipping`, while API spec §4.6 describes the endpoint loosely as usable "while not yet delivered" (which would implicitly include `shipping`). |
 | **Expected Result** | Multiple plausible branches (no outcome assumed in advance): · If the API returns HTTP 4xx + an error refusing the cancel → confirms the backend follows SRS FR-20/FR-10 (blocks `shipping`), consistent with the UI; the gap closes in favor of SRS over the API spec wording. · If the API returns HTTP 200 and the order transitions to `canceled` → **serious BUG**: the backend allows canceling a `shipping` order in violation of SRS FR-20/FR-10; the restriction only exists client-side and can be bypassed via direct API calls - a state-machine invariant violation. |
 | **Verification Points** | 1. UI: no `Hủy đơn` button on the "Đang giao" order · 2. API cross-check: record the actual HTTP status of the direct call · 3. API cross-check: if 200, re-check `order.status` via `GET /api/orders/my-orders` · 4. Compare any returned error message against FR-10's "only Admin can act" wording |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ❌ FAIL — BUG-20-001 |
 
 ### TC-08 — Cancel another user's order (Gap-Probe — Ownership/IDOR)
 
@@ -243,7 +243,7 @@ Backend at `:3000`, frontend-mobile (Expo web export) at `:8081`. The app is har
 | **UI Fallback Note** | `test2@eshop.com`'s UI only lists `test2`'s own orders, with no way to see or enter another user's `order_id` - there is no UI path to reproduce this scenario. |
 | **Expected Result** | Multiple plausible branches (no outcome assumed in advance): · If the API returns HTTP 403/404 + an error denying access → the system checks ownership, safe. · If the API returns HTTP 200 and `test@eshop.com`'s order is canceled → **serious security BUG (IDOR)**: any user can cancel another user's order just by knowing the `order_id`. |
 | **Verification Points** | 1. API cross-check: record the actual HTTP status · 2. If 200: confirm via `GET /api/orders/my-orders` (using `test@eshop.com`'s token) that the order was unexpectedly moved to `canceled` · 3. Compare against FR-11 (view restricted to owner) to assess severity if the cancel permission is looser than the view permission |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS |
 
 ### TC-09 — Confirmation step before cancel (Gap-Probe — UX)
 
@@ -257,7 +257,7 @@ Backend at `:3000`, frontend-mobile (Expo web export) at `:8081`. The app is har
 | **Steps** | 1. Open Hồ sơ, locate the card with a `Hủy đơn` button · 2. Tap `Hủy đơn` exactly once and observe immediately, with no further action |
 | **Expected Result** | Empirical evidence already exists from the Step 3.0 survey (re-verify at execution time): · **[Observed in Step 3.0]** No confirmation dialog appears - the order is canceled immediately, "Trạng thái" jumps straight to "Đã hủy" after exactly one tap. This is a UX gap relative to the FR-24 convention (a confirm dialog is mandatory for cart-item deletion, an equally destructive action) - record as a **UX finding** to report (a single accidental tap permanently cancels an order with no way back). · If the official execution run finds a dialog does appear (behavior changed since the survey) → use `dialog-accept`/`dialog-dismiss` to test both branches, confirming the order only changes state on Confirm. |
 | **Verification Points** | 1. Observe immediately after the tap: dialog present or absent · 2. If absent: status changes after exactly one tap · 3. API cross-check: exactly one `PUT /api/orders/:id/cancel` request was sent (not two, from a double-submit) |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ✅ PASS (with deviation) |
 
 ### TC-10 — Status label color distinction across states (FR-11 cross-feature check)
 
@@ -271,7 +271,7 @@ Backend at `:3000`, frontend-mobile (Expo web export) at `:8081`. The app is har
 | **Steps** | 1. Open Hồ sơ, locate "Lịch sử đơn hàng" · 2. Visually compare the "Trạng thái: ..." text on cards showing different statuses (e.g. "Chờ xác nhận" vs "Đang giao" vs "Đã hủy") |
 | **Expected Result** | ✅ UI: each "Trạng thái" label uses a color that visually differentiates it from the other statuses (e.g. success/cancel in a distinct color from pending/shipping), per FR-11's explicit "phân biệt màu sắc" requirement. |
 | **Verification Points** | 1. Compare the rendered text color of "Trạng thái" across at least 3 different statuses · 2. If all statuses render with the identical color (e.g. plain black/default text with no accent), this is a BUG - FR-11 explicitly requires color differentiation, this is not a silent gap |
-| **Status** | ⬜ Not yet executed |
+| **Status** | ❌ FAIL — BUG-20-002 |
 
 ---
 
