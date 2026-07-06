@@ -35,12 +35,12 @@ Format constraints sourced from:
 
 ### Implicit Gaps
 
-| # | Gap | Risk if not clarified |
-| :--- | :--- | :--- |
-| G1 | Does `login_attempts` reset to 0 after `locked_until` expires? | If not: one more failure would re-lock immediately — different behavior from "first failure". |
-| G2 | Does `login_attempts` keep incrementing while the account is locked (`locked_until > NOW()`)? | Affects how many attempts are needed after unlock. |
-| G3 | Is lockout per-account or per-IP/session? | Affects whether the lockout can be bypassed by switching IP or session. |
-| G4 | No explicit length limit for email and password at login. | Must test with very long strings to detect potential bugs. |
+| # | Gap | Risk if not clarified | Coverage / Decision |
+| :--- | :--- | :--- | :--- |
+| G1 | Does `login_attempts` reset to 0 after `locked_until` expires? | If not: one more failure would re-lock immediately — different behavior from "first failure". | Covered — TC-BVA-04, TC-BVA-05 (bva.md) record the actual counter value after unlock |
+| G2 | Does `login_attempts` keep incrementing while the account is locked (`locked_until > NOW()`)? | Affects how many attempts are needed after unlock. | Observed as a side-effect of TC-BVA-03 execution, not a standalone TC |
+| G3 | Is lockout per-account or per-IP/session? | Affects whether the lockout can be bypassed by switching IP or session. | **Decision: Not tested.** Reason: schema scopes `login_attempts`/`locked_until` to the account row only, no IP/session column exists — a TC would only confirm what the schema already settles. |
+| G4 | No explicit length limit for email and password at login. | Must test with very long strings to detect potential bugs. | **Decision: Not tested.** Reason: field is unbounded (SQLite `TEXT`, no `maxlength`), so no defined boundary exists for BVA to target — this is a robustness/DoS concern, not EP/BVA. |
 
 ---
 

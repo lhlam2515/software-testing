@@ -35,13 +35,13 @@ Cross-feature note: FR-08 states the backend must recompute the order total inde
 
 ### Implicit Gaps
 
-| Variable | Gap | Risk |
-|:---|:---|:---|
-| `code` | Spec does not define case-sensitivity (`SAVE10` vs `save10`) | If case-insensitive, user typos pass silently; if case-sensitive, user gets an opaque error |
-| `total_amount` | API spec accepts `total_amount` from client, but FR-08 mandates backend recomputation — spec conflict | If client value is used, user can manipulate the discount threshold |
-| `discount_amount` | Spec does not define behavior when `fixed_value > total_amount` | `final_amount < 0` is a potential bug (discount exceeds order total) |
-| `uses_by_user` | Tracking mechanism not specified; unclear whether uses are rolled back when an order is cancelled | If no rollback, user loses usage slot when cancelling an order |
-| `expired_at` | Granularity undefined (day vs time); time zone not specified | Exact behavior at the boundary day (midnight cutoff?) is ambiguous |
+| Variable | Gap | Risk | Coverage / Decision |
+|:---|:---|:---|:---|
+| `code` | Spec does not define case-sensitivity (`SAVE10` vs `save10`) | If case-insensitive, user typos pass silently; if case-sensitive, user gets an opaque error | Covered — TC-05 (gap probe) |
+| `total_amount` | API spec accepts `total_amount` from client, but FR-08 mandates backend recomputation — spec conflict | If client value is used, user can manipulate the discount threshold | Covered — TC-13 (gap probe, added 2026-07-06) |
+| `discount_amount` | Spec does not define behavior when `fixed_value > total_amount` | `final_amount < 0` is a potential bug (discount exceeds order total) | Covered — TC-11 (gap probe) |
+| `uses_by_user` | Tracking mechanism not specified; unclear whether uses are rolled back when an order is cancelled | If no rollback, user loses usage slot when cancelling an order | **Decision: Deferred, not tested.** Reason: requires a cross-app, cross-FR flow (web checkout + Admin order-cancel) — a State Transition/integration concern, not a Domain Testing boundary of FR-09's own variables; cost disproportionate given FR-09 already has 13 TCs/18 ECs and the 2026-07-08 deadline. |
+| `expired_at` | Granularity undefined (day vs time); time zone not specified | Exact behavior at the boundary day (midnight cutoff?) is ambiguous | **Decision: Day-level covered, time zone excluded.** Reason: TC-BVA-07/08 confirm the spec's day-level "before" semantics; time zone is undefined in SRS/API spec and untestable without manipulating the system clock — an environment-level concern, not an input-parameter boundary, with negligible risk for a single-server deployment. |
 
 ---
 

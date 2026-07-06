@@ -27,6 +27,8 @@ EP (domain-testing.md) uses midpoint values (`price = 50000`, `price = 150000`) 
 
 Constraint: `price > 0` (strictly positive). No upper bound.
 
+> **Decision: Extreme/Overflow Value check excluded.** Reason: `price` has no spec-stated max, but SQLite `INTEGER` storage is practically unbounded with no client-side cap; an absurd value (e.g. `2^31`) is not plausible Admin input for bulk product import — fuzzing, not a business boundary. TC-BVA-01/02 already cover the spec-defined constraint (`price > 0`).
+
 ```
          INVALID                          VALID
     ─────────────────────┬─────────────────────────────────────────▶

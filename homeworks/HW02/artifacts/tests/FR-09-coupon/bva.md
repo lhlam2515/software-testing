@@ -22,6 +22,8 @@ BVA supplements Domain Testing (EP) by probing **exact boundary points** — whe
 
 String conditions (`code` format, case sensitivity) are not BVA targets — covered by EP gap tests.
 
+> **Decision: Extreme/Overflow Value check excluded.** Reason: `total_amount`, `discount_value`, `max_uses_per_user` have no spec-stated max, but 64-bit SQLite `INTEGER` storage makes a realistic overflow implausible; hitting one needs an Admin to hand-craft an absurd value (e.g. `2^31`), outside FR-09's actual business rules — fuzzing, not a business boundary.
+
 ---
 
 ## 2. Target Variables & Boundary Maps
