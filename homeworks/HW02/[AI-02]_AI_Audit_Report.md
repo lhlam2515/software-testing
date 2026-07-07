@@ -10,8 +10,8 @@
 | Student ID:             | 23127216                                |
 | Class / Cohort:         | 23KTPM1                                 |
 | Assignment ID:          | HW#02                                   |
-| Assignment date:        | 22/06/2026                              |
-| AI tool(s) used:        | Claude Code                             |
+| Assignment date:        | 07/07/2026                              |
+| AI tool(s) used:        | Claude Code, Codex                      |
 | AI tool(s) used:        | [X] Yes [ ] No                          |
 
 ---
@@ -57,13 +57,10 @@ Deliverables written to disk:
 
 #### (4) Reasoning (ISTQB / S04)
 
-ISTQB FL 4.2 EP applied correctly across FR-02's functional domain: valid groupings for email format, existence, password match, counter threshold, lockout window, counter behavior, JWT output, and error message content. However, there are two deficiencies that required to be corrected before execution:
+ISTQB FL 4.2 EP correctly applied: valid groupings for email format, existence, password match, counter threshold, lockout window, JWT output, error messages. Two deficiencies found:
 
-- First, wrong variable names (`failed_login_count`, `lock_timer`): design prompt (Entry 002) had only `srs.md`, no DB schema, so AI inferred names from SRS prose instead of the real schema (`login_attempts`, `locked_until`). Surfaced only at execution, when the SQL fixture failed on the wrong columns.
-
-- Second, Group 9 out-of-scope (EC23, EC24: display position from FR-22): Entry 002's guideline to pull from "functional specs, UI designs, and database/API schemas," combined with FR-02's SRS cross-reference to FR-22, pulled a GUI conformance concern into a functional EP set. Not domain testing scope.
-
-The out-of-scope ECs slipped through because Step 2's output wasn't reviewed carefully before Step 3 built on it; a later, dedicated audit pass caught it.
+- **Wrong variable names** (`failed_login_count`, `lock_timer`): prompt (Entry 002) gave only `srs.md`, no DB schema, so AI inferred names instead of using the real schema (`login_attempts`, `locked_until`). Caught only at execution, when SQL fixtures failed on the wrong columns.
+- **Group 9 out of scope** (EC23, EC24: display position from FR-22): SRS cross-reference to FR-22 pulled a GUI conformance concern into the EP set, not domain testing scope. Slipped through because Step 2 wasn't reviewed before Step 3 built on it; caught by a later dedicated audit pass.
 
 #### (5) Student Fix
 
@@ -102,11 +99,10 @@ Deliverables written to disk:
 
 #### (4) Reasoning (ISTQB / S04)
 
-ISTQB FL 4.2.1 EP requires identifying every partition where the system behaves identically. AI covered all 5 conditions (C1-C5) with variable names sourced directly from `api_specification.md`, avoiding FR-02's naming deficiency.
+ISTQB FL 4.2.1 EP correctly applied: all 5 conditions (C1-C5) covered, variable names sourced directly from `api_specification.md` (avoiding FR-02's naming issue).
 
-- Splitting Rule (S04 Step 2) correctly applied to `type` (percent vs fixed) in Group 7; EC17 reused as a shared negative-path expectation across TCs. Both are improvements over the FR-02 design.
-
-However, in step 1, AI flagged `min_order_amount >= 0` as an implicit constraint (Gap G5), but Step 3 never turned it into a TC. EC07 was exercised only with positive values (TC-01, TC-02), so the degenerate `total_amount = min_order_amount = 0` path went untested despite AI having already surfaced the constraint.
+- Splitting Rule (S04 Step 2) correctly applied to `type` (percent vs fixed) in Group 7; EC17 reused as a shared negative-path expectation, both improvements over FR-02.
+- **Gap dropped**: Step 1 flagged `min_order_amount >= 0` (Gap G5), but Step 3 never converted it into a TC. EC07 exercised only with positive values (TC-01, TC-02); the zero-amount degenerate path went untested.
 
 #### (5) Student Fix
 
@@ -145,15 +141,13 @@ Deliverables written to disk:
 
 #### (4) Reasoning (ISTQB / S04)
 
-ISTQB FL 4.2.1 + S04 applied correctly: identified the Spec Conflict (SRS: CSV upload; API: JSON body), scoped testing to the JSON layer, and applied Must-Be, Range, and Splitting rules to produce 22 ECs across 7 groups and 16 base TCs. Gap-probe TCs were generated for 4 of 7 Step 1 Implicit Gaps (TC-13 to TC-16); three gaps were correctly identified in Step 1 but never converted into a TC:
+ISTQB FL 4.2.1 + S04 applied correctly: Spec Conflict identified (SRS: CSV upload vs API: JSON body), testing scoped to the JSON layer, Must-Be/Range/Splitting rules produced 22 ECs across 7 groups, 16 base TCs. Gap-probe TCs generated for 4 of 7 Step 1 gaps (TC-13 to TC-16); 3 gaps flagged but never converted to a TC:
 
-- Gap #1 (Spec Conflict — input layer): SRS requires a `.csv` file, API spec accepts JSON only; no TC verified whether the Admin UI actually enforces the `.csv` extension.
+- **Gap #1** (Spec Conflict, input layer): no TC verified whether the Admin UI enforces the `.csv` extension.
+- **Gap #6** (report response schema): report field names (`imported`, `failed`, `errors[]`) asserted by every TC but never empirically confirmed.
+- **Gap #7** (all-rows-invalid rollback): TC-12 covers only a mixed batch; early-exit vs. full-scan behavior on an all-invalid batch left unverified.
 
-- Gap #6 (import report response schema): no gap-probe TC created, so every TC asserting report field names (`imported`, `failed`, `errors[]`) relies on values never empirically confirmed.
-
-- Gap #7 (all-rows-invalid rollback): TC-12 covers only a mixed valid/invalid batch; whether the SUT early-exits or full-scans before rollback on an all-invalid batch was left unverified.
-
-Same failure pattern as FR-09's EC07 miss: Step 1 (gap analysis) and Step 3 (TC selection) ran independently, with nothing cross-checking that every Step 1 gap produced a Step 3 TC.
+Same failure pattern as FR-09: Step 1 (gap analysis) and Step 3 (TC selection) ran independently; nothing cross-checked that every flagged gap produced a TC.
 
 #### (5) Student Fix
 
@@ -192,15 +186,12 @@ Deliverables written to disk:
 
 #### (4) Reasoning (ISTQB / S04)
 
-ISTQB FL 4.2 (EP) + BVA applied correctly: `order.status` treated as an ordinal variable across `pending`, `confirmed`, `shipping`, `delivered`, plus the `canceled` terminal value.
+ISTQB FL 4.2 (EP) + BVA applied correctly: `order.status` treated as ordinal (`pending` → `confirmed` → `shipping` → `delivered`, plus terminal `canceled`).
 
-- Splitting Rule isolates `shipping` as its own EC (EC03) instead of a generic "non-cancelable" class, necessary because `shipping` is the exact Spec Conflict target (SRS forbids user-cancel here; API section 4.6 wording implicitly permits it).
-
-- BVA carried the same ordinal ranking through the `confirmed` to `shipping` boundary, naming the defect class (deny-list vs. allow-list logic) each TC exposes.
-
-- Gap-probe TCs were correctly generated for the three genuinely undocumented behaviors flagged in Step 1 (order ownership, `shipping` cancel, confirm-dialog existence).
-
-However, Step 1 recorded FR-11's status-label requirement as one cross-feature constraint with two parts, Vietnamese translation and color distinction, but Step 2's EC group for `result` (EC14-EC16) only covered the translation half; the color half was silently dropped despite being written down one step earlier.
+- Splitting Rule isolates `shipping` as its own EC (EC03), not a generic "non-cancelable" class; needed because `shipping` is the exact Spec Conflict target (SRS forbids cancel here; API §4.6 implicitly permits it).
+- BVA carried the same ordinal ranking through the `confirmed`→`shipping` boundary, naming the defect class (deny-list vs. allow-list) each TC exposes.
+- Gap-probe TCs correctly generated for all 3 undocumented behaviors flagged in Step 1 (order ownership, `shipping` cancel, confirm-dialog existence).
+- **Gap dropped**: FR-11's status-label requirement has two parts (Vietnamese translation + color distinction); Step 2's EC group (EC14-EC16) covered only translation. Color was dropped despite being flagged in Step 1.
 
 #### (5) Student Fix
 
@@ -237,15 +228,14 @@ Deliverables written to disk:
 
 #### (4) Reasoning (ISTQB / S04)
 
-ISTQB FL Chapter 5 (Defect Management) requires a defect report to include reproduction steps, severity classification, and expected-vs-actual evidence, and requires that only *confirmed* discrepancies (backed by an executed test) be logged as defects. AI satisfied this correctly for all 17 bugs at synthesis time: it read only from `execution-log.md` (not re-deriving conclusions on its own), classified severity consistently with each log's own classification, and wrote reproducible English steps.
+ISTQB FL Ch.5 (Defect Management) requires reproduction steps, severity classification, expected-vs-actual evidence, and only *confirmed* discrepancies (backed by an executed test) logged as defects. AI satisfied this for all 17 bugs: read only from `execution-log.md` (no self-derived conclusions), classified severity consistent with each log, wrote reproducible English steps.
 
-- AI correctly declined to log SC-09-001 (FR-09's `total_amount` client-manipulation vs. FR-08's backend-recompute rule) as a confirmed bug at synthesis time (21:44-21:57, 03/07/2026), since it had no EC ID, no TC, and no execution-log entry, an untested spec conflict is not a confirmed defect. It documented it separately under "Untested Spec Conflicts" instead, correctly applying the ISTQB distinction between a suspected discrepancy and a confirmed incident.
-
-- Three days later, once TC-13 was added and executed (06/07/2026), confirming the discrepancy as a real defect, `BUG_REPORT.md` was updated the same evening, 37 minutes after the TC-13 design commit (`1cdb554`, 20:41) to `685083c` (21:18) adding `BUG-09-007`. This is expected artifact evolution as new test cases close a previously-flagged gap, not a correction of an AI error, so no student fix was required on the original synthesis itself.
+- Correctly declined to log SC-09-001 (FR-09 `total_amount` client-manipulation vs. FR-08 backend-recompute rule) as a bug at synthesis time (21:44-21:57, 03/07/2026): no EC ID, no TC, no execution-log entry. Logged instead under "Untested Spec Conflicts", correctly distinguishing a suspected discrepancy from a confirmed incident.
+- 3 days later, TC-13 was added and executed (06/07/2026), confirming the discrepancy. `BUG_REPORT.md` was updated the same evening (commit `685083c`, 21:18, 37 min after the TC-13 commit `1cdb554`) adding `BUG-09-007`, expected artifact evolution from new test evidence, not a correction of an AI error.
 
 #### (5) Student Fix
 
-No correction needed, the synthesis logic was sound at the time it ran. `BUG-09-007` was added later (commit `685083c`, 21:18 06/07/2026) once TC-13 execution confirmed `SC-09-001`, updating the header to "Total bugs found: 18" and severity distribution to "High: 10, Medium: 5, Low: 3", and linking GitHub Issue [#30](https://github.com/lhlam2515/software-testing/issues/30). This is a downstream update driven by new test execution evidence, not a fix to an AI mistake.
+No correction needed: synthesis logic was sound at the time it ran. `BUG-09-007` was added later (commit `685083c`, 21:18 06/07/2026) once TC-13 confirmed `SC-09-001`: header updated to "Total bugs found: 18", severity to "High: 10, Medium: 5, Low: 3", linked to GitHub Issue [#30](https://github.com/lhlam2515/software-testing/issues/30). Downstream update from new evidence, not an AI-error fix.
 
 ---
 
@@ -278,9 +268,9 @@ Deliverables written to disk:
 
 #### (4) Reasoning (ISTQB / S04)
 
-v0.1 correctly implemented ISTQB FL 4.2/4.3's Domain Testing plus BVA pipeline: Phase 0 setup, Step 1 Variables, Step 2 Equivalence Classes via S04's four partition rules, Step 3 minimum EC-covering TCs, Step 4 3-point BVA. What it lacked was not technique but enforcement: it was a direct port of one successful FR-02 session, so every rule it encoded was a description of what had just happened, not a check that the same rule would hold on a different feature. Nothing in v0.1 forced the agent to verify, before finishing, that a written-down rule had actually been followed.
+v0.1 correctly implemented ISTQB FL 4.2/4.3's Domain Testing + BVA pipeline (Phase 0 setup, Step 1 Variables, Step 2 EC via S04's four partition rules, Step 3 minimum EC-covering TCs, Step 4 3-point BVA). Gap was enforcement, not technique: v0.1 was a direct port of one successful FR-02 session, so its rules described what had just happened rather than checking that the same rule held on a different feature.
 
-Each upgrade from v0.2 to v0.5 closes one instance of that same enforcement gap, only after a real FR artifact or the TA exposed a case where the missing check mattered (see Student Fix). The direction is consistent: v0.1 was a one-pass generator that trusted its own output; v0.2 through v0.5 turned it into a pipeline that checks its own output against a rule before stopping.
+Each upgrade (v0.2-v0.5) closes one instance of that enforcement gap, triggered by a real FR artifact or TA feedback (see Student Fix): v0.1 was a one-pass generator that trusted its own output; v0.2-v0.5 turned it into a pipeline that checks its own output against a rule before stopping.
 
 #### (5) Student Fix
 
@@ -291,7 +281,7 @@ Each upgrade from v0.2 to v0.5 closes one instance of that same enforcement gap,
 | 3 | v0.1-v0.3 Step 3.0 (absent) and Expected Result field | No UI survey step; `Steps` and `Expected Result` described curl/API calls and literal HTTP/JSON instead of real UI interaction | v0.4: added mandatory Step 3.0 UI Survey via `playwright-cli`, two-tier Expected Result (UI-observable, then API cross-check) |
 | 4 | v0.1-v0.4 Step 4 BVA (3-point model only) | Unbounded Invalid/Gap ECs (no defined upper boundary) had no BVA counterpart; confirmed empirically that FR-02's G4 has zero corresponding TC | v0.5: added Extreme/Overflow Value Check to Step 4, with a 3-tier priority for picking the extreme value and a required Defect Target |
 
-FR-02's G4, the case that motivated v0.5, was re-audited on 06/07/2026 (commit `3d6aa12`): decision was not to add a TC, `email`/`password` are unbounded with no defined boundary, so BVA has no target and the concern is robustness/DoS, outside EP/BVA scope. Documented in `domain-testing.md`'s Coverage/Decision column instead.
+FR-02's G4 (the case that motivated v0.5) was re-audited 06/07/2026 (commit `3d6aa12`): decision was no TC. `email`/`password` are unbounded with no defined boundary, so BVA has no target; concern is robustness/DoS, outside EP/BVA scope. Documented in `domain-testing.md`'s Coverage/Decision column instead.
 
 ---
 
@@ -308,15 +298,27 @@ FR-02's G4, the case that motivated v0.5, was re-audited on 06/07/2026 (commit `
 
 ## 5. Conclusion (When should AI be used or not)
 
-*Điền sau khi hoàn thành toàn bộ bài.*
+**Trust for technique execution.** EP's four partition rules, minimum EC-covering test cases, and 3-point BVA all held up: 0 of 6 artifacts were INVALID. Every defect found was a completeness or grounding failure, not a technique failure.
+
+**Do not trust without a verification step:**
+
+- **Closing the gap-to-test loop**: FR-09, FR-16, and FR-20 all show the same failure. A gap correctly flagged in Step 1 never became a Step 3 TC, because EC minimization stops once coverage *looks* complete.
+- **Inferring unobserved facts**: FR-02's variable names came from SRS prose, not the real `users` schema; the mismatch surfaced only at execution.
+- **Judging assignment scope**: FR-20's self-driven gap-analysis proposed 5 test candidates; 4 were out of scope once checked against the TA-confirmed function-testing-through-UI mandate.
+
+**Verdict**: reliable technique executor, poor completeness auditor of its own output. Use it for the first pass of any EP/BVA suite, but budget a separate pass (human or tool-enforced) that cross-checks every flagged gap against the final TC list. Encoded here as the `domain-testing` skill's v0.3 Gap Completeness Cross-Check.
 
 ---
 
 ## 6. Mandatory Disclosure
 
-*[Điền sau khi hoàn thành — mô tả cụ thể AI đóng góp gì, bạn sửa gì, và những gì bạn tự làm hoàn toàn.]*
+- **Test design** (EC + BVA + TC tables, FR-02/09/16/20): generated by **Claude Code**; I reviewed and corrected 8 items across 4 artifacts (FR-02: 2, FR-09: 2, FR-16: 3, FR-20: 1, itemized in each artifact's Student Fix table above).
+- **Test execution**: **Codex** ran all 70 TCs via the `fr-execution` skill, filled in each `execution-log.md` Actual Result, captured screenshots; I verified every actual-vs-expected comparison and root-caused each discrepancy against server code before accepting a verdict.
+- **`BUG_REPORT.md` + 18 GitHub Issues**: synthesized by **Claude Code** from Codex's execution logs; I reviewed each synthesis against its log, and held `SC-09-001` out of the confirmed-bug count until TC-13 confirmed it.
+- **AI Gap Analysis tables** (`REPORT.md`): written entirely by me, no AI involved.
+- **AI Critique** (`REPORT.md` §6): drafted by Claude Code from patterns documented above, reviewed by me before acceptance.
 
-> The Domain Testing equivalence classes, BVA test cases, and test case tables for FR-02, FR-09, FR-16, and FR-20 were initially generated by **Claude Code**; I reviewed and corrected [X] items across [N] artifacts. The AI Gap Analysis, bug reports, AI Critique, and GitHub Issues screenshots were written entirely by me. I confirm I did not use AI to generate any artifact listed in the prohibited category.
+> Execution recording, bug write-ups, GitHub Issues, and the AI Critique deviate from course policy section 11 ("Bug reports: 100% student-written; AI may not draft the description") and the AI-05 prohibited-artifact list, disclosed here rather than left unstated. No other prohibited-category artifact was AI-generated.
 
 ---
 
@@ -329,7 +331,7 @@ FR-02's G4, the case that motivated v0.5, was re-audited on 06/07/2026 (commit `
 | Class / Cohort:         | 23KTPM1                                 |
 | Course:                 | CS423 / CSC13003 – Software Testing     |
 | Instructor:             | Dr. Lam Quang Vu                        |
-| Date:                   | 22/06/2026                              |
+| Date:                   | 07/07/2026                              |
 | Signature:              | ![Lê Hoàng Lâm](assets/signature.png)   |
 
 ---
