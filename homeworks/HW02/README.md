@@ -10,6 +10,23 @@
 
 ---
 
+## Submission Contents
+
+| Document | Description |
+| -------- | ------------ |
+| [REPORT.md](./REPORT.md) | Main report — Domain Testing + Boundary Value Analysis + AI Gap Analysis per selected feature |
+| [BUG_REPORT.md](./BUG_REPORT.md) | Consolidated bug report, cross-linked to GitHub Issues |
+| [prompt_log.md](./prompt_log.md) | Full AI prompt log with timestamps |
+| [[AI-02]_AI_Audit_Report.md](./%5BAI-02%5D_AI_Audit_Report.md) | Per-artifact AI audit (prompt, output, verdict, reasoning, student fix) |
+| [[AI-03]_AI_Disclosure_Form.md](./%5BAI-03%5D_AI_Disclosure_Form.md) | Mandatory AI usage disclosure |
+| [[AI-04]_AI_Reflective_Statement.md](./%5BAI-04%5D_AI_Reflective_Statement.md) | AI critique (200-300 words) and reflective statement |
+| [[AI-05]_AI_Privacy_Checklist.md](./%5BAI-05%5D_AI_Privacy_Checklist.md) | AI privacy and responsible-use checklist |
+| [[AI-06]_AI_Student_Acknowledgement.md](./%5BAI-06%5D_AI_Student_Acknowledgement.md) | Signed student acknowledgement |
+| [artifacts/](./artifacts/) | Domain Testing / BVA skill source, per-feature execution logs, and screenshots |
+| [assets/](./assets/) | Demo script and narration transcript supporting the demo video |
+
+---
+
 ## Selected Features
 
 | Pool | Feature ID | Feature Name | Description |
@@ -28,48 +45,51 @@
 | Metric | Count |
 | ------ | ----- |
 | Features under test | 4 |
-| Total test cases designed | — |
-| Total test cases executed | — |
-| Passed | — |
-| Failed | — |
-| Not yet executed | — |
-| Bugs found | — |
+| Total test cases designed | 70 |
+| Total test cases executed | 70 / 70 |
+| Passed | 42 |
+| Passed with deviation | 4 |
+| Failed | 24 |
+| Not yet executed | 0 |
+| Bugs found | 17 |
+
+*"Passed with deviation" = PASS on the behavior under test, with an unrelated defect (already logged against a different TC) polluting the observed output — see [Key Decisions, 2026-07-02] deviation rule in `context/MEMORY.md`.*
 
 ### Per-Feature Breakdown
 
-| Feature | TC Designed | TC Executed | Passed | Failed | Not Run | Bugs |
-| ------- | ----------- | ----------- | ------ | ------ | ------- | ---- |
-| FR-02 — Login and account lockout | — | — | — | — | — | — |
-| FR-09 — Discount coupons | — | — | — | — | — | — |
-| FR-16 — Product import from CSV | — | — | — | — | — | — |
-| FR-20 — Cancel order (Mobile) | — | — | — | — | — | — |
-| **Total** | — | — | — | — | — | — |
+| Feature | TC Designed | TC Executed | Passed | Deviation | Failed | Not Run | Bugs |
+| ------- | ----------- | ----------- | ------ | --------- | ------ | ------- | ---- |
+| FR-02 — Login and account lockout | 12 | 12 | 10 | 0 | 2 | 0 | 4 |
+| FR-09 — Discount coupons | 20 | 20 | 11 | 2 | 7 | 0 | 6 |
+| FR-16 — Product import from CSV | 24 | 24 | 11 | 1 | 12 | 0 | 5 |
+| FR-20 — Cancel order (Mobile) | 14 | 14 | 10 | 1 | 3 | 0 | 2 |
+| **Total** | **70** | **70** | **42** | **4** | **24** | **0** | **17** |
 
 ### Requirements Traceability Matrix (RTM)
 
 | Requirement | TC IDs | Status |
 | ----------- | ------ | ------ |
-| FR-02: Login success (valid credentials) | TC-02-xx | — |
-| FR-02: Login failure counter (< 3 attempts) | TC-02-xx | — |
-| FR-02: Account lockout (≥ 3 failures) | TC-02-xx | — |
-| FR-02: Lockout release after 30s | TC-02-xx | — |
-| FR-09: Valid coupon — percent type | TC-09-xx | — |
-| FR-09: Valid coupon — fixed type | TC-09-xx | — |
-| FR-09: Coupon not found / inactive | TC-09-xx | — |
-| FR-09: Coupon expired | TC-09-xx | — |
-| FR-09: Below min_order_amount | TC-09-xx | — |
-| FR-09: Unauthenticated user | TC-09-xx | — |
-| FR-09: Exceeded max_uses_per_user | TC-09-xx | — |
-| FR-16: Valid CSV — all rows succeed | TC-16-xx | — |
-| FR-16: Invalid file extension | TC-16-xx | — |
-| FR-16: Missing / wrong header | TC-16-xx | — |
-| FR-16: Row with empty name → full rollback | TC-16-xx | — |
-| FR-16: Row with invalid price → full rollback | TC-16-xx | — |
-| FR-20: Cancel when `pending` | TC-20-xx | — |
-| FR-20: Cancel when `confirmed` | TC-20-xx | — |
-| FR-20: Cancel attempt when `shipping` | TC-20-xx | — |
-| FR-20: Cancel attempt when `delivered` | TC-20-xx | — |
-| FR-20: Cancel attempt when `canceled` | TC-20-xx | — |
+| FR-02: Login success (valid credentials) | TC-01, TC-BVA-02, TC-BVA-04, TC-BVA-05 | ✅ Pass |
+| FR-02: Login failure counter (< 3 attempts) | TC-06 | ❌ Fail — BUG-02-003 |
+| FR-02: Account lockout (≥ 3 failures) | TC-07, TC-BVA-01 | ✅ Pass (deviation) — BUG-02-004 |
+| FR-02: Lockout release after 30s | TC-BVA-03, TC-BVA-04, TC-BVA-05 | ✅ Pass (deviation) — BUG-02-004 |
+| FR-09: Valid coupon — percent type | TC-01 | ❌ Fail — BUG-09-001 |
+| FR-09: Valid coupon — fixed type | TC-02 | ✅ Pass |
+| FR-09: Coupon not found / inactive | TC-03, TC-04 | ✅ Pass |
+| FR-09: Coupon expired | TC-06, TC-BVA-07, TC-BVA-08 | ✅ Pass |
+| FR-09: Below min_order_amount | TC-07, TC-BVA-01, TC-BVA-02, TC-BVA-03 | ❌ Fail — BUG-09-005 (ON point) |
+| FR-09: Unauthenticated user | TC-08, TC-09 | ❌ Fail — BUG-09-002, BUG-09-003 |
+| FR-09: Exceeded max_uses_per_user | TC-10, TC-BVA-04, TC-BVA-05, TC-BVA-06 | ✅ Pass |
+| FR-16: Valid CSV — all rows succeed | TC-01, TC-02 | ✅ Pass |
+| FR-16: Invalid file extension | TC-19 | ❌ Fail — BUG-16-005 |
+| FR-16: Missing / wrong header | TC-05, TC-13 | ✅ Pass |
+| FR-16: Row with empty name → full rollback | TC-06, TC-07 | ✅ Pass |
+| FR-16: Row with invalid price → full rollback | TC-08, TC-09, TC-10, TC-11, TC-12, TC-18, TC-BVA-01 | ❌ Fail — BUG-16-002 |
+| FR-20: Cancel when `pending` | TC-01, TC-BVA-03 | ✅ Pass |
+| FR-20: Cancel when `confirmed` | TC-02, TC-BVA-01 | ✅ Pass |
+| FR-20: Cancel attempt when `shipping` | TC-07, TC-BVA-02 | ❌ Fail — BUG-20-001 |
+| FR-20: Cancel attempt when `delivered` | TC-03, TC-BVA-04 | ✅ Pass |
+| FR-20: Cancel attempt when `canceled` | TC-04 | ✅ Pass |
 
 ---
 
@@ -77,17 +97,19 @@
 
 | **No.** | **Criteria** | **Grade** | **Self-Assessed Grade** |
 | --- | --- | --- | --- |
-| **1** | FR-02 — Login and account lockout (Domain + Boundary) | 25 |  |
-| **2** | FR-09 — Discount coupons (Domain + Boundary) | 25 |  |
-| **3** | FR-16 — Product import from CSV (Domain + Boundary) | 25 |  |
-| **4** | FR-20 — Cancel order (Mobile) (Domain + Boundary) | 15 |  |
-| **5** | Agent Skills | 10 |  |
-|  | **Total** | **100** |  |
+| **1** | FR-02 — Login and account lockout (Domain + Boundary) | 25 | 24 |
+| **2** | FR-09 — Discount coupons (Domain + Boundary) | 25 | 24 |
+| **3** | FR-16 — Product import from CSV (Domain + Boundary) | 25 | 23 |
+| **4** | FR-20 — Cancel order (Mobile) (Domain + Boundary) | 15 | 14 |
+| **5** | Agent Skills | 10 | 10 |
+|  | **Total** | **100** | **95** |
 
 ---
 
 ## Demo Videos
 
+*Note: the demo uses FR-01 (Account registration), not one of the four graded features (FR-02/FR-09/FR-16/FR-20). FR-01 had never been run through the skill before recording, so the session shown is a fresh, unedited end-to-end run rather than a re-enactment of already-graded artifacts.*
+
 | # | Feature | Skill Demonstrated | Link |
 | - | ------- | ------------------ | ---- |
-| 1 | FR-02 / FR-09 / FR-16 / FR-20 | Domain Testing & BVA Agent Skill | — |
+| 1 | FR-01 | Domain Testing & BVA Agent Skill | [Demo Video](https://youtu.be/qMp9DU0MQMc) |
