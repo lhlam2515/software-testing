@@ -62,6 +62,8 @@ The login form does not validate the email format before submitting. When a valu
 
 ![BUG-02-001](artifacts/tests/FR-02-login-lockout/screenshots/BUG-02-001-type-text-invalid-email.png)
 
+**GitHub Issue Screenshot:** [assets/issues/BUG-02-001-issue-13.png](assets/issues/BUG-02-001-issue-13.png)
+
 ---
 
 ### BUG-02-002 - Login error message renders in the wrong position
@@ -93,6 +95,8 @@ When logging in with an unregistered email, the generic error message is display
 
 ![BUG-02-002](artifacts/tests/FR-02-login-lockout/screenshots/TC-04-unregistered-email.png)
 
+**GitHub Issue Screenshot:** [assets/issues/BUG-02-002-issue-14.png](assets/issues/BUG-02-002-issue-14.png)
+
 ---
 
 ### BUG-02-003 - Failed login attempts counter increments by 2 instead of 1
@@ -122,6 +126,8 @@ Every time a login attempt fails with the correct email but wrong password, the 
 #### Screenshot
 
 ![BUG-02-003](artifacts/tests/FR-02-login-lockout/screenshots/BUG-02-003-login-attempts-plus2.png)
+
+**GitHub Issue Screenshot:** [assets/issues/BUG-02-003-issue-15.png](assets/issues/BUG-02-003-issue-15.png)
 
 ---
 
@@ -153,6 +159,8 @@ When an account becomes locked after crossing the failed-attempt threshold, the 
 
 ![BUG-02-004](artifacts/tests/FR-02-login-lockout/screenshots/TC-BVA-01-lock-triggered.png)
 
+**GitHub Issue Screenshot:** [assets/issues/BUG-02-004-issue-16.png](assets/issues/BUG-02-004-issue-16.png)
+
 ---
 
 ### BUG-09-001 - Percent coupon formula produces a negative discount instead of a percentage discount
@@ -183,6 +191,8 @@ Applying any `percent`-type coupon (such as `SAVE10`, a 10 percent discount) doe
 
 ![BUG-09-001](artifacts/tests/FR-09-coupon/screenshots/BUG-09-001-percent-formula-wrong.png)
 
+**GitHub Issue Screenshot:** [assets/issues/BUG-09-001-issue-17.png](assets/issues/BUG-09-001-issue-17.png)
+
 ---
 
 ### BUG-09-002 - `/api/apply-coupon` accepts requests with no authentication token at all
@@ -212,6 +222,8 @@ The coupon endpoint does not enforce authentication. A direct request to `POST /
 
 ![BUG-09-002](artifacts/tests/FR-09-coupon/screenshots/BUG-09-002-no-auth-accepted.png)
 
+**GitHub Issue Screenshot:** [assets/issues/BUG-09-002-issue-18.png](assets/issues/BUG-09-002-issue-18.png)
+
 ---
 
 ### BUG-09-003 - `/api/apply-coupon` accepts an invalid/malformed JWT
@@ -240,6 +252,8 @@ Sending `POST /api/apply-coupon` with a clearly invalid bearer token (`Authoriza
 #### Screenshot
 
 ![BUG-09-003](artifacts/tests/FR-09-coupon/screenshots/BUG-09-003-invalid-jwt-accepted.png)
+
+**GitHub Issue Screenshot:** [assets/issues/BUG-09-003-issue-19.png](assets/issues/BUG-09-003-issue-19.png)
 
 ---
 
@@ -271,6 +285,8 @@ When a `fixed`-type coupon's discount value is larger than the order's total amo
 
 ![BUG-09-004](artifacts/tests/FR-09-coupon/screenshots/BUG-09-004-negative-final-amount.png)
 
+**GitHub Issue Screenshot:** [assets/issues/BUG-09-004-issue-20.png](assets/issues/BUG-09-004-issue-20.png)
+
 ---
 
 ### BUG-09-005 - Minimum order amount check uses strict greater-than instead of greater-than-or-equal
@@ -301,6 +317,8 @@ The `total_amount >= min_order_amount` rule is implemented as a strict `>` compa
 
 ![BUG-09-005](artifacts/tests/FR-09-coupon/screenshots/BUG-09-005-on-point-rejected.png)
 
+**GitHub Issue Screenshot:** [assets/issues/BUG-09-005-issue-21.png](assets/issues/BUG-09-005-issue-21.png)
+
 ---
 
 ### BUG-09-006 - Coupon code lookup is case-insensitive
@@ -329,6 +347,8 @@ Typing the coupon code in lowercase (`save10`) is accepted and matched to the se
 #### Screenshot
 
 ![BUG-09-006](artifacts/tests/FR-09-coupon/screenshots/BUG-09-006-lowercase-save10-accepted.png)
+
+**GitHub Issue Screenshot:** [assets/issues/BUG-09-006-issue-22.png](assets/issues/BUG-09-006-issue-22.png)
 
 ---
 
@@ -363,6 +383,8 @@ Typing the coupon code in lowercase (`save10`) is accepted and matched to the se
 
 ![BUG-09-007](artifacts/tests/FR-09-coupon/screenshots/BUG-09-007-client-total-trusted.png)
 
+**GitHub Issue Screenshot:** [assets/issues/BUG-09-007-issue-30.png](assets/issues/BUG-09-007-issue-30.png)
+
 ---
 
 ### BUG-16-001 - Admin-only CSV import route accepts a regular user's token
@@ -392,6 +414,8 @@ The product import endpoint is supposed to be restricted to Admin accounts, but 
 #### Screenshot
 
 ![BUG-16-001](artifacts/tests/FR-16-csv-import/screenshots/BUG-16-001-non-admin-accepted.png)
+
+**GitHub Issue Screenshot:** [assets/issues/BUG-16-001-issue-23.png](assets/issues/BUG-16-001-issue-23.png)
 
 ---
 
@@ -423,6 +447,8 @@ The import route never checks that a row's `price` is a positive number. Rows wi
 
 ![BUG-16-002](artifacts/tests/FR-16-csv-import/screenshots/BUG-16-002-08-invalid-price-accepted.png)
 
+**GitHub Issue Screenshot:** [assets/issues/BUG-16-002-issue-24.png](assets/issues/BUG-16-002-issue-24.png)
+
 ---
 
 ### BUG-16-003 - Import accepts a non-existent `category_id`
@@ -452,6 +478,8 @@ The import route does not verify that `category_id` references an existing categ
 #### Screenshot
 
 ![BUG-16-003](artifacts/tests/FR-16-csv-import/screenshots/BUG-16-003-invalid-category-accepted.png)
+
+**GitHub Issue Screenshot:** [assets/issues/BUG-16-003-issue-25.png](assets/issues/BUG-16-003-issue-25.png)
 
 ---
 
@@ -483,6 +511,8 @@ FR-15 specifies a 255-character maximum for a product's `name`, but the CSV impo
 
 ![BUG-16-004](artifacts/tests/FR-16-csv-import/screenshots/TC-14-name-256-gap-confirmed.png)
 
+**GitHub Issue Screenshot:** [assets/issues/BUG-16-004-issue-26.png](assets/issues/BUG-16-004-issue-26.png)
+
 ---
 
 ### BUG-16-005 - Admin UI does not enforce the `.csv` file extension
@@ -512,6 +542,8 @@ The SRS states that imported files must have a `.csv` extension, but the Admin U
 #### Screenshot
 
 ![BUG-16-005](artifacts/tests/FR-16-csv-import/screenshots/TC-19-txt-extension-accepted-preview.png)
+
+**GitHub Issue Screenshot:** [assets/issues/BUG-16-005-issue-27.png](assets/issues/BUG-16-005-issue-27.png)
 
 ---
 
@@ -543,6 +575,8 @@ The mobile UI correctly hides the `Huy don` (Cancel) button once an order reache
 
 ![BUG-20-001](artifacts/tests/FR-20-cancel-order-mobile/screenshots/BUG-20-001-07-shipping-cancel-accepted.png)
 
+**GitHub Issue Screenshot:** [assets/issues/BUG-20-001-issue-28.png](assets/issues/BUG-20-001-issue-28.png)
+
 ---
 
 ### BUG-20-002 - Order status labels do not use distinct colors as required by FR-11
@@ -572,5 +606,7 @@ FR-11 explicitly requires that order status text be "translated to Vietnamese an
 #### Screenshot
 
 ![BUG-20-002](artifacts/tests/FR-20-cancel-order-mobile/screenshots/BUG-20-002-status-labels-same-color.png)
+
+**GitHub Issue Screenshot:** [assets/issues/BUG-20-002-issue-29.png](assets/issues/BUG-20-002-issue-29.png)
 
 ---
