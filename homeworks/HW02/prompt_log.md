@@ -577,7 +577,10 @@ AI executed the 4-step domain testing framework autonomously via the `domain-tes
 - **8 BVA TCs** (TC-BVA-01 through TC-BVA-08) each identifying the specific operator error detected
 - Setup Protocol with exact SQLite INSERT/DELETE commands and curl sequences for stateful pre-conditions
 
-**Note:** AI output at commit `6153cc0` (21:42 25/06/2026) contained 11 EP TCs. TC-12 (zero-amount degenerate probe) was added by the student on 26/06/2026 after post-design human review (commit `e8d0d84`).
+**Note:** AI output at commit `6153cc0` (21:42 25/06/2026) contained 11 EP TCs. Test cases added by the student after post-design human review:
+
+- TC-12 (zero-amount degenerate probe) — added 26/06/2026, commit `0a855b2`
+- TC-13 (client `total_amount` manipulation below actual cart subtotal, FR-08 spec conflict probe) — added 06/07/2026, commit `1cdb554`
 
 ### Used in
 
@@ -615,7 +618,11 @@ AI executed the 4 steps of the domain testing framework autonomously via the `do
 - **5 BVA TCs** (TC-BVA-01 through TC-BVA-05) each naming the specific wrong operator exposed
 - Setup Protocol with Node.js `repeat()` string generation and post-response length verification
 
-**Note:** AI output at commit `0f518d7` (21:31 27/06/2026) contained 16 EP TCs and 5 BVA TCs. TC-17 (response schema probe) and TC-18 (all-rows-invalid batch) were added by the student after post-design human review, addressing Step 1 Gaps #6 and #7 that the AI identified but did not convert to TCs.
+**Note:** AI output at commit `0f518d7` (21:31 27/06/2026) contained 16 EP TCs and 5 BVA TCs. Test cases added by the student after post-design human review:
+
+- TC-17 (import report response schema probe, addressing Step 1 Gap #6) — added 30/06/2026, commit `a9a9fed`
+- TC-18 (all-rows-invalid batch probe, addressing Step 1 Gap #7) — added 30/06/2026, commit `a9a9fed`
+- TC-19 (CSV file extension enforcement probe, addressing Step 1 Gap #1) — added 02/07/2026, commit `4625540`
 
 ### Used in
 
@@ -779,13 +786,15 @@ Tôi sẽ chỉ bổ sung thêm #5 về màu sắc trạng thái theo FR-11 thô
 
 Backend (`:3000`) và mobile Expo web (`:8081`) vẫn đang chạy nền — báo tôi nếu bạn muốn dừng.
 ```
+
 - Updated `execution-log.md`: recorded TC-10 = FAIL, added **BUG-20-002** (severity Low — direct FR-11 violation, not a gap), updated Execution Summary to 14/14 TC, 2 bugs.
 
-**Note:** Final output committed at `57e7975` (23:52 02/07/2026). Points #1-#4 were AI-proposed but explicitly rejected by the student after scope negotiation — recorded here as an AI Audit example of over-generation followed by human scope filtering, not a silent AI decision.
+**Note:** Final output committed at `57e7975` (23:52 02/07/2026). Points #1-#4 were AI-proposed but explicitly rejected by the student after scope negotiation — documented in `REPORT.md` Section 5.3.
 
 ### Used in
 
-- `[AI-02]_AI_Audit_Report.md`, Artifact 4
+- `[AI-02]_AI_Audit_Report.md`, Artifact 4 (FR-11 fix, EC17/TC-10, only)
+- `REPORT.md`, Section 5.3 (full self-review gap analysis, including rejected candidates)
 
 ---
 
