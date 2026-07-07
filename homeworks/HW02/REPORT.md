@@ -1,13 +1,3 @@
----
-title: "HW02 — Domain Testing on EShop"
-assignment: HW02-AI
-course: CS423 / CSC13003 – Software Testing
-policy: "Adapted from Med Kharbach, PhD (2026) — AI Use Policy Templates for Higher Education. CC BY-NC-SA 4.0."
----
-
-Faculty of Information Technology (FIT) – Ho Chi Minh City University of Science (HCMUS)  
-CS423 / CSC13003 – Software Testing (AI-augmented · 2026)
-
 # Main Report — HW02
 
 ---
@@ -36,135 +26,58 @@ CS423 / CSC13003 – Software Testing (AI-augmented · 2026)
 
 #### Step 1 - Identify Input/Output Variables
 
-FR-02 controls two core behaviors: authenticate email and password and return a JWT
-token on success; and lock the account for 30 seconds after 3 consecutive failures.
-Seven variables were identified across three types: two user inputs (`email`,
-`password`), three server-side system states (`login_attempts`, `account_locked`,
-`locked_until`), and two outputs (`jwt_token`, `error_message`).
+FR-02 governs two behaviors: authenticating email and password to issue a JWT, and locking the account for 30 seconds after 3 consecutive failures. Seven variables were identified across three categories: two user inputs (`email`, `password`), three server-side system states (`login_attempts`, `account_locked`, `locked_until`), and two outputs (`jwt_token`, `error_message`).
 
-The most complex variables are `login_attempts` (the primary state driver, an INTEGER
-column that triggers lockout at 3) and `locked_until` (a DATETIME column set
-server-side and checked against `datetime('now')` on every request). Four implicit
-gaps were flagged where the SRS is silent: whether `login_attempts` resets after the
-lock expires (G1), whether the counter increments while the account is locked (G2),
-whether lockout scope is per-account or per-IP (G3), and whether any length limit
-exists for email or password at login (G4).
+`login_attempts` (an INTEGER counter that triggers lockout at 3) and `locked_until` (a DATETIME checked against `datetime('now')` on every request) drive most of the behavior. Both carry implicit gaps the SRS never answers:
+
+- **G1:** does `login_attempts` reset once the lock expires?
+- **G2:** does it keep incrementing while the account is locked?
+- **G3:** is lockout scope per-account or per-IP?
+- **G4:** is there any length limit on email or password at login?
+
+G1 and G2 are resolved empirically by the BVA boundary probes in §2.2 (TC-BVA-03 to TC-BVA-05). G3 and G4 are descoped with a documented rationale in `domain-testing.md`: the schema ties lockout to the account row only, and both fields are unbounded TEXT columns with no maximum to target.
 
 Full variable table: [`domain-testing.md` - Step 1](artifacts/tests/FR-02-login-lockout/domain-testing.md)
 
 #### Step 2 - Identify Equivalence Classes
 
-Equivalence partitioning was applied across 8 functional groups using Range Rule,
-Must-Be Rule, and Splitting Rule, producing 21 ECs total (9 valid, 12 invalid).
+Equivalence partitioning was applied across 8 functional groups using the Range, Must-Be, and Splitting rules, producing 21 ECs total: 10 valid, 11 invalid.
 
-Key design decisions:
+**Splitting Rule on `email`.** EC01 (empty string) and EC02 (non-empty but invalid format) stay in separate classes because they test two distinct mechanisms: a missing `required` attribute versus HTML5 `type="email"` format validation. The two can fail independently, so collapsing them into one class would let one defect mask the other.
 
-**Splitting Rule on `email`:** EC01 (empty string) and EC02 (non-empty but invalid
-format) are separate classes because they test two distinct mechanisms: a missing
-`required` attribute versus HTML5 `type="email"` format validation. These mechanisms
-can fail independently, so collapsing them into one class would mask one defect with
-the other.
+**EC10 and EC12 coupling.** `login_attempts >= 3` (EC10) and `locked_until > datetime('now')` (EC12) cannot be triggered independently in practice; they always coexist once an account is locked. Both are assigned to TC-07 as a single composite system state. This does not violate Error Isolation, since the coupling is a physical constraint of the SUT, not a test design choice.
 
-**EC10 and EC12 coupling:** `login_attempts >= 3` (EC10) and `locked_until >
-datetime('now')` (EC12) cannot be triggered independently in practice. They always
-coexist when an account is locked. Both are assigned to TC-07 as a composite system
-state; this is not a violation of Error Isolation because the coupling is a physical
-constraint of the SUT, not a test design choice.
+**Output-space invalid ECs (EC14, EC16, EC19, EC21).** These describe behavior the system must not exhibit: counter increments by something other than 1, counter fails to reset, JWT returned on failure, error message reveals the specific reason. None of them can be triggered by the tester directly; they are verified absent within the existing TCs. Error Isolation governs the input domain, not the output domain.
 
-**Output-space invalid ECs (EC14, EC16, EC19, EC21):** These describe behaviors the
-system must NOT exhibit (counter increments by != 1, counter does not reset, JWT
-returned on failure, error reveals the specific reason). They cannot be triggered by
-the tester; they are verified absent within existing TCs. Error Isolation applies to
-the input domain, not the output domain.
-
-| Group | Variable | Valid | Invalid | Total |
-| ----- | -------- | ----- | ------- | ----- |
-| 1 | `email` - Format | EC03 | EC01, EC02 | 3 |
-| 2 | `email` - Existence | EC05 | EC04 | 2 |
-| 3 | `password` - Match | EC08 | EC06, EC07 | 3 |
-| 4 | `login_attempts` - Threshold | EC09 | EC10 | 2 |
-| 5 | `locked_until` - Window | EC11 | EC12 | 2 |
-| 6 | Counter behavior | EC13, EC15 | EC14, EC16 | 4 |
-| 7 | `jwt_token` - Output | EC17, EC18 | EC19 | 3 |
-| 8 | `error_message` - Content | EC20 | EC21 | 2 |
-| **Total** | | **9 Valid** | **12 Invalid** | **21** |
-
-Full EC table: [`domain-testing.md` - Step 2](artifacts/tests/FR-02-login-lockout/domain-testing.md)
+Full EC table (all 8 groups, all 21 ECs): [`domain-testing.md` - Step 2](artifacts/tests/FR-02-login-lockout/domain-testing.md)
 
 #### Step 3 - Minimum Test Case Set
 
-7 test cases were derived using Error Isolation: 1 happy-path TC combining all 7
-valid ECs, plus 6 negative TCs each isolating one triggerable invalid EC group.
+Seven test cases were derived using Error Isolation: one happy-path TC covering all 7 valid ECs, plus six negative TCs each isolating a single triggerable invalid EC group.
 
-TC-01 sets `login_attempts = 1` as a pre-condition (not 0) so it simultaneously
-verifies EC09 (counter below threshold) and EC15 (counter resets to 0 on success)
-within a single execution, without needing a separate TC for the reset check.
+TC-01 sets `login_attempts = 1` as a pre-condition rather than 0, so a single execution verifies both EC09 (counter below threshold) and EC15 (counter resets to 0 on success) without a separate reset check.
 
-TC-07 covers the coupled EC10 and EC12 composite state using correct credentials as
-input. This is intentional: submitting correct credentials while locked proves that
-the lockout mechanism overrides authentication, which is the core behavioral invariant
-of FR-02.
+TC-07 covers the coupled EC10/EC12 state using correct credentials as input: submitting the right password while locked is what proves the lockout mechanism overrides authentication, the core behavioral invariant of FR-02.
 
-| TC | ECs Covered | Input | Pre-condition | Expected Result |
-| -- | ----------- | ----- | ------------- | --------------- |
-| TC-01 | EC03,05,08,09,11,15,17 | test@eshop.com / Test1234! | login_attempts=1 | 200 OK, JWT returned, counter reset to 0 |
-| TC-02 | EC01 | email="" | none | No request sent, HTML5 required blocks |
-| TC-03 | EC02 | email="invalid_no_at_sign" | none | HTML5 type="email" blocks (or 401 if field is type="text") |
-| TC-04 | EC04 | notfound@example.com / Test1234! | none | 401, generic error, no JWT |
-| TC-05 | EC06 | test@eshop.com / "" | login_attempts=0 | 401 or client block, no JWT |
-| TC-06 | EC07, EC13 | test@eshop.com / WrongPass1! | login_attempts=0 | 401, generic error, counter 0 to 1 exactly |
-| TC-07 | EC10, EC12 | test@eshop.com / Test1234! | login_attempts=3, locked_until=NOW+25s | 403, rejected despite correct credentials |
-
-Full TC specifications: [`domain-testing.md` - Step 3](artifacts/tests/FR-02-login-lockout/domain-testing.md)
+Full TC specifications (TC-01 to TC-07, all fields): [`domain-testing.md` - Step 3](artifacts/tests/FR-02-login-lockout/domain-testing.md)
 
 ### 2.2 Boundary Value Analysis
 
-Two numeric variables were identified for BVA enhancement based on their role in
-triggering discrete behavioral transitions.
+Two numeric variables qualify for BVA: each sits at a discrete behavioral turning point, one integer threshold and one time window.
 
-**`login_attempts` at lock threshold = 3.** The SRS states "3 or more consecutive
-failures." The critical boundary is the transition from the last non-locked state
-(login_attempts = 2, the OFF point) to the first locked state (login_attempts = 3,
-the ON point). A potential off-by-one defect would implement `> 3` instead of `>= 3`,
-delaying the lockout by one attempt.
+**`login_attempts` at the lock threshold (3).** The SRS states "3 or more consecutive failures." The turning point sits between the last non-locked state (`login_attempts = 2`, the OFF point) and the first locked state (`login_attempts = 3`, the ON point). A defect that implements `> 3` instead of `>= 3` would delay the lockout by one attempt.
 
-**`locked_until` at the 30-second lockout window.** The expiry condition is
-`locked_until <= datetime('now')`. Three boundary points are tested: UB-1 (NOW+1s, 1
-second remaining, account must still be rejected), UB (NOW, exact expiry, account
-must be allowed), and UB+1 (NOW-1s, 1 second past expiry, account must be allowed).
-A potential defect would use strict less-than `locked_until < datetime('now')`,
-keeping the account locked at the exact expiry boundary.
+**`locked_until` at the 30-second lockout window.** The expiry condition is `locked_until <= datetime('now')`. Three points are tested around it: UB-1 (NOW+1s, one second remaining, must still reject), UB (NOW, exact expiry, must allow), and UB+1 (NOW-1s, one second past expiry, must allow). A defect that implements strict less-than (`locked_until < datetime('now')`) would keep the account locked exactly at expiry.
 
-| TC | Variable | Boundary Point | Defect Targeted |
-| -- | -------- | -------------- | --------------- |
-| TC-BVA-01 | `login_attempts` | 2 to 3 (ON point transition) | `> 3` instead of `>= 3`, lock delayed by one attempt |
-| TC-BVA-02 | `login_attempts` | UB=2, success path | Counter not reset at UB, next failure miscounted as third |
-| TC-BVA-03 | `locked_until` | NOW+1s (UB-1) | Unlock before `locked_until`, early release |
-| TC-BVA-04 | `locked_until` | NOW (UB / OFF point) | `< NOW` instead of `<= NOW`, locked at exact boundary |
-| TC-BVA-05 | `locked_until` | NOW-1s (UB+1) | Post-expiry race condition or timer drift |
+TC-BVA-03 to TC-BVA-05, which walk `locked_until` through UB-1, UB, and UB+1, double as gap probes for G1 and G2: TC-BVA-03 records whether `login_attempts` keeps incrementing while the account is locked (G2), and TC-BVA-04 / TC-BVA-05 record whether the counter resets once the account unlocks (G1). Branch-by-branch outcomes are in `bva.md`.
 
-Full BVA specifications and DB setup protocol: [`bva.md`](artifacts/tests/FR-02-login-lockout/bva.md)
+Full BVA specifications and DB setup protocol (TC-BVA-01 to TC-BVA-05, all fields): [`bva.md`](artifacts/tests/FR-02-login-lockout/bva.md)
 
 ### 2.3 AI Gap Analysis
 
-| # | Missed item | Root cause (why AI missed it) |
-| - | ----------- | ----------------------------- |
-| 1 | Missed TC: No test case asserting that HTTP 401 (wrong credentials) and HTTP 403 (account locked) are two distinct observable behavioral states. AI collapsed both into a single EC20 ("generic error, reason not revealed") covering all failure modes. | Spec quality: SRS FR-02 describes both failure outputs with identical language ("appropriate error message, no reason revealed"). AI had no oracle support to partition EC20 further. The distinction was discovered during execution when TC-07 returned 403 and TC-04/TC-06 returned 401, with the same UI message but different server codes. |
-| 2 | Missed bug (D7): No TC to verify that the login response body does not expose the `password` field. The server returned `user.password` in plaintext in the JSON response. | AI tool limitation: AI assumed spec-compliant hash storage ("matches stored hash" in Step 1 analysis). Black-box design from SRS provides no signal to suspect data exposure in the response body. Discovered only by inspecting the raw API response during execution. |
-
-### 2.4 Execution Summary
-
-| Metric | Count |
-| ------ | ----- |
-| TC Designed (EP) | 7 |
-| TC Designed (BVA) | 5 |
-| TC Executed | 12 / 12 |
-| Passed | 10 |
-| Pass with deviation | 1 (TC-02: blocked by `required`, not `type="email"`) |
-| Failed | 1 (TC-06, BUG-02-003) |
-| Bugs found | 4 (BUG-02-001 to BUG-02-004) |
-
-Full execution log: [`execution-log.md`](artifacts/tests/FR-02-login-lockout/execution-log.md)
+| # | Missed item | Root cause |
+| - | ----------- | ---------- |
+| 1 | AI merged two distinguishable failure states, wrong credentials and an active lockout, into a single equivalence class (EC20, generic error). | SRS FR-02 describes both failure outputs in identical wording, so EP had no textual basis to split the class further. |
 
 ---
 
@@ -177,105 +90,63 @@ Full execution log: [`execution-log.md`](artifacts/tests/FR-02-login-lockout/exe
 
 #### Step 1 - Identify Input/Output Variables
 
-FR-09 governs coupon application at checkout, enforcing five simultaneous conditions (C1 through C5): the code exists and is active, has not expired, the order total meets the minimum threshold, the user holds a valid JWT, and the user has not exhausted their per-user usage allowance. Twelve variables were identified across three categories: three user-supplied inputs (`code`, `total_amount`, `user_id`), seven system-state fields retrieved from the database (`is_active`, `expired_at`, `min_order_amount`, `uses_by_user`, `max_uses_per_user`, `type`, `discount_value`), and two output signals (`discount_amount`, `final_amount`). Five implicit gaps were flagged where the SRS is silent: whether coupon code matching is case-sensitive (G1), a spec conflict between FR-08 (backend must recompute the order total independently) and the `apply-coupon` API accepting a client-supplied `total_amount` (G2), undefined behavior when a fixed `discount_value` exceeds `total_amount` and produces a negative `final_amount` (G3), no specification of whether usage is rolled back when an order is cancelled (G4), and ambiguous granularity for `expired_at` comparisons with no timezone specified (G5).
+FR-09 governs coupon application at checkout, enforcing five conditions simultaneously (C1 through C5): the code exists and is active, has not expired, the order total meets the minimum threshold, the user holds a valid JWT, and the user has not exhausted their per-user usage allowance. Twelve variables were identified across three categories: three user inputs (`code`, `total_amount`, `user_id`), seven system-state fields read from the database (`is_active`, `expired_at`, `min_order_amount`, `uses_by_user`, `max_uses_per_user`, `type`, `discount_value`), and two outputs (`discount_amount`, `final_amount`).
+
+Five implicit gaps were flagged where the SRS is silent:
+
+- **G1:** is coupon code matching case-sensitive?
+- **G2:** the API accepts a client-supplied `total_amount`, but FR-08 mandates the backend recompute the order total independently. Which one governs?
+- **G3:** what happens when a fixed `discount_value` exceeds `total_amount` and `final_amount` goes negative?
+- **G4:** is `uses_by_user` rolled back when an order is cancelled?
+- **G5:** is the `expired_at` comparison day-level or time-level, and in which time zone?
+
+G1 and G3 are resolved by dedicated gap-probe TCs in Step 3 (TC-05 and TC-11). G2 is resolved the same way by TC-13. G5 is partially resolved: BVA in section 3.2 confirms the spec's day-level semantics (TC-BVA-07/08), while time zone is descoped as an environment-level concern, not an input-parameter boundary. G4 is deferred entirely with a documented rationale in `domain-testing.md`: rollback on cancellation is a cross-feature integration flow (web checkout + Admin order-cancel), not a Domain Testing boundary of FR-09's own variables.
 
 Full variable table: [`domain-testing.md` - Step 1](artifacts/tests/FR-09-coupon/domain-testing.md)
 
 #### Step 2 - Identify Equivalence Classes
 
-Equivalence partitioning was applied across eight functional groups using three rules, producing 18 ECs total (8 valid, 10 invalid).
+Equivalence partitioning was applied across eight functional groups using three rules, producing 18 ECs total: 8 valid, 10 invalid.
 
-**Must-Be Rule for C1, C2, and C4.** Code existence and active status, expiry, and authentication are binary gates with no numeric range to partition. Each condition either holds or fails outright, yielding one valid class and one or two invalid classes per group. Range Rule does not apply because there is no continuum.
+**Must-Be Rule for C1, C2, C4.** Code existence and active status, expiry, and authentication are binary gates with no numeric range to partition: each condition either holds or fails outright.
 
-**Range Rule for C3 and C5.** Both conditions use numeric comparisons: `total_amount >= min_order_amount` and `uses_by_user < max_uses_per_user`. Each produces exactly two classes: the region where the condition holds and the region where it fails. These two groups are the primary BVA targets in section 3.2.
+**Range Rule for C3 and C5.** Both conditions are numeric comparisons (`total_amount >= min_order_amount`, `uses_by_user < max_uses_per_user`), each producing exactly two classes. These two groups are the primary BVA targets in §3.2.
 
-**Splitting Rule for `type`.** The `percent` and `fixed` types trigger entirely different formula paths (`discount = total * value / 100` vs. `discount = value`). Although both are syntactically valid inputs, their behavioral outputs differ completely. Collapsing them into one valid EC would execute only one formula path and leave the other untested.
+**Splitting Rule for `type`.** `percent` and `fixed` trigger entirely different formula paths (`discount = total * value / 100` vs. `discount = value`). Collapsing them into one valid EC would exercise only one formula path and leave the other untested.
 
-**Gap-driven ECs (EC04 and EC18).** EC04 (wrong-case code input) and EC18 (negative `final_amount` when fixed discount exceeds total) cannot be derived from SRS text alone. They are labeled gap tests to distinguish them from spec-derived ECs and are assigned dedicated TCs to discover actual system behavior rather than verify a known expected outcome.
-
-| Group | Variable / Condition | Valid ECs | Invalid ECs | Total |
-| ----- | -------------------- | --------- | ----------- | ----- |
-| 1 | `code` exists + `is_active=1` (C1, Must-Be) | EC01 | EC02, EC03 | 3 |
-| 2 | `code` case format (Gap G1) | none | EC04 | 1 |
-| 3 | `expired_at` not expired (C2, Must-Be) | EC05 | EC06 | 2 |
-| 4 | `total_amount >= min_order_amount` (C3, Range) | EC07 | EC08 | 2 |
-| 5 | JWT Token valid (C4, Must-Be) | EC09 | EC10, EC11 | 3 |
-| 6 | `uses_by_user < max_uses_per_user` (C5, Range) | EC12 | EC13 | 2 |
-| 7 | `type` discount formula (Splitting) | EC14, EC15 | none | 2 |
-| 8 | Output correctness | EC16 | EC17, EC18 | 3 |
-| **Total** | | **8 Valid** | **10 Invalid** | **18** |
+**Gap-driven ECs (EC04, EC18).** Wrong-case code input and a fixed discount exceeding the total cannot be derived from SRS text alone. Both are labeled gap ECs and assigned dedicated TCs to discover actual behavior rather than verify a known expected outcome.
 
 Full EC table: [`domain-testing.md` - Step 2](artifacts/tests/FR-09-coupon/domain-testing.md)
 
 #### Step 3 - Minimum Test Case Set
 
-Eleven test cases were derived using Error Isolation: two happy-path TCs covering all valid ECs, eight negative TCs each isolating one triggerable invalid EC, and one dedicated gap test.
+Thirteen test cases were derived using Error Isolation: two happy-path TCs, seven negative TCs each isolating one triggerable invalid EC, and four gap-probe TCs.
 
-TC-01 and TC-02 both represent valid-all-five-conditions scenarios but must be separate because the Splitting Rule requires one TC per `type` value. TC-01 uses `SAVE10` (`type=percent`) and TC-02 uses `BIGBUY` (`type=fixed`). Collapsing them into one TC would execute only one formula path and leave EC14 or EC15 uncovered. TC-11 is a dedicated gap test for EC18: it uses a coupon where `discount_value > total_amount` and records whether the system returns a negative `final_amount` or guards against it, since the SRS specifies no behavior for this case.
+TC-01 and TC-02 both represent all-five-conditions-valid scenarios but must stay separate: the Splitting Rule requires one TC per `type` value. TC-01 uses `SAVE10` (`type=percent`), TC-02 uses `BIGBUY` (`type=fixed`); collapsing them would leave one formula path uncovered.
 
-| TC | ECs Covered | Input `code` | `total_amount` | Expected Result |
-| -- | ----------- | ------------ | -------------- | --------------- |
-| TC-01 | EC01,05,07,09,12,14,16 | SAVE10 | 500,000 VND | 200 OK, discount_amount=50,000, final_amount=450,000 |
-| TC-02 | EC01,05,07,09,12,15,16 | BIGBUY | 600,000 VND | 200 OK, discount_amount=50,000, final_amount=550,000 |
-| TC-03 | EC02,17 | NOTEXIST99 | 500,000 VND | 4xx, code not found |
-| TC-04 | EC03,17 | DEAD01 (is_active=0) | 500,000 VND | 4xx, code inactive |
-| TC-05 | EC04,17 | save10 (wrong case) | 500,000 VND | gap probe: 4xx expected if system is case-sensitive |
-| TC-06 | EC06,17 | EXPIRED | 200,000 VND | 4xx, coupon expired |
-| TC-07 | EC08,17 | SAVE10 | 200,000 VND | 4xx, below minimum 300,000 VND |
-| TC-08 | EC10,17 | SAVE10 | 500,000 VND | 401, no Authorization header |
-| TC-09 | EC11,17 | SAVE10 | 500,000 VND | 401, invalid JWT |
-| TC-10 | EC13,17 | SAVE10 (uses=1, max=1) | 500,000 VND | 4xx, usage limit reached |
-| TC-11 | EC18 | GAPTEST1 (fixed=100k, min=50k) | 60,000 VND | gap probe: negative final_amount or 4xx |
-| TC-12 | EC07 (zero path) | ZERO01 (percent=10%, min=0) | 0 VND | gap probe: zero-amount degenerate — C3 passes (0≥0), discover system behavior |
+The four gap-probe TCs map directly to the Step 1 gaps: TC-05 (`code` submitted in the wrong case) probes G1, TC-11 (`discount_value > total_amount`) probes G3, and TC-13 (a client-manipulated `total_amount` far below the real cart subtotal) probes G2. TC-12 sits outside G1-G5: it targets a degenerate `total_amount = 0` / `min_order_amount = 0` intersection that AI Gap Analysis (§3.3) missed and added only after human review.
 
-Full TC specifications: [`domain-testing.md` - Step 3](artifacts/tests/FR-09-coupon/domain-testing.md)
+Full TC specifications (TC-01 to TC-13, all fields): [`domain-testing.md` - Step 3](artifacts/tests/FR-09-coupon/domain-testing.md)
 
 ### 3.2 Boundary Value Analysis
 
-Three numeric variables were identified for BVA enhancement based on their role in triggering discrete behavioral transitions under Range Rule and strict-comparison conditions.
+Three variables qualify for BVA: two continuous numeric quantities and one discrete counter, each sitting at a condition boundary from §3.1's Range Rule groups.
 
-**`total_amount` vs. `min_order_amount` (C3, `>=` condition).** The spec requires `total_amount >= min_order_amount`. Using `SAVE10` (min=300,000 VND), three boundary points are tested: UB-1 at 299,999 VND (must be rejected), ON point at 300,000 VND (must be accepted per `>=`), and UB+1 at 300,001 VND (confirming the valid range starts exactly at min_order). A potential off-by-one defect would implement `total_amount > min_order_amount` (strict greater-than), causing TC-BVA-02 to fail: an order at exactly 300,000 VND would be incorrectly rejected despite satisfying the spec condition.
+**`total_amount` against the minimum order threshold.** Using `SAVE10` (`min_order_amount = 300,000 VND`), three points are tested: UB-1 at 299,999 VND (must be rejected), UB at 300,000 VND (must be accepted per `>=`), and UB+1 at 300,001 VND (confirms the valid range starts exactly at the threshold). A defect implementing strict `>` instead of `>=` would reject the UB case outright, exactly the pattern BUG-09-005 exhibits.
 
-**`uses_by_user` vs. `max_uses_per_user` (C5, `<` condition).** The condition is `uses_by_user < max_uses_per_user`. Two coupons are tested: `SAVE10` (max=1) and `VIP100` (max=2). Using both max values rules out any hardcoded comparison logic. UB-1 is the last valid use (uses=1, max=2: the second use with VIP100 must be accepted). UB is the transition point where `uses < max` first becomes false (uses=max=1 for SAVE10, uses=max=2 for VIP100: both must be rejected). A potential defect would use `uses <= max`, incorrectly accepting a request when `uses` already equals `max`.
+**`uses_by_user` against the per-user usage limit.** This is a discrete counter, so the turning point is described as OFF/ON rather than UB-x: the OFF point is the last valid use (`uses = max - 1`, tested with `VIP100` at max=2), and the ON point is where `uses < max` first turns false (`uses = max`, tested at both max=1 with `SAVE10` and max=2 with `VIP100`). Testing two different max values rules out a hardcoded comparison rather than a genuine `<` check.
 
-**`expired_at` vs. `current_date` (C2, strict `<` condition).** The SRS states "current date must be before `expired_at`" (strict less-than). The ON point is today's date set as `expired_at`: `today < today` evaluates to FALSE, so the coupon must be rejected. UB+1 is tomorrow's date: `today < tomorrow` is TRUE and the coupon must be accepted. A potential defect would use `current_date <= expired_at`, incorrectly accepting a coupon that expires today.
+**`expired_at` against the current date.** The spec requires strict `<` ("before"), so a coupon expiring today must be rejected. Two points are tested: UB at today's date (must be rejected: `today < today` is false) and UB+1 at tomorrow (must be accepted). A UB-1 point (expiry yesterday) is skipped here since EC06 in Domain Testing already covers the general expired condition; BVA only needs to add value at the untested exact-boundary and day-after points. A defect implementing `<=` instead of `<` would incorrectly accept the UB case.
 
-String conditions (code format and case sensitivity) are not BVA targets as they are not numeric ranges and are already covered by EC04 in the gap test group.
-
-| TC | Variable | Boundary Point | State | Defect Targeted |
-| -- | -------- | -------------- | ----- | --------------- |
-| TC-BVA-01 | `total_amount` | UB-1 = 299,999 VND | Invalid | `>= min_order - 1` instead of `>= min_order`, off-by-one accepting sub-threshold orders |
-| TC-BVA-02 | `total_amount` | ON = 300,000 VND | Valid | `total > min_order` instead of `total >= min_order`, ON point incorrectly rejected |
-| TC-BVA-03 | `total_amount` | UB+1 = 300,001 VND | Valid | Confirms valid range starts at 300,000, not 300,001 |
-| TC-BVA-04 | `uses_by_user` | UB-1: uses=1, max=2 | Valid | `uses < max - 1` instead of `uses < max`, last valid use incorrectly rejected |
-| TC-BVA-05 | `uses_by_user` | UB: uses=1, max=1 | Invalid | `uses <= max` instead of `uses < max`, allows exceeding limit when max=1 |
-| TC-BVA-06 | `uses_by_user` | UB: uses=2, max=2 | Invalid | Same defect as TC-BVA-05 at max=2, rules out hardcoded max=1 logic |
-| TC-BVA-07 | `expired_at` | ON = today | Invalid | `current_date <= expired_at` instead of `<`, coupon expiring today incorrectly accepted |
-| TC-BVA-08 | `expired_at` | UB+1 = tomorrow | Valid | Confirms tomorrow is still valid; catches reverse off-by-one |
-
-Full BVA specifications and DB setup protocol: [`bva.md`](artifacts/tests/FR-09-coupon/bva.md)
+Full BVA specifications and setup protocol (TC-BVA-01 to TC-BVA-08, all fields): [`bva.md`](artifacts/tests/FR-09-coupon/bva.md)
 
 ### 3.3 AI Gap Analysis
 
-| # | Missed item | Root cause (why AI missed it) |
-| - | ----------- | ----------------------------- |
-| 1 | Missed TC: No test case probes concurrent coupon application by the same user. Two simultaneous requests for the same coupon could both pass the C5 check (`uses < max`) before either increments the usage counter, resulting in double usage when `max_uses_per_user=1`. | Technique limitation: Domain Testing and BVA are inherently sequential techniques. Each TC assumes a stable, single-user system state. The `domain-testing` skill designs one TC per EC and has no mechanism to model concurrent state transitions. Concurrency testing is a separate dimension (load and stress testing) that falls outside the Domain Testing methodology scope. |
-| 2 | Missed TC: No test case covers the degenerate combination where `total_amount=0` and `min_order_amount=0`. FR-17 explicitly allows `min_order_amount >= 0`, so C3 should pass (0 >= 0), but the system rejected the request. TC-12 was added after human review and executed: result was HTTP 400 with error "Đơn hàng chưa đủ giá trị tối thiểu 0 ₫ để áp dụng mã này" — confirming BUG-09-005 (strict `>` instead of `>=`) in a degenerate state where the error message is logically absurd ("minimum 0₫ not met" is impossible for a user to satisfy). | Reasoning gap at EC composition: the AI noted the `min_order_amount >= 0` constraint in the Step 1 variable table but applied single-variable analysis. EC07 (`total_amount >= min_order_amount`) was derived without enumerating the degenerate case where both values are zero. The AI identified the range rule correctly but stopped short of exhausting the edge cases that the rule creates when combined with boundary-valid inputs from a different variable. TC-12 serves as a concrete artifact demonstrating this gap: it was not generated by the AI tool, and its execution revealed a qualitatively distinct bug manifestation (absurd error message on a zero-minimum coupon) that the original 11-TC suite did not surface. |
-| 3 | Missed TC: No test case sends a deliberately manipulated `total_amount` (inflated above the actual cart value) to verify whether the backend recomputes the total independently per FR-08 or trusts the client-supplied value. If the backend uses the client value, a user can bypass C3 by sending `total_amount` equal to `min_order_amount` regardless of actual cart contents. | Scope limitation of the `domain-testing` skill: the skill documented this conflict as an Implicit Gap in Step 1 but its workflow covers TC design from spec conditions (EP/BVA from the SRS), not adversarial input probes. Security testing requires intentionally invalid inputs designed to exploit trust boundaries, which is outside the EP methodology. The skill correctly flagged the risk but had no workflow step to convert a noted concern into an attack-scenario TC. |
-
-### 3.4 Execution Summary
-
-| Metric | Count |
-| ------ | ----- |
-| TC Designed (EP) | 12 |
-| TC Designed (BVA) | 8 |
-| TC Executed | 20 / 20 |
-| Passed | 12 |
-| Pass with deviation | 2 (TC-BVA-03, TC-BVA-08: boundary acceptance correct, output values wrong due to BUG-09-001) |
-| Failed | 6 (TC-01, TC-08, TC-09, TC-11, TC-12, TC-BVA-02) |
-| Bugs found | 5 (BUG-09-001 to BUG-09-005) |
-
-Full execution log: [`execution-log.md`](artifacts/tests/FR-09-coupon/execution-log.md)
+| # | Missed item | Root cause |
+| - | ----------- | ---------- |
+| 1 | No test case covers concurrent coupon redemption by the same user: two simultaneous requests could each pass the usage-limit check before either increments the counter. | Domain Testing and BVA assume a stable, single-user system state at the time each test case runs. Neither technique has a construct for modeling concurrent state transitions. |
+| 2 | AI recorded `min_order_amount >= 0` as a valid boundary in Step 1 but never derived a test case for the degenerate state where `total_amount` and `min_order_amount` are both zero. | The gap sits at the intersection of two variables' boundaries. EP evaluates each variable's range on its own and has no step that cross-multiplies boundary-valid values across variables. |
+| 3 | AI flagged the FR-08/FR-09 conflict over which `total_amount` governs, client-supplied or backend-recomputed, as an implicit gap, then never converted it into a test case. | EP derives test cases from stated spec conditions. Testing whether the backend trusts manipulated client input is a security probe, a category outside what EP/BVA generates. |
 
 ---
 
@@ -289,104 +160,63 @@ Full execution log: [`execution-log.md`](artifacts/tests/FR-09-coupon/execution-
 
 #### Step 1 - Identify Input/Output Variables
 
-FR-16 allows Admin to import multiple products via a JSON API endpoint. A core Spec Conflict was identified at the start: SRS section 6 describes uploading a CSV file with RFC 4180 format, while the API spec accepts a JSON body `{"products": [...]}`, meaning CSV parsing occurs at the frontend; the backend only processes JSON. This conflict redefines the test scope to the JSON API layer and excludes CSV-specific constraints (file extension, header row format) from API-level testing.
+FR-16 lets Admin import multiple products in one request. The SRS describes uploading a CSV file (`.csv` extension, RFC 4180 header row), but the API spec accepts a JSON body `{"products": [...]}` instead: CSV parsing happens at the frontend, and the backend only ever sees JSON. Ten variables were identified: three tester-controlled inputs (`products` array, `name`, `price`), three optional per-row inputs (`description`, `imageUrl`, `category_id`), one system-state precondition (category existence in the DB), and three outputs (Authorization gate, atomic rollback behavior, import report).
 
-Ten variables were identified: three inputs under tester control (`products` array, `name` per row, `price` per row), three optional inputs (`description`, `imageUrl`, `category_id`), one system state precondition (DB category existence), and three outputs (Authorization gate, atomic rollback behavior, import report). Seven Implicit Gaps were flagged: the Spec Conflict itself (CSV vs JSON), `category_id` foreign key validation (FR-16 silent), `name` max 255-char enforcement (FR-15 cross-ref, not repeated in FR-16), empty `products: []` behavior (undefined), string-typed `price` coercion from CSV parsing, response body schema (API spec section 6.3 provides no example), and rollback scope when all rows fail.
+Seven implicit gaps were flagged where the SRS is silent or conflicts with the API spec:
+
+- **G1:** the SRS says upload a `.csv` file, the API spec says send JSON. Does the Admin UI actually enforce the `.csv` extension before converting to JSON?
+- **G2:** FR-15 requires `category_id` to reference an existing category, but FR-16 does not repeat this constraint. Does the import endpoint validate it?
+- **G3:** FR-15 caps `name` at 255 characters; FR-16 is silent. Does the import endpoint enforce this cross-reference limit?
+- **G4:** what happens when `products: []` (an empty array) is submitted?
+- **G5:** does the backend coerce a CSV-parsed, string-typed `price` (e.g. `"10000"`) to a number, or reject it?
+- **G6:** the API spec gives no example response body for this endpoint. What fields does the import report actually return?
+- **G7:** when every row in a batch fails, does the report list a reason for each row, or only the first?
+
+All seven gaps are resolved by dedicated gap-probe TCs in Step 3: G1 by TC-19, G2 by TC-15, G3 by TC-14 (plus the BVA boundary probes in §4.2), G4 by TC-13, G5 by TC-16, G6 by TC-17, G7 by TC-18.
 
 Full variable table: [`domain-testing.md` - Step 1](artifacts/tests/FR-16-csv-import/domain-testing.md)
 
 #### Step 2 - Identify Equivalence Classes
 
-Equivalence partitioning was applied across seven functional groups using Must-Be Rule, Range Rule, and Gap Rule, producing 22 ECs total (7 valid, 15 invalid).
+Equivalence partitioning was applied across eight functional groups, producing 23 ECs total: 7 valid, 16 invalid.
 
-**Must-Be Rule for Authorization and `products` key.** Both are binary gates: either the condition holds or it fails outright. EC01 (valid admin JWT), EC04 (products key present with ≥1 item), and their invalid counterparts are each assigned one TC to isolate the failure mode independently.
+**Must-Be Rule for Authorization, `products` key, and `name` presence.** These are binary gates with no range to partition: a JWT is present or not, the `products` key exists or not, `name` is empty or absent or not.
 
-**Range Rule for `price`.** The constraint is `price > 0`, creating exactly two regions: valid (positive numbers) and invalid (0, negative, non-numeric, absent). Six ECs were derived: EC11 through EC15 from spec-derived constraints, and EC22 (string-typed price, e.g. `"10000"`) as a Gap EC from the CSV-parsing coercion risk identified in Step 1.
+**Range Rule for `price`.** The constraint `price > 0` splits cleanly into a valid region (positive numbers) and an invalid region (zero, negative, non-numeric, absent), five invalid ECs against one valid EC, each isolated to its own TC.
 
-**Gap Rule for `category_id` and `name` length.** EC10 (name > 255 chars) and EC17 (non-existent `category_id`) cannot be derived from FR-16 spec text alone; they are Gap ECs targeting cross-reference constraints from FR-15. These receive gap-probe TCs with multi-branch expected results rather than a single definitive assertion.
+**Gap Rule for `category_id`, `name` length, and file extension.** Whether a non-existent `category_id` is rejected, whether the FR-15 255-char cap is enforced, and whether the `.csv` extension is enforced client-side cannot be derived from FR-16's text alone. Each is a Gap EC (EC17, EC10, EC23) with a dedicated gap-probe TC and a multi-branch expected result rather than one definitive assertion.
 
-**Splitting Rule for Atomic Rollback and Import Report.** EC18 (all rows valid → commit) and EC19 (any row invalid → full rollback) are behaviorally distinct outputs each requiring a dedicated TC. Similarly, EC20 (success report) and EC21 (failure report with per-row reasons) are split to verify both report branches.
-
-| Group | Variable / Condition | Valid | Invalid | Total |
-| ----- | -------------------- | ----- | ------- | ----- |
-| 1 | Authorization | EC01 | EC02, EC03 | 3 |
-| 2 | `products` key + array size | EC04 | EC05, EC06 | 3 |
-| 3 | `name` per row | EC07 | EC08, EC09, EC10 | 4 |
-| 4 | `price` per row | EC11 | EC12, EC13, EC14, EC15, EC22 | 6 |
-| 5 | `category_id` per row | EC16 | EC17 | 2 |
-| 6 | Atomic Rollback behavior | EC18 | EC19 | 2 |
-| 7 | Import Report | EC20 | EC21 | 2 |
-| **Total** | | **7 Valid** | **15 Invalid** | **22** |
+**Splitting Rule for Atomic Rollback and Import Report.** EC18/EC19 (all-valid commit vs. any-invalid full rollback) and EC20/EC21 (success report vs. failure report with per-row reasons) are each split into two ECs, since collapsing either pair would leave one branch of the system's output behavior unverified.
 
 Full EC table: [`domain-testing.md` - Step 2](artifacts/tests/FR-16-csv-import/domain-testing.md)
 
 #### Step 3 - Minimum Test Case Set
 
-Eighteen test cases were derived in three layers: 12 base EP TCs using Error Isolation (1 happy-path combining all valid ECs, then 1 TC per triggerable invalid EC group), 4 AI-generated gap probes (TC-13 through TC-16, one per untested Implicit Gap), and 2 student-added gap probes (TC-17, TC-18) for the two gaps the AI identified in Step 1 but failed to convert into TCs.
+Nineteen test cases were derived: twelve base EP TCs using Error Isolation, four AI-generated gap-probe TCs, and three student-added gap-probe TCs.
 
-TC-01 combines all 7 valid ECs into a single happy-path test. TC-12 is the atomicity integration test: a mixed batch of [valid, invalid, valid] rows must result in 0 products committed, verifying that the SUT uses a batch transaction rollback rather than a row-by-row commit strategy.
+TC-01 and TC-02 both cover the all-valid happy path but stay separate: TC-01 imports a single product, TC-02 imports a batch of three, confirming the commit behavior holds at both batch sizes rather than only the trivial one-row case. TC-12 is the atomicity check: a mixed batch of [valid, invalid, valid] rows must commit zero products, proving the SUT rolls back the whole transaction rather than committing row by row.
 
-| TC | ECs Covered | Scenario | Expected Result |
-| -- | ----------- | -------- | --------------- |
-| TC-01 | EC01,04,07,11,16,18,20 | 1 valid product, admin JWT | HTTP 200; 1 row inserted; DB count +1 |
-| TC-02 | EC01,04,07,11,16,18,20 | Batch of 3 valid products | HTTP 200; 3 rows inserted; DB count +3 |
-| TC-03 | EC02 | No Authorization header | HTTP 401; DB unchanged |
-| TC-04 | EC03 | Regular user JWT (non-admin) | HTTP 403; DB unchanged |
-| TC-05 | EC05 | `products` key absent from body | HTTP 400 |
-| TC-06 | EC08,19,21 | `name = ""` (empty string) | Rollback; 0 products; report: reason |
-| TC-07 | EC09,19,21 | `name` field missing | Rollback; 0 products; report: reason |
-| TC-08 | EC12,19,21 | `price = 0` | Rollback; 0 products; price must be > 0 |
-| TC-09 | EC13,19,21 | `price = -1` | Rollback; 0 products |
-| TC-10 | EC14,19,21 | `price = "abc"` (non-numeric) | Rollback; 0 products |
-| TC-11 | EC15,19,21 | `price` field missing | Rollback; 0 products |
-| TC-12 | EC19,21 | Mixed batch: [valid, invalid, valid] | Full rollback; 0 of 3 committed |
-| TC-13 [Gap] | EC06 | `products: []` empty array | Gap probe: HTTP 400 or 200 with 0 imported |
-| TC-14 [Gap] | EC10 | `name` = 256 chars (FR-15 cross-ref) | Gap probe: error or accepted (enforcement check) |
-| TC-15 [Gap] | EC17 | Non-existent `category_id` | Gap probe: HTTP 400 or 200 with dangling FK |
-| TC-16 [Gap] | EC22 | `price = "10000"` (string type) | Gap probe: coerced to number or rejected |
-| TC-17 [Student Gap] | (none) | Valid product; record raw response verbatim | Discover actual response schema field names |
-| TC-18 [Student Gap] | EC19,21 | All 3 rows invalid (distinct price violations) | Gap probe: 1 or 3 failure entries in report |
+The seven gap-probe TCs map one to one with the Step 1 gaps: TC-13 (`products: []`) probes G4, TC-14 (`name` at 256 chars) probes G3, TC-15 (non-existent `category_id`) probes G2, TC-16 (`price` as a numeric string) probes G5, TC-17 (raw response schema recording) probes G6, TC-18 (all-rows-invalid batch) probes G7, and TC-19 (wrong file extension with JSON network inspection) probes G1.
 
-Full TC specifications: [`domain-testing.md` - Step 3](artifacts/tests/FR-16-csv-import/domain-testing.md)
+Full TC specifications (TC-01 to TC-19, all fields): [`domain-testing.md` - Step 3](artifacts/tests/FR-16-csv-import/domain-testing.md)
 
 ### 4.2 Boundary Value Analysis
 
-Two numeric variables were identified for BVA enhancement based on their role in triggering discrete behavioral transitions at explicit or cross-reference boundaries.
+Two variables qualify for BVA: one discrete integer boundary and one cross-reference length boundary.
 
-**`price` lower boundary at 0.** FR-16 specifies `price > 0` (strictly positive), placing the turning point at 0: the ON boundary is 0 (last invalid value), and LB+1 = 1 is the minimum valid value. A potential off-by-one defect would implement `price >= 0`, incorrectly accepting zero-priced products and silently violating the FR-16 business constraint.
+**`price` at the zero/positive turning point.** The constraint is `price > 0`, so the turning point sits directly between 0 and 1: the OFF point is `price = 0` (must be rejected, still invalid) and the ON point is `price = 1` (must be accepted, the smallest valid value). A defect implementing `price >= 0` would let a zero-priced product through silently.
 
-**`name` length upper boundary at 255.** FR-15 caps `name` at 255 characters; FR-16 does not repeat this constraint. Three boundary points probe whether the import endpoint enforces this cross-reference limit: UB-1 at 254 chars (must always be accepted), UB at 255 chars (must be accepted if `<= 255` is implemented correctly), and UB+1 at 256 chars (reveals whether FR-16 import omits the FR-15 enforcement; if accepted, a Gap is confirmed).
+**`name` length at the FR-15 255-character cross-reference cap.** Three points are tested: UB-1 at 254 characters (must always be accepted, regardless of enforcement), UB at 255 characters (must be accepted if the cap is implemented as `<= 255`), and UB+1 at 256 characters, the diagnostic point: acceptance here confirms FR-16 does not enforce the FR-15 constraint at all, since G3 in Step 1 left this unresolved.
 
-| TC | Variable | Boundary Point | State | Defect Targeted |
-| -- | -------- | -------------- | ----- | --------------- |
-| TC-BVA-01 | `price` | 0 (ON/turning point) | Invalid | `price >= 0` instead of `price > 0`, accepts zero-price product |
-| TC-BVA-02 | `price` | 1 (LB+1, min valid) | Valid | Confirms lower bound is correctly exclusive at 0 |
-| TC-BVA-03 | `name` length | 254 chars (UB-1) | Valid | Baseline: must be accepted regardless of enforcement |
-| TC-BVA-04 | `name` length | 255 chars (UB = ON) | Valid | Off-by-one `< 255` instead of `<= 255`, rejects valid 255-char name |
-| TC-BVA-05 | `name` length | 256 chars (UB+1) | Gap | If accepted: FR-16 does not enforce FR-15 255-char limit at import |
-
-Full BVA specifications and DB setup protocol: [`bva.md`](artifacts/tests/FR-16-csv-import/bva.md)
+Full BVA specifications and setup protocol (TC-BVA-01 to TC-BVA-05, all fields): [`bva.md`](artifacts/tests/FR-16-csv-import/bva.md)
 
 ### 4.3 AI Gap Analysis
 
-| # | Missed test case | Root cause (why AI missed it) |
-| - | ---------------- | ----------------------------- |
-| 1 | No gap-probe TC for the Import Report response schema (Step 1 Gap #6). The domain testing framework requires every identified gap to produce a corresponding gap-probe TC. Gap #6 states: "API spec section 6.3 provides no response body example for POST /api/admin/import-products; unknown which fields to verify: `imported`, `failed`, `errors[]`?" Four other gaps each received a TC (TC-13 through TC-16). Gap #6 did not. Consequence: TC-06 through TC-12 assert "report contains failed row count and reason" against field names that were never empirically confirmed to exist in the actual response. Student fix: TC-17 sends TC-01's valid input and records the raw response body verbatim; its output becomes the verified schema for all subsequent report assertions. | Inference chain incomplete: the AI's TC selection in Step 3 applies Error Isolation to invalid ECs (one invalid input per TC). A schema observation probe uses a valid input and an observational assertion, which does not map to the Error Isolation pattern. The AI identified the risk but did not cross-check the framework's completeness requirement ("every Step 1 gap produces a gap-probe TC") before finalizing Step 3. This follows the same pattern as FR-09 Artifact #2, where the AI observed a constraint in Step 1 but did not convert it to a TC. |
-| 2 | No gap-probe TC for the all-rows-fail rollback scenario (Step 1 Gap #7). Gap #7 states: "Behavior when all rows fail is not addressed separately." TC-12 tests a mixed [valid, invalid, valid] 3-row batch and confirms full rollback. No TC tests an all-invalid batch, leaving two behavioral questions unanswered: (a) does the SUT early-exit after the first invalid row or process all rows before rolling back, and (b) does the report list per-row failure reasons for all N rows as SRS requires ("lý do từng dòng") or only for the first. Student fix: TC-18 sends 3 rows all with distinct price violations and records whether the response lists 1 or 3 failure entries. | EC minimization conflict: TC-12 already covers EC19 (any row invalid means rollback). In Step 3, the AI selected the minimum TC set by EC coverage. Since EC19 was already covered, no additional rollback TC was generated. However, Gap #7 requires a behaviorally-motivated probe beyond EC coverage, and the framework's completeness check ("every gap produces a gap-probe TC") was not applied as an independent pass after EC minimization. |
-
-### 4.4 Execution Summary
-
-| Metric | Count |
-| ------ | ----- |
-| TC Designed (EP) | 18 |
-| TC Designed (BVA) | 5 |
-| TC Executed | 23 / 23 |
-| Passed | 11 |
-| Pass with deviation | 3 (TC-14, TC-16, TC-BVA-05) |
-| Failed | 9 (TC-04, TC-08, TC-09, TC-10, TC-11, TC-12, TC-15, TC-18, TC-BVA-01) |
-| Bugs found | 3 (BUG-16-001, BUG-16-002, BUG-16-003) |
-
-Full execution log: [`execution-log.md`](artifacts/tests/FR-16-csv-import/execution-log.md)
+| # | Missed item | Root cause |
+| - | ----------- | ---------- |
+| 1 | AI noted the API spec gives no example response body for the import endpoint, but never derived a test case to record the actual schema before writing assertions against report fields. | Step 3 applies Error Isolation to invalid inputs. An observational schema probe uses a valid input with no error to isolate, so it falls outside that generation pattern. |
+| 2 | AI covered a mixed valid/invalid batch for rollback but never tested an all-invalid batch, leaving early-exit vs. full-row-scan behavior unverified. | The mixed-batch case already satisfied EC coverage for "any invalid row triggers rollback." Minimizing by EC coverage suppressed a behaviorally distinct case sharing the same EC. |
+| 3 | AI recorded the SRS/API-spec conflict over file format, `.csv` upload vs. JSON body, as an implicit gap, but never tested whether the Admin UI enforces the `.csv` extension. | Same pattern as items 1 and 2: Step 1's gap list and Step 3's test-case set were produced independently, with no step cross-checking one against the other. |
 
 ---
 
@@ -401,96 +231,57 @@ Unlike FR-02/FR-09/FR-16 (spec-only design), FR-20's design was grounded in a re
 
 #### Step 1 - Identify Input/Output Variables
 
-FR-20 lets a user cancel their own order from the mobile app; per FR-10 (Order State Machine), cancellation is only allowed while `order.status` is `pending` or `confirmed`. Seven variables were identified: three inputs (`auth_token`, `order_id`, `cancel_action`), two system states (`order.status`, `order_owner_match`), one conditional input (`confirm_dialog_response`, present only if a confirm UI exists), and one output (`result`, the post-attempt `order.status` plus UI feedback). Three implicit gaps/conflicts were flagged: whether `PUT /api/orders/:id/cancel` checks order ownership at all (`order_owner_match`: FR-11 restricts *viewing* orders to the owner but is silent on *cancel*, an IDOR risk if unchecked); a **Spec Conflict** at `order.status = shipping` (SRS FR-20/FR-10 forbids user-cancel here, but API spec section 4.6 loosely describes the endpoint as usable "while not yet delivered," which implicitly permits `shipping` too); and whether a confirmation dialog exists before cancel (`confirm_dialog_response`: FR-24 mandates one for cart-item deletion, an equally destructive action, but FR-20 is silent).
+FR-20 lets a user cancel their own order from the mobile app. Per FR-10, cancellation is only allowed while `order.status` is `pending` or `confirmed`. Seven variables were identified: three inputs (`auth_token`, `order_id`, `cancel_action`), two system states (`order.status`, `order_owner_match`), one conditional input (`confirm_dialog_response`, present only if a confirm UI exists), and one output (`result`, the post-attempt status plus UI feedback).
+
+Three implicit gaps were flagged:
+
+- **G1:** the spec does not state whether `PUT /api/orders/:id/cancel` checks order ownership. FR-11 restricts *viewing* orders to the owner but is silent on *cancel*, an IDOR risk if unchecked.
+- **G2:** a Spec Conflict at `order.status = shipping`. SRS FR-20/FR-10 forbids user-cancel here ("only Admin can act"), but API spec section 4.6 describes the endpoint as usable "while not yet delivered," which implicitly permits `shipping` too.
+- **G3:** whether a confirmation dialog exists before cancel. FR-24 mandates one for cart-item deletion, an equally destructive action, but FR-20 is silent.
+
+All three gaps are resolved by dedicated gap-probe TCs in Step 3: G1 by TC-08, G2 by TC-07 (plus the matched-boundary BVA probe in §5.2), G3 by TC-09.
 
 Full variable table: [`domain-testing.md` - Step 1](artifacts/tests/FR-20-cancel-order-mobile/domain-testing.md)
 
 #### Step 2 - Identify Equivalence Classes
 
-Equivalence partitioning was applied across six groups using Set/Splitting Rule, Must-Be Rule, and Gap Rule, producing 17 ECs total (8 valid, 8 invalid, 1 dual-outcome Must-Be assertion).
+Equivalence partitioning was applied across six functional groups, producing 17 ECs total: 8 valid, 8 invalid, plus one dual-outcome assertion.
 
-**Splitting Rule isolates `shipping` as its own class (EC03).** Even though `shipping`, `delivered`, and `canceled` are all "cannot cancel" outcomes, `shipping` is split out separately because it is the exact Spec Conflict target identified in Step 1, collapsing it into a general "non-cancelable" class would mask the specific SRS-vs-API-spec disagreement behind an ordinary invalid-state assertion.
+**Splitting Rule isolates `shipping` (EC03) from the general non-cancelable group.** `shipping`, `delivered`, and `canceled` all produce a "cannot cancel" outcome, but `shipping` is split into its own class because it is the exact Spec Conflict target from G2. Collapsing it into a general invalid-state class would mask the SRS-vs-API-spec disagreement behind an ordinary assertion.
 
-**Must-Be Rule for `auth_token`, `order_owner_match`, and `order_id`.** Each is a binary gate (present/valid or not) with no numeric range, yielding one valid and one invalid class per group (EC06/EC07, EC08/EC09, EC10/EC11). EC09 (order not owned by the caller) and EC03 (`shipping`) are both labeled Gap-type ECs since the spec does not state the expected system behavior in advance, both require a gap-probe TC rather than an assertion against a known expected result.
+**Must-Be Rule for `auth_token`, `order_owner_match`, and `order_id`.** Each is a binary gate with no numeric range, producing one valid and one invalid class per group. EC09 (order not owned by the caller) is a Gap-type EC alongside EC03, since neither has a spec-stated expected outcome.
 
-**Gap Rule for `confirm_dialog_response` (EC12, EC13).** The spec is silent on whether a confirm dialog exists at all, so both branches (Confirm, Dismiss) are provisional classes pending empirical discovery, not classes derived from a documented business rule.
+**Gap Rule for `confirm_dialog_response` (EC12, EC13).** The spec is silent on whether a confirm dialog exists at all, so both branches are provisional classes pending empirical discovery rather than classes derived from a documented rule.
 
-**Output group for `result` (EC14-EC17).** EC14-EC16 partition the output by response shape (success, business-rule error, auth error) and are verified as present/absent within the TCs that trigger the corresponding input EC, following the same output-space convention used in FR-02. EC17 is a single Must-Be assertion with two possible outcomes (status labels are color-distinguished vs. all render identically) rather than two separate ECs, because there is only one underlying test action, a visual comparison across existing orders, not two independently triggerable inputs. EC17 is a cross-feature constraint pulled from FR-11's explicit "phân biệt màu sắc" (color-distinguished) requirement on the same `result` output variable, not a newly invented rule.
-
-| Group | Variable | Valid | Invalid | Total |
-| ----- | -------- | ----- | ------- | ----- |
-| 1 | `order.status` (Splitting) | EC01, EC02 | EC03 (Gap), EC04, EC05 | 5 |
-| 2 | `auth_token` (Must-Be) | EC06 | EC07 | 2 |
-| 3 | `order_owner_match` (Must-Be) | EC08 | EC09 (Gap) | 2 |
-| 4 | `order_id` (Must-Be) | EC10 | EC11 | 2 |
-| 5 | `confirm_dialog_response` (Gap Rule) | none | EC12, EC13 (Gap) | 2 |
-| 6 | `result`: output (Splitting) | EC14, EC15, EC16 | none | 3 + EC17 (dual-outcome) |
-| **Total** | | **8 Valid** | **8 Invalid** | **17** |
+**Output group for `result` (EC14-EC16), separate Must-Be Rule for EC17.** EC14-EC16 partition the output by response shape (success, business-rule error, auth error) and are verified present or absent within the TCs that trigger the corresponding input EC. EC17 stands apart from that group: it is a single Must-Be assertion with two possible outcomes, status labels color-distinguished or all rendering identically, not an output-shape split, since only one test action exists, a visual comparison across existing orders, not two independently triggerable inputs. It comes directly from FR-11's explicit "phân biệt màu sắc" requirement on the same `result` variable, not an invented rule.
 
 Full EC table: [`domain-testing.md` - Step 2](artifacts/tests/FR-20-cancel-order-mobile/domain-testing.md)
 
 #### Step 3 - Minimum Test Case Set
 
-Ten test cases were derived: two happy-path TCs (EC01/EC02, `pending`/`confirmed`), four negative TCs each isolating one triggerable invalid EC (EC04, EC05, EC07, EC11), three gap-probe TCs discovering actual behavior at each Step 1 gap (EC03, EC09, EC12/EC13), and one cross-feature check added after post-design gap analysis (EC17, FR-11 color distinction).
+Ten test cases were derived: two happy-path TCs (`pending`, `confirmed`), four negative TCs each isolating one triggerable invalid EC, three gap-probe TCs discovering actual behavior at each Step 1 gap, and one cross-feature check added after gap analysis (EC17, FR-11 color distinction).
 
-TC-05, TC-06, TC-07, and TC-08 all carry a **UI Fallback Note**: the mobile app stores its JWT only in-memory (confirmed empty in `localStorage`/`sessionStorage` during the UI survey) and never exposes a free-typed `order_id` or another user's order in the UI, so these scenarios have no reachable UI path and are executed as direct API calls against a valid pre-condition state, consistent with the workspace's UI-first/API-fallback testing discipline. TC-07 and the parallel TC-BVA-02 (section 5.2) both target the same Spec Conflict at `shipping` from two angles (isolated EC vs. matched-boundary comparison against `confirmed`).
+TC-05, TC-06, TC-07, and TC-08 all carry a UI Fallback Note: the mobile app stores its JWT only in memory (confirmed empty in `localStorage`/`sessionStorage` during the UI survey) and never exposes a free-typed `order_id` or another user's order in the UI, so these scenarios have no reachable UI path and run as direct API calls instead. TC-07 and TC-BVA-02 (§5.2) target the same `shipping` Spec Conflict from two angles: an isolated EC assertion versus a matched-boundary comparison against `confirmed`.
 
-| TC | ECs Covered | Scenario | Expected Result |
-| -- | ----------- | -------- | ---------------- |
-| TC-01 | EC01,06,08,10,14 | Tap `Hủy đơn` on a `pending` order (owner, valid token) | UI: status → "Đã hủy", button disappears. API: 200 OK |
-| TC-02 | EC02,06,08,10,14 | Tap `Hủy đơn` on a `confirmed` order | UI: status → "Đã hủy". API: 200 OK |
-| TC-03 | EC04,06,08,10 | `delivered` order: no button in UI; API cross-check direct call | No button; API: 4xx, cannot cancel (final state) |
-| TC-04 | EC05,06,08,10 | `canceled` order: no button; API cross-check direct call | No button; API: 4xx, already canceled |
-| TC-05 | EC07 | No `Authorization` header, then invalid token: direct API (UI fallback) | API: 401/4xx both cases; order status unchanged |
-| TC-06 | EC11 | `PUT /api/orders/999999/cancel`: direct API (UI fallback) | API: 404, order not found |
-| TC-07 [Gap-Probe] | EC03 | `shipping` order: no button in UI; direct API call (Spec Conflict target) | Multi-branch: 4xx confirms SRS wins over API-spec wording; 200 = state-machine bug |
-| TC-08 [Gap-Probe] | EC09 | `test2@eshop.com`'s token targets `test@eshop.com`'s order: direct API (UI fallback, IDOR probe) | Multi-branch: 403/404 = ownership enforced; 200 = IDOR bug |
-| TC-09 [Gap-Probe] | EC12,13 | Tap `Hủy đơn` once, observe immediately for a confirmation dialog | Empirical: no dialog exists (confirmed by UI survey); recorded as UX finding vs. FR-24 convention |
-| TC-10 [FR-11 cross-feature] | EC17 | Compare rendered text color of "Trạng thái" label across ≥3 different statuses | Each status color-distinguished; identical color across all = spec violation |
-
-Full TC specifications: [`domain-testing.md` - Step 3](artifacts/tests/FR-20-cancel-order-mobile/domain-testing.md)
+Full TC specifications (TC-01 to TC-10, all fields): [`domain-testing.md` - Step 3](artifacts/tests/FR-20-cancel-order-mobile/domain-testing.md)
 
 ### 5.2 Boundary Value Analysis
 
-FR-20 has no numeric input (no counters, timers, or amounts govern the cancel decision), so classic range-based BVA does not apply to most variables. The one variable worth boundary analysis is `order.status`: FR-10 defines it as an ordered sequence (`pending → confirmed → shipping → delivered`), and the cancel rule draws a hard line partway through, allowed for the first two states, forbidden from the third onward. This is exactly the shape BVA targets, and it sits at the same Spec Conflict flagged in Step 1: SRS FR-20/FR-10 forbids `shipping`, while API spec section 4.6 loosely implies it may still be allowed. Domain Testing already covers each state as an isolated EC; BVA adds value by testing the **adjacent pair straddling the critical boundary** (`confirmed` vs. `shipping`) under matched conditions, naming the precise wrong-operator defect each TC targets.
+FR-20 has no numeric input: no counters, timers, or amounts govern the cancel decision, so classic range-based BVA does not apply to most variables. The one variable worth a boundary analysis is `order.status`, and applying BVA to it is itself an extension of the technique: FR-10 defines `order.status` as an ordered sequence (`pending → confirmed → shipping → delivered`) rather than a numeric range, so this is BVA generalized to an ordinal variable, closer in spirit to State Transition Testing than to classic numeric BVA. The turning-point framing still earns its place here because the cancel rule draws a hard line partway through that sequence, allowed for the first two states, forbidden from the third onward, exactly the shape BVA targets: the point where an off-by-one or wrong-operator mistake is most likely and most consequential. It also sits at the same Spec Conflict flagged in G2.
 
-| TC | Variable | Boundary Point | Defect Targeted |
-| -- | -------- | --------------- | ---------------- |
-| TC-BVA-01 | `order.status` | UB = `confirmed` (last allowed) | Off-by-one implementation wrongly excluding `confirmed` from the allowed set |
-| TC-BVA-02 | `order.status` | UB+1 = `shipping` (first forbidden) | Wrong-operator deny-list (`!== 'delivered'`) instead of correct allow-list (`in ['pending','confirmed']`), the exact Spec Conflict bug |
-| TC-BVA-03 | `order.status` | LB = `pending` (first allowed) | Off-by-one implementation wrongly excluding `pending` from the allowed set |
-| TC-BVA-04 | `order.status` | UB+2 = `delivered` (second forbidden) | Deny check too narrow, only special-cases `shipping` and fails to generalize further along the chain |
+Domain Testing already covers each state as an isolated EC. BVA adds value here by testing the adjacent pair straddling the critical boundary (`confirmed` vs. `shipping`) under matched conditions, naming the precise wrong-operator defect each TC targets.
 
-Setup uses the Admin API (`PUT /api/admin/orders/:id/status`) to drive each order sequentially through intermediate states, since the test DB helper script has no support for direct writes to the `orders` table. TC-BVA-01 and TC-BVA-02 use two separate sibling orders so both sides of the critical boundary can be verified independently.
+**`confirmed`/`shipping` at the critical boundary.** UB is `confirmed`, the last allowed state: an off-by-one implementation could wrongly exclude it from the allowed set. UB+1 is `shipping`, the first forbidden state and the exact Spec Conflict target: a wrong-operator deny-list (`status !== 'delivered'`) would silently permit it instead of the correct allow-list (`status in ['pending', 'confirmed']`).
 
-Full BVA specifications and setup protocol: [`bva.md`](artifacts/tests/FR-20-cancel-order-mobile/bva.md)
+**`pending`/`delivered` at the outer ends.** LB is `pending`, the first allowed state, subject to the same off-by-one risk from the other direction. UB+2 is `delivered`, the second forbidden state: this catches a fix for the UB+1 case that is too narrow, for example a deny check that special-cases only `shipping` and fails to generalize further along the chain.
+
+Full BVA specifications and setup protocol (TC-BVA-01 to TC-BVA-04, all fields): [`bva.md`](artifacts/tests/FR-20-cancel-order-mobile/bva.md)
 
 ### 5.3 AI Gap Analysis
 
-Unlike FR-02/FR-09/FR-16, where gaps were surfaced only later, during execution or student review, FR-20's initial AI design pass (Entry 009) was followed by a dedicated **AI self-review pass** (Entry 010) in which the same AI was asked to audit its own `domain-testing.md`/`bva.md` output against the SRS and API spec. That pass proposed five candidate gaps; one (#5 below) was implemented and confirmed a real defect (BUG-20-002), the other four were explicitly descoped by the student after a scope-negotiation exchange.
-
-| # | Missed item | Root cause (why AI missed it) |
-| - | ----------- | ------------------------------ |
-| 1 | Status label color distinction (FR-11) was absent from the first design pass entirely, no EC or TC checked whether `pending`/`confirmed`/`shipping`/`delivered`/`canceled` labels are visually distinguished by color. Added as EC17/TC-10 after self-review; execution confirmed **BUG-20-002** (all statuses render identical `rgb(0,0,0)` text with no border/background distinction). | Partial cross-reference: FR-20's Step 1 already cross-referenced FR-11 for the *text-content* half of the status label ("dịch sang tiếng Việt"), but the Must-Be Rule was not extended to the *visual* half of the same FR-11 sentence ("phân biệt màu sắc") in the first pass, the cross-reference filter caught only part of the sentence it was reading. |
-| 2 | No EC/TC for malformed `order_id` values (non-numeric, negative, zero, injection-shape strings like `1; DROP TABLE`). Raised by the AI in self-review, then explicitly excluded. | Not a miss in the traditional sense: this scenario has no UI-reachable path at all (no control lets a user type an `order_id`), unlike TC-05/06/08 which are UI-driven with a single API-fallback step. It is a pure API robustness/security probe, which violates the UI-first, API-fallback-for-one-step-only scope the student set for this feature; correctly excluded as out of scope rather than added. |
-| 3 | No EC/TC for a JWT that expires mid-session while the `Hủy đơn` button is still visible (distinct from TC-05's "no token / invalid token from the start", which is not UI-reachable at all). Raised in self-review as a genuinely UI-reachable scenario, then descoped. | Descoped for a spec-limitation reason, not an AI-quality one: neither `srs.md` nor `api_specification.md` documents the JWT's TTL, so any TC probing expiry-during-session would need to guess a wait duration, producing a flaky test with no spec-backed oracle for the wait time. |
-| 4 | No verification point requiring the *verbatim* error-response body (not just HTTP status) to be recorded for TC-03/04/07/08, so error schema/field names were never pinned down as a shared oracle. Raised in self-review as an "observational gap," then descoped. | Descoped because the spec provides no documented error-response schema; adding a strict body assertion would fabricate an oracle not backed by `srs.md`/`api_specification.md`, rather than test against a real requirement, consistent with the student's decision not to assert against undocumented behavior. |
-
-Point #1's disposition (kept, implemented, confirmed a bug) versus #2-4's disposition (raised, then rejected with a specific documented reason) is itself evidence against a "more AI-generated tests is always better" default: three of the five self-review candidates were over-generation relative to the feature's UI-first testing scope or the spec's actual documentation coverage, and only the scope-negotiation step (Entry 010, three turns) prevented them from silently inflating the test suite with unfalsifiable or out-of-scope assertions.
-
-### 5.4 Execution Summary
-
-| Metric | Count |
-| ------ | ----- |
-| TC Designed (EP) | 10 |
-| TC Designed (BVA) | 4 |
-| TC Executed | 14 / 14 |
-| Passed | 10 |
-| Pass with deviation | 1 (TC-09) |
-| Failed | 3 (TC-07, TC-BVA-02, TC-10) |
-| Bugs found | 2 (BUG-20-001, BUG-20-002) |
-
-Full execution log: [`execution-log.md`](artifacts/tests/FR-20-cancel-order-mobile/execution-log.md)
+| # | Missed item | Root cause |
+| - | ----------- | ---------- |
+| 1 | AI extended FR-11's status-label requirement to the Vietnamese-translation half but not the color-distinction half specified in the same sentence. | FR-11 bundles two sub-requirements, text content and visual styling, into one line of spec text. The Must-Be Rule captured only the clause it was applied to. |
 
 ---
 
