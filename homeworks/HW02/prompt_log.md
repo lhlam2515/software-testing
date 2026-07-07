@@ -937,4 +937,424 @@ total from 17 to 18 bugs — not part of this synthesis session.
 
 ---
 
+## Entry 012 | 10:53 24/06/2026
+
+**Tool:** Claude Code (claude-sonnet-4-6)
+**Feature:** All (skill-level)
+**Step:** Skill Creation (v0.1) via `/skill-creator`
+
+### Prompt
+
+```
+Hãy tổng hợp nội dung toàn bộ quá trình phân tích và thiết kế test case bằng kỹ thuật Domain
+Testing và Boundary Value Analysis thành một Agent Skill (sử dụng /skill-creator) thực hiện
+theo từng bước của quá trình (sử dụng tài liệu @docs/slides/S04_domain_testing.md như tài liệu
+tham khảo). Ở mỗi bước sau khi thực hiện, sử dụng AskUserQuestion để yêu cầu người dùng chấp
+nhận hoặc đưa ra feedback cho output, sau khi chỉnh sửa và được người dùng chấp nhận thì hãy
+Write ra file tương ứng (Step 1-3 vào domain-testing.md, Step 4 vào bva.md folder FR-xx tương
+ứng với FR đang phân tích).
+```
+
+### AI Output
+
+```
+Skill đã active trong session hiện tại (thấy trong `available_skills`). Đây là tổng kết:
+
+Skill `domain-testing`, tổng kết:
+
+Location:
+- Source: `.agents/skills/domain-testing/SKILL.md` (326 dòng)
+- Symlink: `.claude/skills/domain-testing`, active ngay lập tức
+
+Cấu trúc skill:
+
+Phase 0, Setup: đọc SRS, xác định FR, locate/create output folder
+STEP 1, Variables & Constraints: AskUserQuestion, feedback loop, accepted
+STEP 2, Equivalence Classes (4 rules: Range/Set/Must-Be/Splitting): AskUserQuestion, feedback
+loop, accepted
+STEP 3, Minimum TCs (Error Isolation + vertical table per TC): AskUserQuestion, accepted, Write
+domain-testing.md
+STEP 4, BVA (3-point model, ASCII boundary map, Defect target per TC): AskUserQuestion,
+accepted, Write bva.md
+
+Triggers (tự động invoke):
+- "apply domain testing to FR-05"
+- "thiết kế test case cho FR-09"
+- "/domain-testing FR-16"
+- "phân tích FR-03 bằng EP"
+
+Điểm thiết kế quan trọng:
+- AskUserQuestion sau mỗi bước, không bao giờ proceed mà không có approval
+- Error Isolation bắt buộc, skill ghi rõ là "non-negotiable"
+- Mục tiêu Defect cụ thể trong BVA, không chấp nhận "off-by-one" chung chung
+- Implicit Gaps phải được flag, không assume away thiếu sót của SRS
+
+Để test skill trên FR khác, dùng: /domain-testing FR-09 hoặc "apply domain testing to FR-16".
+```
+
+**Note:** Skill was ported directly from the manual FR-02 pipeline just completed (Entry 001 to
+009). Commit `0b90b06 feat(skills): add domain-testing skill for EP + BVA test design`. Same
+day, commit `1ab9b14 refactor(skills): generalize domain-testing skill to English,
+project-agnostic` rewrote SKILL.md fully in English and removed all EShop SUT/CSC13003/FR-01 to
+FR-20 references, replaced with the `{output-folder}/{feature-slug}` placeholder.
+
+### Used in
+
+- `[AI-02]_AI_Audit_Report.md`, artifact domain-testing skill
+- `.agents/skills/domain-testing/SKILL.md` (v0.1)
+
+---
+
+## Entry 013 | 10:38 26/06/2026
+
+**Tool:** Claude Code (claude-sonnet-4-6)
+**Feature:** All (skill-level, so sánh output FR-02 và FR-09)
+**Step:** Skill Upgrade v0.2, 6 improvements
+
+### Prompt
+
+```
+Từ những phân tích trên thì domain-testing skill hiện tại có thể nâng cấp được ở những điểm
+nào nữa
+```
+
+### AI Output
+
+```
+Skill hiện tại là v0.1, được forge từ FR-02. Nhìn vào khoảng cách giữa FR-02 output và FR-09
+output, tôi thấy 6 điểm cụ thể có thể upgrade.
+
+Điểm 1, Cross-reference Filter Rule (HIGH IMPACT): Phase 0 hiện có câu "constraints in
+cross-referenced specs are test targets" quá mở, dẫn đến việc AI đọc FR-22 và add EC23/EC24
+(display positioning) vào domain testing của FR-02, tức scope creep. Fix: thêm quy tắc chỉ đọc
+cross-reference để lấy constraint cho biến đã có ở Step 1, không tạo EC Group mới cho hành vi
+thuộc sở hữu của feature khác.
+
+Điểm 2, Gap Test TC Pattern trong Step 3 (HIGH IMPACT): Step 1 nói "Flag Implicit Gaps" nhưng
+skill không nói phải làm gì với chúng ở Step 3. Fix: mỗi gap từ Step 1 trở thành đúng một
+gap-probe TC, với "ECs Verified Absent" ghi "N/A, gap test, observe behavior" và "Expected
+Result" liệt kê tất cả nhánh khả dĩ thay vì một assertion nhị phân.
+
+Điểm 3, "Invalid/Gap" EC Type trong Step 2 (MEDIUM IMPACT): Step 2 chỉ có Valid/Invalid, cần
+thêm loại Invalid/Gap cho hành vi spec không định nghĩa, expected output ghi "undefined, test
+to discover" thay vì buộc tester đoán assertion cho một hành vi không tồn tại trong spec.
+
+Điểm 4, Spec Conflict Detection trong Step 1 (MEDIUM IMPACT): tách bảng Implicit Gaps hiện tại
+thành hai loại, Implicit Gaps (spec im lặng) và Spec Conflicts (hai nguồn spec mâu thuẫn),
+riêng Spec Conflicts phải document cả hai nguồn và tạo gap-probe TC để verify hệ thống thực tế
+implement theo nguồn nào.
+
+Điểm 5, Multi-parameter BVA trong Step 4 (MEDIUM IMPACT): khi boundary có tham số cấu hình
+được (ví dụ uses_by_user < max_uses_per_user), test điểm ON với ít nhất 2 giá trị tham số khác
+nhau để loại trừ khả năng implementation hardcode ngưỡng thay vì đọc từ config.
+
+Điểm 6, Quality Checklist bổ sung (LOW IMPACT): thêm 4 item tương ứng 4 điểm trên vào checklist
+tự-kiểm trước AskUserQuestion.
+
+Điểm 1 và 2 là critical nhất, độc lập với nhau, có thể implement song song vào SKILL.md.
+
+Bạn muốn tôi apply trực tiếp vào SKILL.md không?
+```
+
+**Note:** Applied as-is, verified (line count, checklist count, both file copies identical),
+then committed at `b1d7a3c feat(skills): upgrade domain-testing to v0.2 with 6 improvements`
+(10:58, same session).
+
+### Used in
+
+- `[AI-02]_AI_Audit_Report.md`, artifact domain-testing skill
+- `.agents/skills/domain-testing/SKILL.md` (v0.2)
+
+---
+
+## Entry 014 | 16:20 đến 16:25 30/06/2026
+
+**Tool:** Claude Code (claude-sonnet-4-6)
+**Feature:** FR-16
+**Step:** Skill Upgrade v0.3, Gap Completeness Cross-Check
+
+**Note:** a near-duplicate prompt at 16:19 (same session) first returned "current version is
+sufficient, no update needed." This corrected analysis below, from an almost identical prompt
+one minute later, is the one that actually drove the v0.3 update.
+
+### Prompt
+
+```
+Dựa vào kết quả AI Audit và AI Gap của FR-16 có thể bổ sung điều chi cho domain-testing skill
+không? Hay phiên bản hiện tại là đã đủ dùng rồi
+```
+
+### AI Output
+
+```
+Kết luận ngắn: Skill chưa đủ, có 2 lỗ hổng cụ thể chưa được address.
+
+Cả 2 deficiency của FR-16 đều cùng một root cause: không có back-reference pass, tức AI xong
+Step 3, EC minimization kết thúc, nhưng không có cơ chế nào quay lại kiểm tra từng gap trong
+Step 1 đã có TC chưa. Hai failure mode cụ thể:
+- Observational gap (Gap #6, response schema unknown): không có EC mới nên EC minimization coi
+  như "done"
+- Intra-EC behavioral gap (Gap #7, early-exit vs full-scan): EC19 đã được cover bởi TC-12 nên EC
+  minimization dừng
+
+Skill hiện có rule "Each gap or conflict identified in Step 1 becomes exactly one gap-probe TC"
+và checklist "Every Implicit Gap and Spec Conflict from Step 1 has a corresponding gap-probe
+TC", nhưng FR-16 vẫn fail vì checklist nằm ở cuối, không được invoke đúng thời điểm, và wording
+"has a corresponding TC" cho phép AI rationalize rằng TC-12 "corresponds" đến Gap #7.
+
+Cần bổ sung 3 điều: (1) Gap completeness cross-check bắt buộc trong Step 3, trước khi viết file,
+scan từng dòng Step 1 gap table và hỏi TC nào cụ thể giải đáp câu hỏi hành vi của gap này; (2)
+phân biệt rõ 2 gap type hay bị skip, observational gap (không có EC mới, dùng valid input, ghi
+nhận raw response) và intra-EC behavioral gap (EC đã covered nhưng spec im lặng về cơ chế hoạt
+động bên trong); (3) siết checklist wording từ "has a corresponding TC" thành "has a TC that
+specifically answers the behavioral question the gap raises."
+
+Đây là failure mode đã lặp lại ở cả FR-09 và FR-16 cùng root cause, đủ evidence để coi là
+systematic gap, không phải edge case. Nên bổ sung.
+
+Bạn muốn tôi apply trực tiếp vào SKILL.md không?
+```
+
+---
+
+### Follow-up prompt (16:25, same session)
+
+```
+apply những bổ sung đó vào SKILL.md bằng tiếng Anh đồng bộ với nội dung hiện tại.
+```
+
+### AI Output
+
+```
+Hai bổ sung đã được apply:
+
+Step 3, thêm "Gap Completeness Cross-Check" ngay trước AskUserQuestion: bắt buộc scan Step 1
+gap table từng dòng sau khi xong TCs, giải thích rõ 2 gap type thường bị EC minimization bỏ qua
+(observational gap và intra-EC behavioral gap).
+
+Quality Checklist, split thành 2 item rõ ràng hơn: item 1 là row-by-row verification kèm lưu ý
+EC coverage không đồng nghĩa gap đã đóng và 2 gap type phải check riêng, thay cho wording cũ
+"has a corresponding TC" quá dễ rationalize; item 2 là multi-branch Expected Result tách riêng
+để không bị lẫn.
+```
+
+**Note:** CHANGELOG and artifact copy updated, then committed at `b2b858b feat(skills): add gap
+completeness cross-check to domain-testing v0.3` (16:29, same session).
+
+### Used in
+
+- `[AI-02]_AI_Audit_Report.md`, artifact domain-testing skill
+- `.agents/skills/domain-testing/SKILL.md` (v0.3)
+
+---
+
+## Entry 015 | 15:15 đến 15:32 02/07/2026
+
+**Tool:** Claude Code (claude-sonnet-5)
+**Feature:** All (skill-level, trigger từ feedback TA và tự quan sát hallucination khi test
+chỉ dựa trên SRS/API spec)
+**Step:** Skill Upgrade v0.4, UI-first và channel-abstraction rules
+
+**Context (TA feedback, not a student prompt, received 08:02 02/07/2026):**
+
+```
+Dear Lâm,
+
+For this assignment, the primary focus is on functional testing, which means the
+starting point for your test workflows should begin at the frontend UI. This applies
+to manual testing as well as any automation you choose to introduce (though please
+note we will have a dedicated exercise for automated testing later).
+
+Regarding your specific constraints, for test cases that cannot be executed through
+the UI, either due to strict client-side validation or because the UI elements are
+not yet implemented, it is acceptable to execute them at the API level. However, you
+must document these API-level test cases clearly and separately in your report,
+noting the specific reason for each. Keep in mind that we will also have a separate
+assignment specifically focused on API testing.
+
+Best regards,
+Thanh
+```
+
+---
+
+### Prompt
+
+```
+Hiện tại, sự chậm trễ trong việc xác minh phương thức thực thi các test-case nên các test-case
+đều được thiết kế chỉ dựa trên srs và api-specification, khiến AI bị hallucination và chỉ kiểm
+tra ở mức độ API thay vì thực sự kiểm tra thông qua UI hay frontend thực tế. Vì vậy, tôi cần phải
+cập nhật lại domain-testing skill và cả fr-execution skill để fix các vấn đề này, cũng như refine
+lại các vấn đề hay điểm đã thảo luận và chỉnh sửa trên các file domain-testing và bva.
+
+Đối với domain-testing skill, ở bước Step 0 hay Step 3 cần phải khảo sát UI thực tế để viết Step
+để tương tác với UI chính xác trước khi viết các bước mô phỏng test-case để giai đoạn thực thi
+thực hiện (giống với nội dung đã chỉnh sửa hiện tại). Đồng thời, các trường Expected Error/Behavior
+ở Step 1, Expected System Output ở Step 2 cần giữ được độ high-level hay abstract giống với những
+gì đã thống nhất và chỉnh sửa ở các commit trước đó; Expected Result của test-case cần thể hiện ở
+UI observed kết hợp với AI cross-references như đã chốt.
+
+Đối với fr-execution skill, khi chụp màn hình thì cần sử dụng `playwright-cli screenshot
+--full-page` để lấy full-page screenshot thay vì sử dụng kích thước tự customize. Đồng thời cập
+nhật những điểm bổ sung khi thực hiện (nếu có)
+```
+
+### AI Output
+
+```
+Symlink đồng bộ hoàn toàn, chỉ 2 file source thay đổi. Hoàn tất cập nhật cả 2 skill.
+
+Tóm tắt thay đổi:
+
+domain-testing/SKILL.md:
+- Thêm sub-step Step 3.0, Survey the Real UI: bắt buộc mở SUT thật qua playwright-cli (survey một
+  lần/feature, dùng lại cho cả Step 3 và Step 4), lấy đúng label/URL thật thay vì suy đoán từ spec;
+  tách rõ setup (DB/API) khỏi execution (UI); mặc định UI, chỉ fallback API khi có blocker thật.
+- Step 1 Expected Error/Behavior và Step 2 Expected System Output: thêm rule + ví dụ before/after
+  giữ trừu tượng, không literal HTTP/JSON (trừ EC phân loại theo response shape).
+- TC template (Step 3 và BVA Step 4): thêm field UI Fallback Note, restructure Expected
+  Result/Verification Points thành 2 tầng (UI-observable trước, API cross-check sau).
+- Quality Checklist: +4 mục kiểm tra tương ứng.
+
+fr-execution/SKILL.md:
+- Screenshot command: thêm --full-page, kèm rule never viewport-only.
+- Field Actual result trong execution-log template: đổi sang 2 tầng UI/API cross-check.
+- Thêm Gotcha về không dùng §/em dash trong prose của execution-log.md.
+
+Chưa commit, để bạn review trước.
+```
+
+---
+
+### Follow-up prompt (15:32, same session)
+
+```
+Cập nhật CHANGELOG và domain-testing skill artifacts với nội dung trích dẫn từ cấu trả lời của
+TA và các quyết định đã được ra, kèm cập nhật
+```
+
+### AI Output
+
+```
+Đã hoàn tất:
+- homeworks/HW02/artifacts/skills/domain-testing/SKILL.md, đồng bộ 1:1 với bản .agents mới nhất
+  (đã có Step 3.0 UI survey, abstraction rule, UI Fallback Note, Expected Result 2 tầng).
+- CHANGELOG.md, thêm entry v0.4 (2026-07-02), mở đầu bằng quote nguyên văn câu trả lời của TA
+  (Thanh, 08:02 02/07/2026), theo sau là các thay đổi cụ thể đã áp dụng để đáp ứng yêu cầu đó,
+  cộng quyết định trong-session rằng Variables/EC vẫn channel-agnostic, không cần redesign toàn
+  bộ, chỉ 2 cột bị leak transport-literal cần sửa.
+- README.md, sửa bảng Status đang stale, thêm dòng v0.4 (Done, nguồn gốc từ retrospective TA
+  feedback).
+
+Tất cả thay đổi đang ở trạng thái chưa commit, sẵn sàng để bạn review trước khi tôi commit.
+```
+
+**Note:** A ScheduleWakeup auto-fire at 15:30 (same session) re-announced already-completed work
+while waiting on background Explore agents; it added no new decision and is omitted here.
+Committed at 15:36, same session: `0c25532 docs(domain-testing): require UI survey and
+channel-abstraction rules` (domain-testing skill) and `1d54c6e docs(fr-execution): require
+full-page screenshots and UI/API split` (fr-execution skill).
+
+### Used in
+
+- `[AI-02]_AI_Audit_Report.md`, artifact domain-testing skill
+- `.agents/skills/domain-testing/SKILL.md` (v0.4)
+
+---
+
+## Entry 016 | 11:48 đến 12:05 06/07/2026
+
+**Tool:** Claude Code (claude-sonnet-5)
+**Feature:** All (skill-level, self-audit)
+**Step:** Skill Self-Audit và Upgrade v0.5, Extreme/Overflow Value Check
+
+### Prompt
+
+```
+Xin chào Claude, tôi đang thực hiện đánh giá kỹ năng domain-testing, kỹ năng giúp tôi Claude
+thực hiện pipeline thiết kế test case bằng kỹ thuật Domain Testing và Boundary Value Analysis.
+Mục tiêu của tôi là đánh giá chất lượng của skill dựa trên các nguyên tắc thiết kế theo tài liệu
+ISTQB và Slide môn học, đảm bảo kỹ năng thực hiện chính xác các bước trong nguyên tắc và đánh
+giá các điểm mở rộng của kỹ năng. Hãy đóng vai là chuyên gia về Software Testing, ISTQB Expert
+để giúp tôi search extensively về kỹ thuật Domain Testing, BVA và đánh giá kỹ năng
+domain-testing. Tôi muốn câu trả lời của tôi ưu tiên sự rõ ràng trong các đánh giá theo thang
+điểm 10 với lời giải thích rõ ràng, cụ thể.
+```
+
+### AI Output
+
+```
+Đánh giá Skill domain-testing, đối chiếu ISTQB CTFL Ch.4 và Slide S04.
+
+Tóm tắt kết luận:
+| Tiêu chí | Điểm /10 | Ghi chú ngắn |
+|---|---|---|
+| Bước 1, Identify Variables & Constraints | 9.0 | Đúng chuẩn + mở rộng System State/Gap hợp lý |
+| Bước 2, Equivalence Classes | 9.5 | Implement đủ 4 quy tắc chuẩn + 1 quy tắc mở rộng chính đáng |
+| Bước 3, Minimum Test Cases | 9.0 | Bám sát Slide 21 tuyệt đối, có bằng chứng thực thi đúng |
+
+Các phần mở rộng vượt ISTQB (không trừ, chỉ ghi nhận):
+1. Parameter Variation, test ON-point với ít nhất 2 giá trị tham số khác nhau để phân biệt
+   implementation hardcode với implementation đọc config, insight không có trong ISTQB lẫn
+   slide.
+2. UI Survey bắt buộc trước khi viết Steps, chặn lỗi phổ biến nhất là suy diễn UI label từ spec
+   thay vì quan sát thật.
+3. Cross-reference filter, ranh giới rõ ràng giữa dùng constraint của FR khác và tạo EC Group
+   cho hành vi thuộc sở hữu của FR khác.
+
+Khuyến nghị cải tiến cụ thể (ưu tiên cao đến thấp):
+1. [Cao] Thêm bước "Extreme/Overflow Value Check" chính thức vào Bước 4, ánh xạ đúng điểm
+   8*/9* của Slide 26, hiện đang bị lệ thuộc vào Gap Rule một cách không nhất quán.
+2. [Trung bình] Chạy lại Gap Completeness Cross-Check trên FR-02 (artifact cũ nhất, tiền-v0.2)
+   để đưa nó lên chuẩn hiện tại, G3 và G4 hiện chưa có TC trả lời.
+3. [Thấp] Cân nhắc ghi rõ trong SKILL.md rằng thuật ngữ "Domain Testing" ở đây tương đương
+   ISTQB "Equivalence Partitioning + BVA".
+
+Điểm tổng: 8.8/10, skill triển khai đúng và đầy đủ cả 4 bước theo cả ISTQB CTFL Ch.4 lẫn Slide
+S04, có các mở rộng thực chiến chất lượng cao, và có bằng chứng cụ thể là cơ chế tự-kiểm đã cải
+thiện qua các version. Hai điểm cần vá (extreme-value BVA, và audit lại FR-02 theo chuẩn mới)
+đều cụ thể, có vị trí file/dòng rõ ràng, không phải nhận xét chung chung.
+```
+
+---
+
+### Follow-up prompt (12:05, same session)
+
+```
+Tôi đồng ý với đánh giá của bạn, đặc biết là những điểm còn thiếu sót trong kỹ năng nay. Hãy
+giúp tôi thực hiện bổ sung bước Extreme/Overflow Value Check cho bước 4 của skill này sau khi
+bạn đã thu thập đầy đủ toàn bộ các thông tin mà bạn cần có để thực hiện nhiệm vụ này. Các công
+việc bạn cần làm đó là cập nhật nội dung skill ở .agents và cập nhật skill được lưu trữ ở dạng
+artifacts ở artifacts/skills cùng CHANGELOG.
+```
+
+### AI Output
+
+```
+Đã hoàn tất bổ sung Extreme/Overflow Value Check vào Bước 4 của skill.
+
+Thay đổi:
+- .agents/skills/domain-testing/SKILL.md (source of truth), thêm subsection mới sau "Parameter
+  Variation": quy tắc chọn giá trị cực trị theo 3 mức ưu tiên (độ dài cột DB, maxlength UI quan
+  sát được ở Bước 3.0, giá trị stress có lý do), yêu cầu Defect Target gọi đúng tên failure mode
+  (truncation/overflow/crash/perf degradation/client-server mismatch), mở rộng enum Boundary
+  Point Type, thêm mục checklist thứ 17 buộc mọi Invalid/Gap EC không biên phải có TC cực trị
+  tương ứng.
+- homeworks/HW02/artifacts/skills/domain-testing/SKILL.md, đồng bộ y hệt (đã diff xác nhận).
+- CHANGELOG.md, thêm entry v0.5 ghi rõ nguồn gốc (audit ISTQB/Slide S04 vừa thực hiện), lý do cụ
+  thể (đối chiếu 9-điểm biên Slide 26, phát hiện G4 của FR-02 chưa từng có TC), và note "Known
+  follow-up" rằng FR-02/bva.md cũ chưa tuân thủ v0.5, cần audit lại.
+- README.md, cập nhật bảng version, v0.5 = Done.
+```
+
+**Note:** Committed at 12:11, same session: `bb59e3a feat(domain-testing): add extreme/overflow
+value check to BVA step` (4 files, 108 insertions, 9 deletions).
+
+### Used in
+
+- `[AI-02]_AI_Audit_Report.md`, artifact domain-testing skill
+- `.agents/skills/domain-testing/SKILL.md` (v0.5)
+
+---
+
 <!-- Duplicate an entry block above for each AI interaction -->

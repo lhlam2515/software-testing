@@ -249,14 +249,60 @@ No correction needed, the synthesis logic was sound at the time it ran. `BUG-09-
 
 ---
 
+### Artifact #6: `domain-testing` Skill (Agent Skill Creation and Iterative Upgrade)
+
+> **Requirement mapping:** Meta-artifact, cross-feature: the Agent Skill used to produce the test designs in Artifacts #1 through #4
+
+#### (1) Prompt + Tool
+
+**Tool:** Claude Code (claude-sonnet-4-6 for v0.1 to v0.3, claude-sonnet-5 for v0.4 and v0.5)
+**Time:** 10:53 24/06/2026 to 12:05 06/07/2026 (skill creation via `/skill-creator`, then 4 upgrade passes across 5 sessions)
+**Prompts:** See [Prompt Log](prompt_log.md), Entries 012 to 016, 24/06/2026 to 06/07/2026
+
+#### (2) AI Output
+
+See [Prompt Log](prompt_log.md), Entries 012 to 016.
+
+Deliverables written to disk:
+
+- `.agents/skills/domain-testing/SKILL.md` (source of truth, 498 lines, v0.5)
+- `.claude/skills/domain-testing` (symlink, auto-synced)
+- `homeworks/HW02/artifacts/skills/domain-testing/SKILL.md` (submission snapshot, byte-identical)
+- `homeworks/HW02/artifacts/skills/domain-testing/CHANGELOG.md`, `README.md`
+
+#### (3) Verdict
+
+**[ ] VALID**: correct and accepted as-is  
+**[ ] INVALID**: wrong; rejected  
+**[x] INCOMPLETE**: acceptable after edits
+
+#### (4) Reasoning (ISTQB / S04)
+
+v0.1 correctly implemented ISTQB FL 4.2/4.3's Domain Testing plus BVA pipeline: Phase 0 setup, Step 1 Variables, Step 2 Equivalence Classes via S04's four partition rules, Step 3 minimum EC-covering TCs, Step 4 3-point BVA. What it lacked was not technique but enforcement: it was a direct port of one successful FR-02 session, so every rule it encoded was a description of what had just happened, not a check that the same rule would hold on a different feature. Nothing in v0.1 forced the agent to verify, before finishing, that a written-down rule had actually been followed.
+
+Each upgrade from v0.2 to v0.5 closes one instance of that same enforcement gap, only after a real FR artifact or the TA exposed a case where the missing check mattered (see Student Fix). The direction is consistent: v0.1 was a one-pass generator that trusted its own output; v0.2 through v0.5 turned it into a pipeline that checks its own output against a rule before stopping.
+
+#### (5) Student Fix
+
+| # | AI-generated item | Issue | Corrected item |
+| - | ----------------- | ----- | --------------- |
+| 1 | v0.1 Phase 0 cross-reference guideline ("constraints in cross-referenced specs are test targets") | Wording too broad; combined with FR-02's cross-reference to FR-22, it pulled FR-22's display-position behavior into FR-02's EC table (Artifact #1, Group 9) | v0.2: added Cross-reference Filter Rule, cross-specs may only add constraints to existing Step 1 variables, no new EC Groups for behavior owned by another feature |
+| 2 | v0.1/v0.2 Step 1 to Step 3 pipeline (no back-reference pass) | Step 1 correctly flagged gaps (Artifact #2's G5, Artifact #3's Gap #1/#6/#7) but Step 3's EC minimization silently dropped gaps that produced no new EC | v0.3: added mandatory Gap Completeness Cross-Check in Step 3, row-by-row scan of the Step 1 gap table before AskUserQuestion |
+| 3 | v0.1-v0.3 Step 3.0 (absent) and Expected Result field | No UI survey step; `Steps` and `Expected Result` described curl/API calls and literal HTTP/JSON instead of real UI interaction | v0.4: added mandatory Step 3.0 UI Survey via `playwright-cli`, two-tier Expected Result (UI-observable, then API cross-check) |
+| 4 | v0.1-v0.4 Step 4 BVA (3-point model only) | Unbounded Invalid/Gap ECs (no defined upper boundary) had no BVA counterpart; confirmed empirically that FR-02's G4 has zero corresponding TC | v0.5: added Extreme/Overflow Value Check to Step 4, with a 3-tier priority for picking the extreme value and a required Defect Target |
+
+FR-02's G4, the case that motivated v0.5, was re-audited on 06/07/2026 (commit `3d6aa12`): decision was not to add a TC, `email`/`password` are unbounded with no defined boundary, so BVA has no target and the concern is robustness/DoS, outside EP/BVA scope. Documented in `domain-testing.md`'s Coverage/Decision column instead.
+
+---
+
 ## 4. Summary of AI Accuracy
 
 | Metric | Count | Percentage |
 | ------ | ----- | ---------- |
-| Total AI-generated artifacts audited | 5 | 100% |
-| **VALID** (correct, accepted as-is) | 1 | 20% |
+| Total AI-generated artifacts audited | 6 | 100% |
+| **VALID** (correct, accepted as-is) | 1 | 16.7% |
 | **INVALID** (wrong; rejected) | 0 | 0% |
-| **INCOMPLETE** (acceptable after edits) | 4 | 80% |
+| **INCOMPLETE** (acceptable after edits) | 5 | 83.3% |
 
 ---
 

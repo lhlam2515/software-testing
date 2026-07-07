@@ -35,9 +35,11 @@ confirmed empirically: FR-02's `domain-testing.md` G4 has zero corresponding TC 
   Check instead — the two are no longer conflated under one instruction
 - Extended Quality Checklist from 16 to 17 items: every unbounded `Invalid/Gap` EC must
   map to an Extreme/Overflow Value TC in Step 4
-- Known follow-up: FR-02's `bva.md` predates this version and does not yet have an
-  Extreme Value TC for G4 — needs a re-audit pass against v0.5, same pattern as the v0.3
-  gap-completeness retrofit
+- Known follow-up (resolved 2026-07-06, commit `3d6aa12`): FR-02's `domain-testing.md` G4 was
+  re-audited against this version. Decision was not to add an Extreme Value TC — `email` and
+  `password` are unbounded SQLite `TEXT` columns with no `maxlength`, so no defined boundary
+  exists for BVA to target; this is a robustness/DoS concern, not an EP/BVA gap. Documented
+  directly in the Coverage/Decision column instead of adding a TC
 
 ## v0.4 — 2026-07-02
 
