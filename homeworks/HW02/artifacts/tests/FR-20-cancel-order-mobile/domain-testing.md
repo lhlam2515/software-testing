@@ -31,11 +31,11 @@ Cross-feature note: FR-11 states a user may only *view* their own orders, but is
 
 ### Implicit Gaps & Spec Conflicts
 
-| Variable | Gap / Conflict | Risk |
-|:---|:---|:---|
-| `order_owner_match` | **Implicit Gap** - the spec does not state whether `PUT /api/orders/:id/cancel` checks order ownership (unlike FR-11, which explicitly restricts order *viewing* to the owner) | If unchecked, user A could cancel user B's order by guessing/supplying `order_id` (IDOR) |
-| `order.status = shipping` | **Spec Conflict** - SRS FR-20/FR-10 explicitly forbids user-initiated cancel from `shipping` ("only Admin can act"); API spec §4.6 describes the same endpoint as usable "only while the order has not been delivered," which implicitly permits `shipping` too (since `shipping` ≠ `delivered`) | Unclear whether the backend actually blocks cancel at `shipping` through the same user-facing endpoint - requires a behavioral test |
-| `confirm_dialog_response` | **Implicit Gap** - FR-24 only mandates a confirm dialog for cart-item deletion, and is silent on order cancellation (an equally destructive, irreversible action) | If no confirm dialog exists, a single accidental tap permanently cancels an order with no recovery path |
+| Variable | Gap / Conflict | Risk | Coverage / Decision |
+|:---|:---|:---|:---|
+| `order_owner_match` | **Implicit Gap** - the spec does not state whether `PUT /api/orders/:id/cancel` checks order ownership (unlike FR-11, which explicitly restricts order *viewing* to the owner) | If unchecked, user A could cancel user B's order by guessing/supplying `order_id` (IDOR) | Covered — TC-08 (gap-probe, direct API call with a second account's token) |
+| `order.status = shipping` | **Spec Conflict** - SRS FR-20/FR-10 explicitly forbids user-initiated cancel from `shipping` ("only Admin can act"); API spec §4.6 describes the same endpoint as usable "only while the order has not been delivered," which implicitly permits `shipping` too (since `shipping` ≠ `delivered`) | Unclear whether the backend actually blocks cancel at `shipping` through the same user-facing endpoint - requires a behavioral test | Covered — TC-07 (gap-probe) + TC-BVA-02 (UB+1 boundary); resolved as **BUG-20-001** |
+| `confirm_dialog_response` | **Implicit Gap** - FR-24 only mandates a confirm dialog for cart-item deletion, and is silent on order cancellation (an equally destructive, irreversible action) | If no confirm dialog exists, a single accidental tap permanently cancels an order with no recovery path | Covered — TC-09 (gap-probe); resolved empirically — no dialog exists (UX finding) |
 
 ---
 

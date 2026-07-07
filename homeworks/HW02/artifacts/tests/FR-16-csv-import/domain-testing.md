@@ -36,15 +36,15 @@ Cross-feature note: FR-15 caps `name` at 255 characters and requires `category_i
 
 ### Implicit Gaps & Spec Conflicts
 
-| Variable | Gap / Conflict | Risk |
-|:---|:---|:---|
-| **Spec Conflict — Input layer** | SRS: "upload CSV file" with `.csv` extension, header row, RFC 4180. API Spec: accepts JSON body `{"products": [...]}`. Backend does not receive CSV — CSV parsing is a frontend concern. | Testing CSV-specific constraints (extension, header row, quoting) cannot be done at the API level; separate E2E frontend tests are required. Probed by TC-19 (Gap Probe). |
-| **`category_id` validation** | FR-16 only validates `name` and `price`. FR-15 requires a valid category. It is unclear whether the import endpoint enforces this constraint. | If not validated, products with dangling foreign keys will be committed → corrupt data. |
-| **`name` max 255 chars** | FR-15 sets a 255-char limit. FR-16 does not repeat it. It is unclear whether the import enforces this. | Import may allow names > 255 chars → truncation or error depending on DB schema. |
-| **Empty `products` array** | Spec does not define behavior when `products: []`. | HTTP 400 or HTTP 200 with "0 imported"? Undefined. |
-| **`price` type coercion** | API example shows `"price": 10000` (number). Frontend CSV parsing may produce `"price": "10000"` (string). Does the backend coerce? | `"10000"` and `"abc"` are both strings — if the backend does not parse, valid-looking prices get rejected. |
-| **Report response schema** | SRS says "clear report" but the API spec does not define the response body schema for this endpoint (no example response). | Unknown which fields to verify: `imported`, `failed`, `errors[]`? |
-| **Rollback scope** | SRS says "the entire import must be rolled back" → all-or-nothing. Behavior when all rows fail is not addressed separately. | If the implementation does per-row commits instead of a batch transaction, partial imports will occur — violating atomicity. |
+| Variable | Gap / Conflict | Risk | Coverage / Decision |
+|:---|:---|:---|:---|
+| **Spec Conflict — Input layer** | SRS: "upload CSV file" with `.csv` extension, header row, RFC 4180. API Spec: accepts JSON body `{"products": [...]}`. Backend does not receive CSV — CSV parsing is a frontend concern. | Testing CSV-specific constraints (extension, header row, quoting) cannot be done at the API level; separate E2E frontend tests are required. Probed by TC-19 (Gap Probe). | Covered — TC-19 (EC23, Gap Probe) |
+| **`category_id` validation** | FR-16 only validates `name` and `price`. FR-15 requires a valid category. It is unclear whether the import endpoint enforces this constraint. | If not validated, products with dangling foreign keys will be committed → corrupt data. | Covered — TC-15 (EC17, Gap Probe) |
+| **`name` max 255 chars** | FR-15 sets a 255-char limit. FR-16 does not repeat it. It is unclear whether the import enforces this. | Import may allow names > 255 chars → truncation or error depending on DB schema. | Covered — TC-14 (EC10, Gap Probe) + TC-BVA-03/04/05 (bva.md, 3-point boundary at 255) |
+| **Empty `products` array** | Spec does not define behavior when `products: []`. | HTTP 400 or HTTP 200 with "0 imported"? Undefined. | Covered — TC-13 (EC06, Gap Probe) |
+| **`price` type coercion** | API example shows `"price": 10000` (number). Frontend CSV parsing may produce `"price": "10000"` (string). Does the backend coerce? | `"10000"` and `"abc"` are both strings — if the backend does not parse, valid-looking prices get rejected. | Covered — TC-16 (EC22, Gap Probe) |
+| **Report response schema** | SRS says "clear report" but the API spec does not define the response body schema for this endpoint (no example response). | Unknown which fields to verify: `imported`, `failed`, `errors[]`? | Covered — TC-17 (Student-added Gap Probe) |
+| **Rollback scope** | SRS says "the entire import must be rolled back" → all-or-nothing. Behavior when all rows fail is not addressed separately. | If the implementation does per-row commits instead of a batch transaction, partial imports will occur — violating atomicity. | Covered — TC-18 (Student-added Gap Probe) |
 
 ---
 
