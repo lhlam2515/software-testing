@@ -11,7 +11,7 @@
 | Class / Cohort:         | 23KTPM1                                                                                   |
 | Assignment ID:          | HW#02                                                                                     |
 | Assignment date:        | 22/06/2026                                                                                |
-| AI tool(s) used:        | Claude Code                                                                               |
+| AI tool(s) used:        | Claude Code, Codex                                                                        |
 | AI Disclosure Form:     | [[AI-03] AI Disclosure Form — HW02]([AI-03]_AI_Disclosure_Form.md)                       |
 | GitHub Repository:      | [github.com/lhlam2515/software-testing](https://github.com/lhlam2515/software-testing)   |
 
@@ -287,13 +287,13 @@ Full BVA specifications and setup protocol (TC-BVA-01 to TC-BVA-04, all fields):
 
 ## 6. AI Critique (200–300 words)
 
-_Điền sau khi hoàn thành quá trình dùng AI._
+The clearest and most repeated failure in this project was not a single technical mistake but a gap in process: on FR-09, FR-16, and half of FR-20, AI correctly identified an implicit gap while analyzing variables in Step 1, but its minimum-test-case selection in Step 3 never converted that gap into an actual test case. Equivalence-class minimization treated the design as complete as soon as every class had at least one test case, even when a gap it had already flagged still had none.
 
-> **Hướng dẫn:** Viết 200–300 từ trả lời:
->
-> - AI sai, thiên lệch, hoặc bỏ sót ở đâu?
-> - Tại sao AI không bắt được vấn đề đó?
-> - Nguyên tắc nào về cộng tác với AI bạn rút ra được?
+AI did not catch this itself because the two steps ran independently within the same pass: Step 1 optimizes for exhaustively listing gaps, Step 3 optimizes for minimal EC coverage, and nothing cross-checks one output against the other. This is a structural limitation of applying Equivalence Partitioning and BVA sequentially, not a one-off lapse.
+
+A second pattern was grounding failure: FR-02's variable names were inferred from SRS prose rather than the real database schema, and the mismatch only surfaced when execution-time SQL fixtures referenced non-existent columns. Both failures share a root cause, AI treating a plausible inference as a verified fact.
+
+The principle I am keeping: a gap AI raises is not resolved just because it was named. It stays open until a specific test case answers the specific question it raises, and that check has to be run explicitly, not assumed from EC coverage. This project turned that principle into a mandatory step, the Gap Completeness Cross-Check added to the `domain-testing` skill in v0.3, so the next feature does not repeat the same drop.
 
 ---
 
