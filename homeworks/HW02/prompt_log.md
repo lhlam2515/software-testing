@@ -632,7 +632,7 @@ AI executed the 4 steps of the domain testing framework autonomously via the `do
 
 ## Entry 009 | 15:42 02/07/2026
 
-**Tool:** Claude Code (claude-sonnet-4-6, domain-testing skill)
+**Tool:** Claude Code (claude-sonnet-5, domain-testing skill)
 **Feature:** FR-20
 **Step:** Full domain testing design via `/domain-testing` skill (Steps 1-4 in one invocation), grounded in a real `playwright-cli` UI survey
 
@@ -682,7 +682,7 @@ The full generated content (7 variables, 3 Implicit Gaps, 17 ECs, Step 3.0 UI su
 
 ## Entry 010 | 22:53 02/07/2026
 
-**Tool:** Claude Code (claude-sonnet-4-6)
+**Tool:** Claude Code (claude-sonnet-5)
 **Feature:** FR-20
 **Step:** Post-design gap-analysis review of `domain-testing.md` / `bva.md`, scoped down through negotiation, then applied
 
@@ -795,6 +795,145 @@ Backend (`:3000`) và mobile Expo web (`:8081`) vẫn đang chạy nền — bá
 
 - `[AI-02]_AI_Audit_Report.md`, Artifact 4 (FR-11 fix, EC17/TC-10, only)
 - `REPORT.md`, Section 5.3 (full self-review gap analysis, including rejected candidates)
+
+---
+
+## Entry 011 | 21:44 03/07/2026
+
+**Tool:** Claude Code (claude-sonnet-5)
+**Feature:** All (FR-02, FR-09, FR-16, FR-20)
+**Step:** Post-execution synthesis of BUG_REPORT.md from execution-log.md files
+
+### Prompt
+
+```
+Hãy giúp tôi tổng hợp lại toàn bộ các bug đã được catch trong quá trình thực hiện kiểm thử
+trên 4 FR và trình bày cho tôi một bản preview BUG_REPORT trước khi thực hiện tổng hợp lại
+thành một file
+```
+
+### AI Output
+
+```
+Đã đọc xong 4 execution log (FR-02, FR-09, FR-16, FR-20). Tổng hợp được 17 bug trên toàn bộ
+4 FR. Dưới đây là bản preview trước khi ghi vào BUG_REPORT.md:
+
+| Bug ID | Feature | Mô tả ngắn | Severity | TC phát hiện |
+|---|---|---|---|---|
+| BUG-02-001 | FR-02 | Email sai định dạng không bị chặn client-side, chỉ server 401 | Medium | TC-03 |
+| BUG-02-002 | FR-02 | Error message render dưới nút Sign In thay vì trên | Low | TC-04 |
+| BUG-02-003 | FR-02 | Counter đăng nhập sai tăng +2 mỗi lần thất bại thay vì +1 | High | TC-06, TC-BVA-01 |
+| BUG-02-004 | FR-02 | Thời gian khóa tài khoản thực tế ~180s, không phải 30s như spec | Medium | TC-BVA-01 |
+| BUG-09-001 | FR-09 | Công thức percent coupon sai (nhân 10 thay vì chia 100) → final_amount âm/sai | High | TC-01, TC-05, TC-BVA-03, TC-BVA-08 |
+| BUG-09-002 | FR-09 | /api/apply-coupon chấp nhận request không có JWT | High | TC-08 |
+| BUG-09-003 | FR-09 | /api/apply-coupon chấp nhận JWT không hợp lệ | High | TC-09 |
+| BUG-09-004 | FR-09 | Coupon fixed không giới hạn trần theo tổng đơn → final_amount âm | High | TC-11 |
+| BUG-09-005 | FR-09 | Ngưỡng min_order_amount dùng strict > thay vì >= | Medium | TC-12, TC-BVA-02 |
+| BUG-09-006 | FR-09 | Mã coupon không phân biệt hoa/thường (case-insensitive) | Medium | TC-05 |
+| BUG-16-001 | FR-16 | Route import admin chấp nhận token của user thường (không phải admin) | High | TC-04 |
+| BUG-16-002 | FR-16 | Không validate price > 0 (0, âm, non-numeric, thiếu field đều được chấp nhận) → rollback atomic không kích hoạt | High | TC-08-12, TC-18, TC-BVA-01 |
+| BUG-16-003 | FR-16 | Import chấp nhận category_id không tồn tại | High | TC-15 |
+| BUG-16-004 | FR-16 | Không giới hạn name 255 ký tự theo cross-feature FR-15 | Medium | TC-14, TC-BVA-05 |
+| BUG-16-005 | FR-16 | UI không enforce đuôi file .csv (chấp nhận .txt) | Low | TC-19 |
+| BUG-20-001 | FR-20 | Backend cho phép cancel đơn ở trạng thái shipping dù UI ẩn nút và spec chỉ cho pending/confirmed | High | TC-07, TC-BVA-02 |
+| BUG-20-002 | FR-20 | Tất cả nhãn trạng thái đơn hàng cùng màu đen, vi phạm yêu cầu "phân biệt màu sắc" của FR-11 | Low | TC-10 |
+
+Phân bố severity: High: 9 · Medium: 5 · Low: 3
+Phân bố theo FR: FR-02: 4 · FR-09: 6 · FR-16: 5 · FR-20: 2
+
+Bạn xác nhận nội dung này đúng và đủ trước khi tôi ghi đầy đủ (kèm Steps to Reproduce,
+Expected/Actual, Screenshot links) vào BUG_REPORT.md chứ?
+```
+
+---
+
+### Follow-up prompt (21:49, same session)
+
+```
+Ngoài những bug được tiếp thấy trong quá trình thực thi ra, thì còn những BUG được nhắc đến
+như một conflict trong các tài liệu spec hay không?
+```
+
+### AI Output
+
+```
+Có. Grep qua toàn bộ domain-testing.md/bva.md của 4 FR cho từ khóa "conflict/gap/ambiguous"
+phát hiện 3 spec conflict được ghi nhận ở giai đoạn thiết kế test, nhưng chỉ 2 trong số đó
+đã được convert thành TC và thực thi (đã nằm trong 17 bug ở trên):
+
+1. FR-16 — SRS yêu cầu upload file .csv, nhưng API spec chỉ nhận JSON body → đã test qua
+   TC-19 → confirmed BUG-16-005.
+2. FR-20 — SRS/FR-10 cấm cancel ở trạng thái shipping, API spec §4.6 diễn đạt lỏng lẻo ngầm
+   cho phép → đã test qua TC-07 + TC-BVA-02 → confirmed BUG-20-001.
+3. FR-09 — API spec cho phép client tự gửi total_amount, nhưng FR-08 yêu cầu backend phải tự
+   recompute độc lập — CHƯA test, được ghi là "Implicit Gap" nhưng không có EC ID, không có
+   TC nào, không xuất hiện trong execution-log.md.
+
+Kết luận: #3 là spec conflict đã biết nhưng chưa kiểm thử thực tế — không nên tính vào 17 bug
+đã catch, nhưng đáng ghi vào mục riêng "Untested Spec Conflicts" để minh bạch phạm vi coverage.
+
+Bạn muốn tôi thêm mục này vào cuối BUG_REPORT.md, hay bỏ qua chỉ tổng hợp đúng 17 bug?
+```
+
+---
+
+### Follow-up prompt (21:53, same session)
+
+```
+Thêm mục Untested Spec Conflicts vào cuối BUG_REPORT.md. Nội dung BUG_REPORT cần được viết
+bằng tiếng Anh một cách tự nhiên nhất khi mô tả BUG
+```
+
+### AI Output
+
+```
+Đã ghi đầy đủ BUG_REPORT.md với:
+- 17 bug chia theo 4 FR, mỗi bug có mô tả tự nhiên bằng tiếng Anh (Description, Steps to
+  Reproduce, Expected vs Actual, Screenshot trỏ đúng đường dẫn ảnh thực tế).
+- Bảng Bug Summary ở đầu với severity distribution (High 9, Medium 5, Low 3).
+- Mục Untested Spec Conflicts ở cuối file, ghi nhận SC-09-001.
+
+Lưu ý: cột GitHub Issue để TBD vì chưa tạo issue thật trên GitHub.
+```
+
+**Note:** the chat reply above is a Vietnamese meta-summary; the AI wrote the actual English
+bug descriptions (Description / Steps to Reproduce / Expected vs Actual / Screenshot) directly
+to `BUG_REPORT.md` rather than printing them in the chat turn — see that file for the full
+verbatim English content (commit `bc96b7a`).
+
+---
+
+### Follow-up prompt (21:57, same session)
+
+```
+Giúp tôi tạo các Github Issue này cho các BUG đã được tìm thấy
+```
+
+### AI Output
+
+```
+Đã tạo xong 17 GitHub Issues và cập nhật BUG_REPORT.md:
+
+| FR | Issues |
+|---|---|
+| FR-02 | #13-#16 |
+| FR-09 | #17-#22 |
+| FR-16 | #23-#27 |
+| FR-20 | #28-#29 |
+
+Mỗi issue theo đúng format đã dùng sẵn trong repo (BUG ID / Title / Feature / Related TC /
+Severity / Status / Description / Steps to Reproduce / Input Data / Expected / Actual /
+Impact / Suggested Fix / Evidence). Cột GitHub Issue trong BUG_REPORT.md giờ đã trỏ đúng số
+issue thay vì TBD.
+```
+
+**Note:** BUG-09-007 (TC-13) was added later on 06/07/2026 (commit `685083c`), raising the
+total from 17 to 18 bugs — not part of this synthesis session.
+
+### Used in
+
+- `BUG_REPORT.md` (full artifact)
+- `[AI-02]_AI_Audit_Report.md`, artifact mới cần bổ sung
 
 ---
 

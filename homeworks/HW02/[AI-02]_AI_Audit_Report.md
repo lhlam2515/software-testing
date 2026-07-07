@@ -171,7 +171,7 @@ Same failure pattern as FR-09's EC07 miss: Step 1 (gap analysis) and Step 3 (TC 
 
 #### (1) Prompt + Tool
 
-**Tool:** Claude Code (claude-sonnet-4-6, `domain-testing` skill)  
+**Tool:** Claude Code (claude-sonnet-5, `domain-testing` skill)  
 **Time:** 15:42 to 23:14, 02/07/2026 (initial design pass, then a separate self-review / gap-analysis pass same day)  
 **Prompts:** See [Prompt Log](prompt_log.md), Entries 009-010, 02/07/2026
 
@@ -210,14 +210,53 @@ However, Step 1 recorded FR-11's status-label requirement as one cross-feature c
 
 ---
 
+### Artifact #5: BUG_REPORT.md Synthesis (Post-Execution Bug Consolidation)
+
+> **Requirement mapping:** Cross-feature, consolidates confirmed defects from all 4 executed FRs (FR-02, FR-09, FR-16, FR-20)
+
+#### (1) Prompt + Tool
+
+**Tool:** Claude Code (claude-sonnet-5)
+**Time:** 21:44 to 21:57, 03/07/2026 (single interactive session, after all 4 `execution-log.md` files were complete)
+**Prompts:** See [Prompt Log](prompt_log.md), Entry 011, 03/07/2026
+
+#### (2) AI Output
+
+See [Prompt Log](prompt_log.md), Entry 011 (03/07/2026).
+
+Deliverables written to disk:
+
+- `BUG_REPORT.md`: Bug Summary table + severity distribution, one detailed English write-up (Description / Steps to Reproduce / Expected vs Actual / Screenshot) per bug, plus an "Untested Spec Conflicts" section
+- 17 matching GitHub Issues created (#13-#29), linked back into the table
+
+#### (3) Verdict
+
+**[x] VALID**: correct and accepted as-is  
+**[ ] INVALID**: wrong; rejected  
+**[ ] INCOMPLETE**: acceptable after edits
+
+#### (4) Reasoning (ISTQB / S04)
+
+ISTQB FL Chapter 5 (Defect Management) requires a defect report to include reproduction steps, severity classification, and expected-vs-actual evidence, and requires that only *confirmed* discrepancies (backed by an executed test) be logged as defects. AI satisfied this correctly for all 17 bugs at synthesis time: it read only from `execution-log.md` (not re-deriving conclusions on its own), classified severity consistently with each log's own classification, and wrote reproducible English steps.
+
+- AI correctly declined to log SC-09-001 (FR-09's `total_amount` client-manipulation vs. FR-08's backend-recompute rule) as a confirmed bug at synthesis time (21:44-21:57, 03/07/2026), since it had no EC ID, no TC, and no execution-log entry, an untested spec conflict is not a confirmed defect. It documented it separately under "Untested Spec Conflicts" instead, correctly applying the ISTQB distinction between a suspected discrepancy and a confirmed incident.
+
+- Three days later, once TC-13 was added and executed (06/07/2026), confirming the discrepancy as a real defect, `BUG_REPORT.md` was updated the same evening, 37 minutes after the TC-13 design commit (`1cdb554`, 20:41) to `685083c` (21:18) adding `BUG-09-007`. This is expected artifact evolution as new test cases close a previously-flagged gap, not a correction of an AI error, so no student fix was required on the original synthesis itself.
+
+#### (5) Student Fix
+
+No correction needed, the synthesis logic was sound at the time it ran. `BUG-09-007` was added later (commit `685083c`, 21:18 06/07/2026) once TC-13 execution confirmed `SC-09-001`, updating the header to "Total bugs found: 18" and severity distribution to "High: 10, Medium: 5, Low: 3", and linking GitHub Issue [#30](https://github.com/lhlam2515/software-testing/issues/30). This is a downstream update driven by new test execution evidence, not a fix to an AI mistake.
+
+---
+
 ## 4. Summary of AI Accuracy
 
 | Metric | Count | Percentage |
 | ------ | ----- | ---------- |
-| Total AI-generated artifacts audited | 4 | 100% |
-| **VALID** (correct, accepted as-is) | 0 | 0% |
+| Total AI-generated artifacts audited | 5 | 100% |
+| **VALID** (correct, accepted as-is) | 1 | 20% |
 | **INVALID** (wrong; rejected) | 0 | 0% |
-| **INCOMPLETE** (acceptable after edits) | 4 | 100% |
+| **INCOMPLETE** (acceptable after edits) | 4 | 80% |
 
 ---
 
