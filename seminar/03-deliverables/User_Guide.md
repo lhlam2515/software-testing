@@ -186,26 +186,40 @@ Goal: kill a mutant on `POST /api/apply-coupon` (FR-09), starting from zero. Pic
 ## 4. Advanced Usage
 
 ### 4.1 Scope and performance
-- **`mutate`** — keep it on `server.js`; once split into modules, narrow to business-logic files and exclude bootstrap/seed.
-- **`coverageAnalysis: 'perTest'`** — runs only the tests covering each mutant; usually the single biggest speedup.
-- **`concurrency`** — defaults to CPU cores; lower it if sqlite makes runs memory-bound.
-- **Mutation levels** (Stryker 8+) — `mutationLevel: 1` for fast PR feedback, default for nightly.
+
+- **`mutate`**: keep it on `server.js`; once split into modules, narrow to business-logic files and exclude bootstrap/seed.
+- **`coverageAnalysis: 'perTest'`**: runs only the tests covering each mutant; usually the single biggest speedup.
+- **`concurrency`**: defaults to CPU cores; lower it if sqlite makes runs memory-bound.
+- **Mutation levels** (Stryker 8+): `mutationLevel: 1` for fast PR feedback, default for nightly.
 
 ### 4.2 Incremental runs (CI)
+
 ```bash
 npx stryker run --incremental    # reuses prior verdicts via reports/stryker-incremental.json
 npx stryker run --force          # full re-run (nightly/weekly) to catch drift
 ```
-Cache `stryker-incremental.json` per branch with a fall-back to `main`. → TODO: paste actual reuse stats.
+
+Cache `stryker-incremental.json` per branch with a fall-back to `main`. Real numbers, scoped to the `apply-coupon` route (`server.js:363-441`, 81 mutants, source/tests unchanged between runs):
+
+| Run | Wall-clock | Log |
+|---|---|---|
+| 1st (`--incremental`, no cache yet) | 2 min 58 s | full mutation run, writes `reports/stryker-incremental.json` |
+| 2nd (`--incremental`, cache present) | 2 s | `IncrementalDiffer: Incremental report: Result: 81 of 81 mutant result(s) are reused.` |
+
+Nothing in `server.js` or the test files changed between the two runs, so every verdict was reused instead of re-executed: an ~89x speedup on this slice. In CI, the same cache only reuses mutants whose source line and covering tests are byte-identical to the cached run; touch either one and that mutant re-executes on the next `--incremental` pass.
 
 ### 4.3 Trimming noisy mutators
+
 ```js
 mutator: { excludedMutations: ['StringLiteral', 'ObjectLiteral', 'ArrayDeclaration'] }
 ```
-These generate many trivial/equivalent mutants on string-heavy code (e.g. the Vietnamese error messages in `server.js`) for little assertion benefit. Re-enable once the score stabilises.
+
+These generate many trivial/equivalent mutants on string-heavy code (e.g. the Vietnamese error messages in `server.js`) for little assertion benefit. Re-enable once the score stabilizes.
 
 ### 4.4 AI assertion synthesis (the AI-augmented feature)
+
 For each surviving mutant, prompt the LLM with the source + the mutant diff:
+
 ```
 You are an expert in Node.js testing with Jest + supertest.
 Source under test:
@@ -218,17 +232,40 @@ The existing test PASSES on the original AND on this mutant:
 Write ONE supertest assertion that PASSES on the original and FAILS on the mutant.
 Return only the test code in a ```js block.
 ```
-Then run the **validation gate** (§4.5). _[pattern: research_result §3.1]_
+
+Then run the **validation gate** (§4.5).
 
 ### 4.5 Mandatory validation gate
+
 Never accept an AI-generated assertion without:
+
 ```
 1. Run the new test on the ORIGINAL  → must PASS.
 2. Run it on the TARGET MUTANT       → must FAIL.
 3. Run it on the other survivors     → report how many it newly kills.
 4. Reject if (1) fails, (2) passes, or (3) = 0.
 ```
-> TODO: capture one real before/after — AI-suggested assertion, MS gain, and one rejected suggestion.
+
+**Worked example, run against this repo: mutant #46, `server.js:56`, `EqualityOperator`:**
+
+```diff
+- if (newAttempts >= 3) {
++ if (newAttempts > 3) {
+```
+
+`newAttempts` is `login_attempts + 2`, so under the seeded/tested flows it only ever takes even values (2, 4, 6...); `>= 3` and `> 3` agree everywhere except exactly `3`, a boundary none of the existing tests reach. Two candidate assertions, both first written to set `login_attempts = 1` via the parameterized `UPDATE users SET login_attempts = ?, locked_until = ? WHERE id = ?` handler so one failed login pushes `newAttempts` to exactly 3:
+
+- **Accepted**: `expect(res.status).toBe(403)` on a login attempt immediately _after_ the boundary-triggering failure (asserts the account is now locked).
+- **Rejected**: `expect(res.body.error).toBe('Invalid email or password')` on the boundary-triggering failure itself (asserts only the generic error message, which is identical on every failed login regardless of whether the lock fires).
+
+Gate results, both run with `npx jest`:
+
+| Assertion | On ORIGINAL | On MUTANT | Verdict |
+|---|---|---|---|
+| Accepted (`toBe(403)`) | PASS | **FAIL** (`Expected: 403, Received: 200`) | kills the mutant → keep |
+| Rejected (error message) | PASS | PASS | never touches the mutated branch → reject per step 4 |
+
+Adding only the accepted assertion and re-running Stryker scoped to `server.js:44-58` confirms the kill (`EqualityOperator` mutant on L56 moves from `Survived` to `Killed`) without touching the sibling `ConditionalExpression` mutant on the same line (`newAttempts >= 3` → `true`), which stays `Survived`. One assertion rarely clears every mutant on a shared line, and the report should be read mutant-by-mutant, not line-by-line.
 
 ---
 
@@ -236,26 +273,45 @@ Never accept an AI-generated assertion without:
 
 > ≥ 3 real errors with fixes. Replace bracketed text with the exact messages you hit.
 
-### E1 — `Cannot find module` / app starts listening during tests
+### E1: `Cannot find module` / app starts listening during tests
+
 **Symptom:** supertest hangs, or `EADDRINUSE :3000` when running Jest.
 **Cause:** `server.js` runs `app.listen()` on import and doesn't export `app`.
 **Fix:** the export + `require.main === module` guard from §2 Step 2.
 
-### E2 — Stryker: "Dry run failed" / "No tests found"
-**Symptom:** Stryker aborts before mutating.
-**Cause:** Jest isn't green standalone, or `mutate`/`testMatch` globs don't match.
-**Fix:** run `npx jest` first and get it green; confirm `mutate: ['server.js']` and the `testMatch` path. → 📷 TODO: real error.
+### E2: Stryker "Dry run failed" / "No tests found"
 
-### E3 — sqlite "database is locked" / non-deterministic test results
+**Symptom:** Stryker aborts before mutating. Real captured error, from pointing `jest.configFile` at a config path that doesn't exist:
+
+```
+ERROR Stryker Unexpected error occurred while running Stryker
+StrykerError: Error: MODULE_NOT_FOUND (undefined)
+Error: Cannot find module '.../apps/backend/.stryker-tmp/sandbox-Op47w4/jest.config.nonexistent.js'
+Require stack:
+- .../node_modules/@stryker-mutator/util/dist/src/require-resolve.js
+    at CustomJestConfigLoader.readConfigFromJestConfigFile (.../jest-runner/dist/src/config-loaders/custom-jest-config-loader.js:55:31)
+    at async JestTestRunner.init (.../jest-runner/dist/src/jest-test-runner.js:59:32)
+```
+
+**Cause:** the same class of failure shows up two ways: Jest isn't green standalone, or the runner can't even load its own config. Here, `jest.config.js` doesn't resolve inside Stryker's sandbox (`.stryker-tmp/sandbox-*`), because the configured path is wrong. Note the error path lives _inside_ the sandbox, not the project root: Stryker copies the project there before running, so a typo'd `configFile` fails only for Stryker, never for a plain `npx jest`.
+**Fix:** run `npx jest` first and get it green; confirm `mutate: ['server.js']`, the `testMatch` path, and that `jest.configFile` in `stryker.config.mjs` points at a file that actually exists relative to `apps/backend/`.
+
+### E3: sqlite "database is locked" / non-deterministic test results
+
 **Symptom:** intermittent failures across mutants.
 **Cause:** tests writing to the shared DB (e.g. via `coupon_usage`), so runs aren't isolated.
 **Fix:** test the **no-`user_id`** branch of apply-coupon (read-only), or point tests at a fresh copy of the seeded DB per run.
 
-### E4 — Jest can't run from a hidden temp dir (Windows)
+### E4: Jest can't run from a hidden temp dir (Windows)
+
 **Symptom:** Stryker fails only on Windows.
 **Fix:** `tempDirName: 'stryker-tmp'` (already in the §2 config).
 
-> TODO: add any additional real errors observed during Stage S3.
+### E5: a full run "times out" in a wrapped/CI shell but Stryker is still running
+
+**Symptom:** the command that invoked `npm run stryker` (a CI job step, an orchestration wrapper, an agent tool call) reports a timeout or non-zero exit around the 5-minute mark, even though the mutation run itself is healthy.
+**Cause:** on `server.js`, a full 541-mutant run takes roughly 8 to 9 minutes wall-clock (confirmed baseline: 8 min 30 s). Any caller with its own shorter timeout (a CI step timeout, a wrapper script, an interactive tool with a fixed call budget) cuts the connection before Stryker finishes, while the underlying process keeps mutating and still writes a complete `reports/mutation/mutation.html` afterward.
+**Fix:** don't trust the wrapper's exit code as the source of truth for a long-running Stryker call. Either raise the caller's timeout above the expected wall-clock time, run `stryker run` detached/in the background and poll for the report file, or check the timestamp on `reports/mutation/mutation.html` before assuming the run failed.
 
 ---
 
@@ -289,18 +345,13 @@ Stryker reports two scores: `MS = detected/valid` and `MS_covered = detected/cov
 
 ## 7. References
 
-> Cite the **original** source, not the AI. Verify every number above against these before submission.
-
-- Jia & Harman — *An Analysis and Survey of the Development of Mutation Testing* (IEEE TSE, 2011).
-- Petrović & Ivanković — *State of Mutation Testing at Google* (ICSE 2018); Petrović et al. — *Practical Mutation Testing at Scale* (arXiv:2102.11378).
-- StrykerJS docs — Getting Started, Configuration, Mutant states & metrics — <https://stryker-mutator.io/docs/stryker-js/>
-- supertest — <https://github.com/ladjs/supertest> · Jest — <https://jestjs.io/>
-- Dakhel et al. — *MuTAP* (Information & Software Technology, 2024; arXiv:2308.16557).
-- Wang et al. — *MutGen* (arXiv:2506.02954, 2025).
-- Tian et al. — *LLMs for Equivalent Mutant Detection* (ISSTA 2024; arXiv:2408.01760).
-- EShop SUT — `docs/eshop-sut/srs.md` (FR-09), `apps/backend/server.js`.
-- AI disclosure: see `[AI-02]`, `[AI-03]` (which LLM, prompts, what was cross-checked).
-
----
-
-> _End of User Guide skeleton — fill TODO/📷 markers during Stage S3/S4._
+- Diffblue: case study on Theodo's banking microservice, cited in §1 for the 96%/93% coverage vs. 34% mutation score gap. Vendor-published benchmark, not independently reproduced; treat as directional, not as a universal ratio.
+- Jia & Harman: _An Analysis and Survey of the Development of Mutation Testing_ (IEEE TSE, 2011).
+- Petrović & Ivanković: _State of Mutation Testing at Google_ (ICSE 2018); Petrović et al.: _Practical Mutation Testing at Scale_ (arXiv:2102.11378).
+- StrykerJS docs: Getting Started, Configuration. <https://stryker-mutator.io/docs/stryker-js/>
+- StrykerJS docs: Mutant states & metrics (source for FM1/FM3/FM4 status semantics: `Timeout` = detected, `RuntimeError` = invalid/excluded, `MS` vs `MS_covered` formulas). <https://stryker-mutator.io/docs/mutation-testing-elements/mutant-states-and-metrics/>
+- supertest: <https://github.com/ladjs/supertest> · Jest: <https://jestjs.io/>
+- Dakhel et al.: _MuTAP_ (Information & Software Technology, 2024; arXiv:2308.16557).
+- Wang et al.: _MutGen_ (arXiv:2506.02954, 2025).
+- Tian et al.: _LLMs for Equivalent Mutant Detection_ (ISSTA 2024; arXiv:2408.01760).
+- EShop SUT: `docs/eshop-sut/srs.md` (FR-09), `apps/backend/server.js`.
