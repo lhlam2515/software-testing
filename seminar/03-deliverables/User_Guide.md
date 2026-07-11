@@ -3,9 +3,7 @@
 > **Seminar:** T10 — Mutation Testing & Test Effectiveness
 > **Traditional tool:** StrykerJS (Jest runner) · **AI-augmented:** Claude / ChatGPT (assertion synthesis)
 > **SUT:** EShop Node.js backend (`apps/backend/server.js`)
-> **Team:** _[names]_ · **Status:** DRAFT skeleton — 2026-06-22
->
-> _Conventions in this draft:_ `TODO` = capture real output before submission · `📷` = insert a screenshot here.
+> **Team:** 02
 
 ---
 
@@ -24,22 +22,32 @@
 ## 1. Introduction
 
 ### The problem
-Code coverage proves a test *executed* a line; it does not prove the test would *fail* if that line were wrong. A suite can hit 100% coverage and still assert nothing meaningful.
 
-> Anchor numbers to cite: 96% line / 93% branch coverage with only **34%** mutation score (Diffblue/Theodo); some suites reach 100% coverage at **~4%** mutation score (Wang et al., MutGen). _[verify before printing — §7]_
+Code coverage proves a test _executed_ a line; it does not prove the test would _fail_ if that line were wrong. A suite can hit 100% coverage and still assert nothing meaningful.
 
-**Mutation testing** seeds small faults (*mutants*) into the source — flip `>` to `>=`, change `-` to `+`, remove a `return` — then runs the existing suite. If a test fails, the mutant is **killed**; if all pass, it **survived** (a blind spot). The **mutation score = killed / valid mutants** is the test-effectiveness KPI.
+A reported case (Theodo, banking microservice, via a Diffblue case study) had **96% line / 93% branch coverage with only 34% mutation score**; Wang et al. (MutGen, arXiv:2506.02954, 2025) report some LLM-generated suites reaching **100% coverage at ~4% mutation score**. Both are vendor/industry benchmarks, not independently reproduced. Treat them as directional evidence that the coverage/mutation gap is real and can be large, not as a universal constant (see §7).
+
+### Core concepts
+
+Three terms carry the rest of this guide:
+
+- **Mutant**: a copy of the source with one small syntactic fault seeded in (a _mutation operator_): flip `>` to `>=`, change `-` to `+`, drop a `return`, swap a string literal. Stryker generates these automatically; you never write one by hand.
+- **Killed vs. Survived**: run the existing test suite against each mutant. If at least one test now fails, the mutant is **killed** (the suite would have caught this bug). If every test still passes, it **survived**, a blind spot in the _assertions_, not necessarily in what code ran. A survived mutant on a line with 100% coverage means a test executed that line and checked nothing about the result.
+- **Mutation Score (MS)**: `MS = killed / valid mutants × 100`, the test-effectiveness KPI this guide optimizes for. The report also shows `MS_covered` (killed / mutants that were actually reached by a test), which is always ≥ `MS` and can look much stronger while hiding untested code entirely. §6 FM3 walks through why citing `MS_covered` alone is misleading and what to report instead.
 
 ### What this guide covers
+
 - Setting up **StrykerJS** on the EShop monolith backend and producing a baseline mutation report.
 - Reading surviving mutants and writing assertions that kill them.
-- Using **Claude/ChatGPT** to synthesise assertion candidates — and the mandatory validation gate that stops the AI from misleading you.
+- Using **Claude/ChatGPT** to synthesise assertion candidates, plus the mandatory validation gate that stops the AI from misleading you.
 
 ### Who it is for
-Developers/QA who already write Jest tests and want to measure and improve *assertion quality*, not just coverage. Assumes Node ≥ 18 and basic Jest familiarity.
+
+Developers/QA who already write Jest tests and want to measure and improve _assertion quality_, not just coverage. Assumes Node ≥ 18 and basic Jest familiarity.
 
 ### Why this stack for EShop
-- EShop's backend is JavaScript (CommonJS, Express 5, sqlite3). StrykerJS is the JS-native mutation engine — PIT (Java) and mutmut (Python) cannot mutate it.
+
+- EShop's backend is JavaScript (CommonJS, Express 5, sqlite3). StrykerJS is the JS-native mutation engine; PIT (Java) and mutmut (Python) cannot mutate it.
 - StrykerJS has **no** assertion generation of its own; we pair it with an LLM to draft assertions for surviving mutants, gated by execution against the original and the mutant.
 
 ---
@@ -47,21 +55,24 @@ Developers/QA who already write Jest tests and want to measure and improve *asse
 ## 2. Installation
 
 ### Prerequisites
+
 | Requirement | Notes |
 |---|---|
 | Node.js ≥ 18 | `node -v` |
 | EShop backend | `apps/backend/` (Express 5, sqlite3) |
 | OS | Linux/macOS/Windows. On Windows + Jest, set `tempDirName` (see §5). |
 
-### Step 1 — install dev dependencies
+### Step 1: Install dev dependencies
+
 ```bash
 cd apps/backend
 npm i -D jest supertest @stryker-mutator/core @stryker-mutator/jest-runner
 ```
-> 📷 TODO: screenshot of successful install / `npx stryker --version`.
 
-### Step 2 — make `server.js` testable (one-time refactor)
+### Step 2: Make `server.js` testable (one-time refactor)
+
 `server.js` calls `app.listen()` directly and does not export `app`, so `supertest` cannot import it. At the bottom of `server.js`:
+
 ```js
 module.exports = app;                       // export for tests
 if (require.main === module) {              // only listen when run directly
@@ -69,7 +80,8 @@ if (require.main === module) {              // only listen when run directly
 }
 ```
 
-### Step 3 — Jest config (`apps/backend/jest.config.js`)
+### Step 3: Jest config (`apps/backend/jest.config.js`)
+
 ```js
 module.exports = {
   testEnvironment: 'node',
@@ -77,24 +89,27 @@ module.exports = {
 };
 ```
 
-### Step 4 — Stryker config (`apps/backend/stryker.config.mjs`)
+### Step 4: Stryker config (`apps/backend/stryker.config.mjs`)
+
 ```js
 /** @type {import('@stryker-mutator/api/core').PartialStrykerOptions} */
 export default {
-  packageManager: 'npm',
   testRunner: 'jest',
-  jest: { projectType: 'custom', configFile: 'jest.config.js' },
+  jest: { configFile: 'jest.config.js' },
   mutate: ['server.js'],            // monolith: the whole backend lives here
   coverageAnalysis: 'perTest',
-  reporters: ['html', 'clear-text', 'progress', 'json'],
-  htmlReporter: { fileName: 'reports/mutation/index.html' },
-  thresholds: { high: 80, low: 60, break: null },   // break:null for the first run
+  reporters: ['html', 'clear-text', 'progress'],
+  htmlReporter: { fileName: 'reports/mutation/mutation.html' },
   timeoutMS: 60000,
-  timeoutFactor: 2,                 // sqlite I/O is slow — give headroom
-  tempDirName: 'stryker-tmp',       // required on Windows + Jest
+  timeoutFactor: 2,                 // sqlite I/O is slow, give headroom
+  concurrency: 1,                   // one mutant worker at a time
+  testRunnerNodeArgs: ['--jitless'],
 };
 ```
+
 > Note: `package.json` here is `"type": "commonjs"`, so the Stryker config uses the `.mjs` extension to stay ESM. Add an npm script: `"test": "jest"`.
+>
+> `concurrency: 1` and `testRunnerNodeArgs: ['--jitless']` are not cosmetic: they exist because parallel mutant workers hitting the same SQLite-backed test database produced non-deterministic `Timeout`/`RuntimeError` results in earlier runs. See §6 FM1 for the failure mode this prevents; skipping these two lines reproduces it.
 
 ---
 
