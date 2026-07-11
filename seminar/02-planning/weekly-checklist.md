@@ -29,20 +29,20 @@
 **Milestone: đủ survivor + failure modes + metrics (cấp dữ liệu cho User_Guide).** ⚠️ *Lịch học bắt đầu: T4 block cả ngày, T6 chiều — dồn việc vào sáng Mon/Tue/Thu/Sat.*
 
 ### Lâm (M1)
-- [ ] `[T4]` Chạy baseline mutation toàn bộ (`mutate: server.js`, `coverageAnalysis: perTest`); ghi `BASELINE.md` (coverage + mutation score)
-- [ ] `[T5a]` Đọc HTML report cụm A; phân loại survivor; chọn 2 mutant (gồm BUG-A/BUG-B coupon)
-- [ ] `[T6a]` Viết kill assertion cho 2 survivor cụm A; chạy lại xác nhận MS tăng
-- [ ] `[T7a]` AI assertion synthesis cụm A + **validation gate** (PASS gốc / FAIL mutant)
-- [ ] Ghi **≥2 failure mode** Stryker quan sát từ cụm A → cấp cho F4
-- [ ] `[R]` Review T5b / T7b của Vũ
+- [x] `[T4]` Chạy baseline mutation toàn bộ (`mutate: server.js`, `coverageAnalysis: perTest`); ghi `BASELINE.md` (coverage + mutation score)
+- [x] `[T5a]` Đọc HTML report cụm A; phân loại survivor; chọn 2 mutant (gồm BUG-A/BUG-B coupon)
+- [x] `[T6a]` Viết kill assertion cho 2 survivor cụm A; chạy lại xác nhận MS tăng
+- [x] `[T7a]` AI assertion synthesis cụm A + **validation gate** (PASS gốc / FAIL mutant)
+- [ ] Ghi **≥2 failure mode** Stryker quan sát từ cụm A → cấp cho F4 *(chưa làm — `User_Guide.md` §6 Failure Modes vẫn skeleton, xem ghi chú trong `BASELINE.md` mục 4b)*
+- [ ] `[R]` Review T5b / T7b của Vũ *(peer review chưa xảy ra, xem `baseline-completion-checklist.md` mục 9)*
 
 ### Vũ (M2)
-- [ ] `[T5b]` Phân loại survivor cụm B; chọn 1–2 mutant (order-status / cart)
-- [ ] `[T6b]` Viết kill assertion cho survivor cụm B; xác nhận MS tăng
-- [ ] `[T7b]` AI assertion synthesis cụm B + **validation gate**
-- [ ] `[T8]` Đo metric (setup time, run time, MS gain/test AI) + AI triage equivalent-mutant
-- [ ] Ghi **≥1 failure mode** Stryker từ cụm B → cấp cho F4
-- [ ] `[R]` Review T4 `BASELINE.md` + T5a / T7a của Lâm
+- [x] `[T5b]` Phân loại survivor cụm B; chọn 1–2 mutant (order-status / cart)
+- [x] `[T6b]` Viết kill assertion cho survivor cụm B; xác nhận MS tăng
+- [x] `[T7b]` AI assertion synthesis cụm B + **validation gate**
+- [x] `[T8]` Đo metric (setup time, run time, MS gain/test AI) + AI triage equivalent-mutant
+- [ ] Ghi **≥1 failure mode** Stryker từ cụm B → cấp cho F4 *(chưa làm — cùng gap với cụm A)*
+- [ ] `[R]` Review T4 `BASELINE.md` + T5a / T7a của Lâm *(peer review chưa xảy ra)*
 
 **🚦 Gate 05/07:** `BASELINE.md` xong · ≥3 survivor đã phân tích · ≥3 failure mode đã ghi · metrics đủ → **sẵn sàng viết User_Guide** · parity check `git shortlog -sn`.
 

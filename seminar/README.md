@@ -53,7 +53,7 @@ Nguồn chuẩn: `00-brief/seminar-guide.md` §4. Trạng thái: ✅ có draft �
 | `AI-04` Reflective (300w EN) | S8 | [03-deliverables](03-deliverables/AI-04_ai-reflective-statement.md) | 🟡 skeleton |
 | `Final_Reflection.md` (300w EN) | S8 | [03-deliverables](03-deliverables/Final_Reflection.md) | 🟡 skeleton |
 | `Peer_Review.md` ×2 | post | [03-deliverables](03-deliverables/Peer_Review.md) | 🟡 skeleton |
-| `BASELINE.md` (metrics) | S3 | [01-research](01-research/BASELINE.md) | 🟡 skeleton |
+| `BASELINE.md` (metrics) | S3 | [01-research](01-research/BASELINE.md) | ✅ draft (chờ peer review) |
 
 ---
 
