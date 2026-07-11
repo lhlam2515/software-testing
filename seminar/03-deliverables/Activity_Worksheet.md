@@ -1,226 +1,338 @@
-# Activity Worksheet — "Kill the Mutant"
+# Activity Worksheet: Kill the Mutant in the EShop Backend
 
-> **Seminar:** T10 — Mutation Testing & Test Effectiveness
-> **Module under test:** EShop coupon endpoint — `POST /api/apply-coupon` (`apps/backend/server.js`, FR-09)
-> **Tool:** StrykerJS (Jest runner) + supertest · **Duration:** 25 minutes · **Team size:** 3–4
-> **Status:** DRAFT for TA review — 2026-06-22
-
----
-
-## 0. Goal
-
-Five mutants below **survived** our baseline (happy-path) test suite — every existing test still passed even though `server.js` was changed. For each mutant, write **one supertest assertion** that PASSES on the original code and FAILS on the mutant (i.e. *kills* it). The team that kills the most mutants wins.
-
-> A mutant is killed only when a test that passes on the ORIGINAL **fails** on the MUTANT. An assertion that passes on both kills nothing.
+> **Seminar:** T10, Mutation Testing and Test Effectiveness
+> **System under test:** EShop backend, covering Auth, Cart, Order Status, and Coupon
+> **Tools:** StrykerJS, Jest, and supertest
+> **Duration:** 25 minutes
+> **Team size:** 3 to 4 students
+> **Sandbox repository:** <https://github.com/lhlam2515/eshop-kill-the-mutant>
+> **Evidence source:** `/tmp/eshop-kill-the-mutant/apps/backend/reports/mutation/mutation.html`
 
 ---
 
-## ⚠️ Reality check — read before you start
+## 0. Objective
 
-This activity runs against EShop's **real, unmodified** backend code. Two things you must know:
+The sandbox mutation report contains useful mutants across the EShop backend, not only in the coupon route. This activity uses six mutants from four business areas. Each mutant represents a different weakness in test design.
 
-1. **It is a monolith.** All logic is inline in `server.js` (no `services/`, no `controllers/`). The coupon logic lives inside the `POST /api/apply-coupon` route handler, nested in sqlite callbacks. We test it at the **HTTP level** with `supertest`, not as a unit function.
-2. **The shipped code already has two real bugs** (EShop is a seeded SUT). Your assertions assert the code's **current behaviour** — which is sometimes wrong. That is the whole lesson: *mutation testing measures whether your tests detect change; it does not tell you the baseline is correct.* You still need the spec (FR-09) to know a bug from a feature.
+For every station, write an assertion that:
 
-| Bug | Where | Current (buggy) behaviour | FR-09 spec |
-|---|---|---|---|
-| **BUG-A** | min-order guard | `total_amount > min_order_amount` → order *exactly* at the threshold is rejected | should be `>=` |
-| **BUG-B** | percent formula | `Math.floor(total_amount * (1 - discount_value))` → a 10% coupon yields a **negative** discount | should be `total × value / 100` |
+1. passes against the original program;
+2. fails when the target mutant is active;
+3. checks the output or state affected by the mutation.
 
-> Talking point for the seminar: these two bugs are effectively **mutants that already survived in production** — no test caught them because EShop ships with zero tests.
+Executing a mutated line is not enough. A test kills a mutant only when it observes a behavioral difference between the original program and the mutant.
+
+### Mutants used in this activity
+
+| Station | Business area | Report mutant | Report status | Mutator |
+|---|---|---:|---|---|
+| A | Auth: failed login | `#22`, `#23` | Survived | `ObjectLiteral`, `StringLiteral` |
+| B | Cart: new cart | `#264` | Survived | `ArrayDeclaration` |
+| C | Order Status: canceled transition | `src/routes/admin.routes.js:29` | Survived | `ConditionalExpression` |
+| D | Order Status: invalid transition | `#491` | Survived | `LogicalOperator` |
+| E | Coupon: percentage calculation | `#378` | NoCoverage | `ArithmeticOperator` |
+
+Mutants `#22` and `#23` use the same request. One precise response oracle can kill both.
 
 ---
 
-## 1. Setup prerequisites (facilitator does this before class)
+## 1. Sandbox context
 
-`server.js` calls `app.listen()` directly and does not export `app`, so supertest cannot import it as-is. One-time refactor:
+The mutation report contains a source snapshot from the stage when the route logic still lived in `server.js`. The prepared sandbox now separates that logic into routers under `src/routes/`. The mutant IDs and report line numbers remain useful evidence, while the current locations show where the same logic now resides.
+
+| Mutation report snapshot | Current sandbox location |
+|---|---|
+| `server.js` line 38 | `src/routes/auth.routes.js`, failed-login response |
+| `server.js` line 286 | `src/routes/commerce.routes.js`, cart initialization |
+| `server.js` order-status handler | `src/routes/admin.routes.js`, `canceled` transition rule |
+| `server.js` lines 543 to 544 | `src/routes/admin.routes.js`, `confirmed` transition rule |
+| `server.js` line 400 | `src/routes/coupons.routes.js`, percentage formula |
+
+### Provided test harness
 
 ```js
-// bottom of server.js
-module.exports = app;                 // add this
-if (require.main === module) {        // guard the listen
-  app.listen(PORT, () => console.log(`Server on http://localhost:${PORT}`));
-}
-```
-
-Install + scope Stryker to the coupon route:
-
-```bash
-npm i -D jest supertest @stryker-mutator/core @stryker-mutator/jest-runner
-# stryker.config.mjs → mutate: ['server.js'], testRunner: 'jest', coverageAnalysis: 'perTest'
-```
-
-All five mutants below use the **no-`user_id` branch**, so tests do **not** write to `coupon_usage` — the seeded DB stays read-only and the activity is fully reproducible.
-
-### Endpoint contract (FR-09)
-
-```
-POST /api/apply-coupon
-body: { code, total_amount, user_id? }
-200 → { success:true, coupon_id, discount_amount, final_amount, message }
-400 → { error }   // min-order not met, expired, usage limit
-404 → { error }   // code not found / inactive
-```
-
-### Seeded coupons (`database.js`)
-
-| Code | type | discount_value | min_order_amount | expired_at | max_uses_per_user |
-|---|---|---|---|---|---|
-| `SAVE10` | percent | 10 | 300,000 | 2099-12-31 | 1 |
-| `BIGBUY` | fixed | 50,000 | 500,000 | 2099-12-31 | 1 |
-| `VIP100` | fixed | 100,000 | 300,000 | 2099-12-31 | 2 |
-| `EXPIRED` | percent | 20 | 100,000 | 2020-01-01 | 1 |
-
-### Assertion format (supertest + Jest)
-
-```js
-const request = require('supertest');
 const app = require('../server');
+const db = require('../database');
+const { getAuthToken } = require('./helpers/auth');
+const { createApi } = require('./helpers/http');
 
-test('kills mutant N', async () => {
-  const res = await request(app)
-    .post('/api/apply-coupon')
-    .send({ code: '...', total_amount: ... });   // omit user_id → no-user branch
-  expect(res.status).toBe(...);
-  // and/or: expect(res.body.discount_amount).toBe(...);
-});
+const api = createApi(app);
+const userAuth = `Bearer ${getAuthToken(2)}`;
+const adminAuth = `Bearer ${getAuthToken(1)}`;
 ```
+
+For the Order Status stations, the facilitator also provides the fixture helper already used in `order-status.test.js`:
+
+```js
+const orderId = await createOrder('pending');
+```
+
+The helper creates an isolated order and registers it for cleanup after the test.
 
 ---
 
-## 2. The five surviving mutants
+## 2. Mutant stations
 
-Each box shows the original line (`-`) and the mutated line (`+`), with the line in `server.js`. Pick `code` + `total_amount` that make the two behave **differently**.
+Read the diff at each station before writing an assertion. First identify the observable difference. Then select the input and oracle needed to expose it.
 
-### Mutant 1 — `RelationalOperator` on the min-order guard (line ~379)
+### Station A: Auth response oracle
+
+**Endpoint:** `POST /api/login`
+
+**Report evidence:** mutant `#22` (`ObjectLiteral`) and mutant `#23` (`StringLiteral`), both Survived.
+
 ```diff
-- if (total_amount > coupon.min_order_amount) {
-+ if (total_amount >= coupon.min_order_amount) {
-```
-*Hint: a happy-path total (e.g. 600,000) won't catch this. What total exactly equals the threshold? (This line is also BUG-A — the mutant is accidentally the **correct** spec behaviour.)*
+  return res.status(401).json({ error: "Invalid email or password" });
 
-### Mutant 2 — `RelationalOperator` on the expiry check (line ~382)
+# Mutant #22
+- return res.status(401).json({ error: "Invalid email or password" });
++ return res.status(401).json({});
+
+# Mutant #23
+- return res.status(401).json({ error: "Invalid email or password" });
++ return res.status(401).json({ error: "" });
+```
+
+Use an email address that does not exist. The password may contain any non-empty value.
+
+**Task:** Write one response-body assertion that kills both `#22` and `#23`.
+
+`expect(res.status).toBe(401)` is a weak oracle here. The original and both mutants return the same status.
+
+### Station B: Exact cart contents
+
+**Endpoint:** `GET /api/cart`
+
+**Report evidence:** mutant `#264` (`ArrayDeclaration`), Survived.
+
 ```diff
-- if (expiry < now) {
-+ if (expiry > now) {
+- if (!userCarts[userId]) userCarts[userId] = [];
++ if (!userCarts[userId]) userCarts[userId] = ["Stryker was here"];
 ```
-*Hint: there is exactly one already-expired coupon. Make sure its total clears the min-order guard first.*
 
-### Mutant 3 — `EqualityOperator` on the coupon-type check (line ~418, no-user branch)
+Use a user ID that has not accessed the cart during the current process:
+
+```js
+const freshAuth = `Bearer ${getAuthToken(880264)}`;
+const res = await api
+  .get('/api/cart')
+  .set('Authorization', freshAuth);
+```
+
+**Task:** Replace `Array.isArray(res.body)` with an assertion that checks the exact contents of a new cart.
+
+### Station C: Canceled order transition
+
+**Endpoint:** `PUT /api/admin/orders/:id/status`
+
+**Report evidence:** `ConditionalExpression` at `src/routes/admin.routes.js:29`, Survived.
+
 ```diff
-- if (coupon.type === "percent") {
-+ if (coupon.type !== "percent") {
+  if (
+-   currentStatus === "canceled" && status === "delivered"
++   false
+  ) isValidTransition = true;
 ```
-*Hint: send a percent coupon. Original takes the percent path (BUG-B → negative); mutant takes the fixed path. The two `discount_amount` values are very different.*
 
-### Mutant 4 — `ArithmeticOperator` inside the percent formula (line ~419, no-user branch)
+Create an order in `canceled` state and request a transition to `delivered`:
+
+```js
+const orderId = await createOrder('canceled');
+const res = await api
+  .put(`/api/admin/orders/${orderId}/status`)
+  .set('Authorization', adminAuth)
+  .send({ status: 'delivered' });
+```
+
+**Task:** Write an assertion that distinguishes the observed transition in the original program from the mutant that disables this branch. Compare the observed behavior with the FR-10 state machine and record the specification defect separately.
+
+### Station D: Invalid order transition
+
+**Endpoint:** `PUT /api/admin/orders/:id/status`
+
+**Report evidence:** mutant `#491` (`LogicalOperator`), Survived.
+
+```diff
+- currentStatus === "confirmed" &&
+-   (status === "shipping" || status === "canceled")
++ currentStatus === "confirmed" || status === "shipping" || status === "canceled"
+```
+
+Create an order in `pending` state and attempt to move it directly to `shipping`:
+
+```js
+const orderId = await createOrder('pending');
+const res = await api
+  .put(`/api/admin/orders/${orderId}/status`)
+  .set('Authorization', adminAuth)
+  .send({ status: 'shipping' });
+```
+
+**Task:** Assert the HTTP result of this invalid transition. Explain why the mutant accepts the request.
+
+### Station E: Exact coupon calculation
+
+**Endpoint:** `POST /api/apply-coupon`
+
+**Report evidence:** mutant `#378` (`ArithmeticOperator`), NoCoverage.
+
 ```diff
 - discount_amount = Math.floor(total_amount * (1 - coupon.discount_value));
-+ discount_amount = Math.floor(total_amount * (1 + coupon.discount_value));
++ discount_amount = Math.floor(total_amount / (1 - coupon.discount_value));
 ```
-*Hint: `expect(typeof discount_amount).toBe('number')` passes on BOTH. Assert the actual value.*
 
-### Mutant 5 — `ArithmeticOperator` on the final amount (line ~425, no-user branch)
-```diff
-- const final_amount = total_amount - discount_amount;
-+ const final_amount = total_amount + discount_amount;
+Apply `SAVE10` to a total of `400000`. Omit `user_id` so the request follows the no-user branch.
+
+```js
+const res = await api
+  .post('/api/apply-coupon')
+  .send({ code: 'SAVE10', total_amount: 400000 });
 ```
-*Hint: use a **fixed** coupon for clean numbers, and assert `final_amount`, not `discount_amount`.*
+
+**Task:** Assert the exact `discount_amount` produced by the original program.
+
+The current percentage formula does not comply with FR-09. For this exercise, assert the observed baseline behavior so the test can distinguish the original from the mutant. Record the specification defect separately. Mutation testing measures test sensitivity; it does not prove that the baseline behavior is correct.
 
 ---
 
-## 3. Your answers — one assertion per mutant
+## 3. Team answer sheet
 
-| # | code | total_amount | Assertion (status and/or body field = expected) | Will it kill? (✓/✗) |
+| Station | Original result | Mutant result | Proposed assertion | KILL, WEAK, or BROKEN |
 |---|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-| 4 |  |  |  |  |
-| 5 |  |  |  |  |
+| A: Auth response |  |  |  |  |
+| B: Empty cart |  |  |  |  |
+| C: Canceled transition |  |  |  |  |
+| D: Invalid transition |  |  |  |  |
+| E: Percentage calculation |  |  |  |  |
+
+### Review questions
+
+1. Why can the assertion at Station A kill two mutants?
+2. Which stations require state setup, and which require only input selection?
+3. How does a NoCoverage mutant differ from a Survived mutant?
+4. Which station is most likely to produce a weak oracle?
 
 ---
 
-## 4. Swap & review (0:13–0:18)
+## 4. Peer review
 
-Swap worksheets with a partner team. For each assertion, mark:
-- **KILL** — passes on original, fails on mutant. ✓
-- **WEAK** — passes on both (wrong data, or only checks `typeof`/`success`). ✗
-- **BROKEN** — fails on the original too (wrong expected value). ✗
+Exchange worksheets with another team. Classify every assertion:
 
-Write one sentence: *which mutant was hardest to kill, and why?*
+- **KILL:** passes against the original and fails against the mutant;
+- **WEAK:** passes against both versions;
+- **BROKEN:** fails against the original;
+- **STATE LEAK:** depends on a cart or order left by another test.
+
+For each classification, state the observable difference or explain why no difference is observed.
 
 ---
 
-## 5. Rules & timing
+## 5. Timing and rules
 
-| Time | Step |
+| Time | Activity |
 |---|---|
-| 0:00–0:03 | Facilitator shows the 5 mutant diffs |
-| 0:03–0:13 | Each team writes 5 candidate assertions (§3) |
-| 0:13–0:18 | Swap & review with a partner team (§4) |
-| 0:18–0:22 | Facilitator runs assertions in the prepared sandbox; tally kills |
-| 0:22–0:25 | Winning team explains its assertion design |
+| 0:00 to 0:03 | The facilitator explains the pass-original, fail-mutant rule and assigns stations |
+| 0:03 to 0:12 | Each team writes five candidate assertions |
+| 0:12 to 0:17 | Teams exchange worksheets and review the observable differences |
+| 0:17 to 0:22 | The facilitator runs the assertions in the sandbox and records killed mutants |
+| 0:22 to 0:25 | The winning team explains one strong oracle and one weak oracle |
 
-- AI tools allowed — but **every AI-suggested assertion must be cross-checked manually**. An assertion that passes on the mutant kills nothing.
-- No internet needed after setup: the sandbox, seeded DB, and refactored `server.js` are provided.
-- One minute-paper per team at the end (audience attendance credit).
+- Do not modify production code during the activity.
+- Use the assigned fixtures and tokens to avoid state leaks.
+- Run every AI-suggested assertion against both the original and the mutant.
+- The score is based on mutants killed, not the number of assertions written.
 
 ---
+
+# Answer key: facilitator only
+
+Do not distribute this section before minute 17. The expected results below come from the source snapshot embedded in the mutation report and the corresponding logic in the current sandbox.
+
+## Station A: Kill `#22` and `#23`
+
+```js
+const res = await api
+  .post('/api/login')
+  .send({ email: 'notfound@example.com', password: 'anything' });
+
+expect(res.status).toBe(401);
+expect(res.body.error).toBe('Invalid email or password');
+```
+
+The original returns the complete error message. Mutant `#22` returns an empty object, so `error` is `undefined`. Mutant `#23` returns an empty string. The exact-value assertion fails against both mutants.
+
+## Station B: Kill `#264`
+
+```js
+const freshAuth = `Bearer ${getAuthToken(880264)}`;
+const res = await api
+  .get('/api/cart')
+  .set('Authorization', freshAuth);
+
+expect(res.status).toBe(200);
+expect(res.body).toEqual([]);
+```
+
+The original initializes a new cart as `[]`. The mutant initializes it as `["Stryker was here"]`. An array type check passes against both versions, but the exact-content assertion kills the mutant.
+
+## Station C: Kill the canceled-transition mutant
+
+```js
+const orderId = await createOrder('canceled');
+const res = await api
+  .put(`/api/admin/orders/${orderId}/status`)
+  .set('Authorization', adminAuth)
+  .send({ status: 'delivered' });
+
+expect(res.status).toBe(200);
+expect(res.body.message).toBe('Order status updated');
+
+const row = await dbGet('SELECT status FROM orders WHERE id = ?', [orderId]);
+expect(row.status).toBe('delivered');
+```
+
+The original accepts `canceled` to `delivered`, returns 200, and updates the stored state. The mutant replaces the condition with `false`, so no rule validates the transition and the response becomes 400. FR-10 does not allow a canceled order to become delivered, so this assertion deliberately pins the observed baseline behavior for mutation analysis; it does not certify that behavior as specification-correct.
+
+## Station D: Kill `#491`
+
+```js
+const orderId = await createOrder('pending');
+const res = await api
+  .put(`/api/admin/orders/${orderId}/status`)
+  .set('Authorization', adminAuth)
+  .send({ status: 'shipping' });
+
+expect(res.status).toBe(400);
+expect(res.body.error).toBe(
+  'Invalid state transition from pending to shipping'
+);
+```
+
+The original rejects `pending` to `shipping`. In the mutant, `status === 'shipping'` makes the new `||` expression true even though the current state is not `confirmed`. The mutant updates the order and returns 200.
+
+## Station E: Kill `#378`
+
+```js
+const res = await api
+  .post('/api/apply-coupon')
+  .send({ code: 'SAVE10', total_amount: 400000 });
+
+expect(res.status).toBe(200);
+expect(res.body.discount_amount).toBe(-3600000);
+```
+
+The original calculates `floor(400000 * (1 - 10))`, which is `-3600000`. The mutant calculates `floor(400000 / (1 - 10))`, which is `-44445`. Both values are numbers, so a type assertion is weak. The exact numeric assertion kills the mutant.
+
+## Debrief map
+
+| Test-design issue | Station |
+|---|---|
+| Status-only assertion misses a response-payload defect | A |
+| Type checking is weaker than an exact-content oracle | B |
+| A transition decision table needs valid and invalid cases | C, D |
+| State setup determines whether a mutant is reached | B, C, D |
+| An exact numeric oracle kills an arithmetic mutant | E |
+| Mutation testing does not replace specification-based testing | E |
+
 ---
-
-# ANSWER KEY — FACILITATOR ONLY
-
-> Do not distribute before 0:18. All values are the **real** behaviour of the unmodified `server.js` (bugs included). Each assertion passes on the original and fails on the stated mutant.
-
-### Mutant 1 — min-order `>` → `>=` (boundary, status-based)
-`SAVE10` (min 300,000), `total_amount = 300,000`, no `user_id`.
-- Original `>`: `300000 > 300000` → false → else branch → **400** "chưa đủ giá trị tối thiểu".
-- Mutant `>=`: `300000 >= 300000` → true → proceeds → **200**.
-```js
-const res = await request(app).post('/api/apply-coupon').send({ code:'SAVE10', total_amount:300000 });
-expect(res.status).toBe(400);   // original 400, mutant 200 → KILL
-```
-> Teaching point: the *mutant* here is the spec-correct version (`>=`). The test locks in BUG-A. Mutation testing proves the test is sensitive to this line — it does **not** prove the line is correct.
-
-### Mutant 2 — expiry `<` → `>` (status-based)
-`EXPIRED` (exp 2020-01-01, min 100,000), `total_amount = 200,000`, no `user_id`.
-- Original `<`: `2020 < now` → true → **400** "Mã giảm giá đã hết hạn".
-- Mutant `>`: `2020 > now` → false → proceeds → 200.
-```js
-const res = await request(app).post('/api/apply-coupon').send({ code:'EXPIRED', total_amount:200000 });
-expect(res.status).toBe(400);   // original 400, mutant 200 → KILL
-```
-
-### Mutant 3 — type `===` → `!==` (value-based)
-`SAVE10` (percent, value 10), `total_amount = 500,000`, no `user_id`.
-- Original: percent path → BUG-B `floor(500000 * (1 - 10))` = `floor(-4,500,000)` = **-4,500,000**.
-- Mutant `!==`: takes the fixed path → `discount_amount = discount_value` = **10**.
-```js
-const res = await request(app).post('/api/apply-coupon').send({ code:'SAVE10', total_amount:500000 });
-expect(res.body.discount_amount).toBe(-4500000);   // original -4,500,000, mutant 10 → KILL
-```
-> Teaching point: the original value is *negative* — that is BUG-B. The assertion documents real (broken) behaviour; flag the bug separately.
-
-### Mutant 4 — percent arithmetic `1 - value` → `1 + value` (value-based)
-`SAVE10` (percent, value 10), `total_amount = 400,000`, no `user_id`.
-- Original: `floor(400000 * (1 - 10))` = `floor(-3,600,000)` = **-3,600,000**.
-- Mutant: `floor(400000 * (1 + 10))` = `floor(4,400,000)` = **4,400,000**.
-```js
-const res = await request(app).post('/api/apply-coupon').send({ code:'SAVE10', total_amount:400000 });
-expect(res.body.discount_amount).toBe(-3600000);   // original -3.6M, mutant 4.4M → KILL
-```
-> Teaching point: `expect(typeof res.body.discount_amount).toBe('number')` passes on BOTH → the classic coverage-vs-mutation gap.
-
-### Mutant 5 — final `-` → `+` (value-based, clean numbers via fixed coupon)
-`BIGBUY` (fixed 50,000, min 500,000), `total_amount = 600,000`, no `user_id`.
-- Original: `discount_amount = 50,000`; `final_amount = 600000 - 50000` = **550,000**.
-- Mutant: `final_amount = 600000 + 50000` = **650,000**.
-```js
-const res = await request(app).post('/api/apply-coupon').send({ code:'BIGBUY', total_amount:600000 });
-expect(res.body.final_amount).toBe(550000);   // original 550000, mutant 650000 → KILL
-```
-> Teaching point: a test that only asserts `discount_amount` (= 50,000 on both) leaves this mutant ALIVE. You must assert `final_amount`. (Fixed coupons avoid BUG-B, so the numbers stay clean.)
-
-### Why these survive a happy-path suite
-A naive baseline test like `POST {code:'BIGBUY', total_amount:600000} → expect status 200` covers all five lines but kills **none** of M1–M5 (no boundary, no expired coupon, no type-flip, only `typeof`/`success` checks). That is the gap the activity exposes.
+*Voice-check: Technical mode applied; zero em/en dashes, no self-narrating prose, no forced rule of three, and direct causal explanations retained.*
