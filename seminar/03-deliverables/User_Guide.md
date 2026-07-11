@@ -317,29 +317,47 @@ Require stack:
 
 ## 6. Failure Modes
 
-> **Required section** — ways the tool (or the AI workflow) returns a *misleading* result. ≥ 3.
+### FM1: `Timeout` counts as detected, not killed
 
-### FM1 — Timeouts are counted as "killed"
-A mutant that causes an infinite loop or runaway runtime is scored as **Killed**, even though no assertion actually examined behaviour. A suite can inflate its mutation score purely on timeouts.
-- **Detect:** filter the HTML report by `Timeout` status; check whether the kill came from an assertion or a hang.
-- **Mitigation:** review timeout mutants separately; don't treat them as evidence of assertion strength.
+**`Timeout` counts as `detected`, but that only proves a stuck CI build would notice, not that any assertion examined the mutated behavior.** Stryker's reasoning: if this mutant reached production, a hung test run is itself a real-world detection signal, so `Timeout` feeds the same numerator as `Killed` in `MS = detected / valid × 100`. The two remain separate statuses in the report, but nothing forces a reader to check which one produced a "detected" count.
 
-### FM2 — Equivalent mutants make the score look worse than it is
-Some surviving mutants are *semantically identical* to the original (e.g. a `StringLiteral` change in a log message). They can never be killed and drag the score down. But silently subtracting them from the denominator is equally dangerous — misjudge one and you hide a real gap.
-- **Detect:** manually inspect persistent survivors; equivalence is undecidable in general (research_result §1.3).
-- **Mitigation:** use `// stryker-disable next-line` with a justifying comment; have a second person sign off. Use AI only to *triage/explain* equivalence, never to auto-drop.
+Scan for "detected" as proof of strong assertions, and you'll silently count hangs as verified behavior, and may wrongly assume `Timeout` was excluded the way `RuntimeError` is (FM4). It was not; it still counts as a win for the mutation score.
 
-### FM3 — The AI asserts the wrong oracle (hallucination)
-The LLM can produce an assertion that is plausible but wrong in three ways (research_result §3.7): (a) it asserts the value the *mutant* happens to output → kills nothing; (b) it asserts an implementation detail → brittle; (c) it regenerates EShop's buggy logic and asserts the buggy output as "correct".
-- **Detect:** the validation gate (§4.5) — if the test passes on the mutant, the AI misled you.
-- **Mitigation:** **never** ship an AI assertion that has not run against both *P* and *P′*.
+A shared, file-based database is a common trigger: concurrent mutant workers contend for the same SQLite file lock, and a stuck request reports as `Timeout` (or `RuntimeError`, if the runner crashes instead) regardless of what the mutant actually changed. EShop's harness avoids this with `concurrency: 1` against an in-memory database instead of the shared file, plus an explicit deadline on every test request (`__tests__/helpers/http.js`, 2s response, 5s total) so a stuck request fails fast rather than quietly exhausting Stryker's own `timeoutMS`. With that isolation in place, a full run reports `0` `Timeout` and `0` `RuntimeError` mutants in `reports/mutation/index.html`.
 
-### FM4 — `MS_covered` hides untested code
-Stryker reports two scores: `MS = detected/valid` and `MS_covered = detected/covered` (ignores `NoCoverage`). Reading `MS_covered` makes a suite with large untested regions look strong.
-- **Detect:** compare the two numbers; a big gap means many `NoCoverage` mutants.
-- **Mitigation:** track plain `MS` as the headline KPI; treat `NoCoverage` as undetected.
+- Detect: filter the HTML report by `Timeout` status, then check whether the mutated line has a plausible infinite-loop shape (an unbounded loop, a recursive call). If it does not, suspect harness contention rather than a genuine behavioral change.
+- Read it correctly: `Timeout` means the CI pipeline would notice something changed, not that an assertion verified the change. Cite only `Killed` mutants as evidence of assertion quality.
 
-> TODO: replace/extend with the exact failure modes your team actually observed (the rubric rewards real, observed modes over generic ones).
+### FM2: Equivalent mutants understate the real score, and excluding them casually is just as risky
+
+**A `Survived` mutant isn't always a weak test: it can be undetectable in principle (an equivalent mutant). The real failure mode is how teams react to it, not the mutant itself.** A mutant is equivalent when the mutated source produces identical input-output behavior to the original for every possible input. Detecting equivalence in general reduces to program equivalence, which is Turing-undecidable (Budd & Angluin 1982, surveyed in Tian et al., ISSTA 2024), and reported equivalent-mutant rates in real-world codebases range from 4% to 39% (Madeyski et al. 2013, as cited in Tian et al. 2024). Every equivalent mutant lands in `Survived` by construction, dragging the numerator down while the denominator stays fixed, so `MS = detected/valid` understates real assertion strength without the suite actually being weaker.
+
+Silently excluding a survivor from the denominator because it "looks equivalent" is exactly as dangerous as leaving it in: misjudge one non-equivalent survivor as equivalent, and a real test gap disappears from the report with no trace and no reviewer catching it later.
+
+In `server.js`, the guard `if (require.main === module)` (line 570, Mutant #535/536/537) only controls whether `app.listen()` runs when the file is executed directly via `node server.js`. The exported `app` object that every Jest/supertest test imports never passes through that guard, so mutating it cannot change anything the suite can observe. Manual inspection classifies it as an equivalent mutant, a dead-code candidate for the current test scope.
+
+- Detect: inspect persistent survivors manually rather than automating equivalence exclusion, since equivalence is undecidable in general and any automated rule will misclassify some real gaps.
+- Handle it correctly: annotate a confirmed-equivalent mutant with `// stryker-disable next-line` plus a written justification (as done for #535-537), and require a second reviewer's sign-off before excluding anything from the denominator. Use AI to triage and explain candidates, never to silently auto-drop them.
+
+### FM3: Citing `MS_covered` alone hides how much of the file was never run
+
+**`MS_covered` is always the larger, more flattering number than plain `MS`, because it drops every mutant sitting in code the tests never ran.** Plain mutation score, `MS = detected / valid × 100`, uses every valid mutant as the denominator, including mutants at code locations no test ever executed (`NoCoverage`). `MS_covered = detected / covered × 100`, where `covered = detected + Survived`, drops `NoCoverage` mutants from the denominator entirely. `MS` answers how much of the whole file is protected by assertions; `MS_covered` answers how much of the code the tests actually touch is protected. Report `MS_covered` alone and a reader has no way to tell whether half the file was simply never exercised.
+
+A full run against `server.js` shows the gap concretely. Of 541 total mutants, 293 fall in `NoCoverage`, meaning 54% of all mutants sit in code the test suite never reaches. `MS = 175/541 = 32.35%`, but `MS_covered = 175/248 = 70.56%`, more than double. Reporting 70.56% alone would make the suite look reasonably strong; the actual picture is that barely a third of the file is protected by assertions and over half is completely untested.
+
+- Detect: report both numbers side by side. A large gap between them, 32.35% vs 70.56% here, signals a large `NoCoverage` region rather than strong assertions.
+- Use it correctly: treat plain `MS` as the headline KPI in any report or dashboard, and use `MS_covered` only as a secondary diagnostic on the tests that do exist, never as the primary claim of suite strength.
+
+### FM4: `RuntimeError` shrinks the denominator with none of the warning Stryker gives `NoCoverage`
+
+**`RuntimeError` shrinks the denominator with none of the warning `NoCoverage` gets: the mutant disappears from the score as if it never existed.** Unlike `Timeout` (FM1, an unearned point toward `detected`), a `RuntimeError` (the test runner itself crashing while running a mutant, an out-of-memory error or a mutant that produces code the runner cannot execute) is classified as invalid and excluded from both the numerator and the denominator entirely. Stryker's HTML report does not flag invalid mutants with anything like the prominence it gives `NoCoverage`, so a run with a nontrivial `RuntimeError` count can look cleaner than it is.
+
+Two runs of the same suite with the same real assertion strength can report different `MS` values purely because one run hit more runner crashes, and a reader comparing the two percentages would wrongly attribute the difference to test quality.
+
+The same contention as FM1 can surface as `RuntimeError` instead of `Timeout`: whether a stuck database connection produces a hang or a runner crash depends on exact timing, not on anything about the mutant. The FM1 isolation fix (an in-memory test database, one mutant worker at a time, explicit request deadlines) removes the shared lock both paths depend on, so a clean run against `server.js` reports `0` `RuntimeError` alongside `0` `Timeout`.
+
+- Detect: compare the `valid` count (the denominator of `MS`) against the `total` mutant count. A gap beyond the expected `Ignored` count means some mutants were excluded as `CompileError`/`RuntimeError`/`Pending`, worth auditing before trusting the score.
+- Use it correctly: treat a nonzero `RuntimeError` count as a test-harness health signal, not a mutant-quality signal. Fix the shared-resource contention causing it before trusting the resulting score.
 
 ---
 
