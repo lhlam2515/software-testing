@@ -153,58 +153,6 @@
     "cluster": "FR-02 (login)"
   },
   {
-    "id": "28",
-    "file": "server.js",
-    "status": "Survived",
-    "mutatorName": "EqualityOperator",
-    "location": {
-      "end": {
-        "column": 70,
-        "line": 40
-      },
-      "start": {
-        "column": 30,
-        "line": 40
-      }
-    },
-    "original": "new Date() < new Date(user.locked_until)",
-    "replacement": "new Date() <= new Date(user.locked_until)",
-    "statusReason": null,
-    "static": false,
-    "coveredBy": [
-      "21",
-      "23",
-      "24",
-      "25",
-      "26"
-    ],
-    "killedBy": [],
-    "testsCompleted": 5,
-    "sourceContext": [
-      {
-        "line": 38,
-        "text": "      return res.status(401).json({ error: \"Invalid email or password\" });"
-      },
-      {
-        "line": 39,
-        "text": ""
-      },
-      {
-        "line": 40,
-        "text": "    if (user.locked_until && new Date() < new Date(user.locked_until)) {"
-      },
-      {
-        "line": 41,
-        "text": "      return res"
-      },
-      {
-        "line": 42,
-        "text": "        .status(403)"
-      }
-    ],
-    "cluster": "FR-02 (login)"
-  },
-  {
     "id": "38",
     "file": "server.js",
     "status": "Survived",
@@ -503,54 +451,6 @@
       {
         "line": 288,
         "text": "});"
-      }
-    ],
-    "cluster": "FR-08 (cart/checkout)"
-  },
-  {
-    "id": "268",
-    "file": "server.js",
-    "status": "Survived",
-    "mutatorName": "ConditionalExpression",
-    "location": {
-      "end": {
-        "column": 25,
-        "line": 292
-      },
-      "start": {
-        "column": 7,
-        "line": 292
-      }
-    },
-    "original": "!userCarts[userId]",
-    "replacement": "true",
-    "statusReason": null,
-    "static": false,
-    "coveredBy": [
-      "34"
-    ],
-    "killedBy": [],
-    "testsCompleted": 1,
-    "sourceContext": [
-      {
-        "line": 290,
-        "text": "app.post(\"/api/cart\", authenticateToken, (req, res) => {"
-      },
-      {
-        "line": 291,
-        "text": "  const userId = req.user.id;"
-      },
-      {
-        "line": 292,
-        "text": "  if (!userCarts[userId]) userCarts[userId] = [];"
-      },
-      {
-        "line": 293,
-        "text": "  userCarts[userId].push(req.body);"
-      },
-      {
-        "line": 294,
-        "text": "  res.json({ message: \"Added to cart\" });"
       }
     ],
     "cluster": "FR-08 (cart/checkout)"
@@ -1253,276 +1153,6 @@
       {
         "line": 414,
         "text": "            },"
-      }
-    ],
-    "cluster": "FR-09 (apply-coupon)"
-  },
-  {
-    "id": "393",
-    "file": "server.js",
-    "status": "Survived",
-    "mutatorName": "ConditionalExpression",
-    "location": {
-      "end": {
-        "column": 40,
-        "line": 418
-      },
-      "start": {
-        "column": 15,
-        "line": 418
-      }
-    },
-    "original": "coupon.type === \"percent\"",
-    "replacement": "false",
-    "statusReason": null,
-    "static": false,
-    "coveredBy": [
-      "0",
-      "1",
-      "8",
-      "11",
-      "16"
-    ],
-    "killedBy": [],
-    "testsCompleted": 5,
-    "sourceContext": [
-      {
-        "line": 416,
-        "text": "        } else {"
-      },
-      {
-        "line": 417,
-        "text": "          let discount_amount = 0;"
-      },
-      {
-        "line": 418,
-        "text": "          if (coupon.type === \"percent\") {"
-      },
-      {
-        "line": 419,
-        "text": "            discount_amount = Math.floor("
-      },
-      {
-        "line": 420,
-        "text": "              total_amount * (1 - coupon.discount_value),"
-      }
-    ],
-    "cluster": "FR-09 (apply-coupon)"
-  },
-  {
-    "id": "395",
-    "file": "server.js",
-    "status": "Survived",
-    "mutatorName": "StringLiteral",
-    "location": {
-      "end": {
-        "column": 40,
-        "line": 418
-      },
-      "start": {
-        "column": 31,
-        "line": 418
-      }
-    },
-    "original": "\"percent\"",
-    "replacement": "\"\"",
-    "statusReason": null,
-    "static": false,
-    "coveredBy": [
-      "0",
-      "1",
-      "8",
-      "11",
-      "16"
-    ],
-    "killedBy": [],
-    "testsCompleted": 5,
-    "sourceContext": [
-      {
-        "line": 416,
-        "text": "        } else {"
-      },
-      {
-        "line": 417,
-        "text": "          let discount_amount = 0;"
-      },
-      {
-        "line": 418,
-        "text": "          if (coupon.type === \"percent\") {"
-      },
-      {
-        "line": 419,
-        "text": "            discount_amount = Math.floor("
-      },
-      {
-        "line": 420,
-        "text": "              total_amount * (1 - coupon.discount_value),"
-      }
-    ],
-    "cluster": "FR-09 (apply-coupon)"
-  },
-  {
-    "id": "396",
-    "file": "server.js",
-    "status": "Survived",
-    "mutatorName": "BlockStatement",
-    "location": {
-      "end": {
-        "column": 12,
-        "line": 422
-      },
-      "start": {
-        "column": 42,
-        "line": 418
-      }
-    },
-    "original": "{\n            discount_amount = Math.floor(\n              total_amount * (1 - coupon.discount_value),\n            );\n          }",
-    "replacement": "{}",
-    "statusReason": null,
-    "static": false,
-    "coveredBy": [
-      "1",
-      "11",
-      "16"
-    ],
-    "killedBy": [],
-    "testsCompleted": 3,
-    "sourceContext": [
-      {
-        "line": 416,
-        "text": "        } else {"
-      },
-      {
-        "line": 417,
-        "text": "          let discount_amount = 0;"
-      },
-      {
-        "line": 418,
-        "text": "          if (coupon.type === \"percent\") {"
-      },
-      {
-        "line": 419,
-        "text": "            discount_amount = Math.floor("
-      },
-      {
-        "line": 420,
-        "text": "              total_amount * (1 - coupon.discount_value),"
-      },
-      {
-        "line": 421,
-        "text": "            );"
-      },
-      {
-        "line": 422,
-        "text": "          } else {"
-      },
-      {
-        "line": 423,
-        "text": "            discount_amount = coupon.discount_value;"
-      },
-      {
-        "line": 424,
-        "text": "          }"
-      }
-    ],
-    "cluster": "FR-09 (apply-coupon)"
-  },
-  {
-    "id": "397",
-    "file": "server.js",
-    "status": "Survived",
-    "mutatorName": "ArithmeticOperator",
-    "location": {
-      "end": {
-        "column": 57,
-        "line": 420
-      },
-      "start": {
-        "column": 15,
-        "line": 420
-      }
-    },
-    "original": "total_amount * (1 - coupon.discount_value)",
-    "replacement": "total_amount / (1 - coupon.discount_value)",
-    "statusReason": null,
-    "static": false,
-    "coveredBy": [
-      "1",
-      "11",
-      "16"
-    ],
-    "killedBy": [],
-    "testsCompleted": 3,
-    "sourceContext": [
-      {
-        "line": 418,
-        "text": "          if (coupon.type === \"percent\") {"
-      },
-      {
-        "line": 419,
-        "text": "            discount_amount = Math.floor("
-      },
-      {
-        "line": 420,
-        "text": "              total_amount * (1 - coupon.discount_value),"
-      },
-      {
-        "line": 421,
-        "text": "            );"
-      },
-      {
-        "line": 422,
-        "text": "          } else {"
-      }
-    ],
-    "cluster": "FR-09 (apply-coupon)"
-  },
-  {
-    "id": "398",
-    "file": "server.js",
-    "status": "Survived",
-    "mutatorName": "ArithmeticOperator",
-    "location": {
-      "end": {
-        "column": 56,
-        "line": 420
-      },
-      "start": {
-        "column": 31,
-        "line": 420
-      }
-    },
-    "original": "1 - coupon.discount_value",
-    "replacement": "1 + coupon.discount_value",
-    "statusReason": null,
-    "static": false,
-    "coveredBy": [
-      "1",
-      "11",
-      "16"
-    ],
-    "killedBy": [],
-    "testsCompleted": 3,
-    "sourceContext": [
-      {
-        "line": 418,
-        "text": "          if (coupon.type === \"percent\") {"
-      },
-      {
-        "line": 419,
-        "text": "            discount_amount = Math.floor("
-      },
-      {
-        "line": 420,
-        "text": "              total_amount * (1 - coupon.discount_value),"
-      },
-      {
-        "line": 421,
-        "text": "            );"
-      },
-      {
-        "line": 422,
-        "text": "          } else {"
       }
     ],
     "cluster": "FR-09 (apply-coupon)"
@@ -2236,83 +1866,27 @@
     "cluster": "FR-10 (order-status)"
   },
   {
-    "id": "515",
-    "file": "server.js",
-    "status": "Survived",
+    "id": "520",
     "mutatorName": "ConditionalExpression",
+    "replacement": "true",
+    "status": "Survived",
+    "static": false,
+    "testsCompleted": 1,
+    "coveredBy": [
+      "30"
+    ],
     "location": {
       "end": {
         "column": 65,
         "line": 550
       },
       "start": {
-        "column": 11,
+        "column": 43,
         "line": 550
       }
     },
-    "original": "currentStatus === \"canceled\" && status === \"delivered\"",
-    "replacement": "false",
     "statusReason": null,
-    "static": false,
-    "coveredBy": [
-      "27",
-      "28",
-      "29",
-      "30"
-    ],
     "killedBy": [],
-    "testsCompleted": 4,
-    "sourceContext": [
-      {
-        "line": 548,
-        "text": "        isValidTransition = true;"
-      },
-      {
-        "line": 549,
-        "text": ""
-      },
-      {
-        "line": 550,
-        "text": "      if (currentStatus === \"canceled\" && status === \"delivered\")"
-      },
-      {
-        "line": 551,
-        "text": "        isValidTransition = true;"
-      },
-      {
-        "line": 552,
-        "text": ""
-      }
-    ],
-    "cluster": "FR-10 (order-status)"
-  },
-  {
-    "id": "519",
-    "file": "server.js",
-    "status": "Survived",
-    "mutatorName": "StringLiteral",
-    "location": {
-      "end": {
-        "column": 39,
-        "line": 550
-      },
-      "start": {
-        "column": 29,
-        "line": 550
-      }
-    },
-    "original": "\"canceled\"",
-    "replacement": "\"\"",
-    "statusReason": null,
-    "static": false,
-    "coveredBy": [
-      "27",
-      "28",
-      "29",
-      "30"
-    ],
-    "killedBy": [],
-    "testsCompleted": 4,
     "sourceContext": [
       {
         "line": 548,

@@ -200,8 +200,8 @@ it('returns 200 when locked_until exactly equals the server clock (UB: locked_un
 
 | Check | Kết quả | Bằng chứng |
 |---|---|---|
-| PASS trên code gốc | ✅ | `npm test` → 27/27 pass |
-| FAIL trên mutant (Killed) | ✅ | Mutant 28: `Survived` (`mutation_baseline.html`) → `Killed` (`mutation.html`) |
+| PASS trên code gốc | ✅ | Target Jest test pass; full suite ngày 2026-07-11 đạt 40/40 pass |
+| FAIL trên mutant (Killed) | ✅ | Mutant 28: expected 200, mutant trả 403; `killedBy: ["25"]` trong report hợp nhất |
 
 **Action Item:** Đã kill mutant bằng cách thay `new Date()` runtime bằng một `Date` override giúp đóng băng đồng hồ (`global.Date = FrozenDate`), qua đó loại bỏ hoàn toàn độ trôi thời gian giữa lúc set fixture và lúc server evaluate.
 
@@ -254,8 +254,8 @@ it('returns 200 with the current percent-coupon arithmetic when valid percent co
 
 | Check | Kết quả | Bằng chứng |
 |---|---|---|
-| PASS trên code gốc | ✅ | `npm test` → 27/27 pass |
-| FAIL trên mutant (Killed) | ✅ | Mutant 397, 398: `Survived` → `Killed` trong `mutation.html` |
+| PASS trên code gốc | ✅ | Hai target coupon test pass; full suite ngày 2026-07-11 đạt 40/40 pass |
+| FAIL trên mutant (Killed) | ✅ | Mutant 397/398: expected `-4500000`, mutant lần lượt trả `-55556` và `5500000`; `killedBy: ["1"]` |
 
 **Action Item:** Đã kill mutant theo hướng (a): assert giá trị thực tế hiện tại, kèm comment `pinned - regression guard, not fix` để làm rõ đây là regression guard chứ không phải fix. Không sửa lại công thức vì SUT hiện đang sai theo đúng spec; việc sửa root cause nằm ngoài phạm vi T5a/T6a và cần bàn bạc thêm với M2 vì có đụng đến code dùng chung.
 
@@ -318,8 +318,8 @@ it('returns 200 with the current percent-coupon arithmetic when coupon expires t
 
 | Check | Kết quả | Bằng chứng |
 |---|---|---|
-| PASS trên code gốc | ✅ | `npm test` → 27/27 pass |
-| FAIL trên mutant (Killed) | ✅ | Mutant 396: `Survived` → `Killed` trong `mutation.html` (bonus: mutant 393, 395 cùng vùng code cũng bị kill) |
+| PASS trên code gốc | ✅ | Hai target coupon test pass; full suite ngày 2026-07-11 đạt 40/40 pass |
+| FAIL trên mutant (Killed) | ✅ | Mutant 396: expected `-4500000`, mutant trả `0`; `killedBy: ["1"]`. Mutant 393 và 395 cùng vùng code cũng chuyển `Survived` → `Killed` |
 
 **Action Item:** Đã kill mutant bằng cách assert `discount_amount` khác `0` (pin theo giá trị cụ thể của bug hiện tại), nhờ đó block rỗng do mutant tạo ra bị phát hiện ngay lập tức.
 
@@ -327,7 +327,7 @@ it('returns 200 with the current percent-coupon arithmetic when coupon expires t
 
 ### 4b. Group B - Order-status + Cart (T5b, owner: Vũ)
 
-> **Đã hoàn thành phần phân tích T5b/T6b/T7b/T8 ở mức tài liệu.** Xác nhận từ `survivors.json` và `mutation.html`: Mutant 515 và Mutant 268 vẫn **Survived** tính đến baseline 2026-07-03. Chưa có bằng chứng chạy lại `npm test` / `npm run stryker` sau khi thêm assertion, nên Validation Gate được ghi là **Blocked**, không tự suy diễn kết quả.
+> **Đã hoàn thành Validation Gate cho Group B.** Baseline ngày 2026-07-03 ghi Mutant 515 và 268 là `Survived`; report sau cải tiến ngày 2026-07-11 xác nhận cả hai là `Killed`. Full Jest suite trên source gốc đạt 40/40 test.
 
 #### Survivor B1 - Mất transition `canceled → delivered` (Mutant 515, Group B, FR-10)
 
@@ -337,7 +337,7 @@ it('returns 200 with the current percent-coupon arithmetic when coupon expires t
 | Mutator | `ConditionalExpression` |
 | Vị trí | `server.js:L550` |
 | Route / FR | `PUT /api/admin/orders/:id/status` / FR-10 |
-| Tests covering (coveredBy) | 4 tests |
+| Tests covering (coveredBy) | 5 tests sau cải tiến |
 
 **Original code:**
 
@@ -390,10 +390,10 @@ it('returns 200 and persists delivered when current status is canceled', async (
 
 | Check | Kết quả | Bằng chứng |
 |---|---|---|
-| PASS trên code gốc | ⚠️ Blocked | Cần thêm assertion vào test và chạy `npm test`; chưa có output trong repo |
-| FAIL trên mutant (Killed) | ⚠️ Blocked | Cần chạy lại `npm run stryker` và xác nhận Mutant 515: `Survived` → `Killed` trong `mutation.html` |
+| PASS trên code gốc | ✅ | `npm test -- --runInBand __tests__/order-status.test.js -t 'canceled to delivered'` → 1/1 target pass; full suite 40/40 pass |
+| FAIL trên mutant (Killed) | ✅ | Mutant 515: expected HTTP 200 nhưng mutant trả 400; `killedBy: ["30"]` trong `reports/mutation/mutation.html` |
 
-**Action Item:** Thêm test transition `canceled -> delivered`; assert cả response lẫn trạng thái lưu cuối cùng. Cần fixture ổn định cho order có status ban đầu là `canceled`.
+**Action Item:** Hoàn thành. Test tạo order `canceled`, assert HTTP response và trạng thái `delivered` trong DB, rồi xóa fixture ở `afterEach`.
 
 ---
 
@@ -405,7 +405,7 @@ it('returns 200 and persists delivered when current status is canceled', async (
 | Mutator | `ConditionalExpression` |
 | Vị trí | `server.js:L292` |
 | Route / FR | `POST /api/cart` / FR-08 |
-| Tests covering (coveredBy) | 1 test |
+| Tests covering (coveredBy) | 2 tests sau cải tiến |
 
 **Original code:**
 
@@ -467,10 +467,10 @@ it('keeps existing cart items when the same user adds another item', async () =>
 
 | Check | Kết quả | Bằng chứng |
 |---|---|---|
-| PASS trên code gốc | ⚠️ Blocked | Cần thêm assertion vào test và chạy `npm test`; chưa có output trong repo |
-| FAIL trên mutant (Killed) | ⚠️ Blocked | Cần chạy lại `npm run stryker` và xác nhận Mutant 268: `Survived` → `Killed` trong `mutation.html` |
+| PASS trên code gốc | ✅ | `npm test -- --runInBand __tests__/cart.test.js -t 'keeps existing cart items'` → 1/1 target pass; full suite 40/40 pass |
+| FAIL trên mutant (Killed) | ✅ | Mutant 268 làm cart chỉ còn 1 item thay vì 2; `killedBy: ["36"]` trong `reports/mutation/mutation.html` |
 
-**Action Item:** Thêm test sequence: add item A, add item B, gọi `GET /api/cart`, assert cả hai item còn tồn tại. Cần cô lập state `userCarts` hoặc dùng user riêng cho test này.
+**Action Item:** Hoàn thành. Test dùng user ID riêng `515268`, thêm hai item liên tiếp và assert đủ hai item cùng giá trị định danh/số lượng.
 
 ---
 
@@ -546,19 +546,24 @@ Tests giả định initial state và không test behavior trong multi-step sequ
 
 ## 6. Delta sau khi thêm AI assertion
 
-> Cập nhật cho Group B (owner: Vũ). Phần assertion đã được thiết kế cho Mutant 515 và Mutant 268, nhưng chưa có bằng chứng chạy lại `npm test` / `npm run stryker`, nên các số liệu "Sau" vẫn để blocked/TBD thay vì tự suy diễn.
+> Tổng hợp Group A và Group B từ cùng full run ngày 2026-07-11 trên commit `f99c760d77fc089e8a11e60934416fa8a21a5bcf`. Report hợp nhất xác nhận toàn bộ mutant mục tiêu 28, 396, 397, 398, 515 và 268 đều bị kill. Hai mutant 393/395 của Group A cũng bị kill như hiệu ứng bổ sung của assertion percent-coupon.
 
 | Metric | Trước | Sau | Δ | Trạng thái |
 |--------|-------|-----|---|---|
-| Mutation score % (`server.js`) | 32.35% | *TBD* | *TBD* | Blocked - cần chạy lại Stryker sau khi thêm assertion |
-| Survivor count (`server.js`) | 73 | *TBD* | *TBD* | Blocked - cần mutation report mới |
-| Mutant 515 status | `Survived` | Expected `Killed` | *TBD* | Blocked - cần Validation Gate |
-| Mutant 268 status | `Survived` | Expected `Killed` | *TBD* | Blocked - cần Validation Gate |
-| AI assertions proposed | 0 | 2 | +2 | Đã có assertion design cho Mutant 515 và Mutant 268 |
-| AI assertions used unchanged | 0 | *TBD* | *TBD* | Cần chạy test thật để biết có phải sửa fixture/assertion không |
-| AI assertions requiring manual edits | 0 | *TBD* | *TBD* | Cần fixture và test execution evidence |
-| Setup time Stryker lần đầu | *Chưa ghi* | *Chưa ghi* | *N/A* | Missing information |
-| Full `npm run stryker` time | *Chưa ghi* | *Chưa ghi* | *N/A* | Missing information |
+| Mutation score % (`server.js`) | 32.35% | 34.75% | +2.40 điểm % | 188/541 mutants killed |
+| Killed count (`server.js`) | 175 | 188 | +13 | +6 Group A; Group B tăng coverage và kill thêm 7 mutants |
+| Survivor count (`server.js`) | 73 | 65 | -8 | 6 Group A + 2 Group B chuyển từ `Survived` sang `Killed`; một mutant Group B chuyển `NoCoverage` sang `Survived` |
+| NoCoverage count (`server.js`) | 293 | 288 | -5 | Test Group B cover thêm vùng cart/order-status; Group A chỉ tăng độ mạnh assertion trên dòng đã cover |
+| Mutant 28 status | `Survived` | `Killed` | Killed | Frozen clock làm boundary equality deterministic |
+| Mutant 393/395/396 status | `Survived` | `Killed` | Killed | Assertion percent-coupon phát hiện block/condition bị bỏ qua |
+| Mutant 397/398 status | `Survived` | `Killed` | Killed | Assertion pin giá trị hiện tại của BUG-09-001 cho mutation analysis |
+| Mutant 515 status | `Survived` | `Killed` | Killed | Target test `returns 200 and updates status when transition is canceled to delivered` |
+| Mutant 268 status | `Survived` | `Killed` | Killed | Target test `keeps existing cart items when the same user adds another item` |
+| AI assertions proposed | 0 | 5 | +5 | 3 assertion Group A + 2 assertion Group B |
+| AI assertions used unchanged | 0 | 3 | +3 | Ba thiết kế Group A được triển khai đúng oracle đã ghi trong phần survivor analysis |
+| AI assertions requiring manual edits | 0 | 2 | +2 | Hai thiết kế Group B cần chỉnh fixture/schema field để khớp test suite thực tế |
+| Setup time Stryker lần đầu | `Not recorded` | `Not recorded` | N/A | Không có evidence lịch sử; không đo lại để thay thế |
+| Full `npm run stryker` time | `Not recorded` | khoảng 8 phút 30 giây | N/A | Node v24.11.1, Stryker 9.6.1, concurrency 1, mutate `server.js`; report hợp nhất ghi lúc 10:56:29 +07 |
 
 ### T8 - Metrics hiện có từ baseline
 
@@ -584,7 +589,8 @@ Ví dụ triage: Mutant 535/536/537 ở `server.js:L570` mutate guard `require.m
 
 ### Assumptions / Missing Information
 
-- Chưa có thời gian setup Stryker lần đầu.
-- Chưa có thời gian một lượt `npm run stryker` full run sau khi thêm assertion.
-- Chưa có mutation report mới để xác nhận Mutant 515 và Mutant 268 đã `Killed`.
-- Cần fixture ổn định cho order `canceled` và cô lập state `userCarts` trước khi chạy Validation Gate.
+- Setup time Stryker lần đầu: `Not recorded` vì không có evidence lịch sử.
+- Full run hợp nhất có thời lượng wall-clock xấp xỉ 8 phút 30 giây; output trực tiếp của tool wrapper hết hạn sau 300 giây, nhưng process Stryker tiếp tục và report hoàn tất lúc `2026-07-11 10:56:29 +07`.
+- Evidence: `apps/backend/reports/mutation/mutation.html`; 541 mutants = 188 Killed + 65 Survived + 288 NoCoverage; RuntimeError/Timeout/CompileError = 0/0/0.
+- Coverage hậu cải tiến: `server.js` line 51.66%, branch 45.8%; toàn repo line 57.48%, branch 54%; full suite 40/40 pass.
+- Commands: target Jest tests → `npm test -- --runInBand` → `npm run test:coverage -- --runInBand` → `npm run stryker`.
