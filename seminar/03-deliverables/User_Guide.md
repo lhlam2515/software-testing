@@ -115,47 +115,71 @@ export default {
 
 ## 3. First Test (end-to-end on EShop)
 
-Goal: from zero to a killed mutant in ≤ 15 steps, using the coupon endpoint `POST /api/apply-coupon` (FR-09).
+Goal: kill a mutant on `POST /api/apply-coupon` (FR-09), starting from zero. Picks up after §2 (Jest + Stryker already configured). Scope Stryker to just this route (81 mutants, not the whole file) so runs stay fast. All numbers below are from these five tests only; a fuller suite kills more of the same 81 mutants, that's expected.
 
-1. Refactor `server.js` to export `app` (§2 Step 2).
-2. Create `apps/backend/__tests__/coupon.test.js`.
-3. Write one **happy-path** baseline test:
+1. `server.js` already exports `app` (§2 Step 2).
+2. In `stryker.config.mjs`: `mutate: ["server.js:363-441"]`. Revert to `["server.js"]` after this section.
+3. Create `apps/backend/__tests__/coupon.test.js`. Use `createApi(app)` from `__tests__/helpers/http.js`, not raw `supertest` (adds a 2s/5s timeout, §6 FM1).
+4. One happy-path test on `BIGBUY`:
+
    ```js
-   const request = require('supertest');
+   const { createApi } = require('./helpers/http');
    const app = require('../server');
+   const api = createApi(app);
 
-   test('BIGBUY applies a fixed discount', async () => {
-     const res = await request(app)
-       .post('/api/apply-coupon')
-       .send({ code: 'BIGBUY', total_amount: 600000 });   // no user_id → no-user branch
+   it('returns 200 with correct discount when valid fixed coupon meets min-order', async () => {
+     const res = await api.post('/api/apply-coupon').send({ code: 'BIGBUY', total_amount: 600000 });
+     expect(res.status).toBe(200);
+     expect(res.body.success).toBe(true);
+     expect(res.body.discount_amount).toBe(50000);
+     expect(res.body.final_amount).toBe(550000);
+   });
+   ```
+
+5. `npx jest`: 1 passed.
+6. `npx stryker run`. **81 mutants, 21 killed, 16 survived, 44 NoCoverage → 25.93% / 56.76%.**
+7. Clearest survivor: `server.js:L379`, `total_amount > coupon.min_order_amount` mutated to `>=`. Survives because the test (600000 vs 500000) never touches the boundary.
+8. Add three BVA tests on `SAVE10` (`min_order_amount: 300000`):
+
+   ```js
+   it('returns 400 when total_amount is one unit below min-order (OFF point: 299,999)', async () => {
+     const res = await api.post('/api/apply-coupon').send({ code: 'SAVE10', total_amount: 299999 });
+     expect(res.status).toBe(400);
+   });
+
+   it('returns 400 when total_amount equals min-order (ON point: 300,000)', async () => {
+     const res = await api.post('/api/apply-coupon').send({ code: 'SAVE10', total_amount: 300000 });
+     expect(res.status).toBe(400);   // documents current behavior, see note below
+   });
+
+   it('returns 200 when total_amount is one unit above min-order (UB+1: 300,001)', async () => {
+     const res = await api.post('/api/apply-coupon').send({ code: 'SAVE10', total_amount: 300001 });
      expect(res.status).toBe(200);
      expect(res.body.success).toBe(true);
    });
    ```
-4. Run Jest, confirm green: `npx jest`. → 📷 TODO.
-5. Run the baseline mutation pass: `npx stryker run`.
-6. Open `reports/mutation/index.html` in a browser. → 📷 TODO: HTML report overview.
-7. Record the **baseline mutation score** for `server.js` in `BASELINE.md`. → TODO: `__%`.
-8. Drill into the coupon lines; find a **Survived** mutant. Example you will see:
-   `total_amount - discount_amount` → `total_amount + discount_amount` (final-amount mutant) survives, because the happy-path test only checks `status`/`success`.
-9. Explain *why* it survived: no assertion inspects `final_amount`.
-10. Add a targeted assertion that kills it:
+
+   ON-point (300,000) returns 400 today: an order that exactly equals the minimum is rejected. Likely a bug (a minimum should mean "reach it," not "exceed it"), found independently here, no existing ticket. `expect(400)` documents current behavior only.
+9. `npx jest`: 4 passed.
+10. `npx stryker run`. **24 killed, 20 survived, 37 NoCoverage → 29.63% / 54.55%.** L379 now **Killed**, but covered-score drops anyway: `SAVE10` is percent-type, so these tests newly cover the percent formula (`L419-420`) and its guard (`L418`), and only assert `status`. Two new survivors appear right there: a `BlockStatement` mutant on the `L418` guard, two `ArithmeticOperator` mutants on `L420`.
+11. Why it matters: `discount_amount = Math.floor(total_amount * (1 - coupon.discount_value))`. `SAVE10.discount_value` is `10` (meant as "10%"), not `0.1`. `(1 - 10) = -9`: the route charges roughly 10x the order total instead of discounting 10%. Another bug found only by writing this assertion, no test before this checked the actual number.
+12. Pin the current (buggy) output, don't fix it (out of scope, formula shared with other routes):
+
     ```js
-    test('BIGBUY final_amount = total - discount (kills + mutant)', async () => {
-      const res = await request(app)
-        .post('/api/apply-coupon')
-        .send({ code: 'BIGBUY', total_amount: 600000 });
-      expect(res.body.discount_amount).toBe(50000);
-      expect(res.body.final_amount).toBe(550000);   // original 550000, mutant 650000
+    it('returns the exact percent-coupon discount and final amount for SAVE10 at 500,000', async () => {
+      const res = await api.post('/api/apply-coupon').send({ code: 'SAVE10', total_amount: 500000 });
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.discount_amount).toBe(-4500000);
+      expect(res.body.final_amount).toBe(5000000);
     });
     ```
-11. Re-run `npx jest` → green on original.
-12. Re-run `npx stryker run`; confirm that mutant is now **Killed**. → 📷 TODO.
-13. Note the new mutation score vs baseline in `BASELINE.md`. → TODO.
-14. Repeat for two more survivors (e.g. the expiry `<`→`>` and the min-order `>`→`>=` mutants).
-15. Commit: tests + config + `BASELINE.md`.
 
-> ⚠️ EShop ships with two real bugs in this route (min-order uses `>` instead of `>=`; the percent formula yields a *negative* discount). Asserting current behaviour will lock those bugs in — flag them against FR-09 separately. See §6.
+13. `npx jest`: 5 passed. `-4,500,000` / `5,000,000` is real output, confirmed before trusting the next Stryker run.
+14. `npx stryker run`. **29 killed, 15 survived, 37 NoCoverage → 35.80% / 65.91%.** `L379`, `L418`, `L420` ×2 all **Killed**: 8 more kills from 2 assertions, zero new coverage since step 10.
+15. Remaining 15 survivors: cosmetic message strings (`L431`) or low-value (`user_id` branch, `L386`, untested path here). Out of scope. Revert `mutate` to `["server.js"]`, commit `coupon.test.js`, move to §4.
+
+> ⚠️ Two real bugs pinned above, not fixed: the percent-formula sign error (`L419-420`) and the strict `>` min-order check (`L379`). Both found independently while writing this walkthrough, no existing ticket for either. **Killed** proves the test now catches a change on that line; it does not mean the line's business logic is correct. See §6.
 
 ---
 
