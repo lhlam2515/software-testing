@@ -159,22 +159,39 @@ describe('POST /api/login — BVA', () => {
       expect(res.body.token).toBeUndefined();
     });
 
-    // TC-BVA-04 — UB: locked_until = NOW() → boundary expired → 200
-    it('returns 200 when lock has just expired (UB: locked_until = now)', async () => {
-      const now = new Date().toISOString();
-      await dbRun(
-        "UPDATE users SET login_attempts=3, locked_until=? WHERE email='test@eshop.com'",
-        [now]
-      );
+    // TC-BVA-04 — UB: freeze the server clock so equality is deterministic
+    it('returns 200 when locked_until exactly equals the server clock (UB: locked_until = now)', async () => {
+      const RealDate = global.Date;
+      const frozen = new RealDate('2026-07-03T10:00:00.000Z');
 
-      // Server checks: new Date() < new Date(locked_until)
-      // At this point new Date() >= locked_until → unlocked
-      const res = await api
-        .post('/api/login')
-        .send({ email: 'test@eshop.com', password: 'Test1234!' });
+      class FrozenDate extends RealDate {
+        constructor(...args) {
+          super(...(args.length === 0 ? [frozen.getTime()] : args));
+        }
 
-      expect(res.status).toBe(200);
-      expect(res.body.token).toBeTruthy();
+        static now() {
+          return frozen.getTime();
+        }
+      }
+      FrozenDate.parse = RealDate.parse;
+      FrozenDate.UTC = RealDate.UTC;
+
+      try {
+        global.Date = FrozenDate;
+        await dbRun(
+          "UPDATE users SET login_attempts=3, locked_until=? WHERE email='test@eshop.com'",
+          [frozen.toISOString()]
+        );
+
+        const res = await api
+          .post('/api/login')
+          .send({ email: 'test@eshop.com', password: 'Test1234!' });
+
+        expect(res.status).toBe(200);
+        expect(res.body.token).toBeTruthy();
+      } finally {
+        global.Date = RealDate;
+      }
     });
 
     // TC-BVA-05 — UB+1: locked_until = NOW()-1s → clearly past expiry → 200

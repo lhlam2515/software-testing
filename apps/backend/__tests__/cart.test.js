@@ -84,6 +84,37 @@ describe('Cart and checkout routes - T3b baseline', () => {
     );
   });
 
+  it('keeps existing cart items when the same user adds another item', async () => {
+    const isolatedAuthHeader = `Bearer ${getAuthToken(515268)}`;
+    const firstItem = { id: 101, name: 'Item A', price: 10000, quantity: 1 };
+    const secondItem = { id: 102, name: 'Item B', price: 20000, quantity: 2 };
+
+    await api
+      .post('/api/cart')
+      .set('Authorization', isolatedAuthHeader)
+      .send(firstItem)
+      .expect(200);
+
+    await api
+      .post('/api/cart')
+      .set('Authorization', isolatedAuthHeader)
+      .send(secondItem)
+      .expect(200);
+
+    const res = await api
+      .get('/api/cart')
+      .set('Authorization', isolatedAuthHeader);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(2);
+    expect(res.body).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 101, quantity: 1 }),
+        expect.objectContaining({ id: 102, quantity: 2 }),
+      ])
+    );
+  });
+
   it('returns 200 and creates pending order when checkout is authenticated', async () => {
     const res = await api
       .post('/api/checkout')

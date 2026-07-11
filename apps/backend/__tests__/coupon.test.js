@@ -98,14 +98,16 @@ describe('POST /api/apply-coupon — EP', () => {
     expect(res.body.final_amount).toBe(550000);
   });
 
-  // TC-01 — percent coupon: BUG-09-001 formula wrong, assert presence only
-  it('returns 200 when valid percent coupon meets min-order (formula output not asserted — BUG-09-001)', async () => {
+  // TC-01 — pin current BUG-09-001 output for mutation analysis, not as a business oracle
+  it('returns 200 with the current percent-coupon arithmetic when valid percent coupon meets min-order (BUG-09-001 pinned)', async () => {
     const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'SAVE10', total_amount: 500000 });
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
+    expect(res.body.discount_amount).toBe(-4500000);
+    expect(res.body.final_amount).toBe(5000000);
   });
 
   // TC-03 — code not found
@@ -267,13 +269,15 @@ describe('POST /api/apply-coupon — BVA', () => {
   });
 
   // TC-BVA-08 — UB+1: expired_at = tomorrow → still valid
-  it('returns 200 when coupon expires tomorrow (UB+1: expired_at = tomorrow)', async () => {
+  it('returns 200 with the current percent-coupon arithmetic when coupon expires tomorrow (UB+1: expired_at = tomorrow)', async () => {
     const res = await api
       .post('/api/apply-coupon')
       .send({ code: 'TOMORROWEXP', total_amount: 200000 });
 
-    // Percent formula buggy (BUG-09-001) — assert presence only
+    // Pin current BUG-09-001 output for mutation analysis, not as a business oracle.
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
+    expect(res.body.discount_amount).toBe(-1800000);
+    expect(res.body.final_amount).toBe(2000000);
   });
 });

@@ -95,6 +95,22 @@ describe('PUT /api/admin/orders/:id/status - T3b baseline', () => {
     expect(row.status).toBe('delivered');
   });
 
+  it('returns 200 and updates status when transition is canceled to delivered', async () => {
+    const orderId = await createOrder('canceled');
+    createdOrderIds.push(orderId);
+
+    const res = await api
+      .put(`/api/admin/orders/${orderId}/status`)
+      .set('Authorization', authHeader)
+      .send({ status: 'delivered' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.message).toMatch(/updated/i);
+
+    const row = await dbGet('SELECT status FROM orders WHERE id = ?', [orderId]);
+    expect(row.status).toBe('delivered');
+  });
+
   it('returns 400 when transition is pending to delivered', async () => {
     const orderId = await createOrder('pending');
     createdOrderIds.push(orderId);
