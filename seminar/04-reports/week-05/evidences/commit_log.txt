@@ -1,0 +1,162 @@
+* commit f8c24945ca15e4c3740b40e87ceb9231f8077a8d
+| Author:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| AuthorDate: 2026-07-11T18:33:42+07:00
+| Commit:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| CommitDate: 2026-07-11T20:05:25+07:00
+| 
+|     docs(seminar): revise Kill the Mutant activity worksheet
+|     
+|     - expand the activity to five stations across four business areas
+|     - document the canceled-order mutant and classroom workflow
+|     - link the public EShop sandbox repository
+| 
+|  seminar/03-deliverables/Activity_Worksheet.md | 396 +++++++++++++++---------
+|  1 file changed, 254 insertions(+), 142 deletions(-)
+| 
+* commit 5683baf9d9a14798f2dabb071db40e0f83823021
+| Author:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| AuthorDate: 2026-07-11T17:50:38+07:00
+| Commit:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| CommitDate: 2026-07-11T20:05:25+07:00
+| 
+|     docs(seminar): rewrite User_Guide §6 Failure Modes with measured data
+|     
+|     - Rewrite FM1-FM3 against a real run: 541 mutants, MS 32.35% vs MS_covered 70.56%
+|     - Add FM4 (RuntimeError silently shrinks denominator, no NoCoverage-level warning)
+|     - Satisfies gate requirement of >=3 documented failure modes with real, observed data
+| 
+|  seminar/03-deliverables/User_Guide.md | 54 ++++++++++++++++++++++-----------
+|  1 file changed, 36 insertions(+), 18 deletions(-)
+| 
+* commit 1684a9280b41d94451d42d6144efd39a2366aea1
+| Author:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| AuthorDate: 2026-07-11T17:50:31+07:00
+| Commit:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| CommitDate: 2026-07-11T20:05:25+07:00
+| 
+|     docs(seminar): back User_Guide §4-5-7 with captured runs and sourced links
+|     
+|     - Add real incremental-run benchmark (2m58s -> 2s, ~89x speedup) to §4.2
+|     - Add worked AI validation-gate example (mutant #46 login lockout) to §4.5
+|     - Replace E2 placeholder with captured Stryker sandbox MODULE_NOT_FOUND error; add E5 (wrapper-timeout vs still-running Stryker)
+|     - Rewrite §7 References with per-claim source attribution and working links
+| 
+|  seminar/03-deliverables/User_Guide.md | 113 +++++++++++++++++++++++---------
+|  1 file changed, 82 insertions(+), 31 deletions(-)
+| 
+* commit 50b57cfac1fa7cbd8bfc1f634e4aa919f676e377
+| Author:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| AuthorDate: 2026-07-11T17:50:23+07:00
+| Commit:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| CommitDate: 2026-07-11T20:05:25+07:00
+| 
+|     docs(seminar): rewrite User_Guide §3 First Test with real Stryker output
+|     
+|     - Replace generic 15-step outline with real coupon.test.js walkthrough (5 tests, scoped to server.js:363-441)
+|     - Record actual mutation score progression: 25.93% -> 29.63% -> 35.80%
+|     - Add BVA tests for SAVE10 min-order boundary (299999/300000/300001)
+|     - Document 2 real bugs found: strict > min-order check and negative percent-discount formula
+| 
+|  seminar/03-deliverables/User_Guide.md | 82 +++++++++++++++++++++------------
+|  1 file changed, 53 insertions(+), 29 deletions(-)
+| 
+* commit 78fc7cd84242942526c880022cd2b86ccbb78230
+| Author:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| AuthorDate: 2026-07-11T17:50:16+07:00
+| Commit:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| CommitDate: 2026-07-11T20:05:25+07:00
+| 
+|     docs(seminar): finalize User_Guide §1-2 with sourced case studies
+|     
+|     - Replace DRAFT skeleton status/team placeholder with final team line
+|     - Split mutation-testing intro into Mutant/Killed-Survived/MS core concepts
+|     - Attribute coverage-vs-mutation gap numbers to Diffblue/Theodo case study and MutGen paper (arXiv:2506.02954)
+|     - Document why concurrency:1 + --jitless are required (SQLite race avoidance, cross-ref §6 FM1)
+| 
+|  seminar/03-deliverables/User_Guide.md | 57 +++++++++++++++++++++------------
+|  1 file changed, 36 insertions(+), 21 deletions(-)
+| 
+* commit e5bf24288ade7c6ec5d963f42ed71b8219708d59
+| Author:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| AuthorDate: 2026-07-11T12:09:49+07:00
+| Commit:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| CommitDate: 2026-07-11T20:05:25+07:00
+| 
+|     docs(seminar): sync tracking docs with BASELINE completion status
+|     
+|     - weekly-checklist.md: tick Tuan 2 tasks confirmed by evidence
+|       (T4, T5a/T6a/T7a, T5b/T6b/T7b, T8); leave failure-mode and
+|       peer-review [R] items unchecked, they are still outstanding
+|     - README.md: update BASELINE.md deliverable status from skeleton
+|       to draft, pending peer review
+| 
+|  seminar/02-planning/weekly-checklist.md | 24 ++++++++++++------------
+|  seminar/README.md                       |  2 +-
+|  2 files changed, 13 insertions(+), 13 deletions(-)
+| 
+* commit 2fa5c22fc3631f5aad074f091515598bc1c5f217
+| Author:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| AuthorDate: 2026-07-11T11:20:05+07:00
+| Commit:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| CommitDate: 2026-07-11T20:05:25+07:00
+| 
+|     docs(seminar): complete BASELINE.md validation gate and survivor delta
+|     
+|     - record post-assertion mutation run: 541 mutants, 188 killed,
+|       65 survived, 288 NoCoverage, mutation score 34.75% (+2.40pp)
+|     - close Validation Gate for mutants 28, 393, 395, 396, 397, 398,
+|       515, 268 with PASS-original / FAIL-mutant evidence and killedBy IDs
+|     - remove the 8 killed mutants from survivors.json (73 to 65 entries)
+|     - add full run evidence: commands, Jest/coverage summary, Stryker
+|       timing, and AI assertion accounting (5 proposed, 3 unchanged,
+|       2 manually edited, 0 rejected)
+| 
+|  seminar/01-research/BASELINE.md                   |  64 +--
+|  .../baseline-completion-evidence-2026-07-11.md    |  73 ++++
+|  seminar/01-research/survivors.json                | 440 +-------------------
+|  3 files changed, 115 insertions(+), 462 deletions(-)
+| 
+* commit b39a91554b2a10af8d5559c5893ece06e7da3e60
+| Author:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| AuthorDate: 2026-07-11T11:19:53+07:00
+| Commit:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| CommitDate: 2026-07-11T20:05:08+07:00
+| 
+|     test(backend): add kill assertions for BASELINE mutation survivors
+|     
+|     - auth.test.js: freeze server clock to make locked_until ON-point
+|       deterministic, killing mutant 28 (EqualityOperator)
+|     - coupon.test.js: pin current percent-discount arithmetic values,
+|       killing mutants 396/397/398 (BlockStatement/ArithmeticOperator)
+|     - order-status.test.js: cover canceled to delivered transition,
+|       killing mutant 515 (ConditionalExpression)
+|     - cart.test.js: assert cart retains prior items across sequential
+|       adds, killing mutant 268 (ConditionalExpression)
+| 
+|  apps/backend/__tests__/auth.test.js         | 49 ++++++++++++++++++---------
+|  apps/backend/__tests__/cart.test.js         | 31 +++++++++++++++++
+|  apps/backend/__tests__/coupon.test.js       | 12 ++++---
+|  apps/backend/__tests__/order-status.test.js | 16 +++++++++
+|  apps/backend/package-lock.json              | 31 +++--------------
+|  5 files changed, 93 insertions(+), 46 deletions(-)
+| 
+* commit f99c760d77fc089e8a11e60934416fa8a21a5bcf
+  Author:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+  AuthorDate: 2026-07-06T11:08:08+07:00
+  Commit:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+  CommitDate: 2026-07-06T11:08:08+07:00
+  
+      docs(seminar): add week-04 report and evidence submission
+      
+      - add Group02.md/pdf week-04 report and AI usage guideline
+      - add survivor mutant classification evidence and baseline metrics
+      - add commit log evidence and consolidated weekly-report
+  
+   seminar/04-reports/AI_Usage_Guideline.md          | 204 +++++++
+   seminar/04-reports/week-04/Group02.md             | 198 +++++++
+   seminar/04-reports/week-04/Group02.pdf            | Bin 0 -> 156578 bytes
+   .../2026-07-03_gemini_survivor-classification.md  |  58 ++
+   seminar/04-reports/week-04/evidences/BASELINE.md  | 590 ++++++++++++++++++++
+   .../04-reports/week-04/evidences/commit_log.txt   | 163 ++++++
+   seminar/04-reports/weekly-report.md               |  51 ++
+   7 files changed, 1264 insertions(+)
