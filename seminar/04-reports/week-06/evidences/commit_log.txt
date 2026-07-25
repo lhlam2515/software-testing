@@ -1,0 +1,17 @@
+* commit 59cb3fe89d118633c6e907688e68880c4b4d86fc
+  Author:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+  AuthorDate: 2026-07-13T17:06:22+07:00
+  Commit:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+  CommitDate: 2026-07-13T17:06:22+07:00
+  
+      docs(seminar): add week 05 progress report and baseline evidence
+      
+      - summarize completed tasks and next-week plans for Group 02
+      - document coverage and mutation testing baseline results
+      - include validation evidence and the supporting commit log
+  
+   seminar/04-reports/week-05/Group02.md             | 240 ++++++++
+   seminar/04-reports/week-05/evidences/BASELINE.md  | 596 ++++++++++++++++++++
+   .../baseline-completion-evidence-2026-07-11.md    |  73 +++
+   .../04-reports/week-05/evidences/commit_log.txt   | 162 ++++++
+   4 files changed, 1071 insertions(+)
