@@ -1,0 +1,10 @@
+HW03 — Git Commit Log
+=====================
+
+TODO: generate before submission (assignment §13 requires one commit per testing step).
+
+Suggested command (run from the repository root):
+
+    git log --oneline --decorate --date=short \
+        --pretty=format:'%h %ad %s' -- homeworks/HW03 > homeworks/HW03/assets/commit-log.txt
+
