@@ -1,0 +1,21 @@
+Uncommitted working-tree snapshot at time of writing (2026-07-25, ~22:50 +07:00).
+Command: git status --porcelain (seminar-relevant paths only) + wc -l/-c + stat mtime
+
+git status --porcelain:
+ M .gitignore
+?? .claude/skills/marp-slide-designer/
+?? NOTES.md
+?? mutation_testing_and_test_effectiveness.md
+?? seminar/04-reports/week-07/
+?? seminar/NOTES.md
+?? seminar_content.md
+
+File                                                                      Lines      Bytes        Last modified
+NOTES.md                                                                   1433      36467  2026-07-25 16:52:18
+mutation_testing_and_test_effectiveness.md                                 2164      53489  2026-07-25 21:28:17
+seminar_content.md                                                          233      18568  2026-07-25 22:35:05
+seminar/NOTES.md                                                              1        333  2026-07-22 08:47:21
+.claude/skills/marp-slide-designer/slides/mutation-testing-seminar.marp.md      298      12056  2026-07-25 12:51:16
+
+Marp slide deck slide count (--- delimiters, excluding front matter): 15 slides (<= 15 hard cap, Guide S6).
+New skill added (untracked, not yet committed or symlinked per .agents/skills convention): .claude/skills/marp-slide-designer/ (source + generated deck).

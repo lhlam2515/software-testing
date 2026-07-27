@@ -1,0 +1,31 @@
+Scope: branch `seminar` only, 2026-07-20 00:00:00 through 2026-07-25 23:59:59, timezone +07:00.
+Command: git log --graph refs/heads/seminar --stat --since=2026-07-20T00:00:00+07:00 --until=2026-07-25T23:59:59+07:00 --date=iso-strict --pretty=fuller
+
+* commit eb4dd9e2b8d06d8b2508ceb35a8c2435510dc728
+| Author:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| AuthorDate: 2026-07-25T12:01:13+07:00
+| Commit:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| CommitDate: 2026-07-25T12:01:13+07:00
+|
+|     docs(seminar): add week 06 report evidence
+|
+|  seminar/04-reports/week-06/Group02.md             | 129 +++++++
+|  .../week-06/evidences/Activity_Worksheet.md       | 338 ++++++++++++++++++
+|  .../04-reports/week-06/evidences/User_Guide.md    | 375 ++++++++++++++++++++
+|  .../04-reports/week-06/evidences/commit_log.txt   |  17 +
+|  4 files changed, 859 insertions(+)
+|
+* commit f2ac0caba0d0f6d0b8ef788b8904de1d1e1562ba
+  Author:     VVVu1511 <161138657+VVVu1511@users.noreply.github.com>
+  AuthorDate: 2026-07-23T12:04:57+07:00
+  Commit:     VVVu1511 <161138657+VVVu1511@users.noreply.github.com>
+  CommitDate: 2026-07-23T12:04:57+07:00
+
+      docs(seminar): make seminar slides
+
+   seminar/03-deliverables/Seminar_Slides.md | 1120 +++++++++++++++++++++++++++
+   1 file changed, 1120 insertions(+)
+
+--- Cumulative parity check (git shortlog -sn refs/heads/seminar) ---
+    42	SoJDev | Hoàng Lâm
+     3	VVVu1511
