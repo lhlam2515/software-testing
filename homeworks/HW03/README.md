@@ -7,7 +7,7 @@
 - **Group**: 02
 - **Class / Cohort**: 23KTPM1
 - **Github Repository**: [github.com/lhlam2515/software-testing](https://github.com/lhlam2515/software-testing)
-- **SUT (EMS web)**: <https://promoter-starboard-prude.ngrok-free.dev/>
+- **SUT (EMS web)**: <https://prod-dev.ems-fitus.cloud/>
 
 ---
 
@@ -34,18 +34,17 @@
 
 **Scenario B — User registers for an event** (public discovery + participant registration flow).
 
-> **TODO:** confirm with the group that no other member picked Scenario B with the same screen set (§5 non-overlap rule).
-
 ### Screens Under Test (≥ 3 required)
 
 | Screen ID | Screen | URL / Path | Why this screen |
 | --------- | ------ | ---------- | --------------- |
-| B1 | Home / event listing — featured carousel, category, search & filter | _TBD_ | _TBD_ |
-| B2 | Event detail — banner, schedule, register button, waitlist notice | _TBD_ | _TBD_ |
-| B3 | Registration form — role selection, additional role, confirmation | _TBD_ | _TBD_ |
-| B4 | My Registrations / ticket — status and barcode/QR | _TBD_ | _TBD_ |
+| B1 | Home / event listing — featured carousel, category, search & filter | `/dashboard` (behind login) | _TBD_ |
+| B2 | Event detail — banner, schedule, register button, waitlist notice | `/events/{id}` | _TBD_ |
+| B3 | Registration form — role selection, additional role, confirmation | _TBD — no separate route found; "Select Participant" / "Register (Student/Lecturer)" is an in-page panel on `/events/{id}` (B2), not a distinct screen. Confirm before Task 1B whether B3 stays a separate row or folds into B2._ | _TBD_ |
+| B4 | My Registrations / ticket — status and barcode/QR | _TBD — not in the top nav (Events / Calendar / Saved Events / User guide); likely under the user-menu dropdown (top-right avatar), not yet surveyed_ | _TBD_ |
 
 > **TODO:** keep at least 3 rows; drop or replace a row only with a stated reason (§5 allows other screens within the same pool if justified).
+> **Note (2026-07-28):** the whole app now sits behind a login wall — root `/` and every route redirect to `/login` when unauthenticated. This differs from the "public discovery" premise this scenario was originally framed around; confirm with the group/TA whether that still holds for the redeployed build before finalizing screen descriptions.
 
 ---
 

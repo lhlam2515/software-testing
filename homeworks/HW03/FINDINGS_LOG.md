@@ -1,7 +1,7 @@
 # Bug & Usability Findings Log — HW03
 
 **Student**: Lê Hoàng Lâm · 23127216 · Group 02 · 23KTPM1
-**SUT**: EMS — <https://promoter-starboard-prude.ngrok-free.dev/>
+**SUT**: EMS — <https://prod-dev.ems-fitus.cloud/>
 **Scenario**: B — User registers for an event
 
 ---

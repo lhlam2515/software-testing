@@ -12,7 +12,7 @@
 | Student ID | 23127216 |
 | Group | 02 |
 | Class / Cohort | 23KTPM1 |
-| SUT | EMS — <https://promoter-starboard-prude.ngrok-free.dev/> |
+| SUT | EMS — <https://prod-dev.ems-fitus.cloud/> |
 | Test account(s) used | _TBD (self-registered student/lecturer/guest account — do not share with other members)_ |
 | Report date | _TBD_ |
 
