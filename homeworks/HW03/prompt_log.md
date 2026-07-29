@@ -12,28 +12,24 @@
 
 ---
 
-## Entry 001 | _HH:MM DD/MM/2026_
+## Entry 001 | 12:56 28/07/2026
 
-**Tool:** _TBD_
-**Task:** _Task 1A / 1B / 2 / 3_
-**Step:** _TBD_
+**Tool:** Claude Code (Sonnet 5)
+**Task:** Task 1A — shared GUI checklist, initial generation (only round; refinement was manual human review, not a second AI prompt)
+**Step:** Draft the 4-aspect (IA-01…IA-04) GUI checklist from course references + EMS context
 
 ### Prompt
 
-```
-TODO: paste verbatim prompt
-```
+Verbatim, identical to `group/checklist-prompts.md` Round 1 — reproduced in full there (same timestamp) rather than duplicated here, to keep one source of truth. See [group/checklist-prompts.md](group/checklist-prompts.md#round-1--initial-generation-only-round).
 
 ### AI Output
 
-```
-TODO: paste verbatim output, or reference a labelled screenshot
-```
+Verbatim, identical to `group/checklist-prompts.md` Round 1 — 54 items (IA-01=14, IA-02=16, IA-03=13, IA-04=11), reproduced in full there. See [group/checklist-prompts.md](group/checklist-prompts.md#round-1--initial-generation-only-round).
 
 ### Used in
 
-- `[AI-02]_AI_Audit_Report.md`, Artifact _N_
+- `group/gui-checklist.md` (post-review, 61 items) and `group/ai-gap-notes.md` (11 `Human` items + 4 removed/2 rewritten AI items, root-caused)
 
 ---
 
-> **TODO:** duplicate the entry block above for every AI interaction, numbered sequentially.
+> **TODO:** add Entry 002+ for Task 1B / 2 / 3 AI interactions as they happen, numbered sequentially.
