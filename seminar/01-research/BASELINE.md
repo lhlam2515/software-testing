@@ -22,19 +22,26 @@
 
 ---
 
-## 2. Coverage baseline (gate 28/06)
+## 2. Coverage baseline (gate 28/06, recomputed 2026-07-31)
 
-> Đo bằng `npm run test:coverage` (Jest + lcov). Code toàn bộ nằm trong `server.js` - per-section coverage tính từ lcov.info.
+> Đo bằng `npm run test:coverage` (Jest + lcov), nguồn `apps/backend/coverage/lcov.info`.
+> **Recomputed bằng script xác định:** `apps/backend/scripts/coverage-by-route.js`. Script tự phát hiện code block của từng Express route bằng cách cân bằng dấu `(`/`)` và `{`/`}` bắt đầu từ dòng `app.<method>(...)`, thay vì dùng line range chọn tay như bản đo 28/06 - loại bỏ sai số do ước lượng range thủ công. Chạy: `node scripts/coverage-by-route.js` (từ `apps/backend/`).
 
-| Group | Route (FR) | Line % | Branch % |
-|-----|-----------|--------|----------|
-| A | `POST /api/apply-coupon` (FR-09) | **93%** (27/29) | **85%** (17/20) |
-| A | `POST /api/login` (FR-02) | **100%** (18/18) | **92%** (11/12) |
-| B | `PUT /api/admin/orders/:id/status` (FR-10) | **86%** (19/22) | **83%** (20/24) |
-| B | `POST /api/cart` + `POST /api/checkout` (FR-08) | **59%** (19/32) | **29%** (4/14) |
-| **Tổng** | `server.js` overall | **51%** (123/240) | **44%** (57/131) |
+| Group | Route (FR) | Line range (auto-detect) | Line % | Branch % |
+|-----|-----------|---------------------------|--------|----------|
+| A | `POST /api/login` (FR-02) | L32-L66 | **100%** (18/18) | **92%** (11/12) |
+| A | `POST /api/apply-coupon` (FR-09) | L363-L441 | **93%** (27/29) | **85%** (17/20) |
+| B | `POST /api/cart` + `POST /api/checkout` (FR-08) | L290-L295, L297-L309 | **100%** (11/11) | **75%** (3/4) |
+| B | `PUT /api/admin/orders/:id/status` (FR-10) | L525-L568 | **100%** (18/18) | **95%** (21/22) |
+| **Tổng 4 routes** | | | **97%** (74/76) | **90%** (52/58) |
+| **Tổng** | `server.js` overall | L1-L576 | **52%** (124/240) | **46%** (60/131) |
 
-> **Ghi chú FR-08:** Coverage thấp do checkout route có nhiều nhánh DB callback chưa được test đầy đủ.
+> **Δ so với bản đo 28/06 (line range chọn tay):** FR-02 và FR-09 khớp 100% với số cũ (range chọn tay tình cờ đúng với code block thật). FR-08 và FR-10 lệch lớn:
+> - FR-08 cũ dùng range `L284-L342` (59%/29%, 32 dòng/14 nhánh) - range này thực chất bao gồm cả `GET /api/cart`, `GET /api/orders/my-orders`, và `PUT /api/orders/:id/cancel`, tức 5 route chứ không phải chỉ 2 route mà tên cột (FR-08) công bố. Sau khi giới hạn đúng 2 route đã khai báo, coverage thực tế của `POST /api/cart` + `POST /api/checkout` là **100%/75%**, không phải 59%/29%.
+> - FR-10 cũ dùng range `L525-L580`, vượt quá cả độ dài file thực tế (`server.js` chỉ có 576 dòng) - range này tràn vào `if (require.main === module) { app.listen(...) }`, không thuộc route. Route thật kết thúc ở `L568`; coverage đúng là **100%/95%**, không phải 86%/83%.
+> - Tổng `server.js` cũng lệch nhẹ (51%→52% line, 44%→46% branch) do cùng nguyên nhân: các route group cũ dùng range sai lệch vài dòng khi cộng dồn.
+>
+> **Kết luận:** FR-08 (giỏ hàng + checkout) không phải là điểm yếu coverage như baseline 28/06 từng kết luận - 2 route này nhỏ (16 dòng tổng) và được cover gần như hoàn toàn ở mức line. Route thật sự thiếu coverage nằm ở các route ngoài phạm vi 4 FR (register, forgot-password, admin products/categories...), đúng như mục 3 đã ghi nhận qua NoCoverage 293/541 mutants.
 
 ---
 
@@ -51,38 +58,42 @@
 > **Covered-code denominator:** 541 − 293 (NoCoverage) = **248 mutants được test**.
 > **Insight:** 293/541 = **54% mutants không có test nào reach** - tương ứng với các route chưa được test (register, forgot-password, admin products, categories, ...).
 >
-> **Coverage vs Mutation Score:** Server.js line coverage 51% ↔ overall Mutation Score **32.35%**.
+> **Coverage vs Mutation Score:** Server.js line coverage 52% ↔ overall Mutation Score **32.35%**.
 > Trên phần đã được test (248 mutants), kill rate = **70.56%** và **29.44%** vẫn sống sót → **bằng chứng "coverage lies"**:
 > code được execute chưa chắc đã được *assert* đúng.
 
 ---
 
-## 3b. Mutation Score trên routes được test (scoped analysis)
+## 3b. Mutation Score trên routes được test (scoped analysis, recomputed 2026-07-31)
 
-> Đo bằng cách filter mutants từ HTML report theo line range của 4 FRs mà team phụ trách.
-> **Mục đích:** tách nhiễu từ ~281 mutants ở các routes không có test (register, products, categories, admin…) để có con số phản ánh đúng test effectiveness thực tế của team.
+> Đo bằng cách filter mutants từ `reports/mutation/mutation_baseline.html` theo line range của 4 FRs mà team phụ trách.
+> **Recomputed bằng script xác định:** `apps/backend/scripts/mutation-by-route.js`. Script dùng chung route-boundary detector với `coverage-by-route.js` (mục 2) - cân bằng dấu `(`/`)`/`{`/`}` từ dòng `app.<method>(...)` để lấy đúng code block, thay cho line range chọn tay của bản đo trước. Report gốc (541 mutants: 175 Killed, 73 Survived, 293 NoCoverage, 0 Timeout) không đổi - chỉ có ranh giới route dùng để lọc là khác.
+> **Mục đích:** tách nhiễu từ các mutants ở routes không có test (register, products, categories, admin…) để có con số phản ánh đúng test effectiveness thực tế của team.
 
 ### Phân vùng mutants
 
 | Vùng | Mutants | Ghi chú |
 |------|---------|---------|
-| Trong 4 routes được test | **260** | FR-02 (L32-L67) + FR-09 (L363-L443) + FR-08 (L284-L342) + FR-10 (L525-L580) |
-| Ngoài 4 routes | 281 | Không thuộc phạm vi cam kết - luôn là NoCoverage/Survived |
+| Trong 4 routes được test | **215** | FR-02 (L32-L66) + FR-09 (L363-L441) + FR-08 (L290-L295, L297-L309) + FR-10 (L525-L568) |
+| Ngoài 4 routes | 326 | Không thuộc phạm vi cam kết - luôn là NoCoverage/Survived |
+
+> **Δ so với bản đo trước (260 trong scope / 281 ngoài scope):** FR-02 và FR-09 không đổi (range chọn tay tình cờ khớp code block thật). FR-08 giảm mạnh 58 → 19 mutants vì range cũ (`L284-L342`) gộp cả `GET /api/cart`, `GET /api/orders/my-orders`, `PUT /api/orders/:id/cancel` - 3 route ngoài cam kết FR-08. FR-10 giảm 78 → 72 vì range cũ (`L525-L580`) tràn quá cuối file thật (576 dòng), gồm cả 3 mutant dead-code ở startup guard `require.main === module` (mutant 535/536/537, mục 4b) vốn không thuộc route order-status.
 
 ### Scoped mutation score
 
 | Metric | Full `server.js` | **4 routes được test** | Δ |
 |--------|-----------------|----------------------|---|
-| Total mutants | 541 | **260** | |
-| Killed | 175 | **161** | |
-| Survived | 73 | **49** | |
-| NoCoverage | 293 | **50** | |
-| Covered (total − NC) | 248 | **210** | |
-| Score (K/total) | 32.35% | **61.92%** | +29.57% |
-| **Score Stryker (K/K+S+T)** | **70.56%** | **76.67%** | +6.11% |
+| Total mutants | 541 | **215** | |
+| Killed | 175 | **156** | |
+| Survived | 73 | **43** | |
+| NoCoverage | 293 | **16** | |
+| Covered (total − NC) | 248 | **199** | |
+| Score (K/total) | 32.35% | **72.56%** | +40.21% |
+| **Score Stryker (K/K+S+T)** | **70.56%** | **78.39%** | +7.83% |
 
-> **Con số đại diện cho test effectiveness của team = 76.67%**, không phải 32.35%.
-> 32.35% bị kéo thấp vì bao gồm 281 mutants ở code chưa được test - nên dùng để minh họa hậu quả của "partial testing", không dùng để đánh giá chất lượng test trong scope cam kết.
+> **Con số đại diện cho test effectiveness của team = 78.39%**, không phải 32.35%.
+> 32.35% bị kéo thấp vì bao gồm 326 mutants ở code chưa được test - nên dùng để minh họa hậu quả của "partial testing", không dùng để đánh giá chất lượng test trong scope cam kết.
+> **Δ so với bản đo trước (76.67%):** con số đại diện tăng lên +1.72 điểm % sau khi sửa scope FR-08/FR-10 - phần lớn NoCoverage từng gán cho FR-08 (33/58) thực ra thuộc 3 route khác không nằm trong cam kết của team, không phản ánh chất lượng test trên `POST /api/cart` + `POST /api/checkout`.
 
 ### Per-route breakdown
 
@@ -90,22 +101,22 @@
 |-------|-------|--------|----------|-------|---------|-------------------|
 | FR-02 `POST /api/login` | 43 | 33 | 9 | 1 | 42 | **78.6%** |
 | FR-09 `POST /api/apply-coupon` | 81 | 52 | 23 | 6 | 75 | **69.3%** ← yếu nhất |
-| FR-08 `GET+POST /api/cart` + checkout | 58 | 20 | 5 | **33** | 25 | **80.0%** |
-| FR-10 `PUT /api/admin/orders/:id/status` | 78 | 56 | 12 | 10 | 68 | **82.4%** ← tốt nhất |
-| **Tổng 4 routes** | **260** | **161** | **49** | **50** | **210** | **76.67%** |
+| FR-08 `POST /api/cart` + `POST /api/checkout` | 19 | 15 | 2 | 2 | 17 | **88.2%** ← tốt nhất |
+| FR-10 `PUT /api/admin/orders/:id/status` | 72 | 56 | 9 | 7 | 65 | **86.2%** |
+| **Tổng 4 routes** | **215** | **156** | **43** | **16** | **199** | **78.4%** |
 
-> **Lưu ý FR-08:** 33/58 mutants (57%) là NoCoverage - checkout route có nhiều nhánh DB callback chưa có test reach. Kill rate 80% trên phần covered, nhưng coverage bản thân đã thấp.
+> **Lưu ý FR-08 (đã sửa):** đúng phạm vi 2 route đã khai báo, chỉ 2/19 mutants (10.5%) là NoCoverage - không phải 57% như bản đo trước. Kill rate 88.2% trên phần covered - route tốt nhất trong 4 FR sau khi sửa scope, không phải yếu nhất như từng mô tả.
 
-### Survivor mutators trong 4 routes được test (49 survivors)
+### Survivor mutators trong 4 routes được test (43 survivors)
 
 | Mutator | Count | Ý nghĩa |
 |---------|-------|---------|
-| `ConditionalExpression` | 20 | Logic điều kiện - test chưa cover đủ path |
-| `StringLiteral` | 15 | Error message / field name bị đổi nhưng test không verify |
-| `EqualityOperator` | 6 | Boundary condition (ON-point thiếu) |
+| `ConditionalExpression` | 18 | Logic điều kiện - test chưa cover đủ path |
+| `StringLiteral` | 13 | Error message / field name bị đổi nhưng test không verify |
+| `EqualityOperator` | 5 | Boundary condition (ON-point thiếu) |
 | `ObjectLiteral` | 2 | Response shape không được assert |
-| `ArrayDeclaration` | 2 | Sequential state assumption |
 | `ArithmeticOperator` | 2 | Giá trị số liệu không được assert |
+| `ArrayDeclaration` | 1 | Sequential state assumption |
 | `BlockStatement` | 1 | Return value unchecked |
 | `LogicalOperator` | 1 | Logic compound chưa đủ test case |
 
@@ -578,9 +589,9 @@ Tests giả định initial state và không test behavior trong multi-step sequ
 | Full `server.js` NoCoverage | 293 |
 | Full `server.js` mutation score | 32.35% |
 | Covered-code kill rate | 70.56% |
-| Four tested routes scoped score | 76.67% |
-| FR-08 covered kill rate | 80.0% |
-| FR-10 covered kill rate | 82.4% |
+| Four tested routes scoped score (recomputed, mục 3b) | 78.39% |
+| FR-08 covered kill rate (recomputed) | 88.2% |
+| FR-10 covered kill rate (recomputed) | 86.2% |
 | RuntimeError / Timeout / CompileError | 0 / 0 / 0 |
 
 ### T8 - AI triage equivalent-mutant
