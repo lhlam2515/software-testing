@@ -91,6 +91,22 @@ See [playwright-cli's troubleshooting.md](../../playwright-cli/references/troubl
 for the fix and for a route-free alternative (race a reload against an
 immediate screenshot) that can't hang the session.
 
+### Icon classes are reused across unrelated controls — don't trust a bare CSS-class selector
+
+This SUT reuses the same lucide icon class (e.g. `svg.lucide-chevron-left`)
+on completely unrelated controls — a sidebar "Collapse categories" button
+*and* the pagination "previous page" button both render a chevron-left icon
+with that exact class. `document.querySelector('svg.lucide-chevron-left')`
+silently grabs whichever one appears first in the DOM, which is not
+necessarily the one under test — in this case it returned the sidebar
+button (which *does* have a correct `aria-label`), producing a false
+"Passed" reading for a pagination button that actually has none. Always
+`querySelectorAll` (plural), inspect the full match list, and pick the
+element by a scoping signal that's actually unique to the item under test
+(nearby text like "Rows per page", the parent's test region, or the
+specific event handler/href) — never assume a class-based icon selector
+returns a unique element on this SUT.
+
 ### Native `<input type="date">` already blocks invalid dates (IA-02-07)
 
 If the date filter/field under test is a real `<input type="date">`, the

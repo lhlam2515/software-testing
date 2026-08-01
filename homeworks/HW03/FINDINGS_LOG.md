@@ -164,7 +164,34 @@ Add `aria-label="Previous page"` and `aria-label="Next page"` to the two buttons
 
 **Evidence**
 
-`artifacts/screens/B1-home-event-list/screenshots/IA-01-08-pagination-icon-no-name.png`
+`artifacts/screens/B1-home-event-list/screenshots/IA-01-08-pagination-icon-no-name.png` (visual location/context only — a screenshot cannot show a missing `aria-label`; the actual defect proof is the DOM/accessibility-tree excerpt below).
+
+**DOM / accessibility-tree evidence** (re-verified live, 2026-08-01)
+
+Playwright's accessibility-tree snapshot of the pagination row shows a name string for the numbered page buttons but none for prev/next:
+
+```yaml
+- generic [ref=e1167]:
+  - button [disabled]:      # <- prev: no accessible name
+    - img
+  - button "1" [ref=e1168] [cursor=pointer]
+  - button "2" [ref=e1169] [cursor=pointer]
+  - button [ref=e1170] [cursor=pointer]:  # <- next: no accessible name
+    - img [ref=e1171]
+```
+
+Matching `outerHTML` (attribute `aria-label` absent on both; icon carries `aria-hidden="true"`):
+
+```html
+<!-- prev -->
+<button data-disabled="true" type="button" disabled data-react-aria-pressable="true" class="...">
+  <svg class="lucide lucide-chevron-left" aria-hidden="true">...</svg>
+</button>
+<!-- next -->
+<button type="button" tabindex="0" data-react-aria-pressable="true" class="...">
+  <svg class="lucide lucide-chevron-right" aria-hidden="true">...</svg>
+</button>
+```
 
 **Google Form submission**
 
@@ -325,7 +352,29 @@ Add `aria-pressed` (or `role="tab"` + `aria-selected` if the group is semantical
 
 **Evidence**
 
-`artifacts/screens/B1-home-event-list/screenshots/IA-04-08-filter-chip-no-aria-state.png`
+`artifacts/screens/B1-home-event-list/screenshots/IA-04-08-filter-chip-no-aria-state.png` (visual location/context only — "selected" here is a CSS color choice, invisible in the accessibility tree; the actual defect proof is the DOM excerpt below).
+
+**DOM / accessibility-tree evidence** (re-verified live, 2026-08-01)
+
+Playwright's accessibility-tree snapshot shows all three chips as plain, unannotated buttons — no `[pressed]`/`[selected]` marker on "Upcoming" despite it being the visually active one:
+
+```yaml
+- button "Upcoming" [ref=e45] [cursor=pointer]
+- button "Ongoing" [ref=e51] [cursor=pointer]
+- button "Ended" [ref=e55] [cursor=pointer]
+```
+
+Direct attribute check on the live DOM confirms all three are `null`:
+
+```json
+[
+  { "text": "Upcoming", "role": null, "ariaPressed": null, "ariaSelected": null },
+  { "text": "Ongoing",  "role": null, "ariaPressed": null, "ariaSelected": null },
+  { "text": "Ended",    "role": null, "ariaPressed": null, "ariaSelected": null }
+]
+```
+
+The only place the active/inactive distinction exists is in the Tailwind class list (e.g. active "Upcoming" carries `border-violet-200 bg-violet-50/70 text-violet-700`, structurally identical in kind to the inactive "Ended" chip's `border-slate-200 bg-slate-50/70 text-slate-700` — color only, no semantic attribute).
 
 **Google Form submission**
 
@@ -366,7 +415,30 @@ Wrap the save/saved state change in an `aria-live="polite"` region, or add a toa
 
 **Evidence**
 
-`artifacts/screens/B1-home-event-list/screenshots/IA-04-09-save-no-aria-live.png`
+`artifacts/screens/B1-home-event-list/screenshots/IA-04-09-save-no-aria-live.png` (visual location/context only — the absence of a live region has no visual signature; the actual defect proof is the DOM excerpt below).
+
+**DOM / accessibility-tree evidence** (re-verified live, 2026-08-01)
+
+Button state before/after click confirms the action genuinely succeeds (`aria-label` flips, text flips):
+
+```html
+<!-- before -->
+<button type="button" aria-label="Save event" class="...">...</button>
+<!-- after click -->
+<button type="button" aria-label="Unsave event" class="...">...</button>
+```
+
+But a page-wide scan for any live-region mechanism returns zero matches — not just near the button, anywhere in the document:
+
+```json
+{
+  "ariaLiveElementsOnPage": 0,
+  "statusOrAlertElementsOnPage": 0,
+  "bodyHasAriaLiveAnywhere": false
+}
+```
+
+(`document.querySelectorAll('[aria-live]')`, `[role=status]`, `[role=alert]` all empty; `document.body.innerHTML.includes('aria-live')` is `false` — the string does not exist anywhere in the rendered page, confirming this isn't a scoping/selector miss.)
 
 **Google Form submission**
 

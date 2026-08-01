@@ -62,6 +62,15 @@ Finish one cluster fully before starting the next: `IA-01 -> IA-02 -> IA-03 -> I
    ```bash
    playwright-cli screenshot --filename="homeworks/HW03/artifacts/screens/<screen-id>/screenshots/<CHECKLIST-ID>-<slug>.png"
    ```
+   **If the item's source is WCAG 4.1.2 (Name/Role/Value) or 4.1.3 (Status
+   Messages)** — or any other criterion whose pass/fail hinges on a DOM
+   attribute rather than something rendered — the screenshot only proves
+   *where* the control is, not *what's wrong with it*: `aria-label`,
+   `aria-pressed`, `aria-live`, etc. have no visual signature. Also capture a
+   DOM/accessibility-tree evidence snippet (accessibility-tree excerpt +
+   attribute dump via `--raw eval`) per `references/verification-techniques.md`
+   § "Evidence for non-visual (ARIA/WCAG 4.x) items" — this is what actually
+   proves the defect, the screenshot stays as location context only.
 4. **Write the row immediately** (don't batch), exactly 5 columns:
    `| <ID> | Passed\|Failed\|N/A | <notes — mandatory for Failed/N/A> | <screenshot or empty> | <Finding ID or empty> |`
 5. **If it's a real defect**, append a row to `findings-log.md` immediately:
@@ -104,8 +113,13 @@ Repeat Phase 1 + Phase 2 for `IA-02`, `IA-03`, `IA-04`.
 3. Promote every `findings-log.md` row to `FINDINGS_LOG.md` (root): assign a
    `BUG-B<n>-NNN` / `USA-B<n>-NNN` ID per its Reporting rule, add the detailed
    entry, back-fill the Finding ID into the matching `checklist-run.md` row,
-   mark `findings-log.md`'s `Promoted? = Yes`. Google Form submission stays
-   with the user (out of this skill's scope) — flag which findings still need it.
+   mark `findings-log.md`'s `Promoted? = Yes`. For any finding sourced from
+   WCAG 4.1.2/4.1.3 (or otherwise non-visual), carry the DOM/accessibility-tree
+   evidence captured in Phase 1 into the detailed entry as a `**DOM /
+   accessibility-tree evidence**` subsection after `**Evidence**` — don't let
+   it get dropped at promotion time, it's the actual proof, the screenshot
+   line is context only. Google Form submission stays with the user (out of
+   this skill's scope) — flag which findings still need it.
 4. Stage the screen's artifacts and hand off to the `commit` skill:
    ```bash
    git add "homeworks/HW03/artifacts/screens/<screen-id>/checklist-run.md" \
@@ -119,7 +133,8 @@ Repeat Phase 1 + Phase 2 for `IA-02`, `IA-03`, `IA-04`.
 
 - `references/gotchas.md` — known pitfalls: contrast measurement, cross-screen
   items, why the verdict model is intentionally Passed/Failed/N/A, SUT login
-  gate, checklist-run.md template quirk.
+  gate, checklist-run.md template quirk, reused-icon-class false matches.
 - `references/verification-techniques.md` — how to verify each checklist item
-  pattern (contrast, accessible name, keyboard, i18n, form validation,
-  feedback/toast) with concrete commands.
+  pattern (contrast, accessible name, ARIA state, live regions, keyboard,
+  i18n, form validation, feedback/toast) with concrete commands, plus the
+  DOM/accessibility-tree evidence requirement for non-visual (WCAG 4.x) items.
