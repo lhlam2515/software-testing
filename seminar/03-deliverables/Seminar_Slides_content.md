@@ -1,272 +1,1083 @@
-# Seminar Slides — content source (build → `Seminar_Slides.pptx`)
+# Mutation Testing & Test Effectiveness — Slide Content (Slides 1–15)
 
-> **T10 — Mutation Testing & Test Effectiveness** · ≤ 15 slides · 45-min session
-> **Convention:** *On-slide* = English (keep it sparse — the activity is the centrepiece, not the slides). *Speaker notes* = tiếng Việt (để nhóm tập nói). `📷/TODO` = chèn ảnh/đo thật trước khi nộp.
-> **Roles:** Presenter (S1–S8, S12–S15) · Demoer (live demo) · Facilitator (S9–S11 + activity) · Timekeeper.
-> **Time map:** Pitch S1–S8 = 10' · Live demo (no slides) = 10' · Activity S9–S11 = 20' · Debrief+Q&A S12–S15 = 5'.
-
----
-
-## Slide 1 — Title  · ⏱ 0:00–0:30
-
-**On-slide**
-
-- **Mutation Testing & Test Effectiveness**
-- *"Coverage lies. Mutation testing tells you if your tests can actually catch bugs."*
-- T10 · CS423/CSC15003 Software Testing · FIT @ HCMUS
-- Team *[names]* · Tools: StrykerJS + Claude/ChatGPT · SUT: EShop
-
-**Speaker notes (VN)**
-
-- Chào lớp, nhóm mình làm T10. Một câu mở: "coverage nói dối — mutation testing mới cho biết test có bắt được lỗi không". Cả buổi xoay quanh chứng minh điều đó ngay trên EShop, và dành 20 phút để các bạn tự tay "giết mutant".
+> Source: `seminar_presentation_design.md`. This file is the **English delivery script** for the first 15 slides.
+> Every e-Shop number here is a measured value from the repository, not an estimate.
+> Language level: B1/B2 (IELTS ~6.5). Sentences are kept short so they are easy to say out loud.
 
 ---
 
-## Slide 2 — Hook: coverage lies  · ⏱ 0:30–2:00
+## Slide 1 — Mutation Testing & Test Effectiveness
 
-**On-slide**
+**Purpose:**
+Position the talk. Make one thing clear before anything else: this technique grades the *test suite*, not the *production code*. Also introduce the SUT and the tooling that every number in the talk comes from.
 
-- Coverage answers: *"Did a test run this line?"*
-- It does **not** answer: *"Would a test fail if this line were wrong?"*
-- Real cases: **96% coverage → 34% mutation score** · some suites **100% coverage → ~4% mutation score**
-- 📷 simple bar: Coverage vs Mutation Score
+**Outline Content:**
 
-**Speaker notes (VN)**
+```xml
+<slide id="1" section="opening" time="0:45" script-words="95">
+  <title>MUTATION TESTING &amp; TEST EFFECTIVENESS</title>
+  <hook>If this line were wrong, would your tests complain?</hook>
+  <code-focus language="js">
+    if (total_amount &gt; coupon.min_order_amount)
+    <!-- the operator ">" is highlighted; an arrow points to ">=" -->
+  </code-focus>
+  <meta>
+    <course>CSC13003 — Seminar T10 · Group 02</course>
+    <sut>e-Shop backend</sut>
+    <tooling>StrykerJS 9.6.1 + Jest 30</tooling>
+  </meta>
+  <design-note>No DNA or virus icon — the biological metaphor wrongly suggests mutants are random.</design-note>
+</slide>
+```
 
-- Đặt vấn đề: coverage chỉ đo "code có chạy qua khi test không", không đo "test có phát hiện lỗi không". Dẫn 2 số liệu thật (nhớ verify nguồn ở §7 user guide). Câu chốt: một bộ test có thể 100% coverage mà gần như không assert gì → đó là "test giả tạo". Mutation testing vạch trần điều này.
+**Speaker Script:**
+"Good morning, everyone. Today our group will talk about Mutation Testing and Test Effectiveness.
 
----
+Before we start, I want to remove one common misunderstanding. This is **not** a technique for finding bugs in your production code. It is a technique for grading your **test suite**. The thing being evaluated here is the `expect` lines that you wrote.
 
-## Slide 3 — What is a mutant? + Mutation Score  · ⏱ 2:00–3:30
+Every example and every number in this session comes from e-Shop — the system under test that our whole class is working on. We ran it with StrykerJS 9.6.1 and Jest 30. None of the numbers are illustrative. They are all measured."
 
-**On-slide**
+**Evidence:**
 
-- **Mutant** = source with one small fault seeded: `>`→`>=`, `-`→`+`, `true`→`false`, remove `return`
-- Run the existing suite on each mutant:
-  - **Killed** — a test failed ✓ (good)
-  - **Survived** — all tests passed ✗ (blind spot)
-  - **Equivalent** — behaviour unchanged (noise — exclude)
-- **Mutation Score = Killed / (Total − Equivalent)**
-
-**Speaker notes (VN)**
-
-- Giải thích cơ chế: tool sửa nhẹ source tạo mutant, chạy lại test. Killed = có test fail (mong muốn). Survived = mọi test pass → lỗ hổng test. Equivalent = đổi cú pháp nhưng logic không đổi, loại khỏi mẫu số. Mutation score là KPI: càng cao test càng nhạy. Ví dụ nhanh đổi `>` thành `>=`.
-
----
-
-## Slide 4 — Goal & Why  · ⏱ 3:30–5:00
-
-**On-slide**
-
-- **Goal:** test the *test suite*, not the production code — measure & raise Test Effectiveness
-- **Why it matters**
-  - Exposes "fake coverage" (high coverage, weak/no asserts)
-  - Pinpoints the exact line/boundary missing a test
-  - A real safety net for refactoring
-
-**Speaker notes (VN)**
-
-- Nhấn mục tiêu tối thượng: không phải tìm bug trong code, mà kiểm định + nâng chất lượng chính bộ test. 3 lý do: vạch trần test giả tạo; chỉ đích danh dòng/điều kiện biên thiếu test; tấm lưới an toàn khi refactor. (Liên hệ: lát nữa demo sẽ thấy test happy-path bỏ sót boundary thế nào.)
+- Real config: `apps/backend/package.json` — `@stryker-mutator/core ^9.6.1`, `@stryker-mutator/jest-runner ^9.6.1`, `jest ^30.4.2`, `supertest ^7.2.2`.
+- Stryker config file: `apps/backend/stryker.config.mjs`.
+- The opening question restates the "governing question" from `seminar_content.md` §Introduction.
+- Deliberate visual choice: no biology metaphor, because mutants are generated by rules, not randomly.
 
 ---
 
-## Slide 5 — Level & Method  · ⏱ 5:00–6:15
+## Slide 2 — What We Will Go Through
 
-**On-slide**
+**Purpose:**
+Set expectations. Tell the audience that this is one continuous argument, not a list of definitions, and warn them early that the AI part has two separate directions and that the ending is a live demo.
 
-- **Level:** primarily **Unit** (ms-fast → survives running the suite ×N mutants; high isolation). Integration: limited (Extreme Mutation). System/E2E: impractical.
-- **Method:** **Automated White-box (Glass-box)**
-  - White-box: needs AST/source access to seed mutants + coverage to optimise
-  - Automated: state explosion makes manual impossible; humans only analyse survivors
+**Outline Content:**
 
-**Speaker notes (VN)**
+```xml
+<slide id="2" section="agenda" time="0:50" script-words="110">
+  <title>What we will go through</title>
+  <agenda>
+    <item n="1" label="WHY">High coverage can still mean a weak test suite</item>
+    <item n="2" label="WHAT">Mutants, mutation score, and the RIPR model</item>
+    <item n="3" label="WHERE">Where it pays off — and where it stops being cheap</item>
+    <item n="4" label="HOW">The 7-step loop and CI/CD integration</item>
+    <item n="5" label="AI">Who grades agent-written tests — and how AI helps back</item>
+    <item n="6" label="DEMO">e-Shop: one surviving mutant, fixed, re-run</item>
+  </agenda>
+  <navigation>A thin progress bar at the bottom of every following slide, highlighting the current stage.
+    17 screens carry these 6 stages — two topics are split across two screens each (6a/6b, 10a/10b).</navigation>
+</slide>
+```
 
-- Trả lời 2 câu TA hỏi. Level: chủ yếu Unit vì test chạy mili-giây, chịu được việc lặp hàng trăm lần/mutant; cô lập cao. Integration ít (tốn thời gian, dùng Extreme Mutation). System/E2E gần như không. Method: bắt buộc White-box (phải đọc cấu trúc code để sinh mutant) + Automated (số mutant quá lớn, không làm tay). Điểm độc đáo: đây là White-box dùng để soi chính bộ test.
+**Speaker Script:**
+"Six stages.
 
----
+We deliberately do not start with definitions. A definition without a problem attached to it is very hard to remember. So we start with the problem first — a number we measured on e-Shop — and we introduce each term only at the moment the argument needs it.
 
-## Slide 6 — Strategy for any project  · ⏱ 6:15–7:30
+Stage five has two directions, and I want to announce that early so nobody gets confused. One direction is using mutation testing to **grade** tests written by an AI agent. The other direction is using AI to **write** tests that target mutants. These are two different things, and they are connected by exactly one mechanism.
 
-**On-slide**
+The last part is a live demo in the terminal, about four minutes."
 
-- 1. **Foundation first** — only apply when line coverage ~70–80%; if no tests, write happy-path first
-- 1. **Limit scope** — core/business/financial/security/shared utils; exclude boilerplate, DTO, config, UI
-- 1. **Optimise** — coverage-guided + incremental (git diff) + select 5–7 operators
-- 1. **CI/CD** — local before PR; nightly/scheduled; don't block merge if > ~10 min
+**Evidence:**
 
-**Speaker notes (VN)**
-
-- Đây là chiến lược tổng quát cho project bất kỳ, không riêng EShop. Bước 1 quan trọng: chưa có test thì viết test trước (EShop chính là case này — mình phải tự viết bộ baseline). Bước 2: chỉ quét vùng giá trị cao. Bước 3–4: tối ưu + đưa vào CI nhưng không chặn merge. Chuyển ý: vậy AI giúp gì trong quy trình này?
-
----
-
-## Slide 7 — AI Workflow  · ⏱ 7:30–8:45
-
-**On-slide**
-
-- AI plugs in at 4 points:
-  1. **Predictive filter** — AST analysis → mutate high-risk code only (save CPU)
-  2. **Engine runs** (StrykerJS) → list of survivors
-  3. **AI triage** — flag equivalent mutants + missing-assert spots
-  4. **AI synthesises assertions** to kill survivors
-- ⚠️ Every AI assertion → **validation gate**: PASS on original, FAIL on mutant
-- 📷 4-box flow diagram
-
-**Speaker notes (VN)**
-
-- 4 điểm AI cắm vào (vẽ sơ đồ 4 hộp dọc). Dẫn vài bằng chứng: MuTAP đạt 94% mutation score; UniXCoder fine-tuned F1≈86.6% phát hiện equivalent mutant (verify §7). Chốt nguyên tắc xuyên suốt: AI chỉ là bản nháp — mọi assertion phải qua validation gate (pass code gốc, fail trên mutant) mới nhận. Không bao giờ tin mù.
+- The ordering follows the 5W1H frame required by the course brief; it is a presentation decision, not a claim from a source.
+- The progress bar is a navigation tool, not decoration — the audience should always know where they are in the argument.
+- Design principle for the whole deck: never teach a term before the argument needs it. The word "mutant" first appears on slide 5.
 
 ---
 
-## Slide 8 — Why StrykerJS + Claude/ChatGPT  · ⏱ 8:45–10:00
+## Slide 3 — 40 Out of 40 Tests Pass. So Is the Suite Good?
 
-**On-slide**
+**Purpose:**
+Create the paradox with real measured numbers, so the audience feels that coverage is not enough **before** hearing any definition. Critically, every number must be **scoped to the same four routes** — showing whole-file coverage here would let the audience explain the survivors away as "you just did not cover enough code".
 
-- **StrykerJS** — JS/TS-native mutation engine; Jest runner; HTML/JSON reports → fits EShop (Node/CommonJS). PIT (Java) / mutmut (Python) can't mutate it.
-- **Claude/ChatGPT** — assertion synthesis Stryker lacks natively
-- Pairing satisfies the mandatory *traditional + AI* rule
-- Next: **live demo on EShop's coupon endpoint**
+**Outline Content:**
 
-**Speaker notes (VN)**
+```xml
+<slide id="3" section="why" time="2:00" script-words="260">
+  <title>40/40 tests pass. 97% line coverage. So is the suite good?</title>
+  <context>e-Shop backend · the 4 routes our group committed to test (FR-02, FR-08, FR-09, FR-10)</context>
+  <scope-rule>Every number on this slide is measured on the SAME four routes. Nothing is averaged with untested routes.</scope-rule>
+  <metrics status="looks-fine">
+    <metric name="npm test" value="40/40 pass"/>
+    <metric name="line coverage (4 routes)" value="97%  (74/76)"/>
+    <metric name="branch coverage (4 routes)" value="90%  (52/58)"/>
+  </metrics>
+  <metrics status="alarming">
+    <what-we-did>We then generated 215 single-line wrong versions of that same code.
+      One changed operator, one changed constant, one changed line — each.</what-we-did>
+    <equation>215 = 199 the tests DO execute + 16 no test ever reaches</equation>
+    <highlight>43 of those 199 still let ALL 40 tests report green</highlight>
+    <blocker>Only 16 were never reached → this is NOT a coverage problem</blocker>
+    <metric name="mutation score (same 4 routes)" value="78.39%"/>
+  </metrics>
+  <naming-rule>Deliberate: the word "mutant" is not used on this slide. The audience must feel the
+    number before it has a term attached to it. The term arrives on slide 5, as the answer to a
+    question they have already asked themselves here.</naming-rule>
+  <per-route-detail render="small, right column">
+    <route fr="FR-02" name="POST /api/login" line="100%" branch="92%"/>
+    <route fr="FR-09" name="POST /api/apply-coupon" line="93%" branch="85%"/>
+    <route fr="FR-08" name="POST /api/cart + /api/checkout" line="100%" branch="75%"/>
+    <route fr="FR-10" name="PUT /api/admin/orders/:id/status" line="100%" branch="95%"/>
+  </per-route-detail>
+  <provenance>Mutation run 2026-07-11 · scope recomputed 2026-07-31 · StrykerJS 9.6.1 · Node v24.11.1 · commit f99c760</provenance>
+  <visual>A strip of 199 squares: 156 grey (a test failed → caught), 43 red (all 40 tests still green → missed).
+    Not a pie chart — each square is one concrete wrong behaviour. Labels stay behavioural here;
+    "killed" and "survived" are introduced on slide 5.</visual>
+</slide>
+```
 
-- Lý do chọn: EShop là Node/CommonJS nên Stryker là lựa chọn native duy nhất (PIT/mutmut không mutate được). Stryker không tự sinh assertion → ghép Claude/ChatGPT. Cặp này thỏa rule bắt buộc traditional+AI. Bàn giao cho bạn demo: chạy thật trên route apply-coupon.
+**Speaker Script:**
+"These are our real numbers on the four routes our group was assigned in e-Shop. One word about scope first: **every number on this slide is measured on those same four routes**. Nothing is averaged with routes we never agreed to test. That matters, and you will see why in ten seconds.
 
----
+The tests are green: forty out of forty. Line coverage on those four routes is ninety-seven percent — seventy-four lines out of seventy-six. Branch coverage is ninety. Three of the four routes are at one hundred percent line coverage. Put this dashboard in a sprint review and nobody asks a second question.
 
-## 🔴 LIVE DEMO (no slides) · ⏱ 10:00–20:00
+Then we did something else on exactly the same four routes. We generated **two hundred and fifteen slightly wrong versions** of that code. Each version changes one thing — one operator, one constant, one line. Then we re-ran the whole suite against every version, one at a time.
 
-> Demoer chạy terminal/IDE thật. Có **backup recording** phòng sự cố. Kịch bản (khớp `../02-planning/content-outline.md §4`):
->
-> 1. `npx stryker run` trên `server.js`; mở HTML report; chỉ 1–2 survivor ở route coupon (vd: `final_amount` `-`→`+`).
-> 2. Giải thích vì sao sống: test happy-path chỉ check `status/success`.
-> 3. Đưa survivor + source vào Claude/ChatGPT (prompt template) → nhận assertion.
-> 4. Chạy **validation gate**: PASS code gốc, FAIL trên mutant → mutation score tăng.
-> 5. Chốt: coverage không đổi nhưng mutation score tăng → "coverage lies".
-> *(Tùy chọn nhấn 2 bug seed của EShop như "mutant đã sống sót ngoài đời thực vì không có test".)*
+Sixteen of them are never reached by any test. So one hundred and ninety-nine run inside code our tests **do** execute. **Forty-three of those still let all forty tests report green.**
 
----
+And notice what you **cannot** say here. You cannot say 'you simply did not write enough tests'. The lines are covered. The branches are covered. Ninety-seven percent. The gap is not about which code we executed — it is about what we **checked** after executing it.
 
-## Slide 9 — Activity: Kill the Mutant  · ⏱ 20:00–21:00
+Stop at forty-three for a second. It is not forty-three percent. It is forty-three **specific wrong behaviours**, each with a file name and a line number, that our suite cannot see. Coverage told us nothing about any of them."
 
-**On-slide**
+**Evidence:**
 
-- **Your turn (20 min):** 5 mutants survived our baseline suite on EShop's coupon endpoint
-- For each mutant, write **one assertion** that passes on the original, fails on the mutant
-- Most kills wins 🏆
-- Worksheet = the `Activity_Worksheet.md` shared 3 days ago
-
-**Speaker notes (VN)**
-
-- Facilitator tiếp quản. Giới thiệu luật chơi: 5 mutant sống sót, mỗi nhóm viết 1 assertion/mutant để giết. Killed = pass code gốc, fail trên mutant. Nhóm giết nhiều nhất thắng. Nhắc đã phát worksheet 3 ngày trước.
-
----
-
-## Slide 10 — Rules & what you need  · ⏱ 21:00–22:00
-
-**On-slide**
-
-- Work in teams of 3–4; one note-taker
-- On your machine: refactored EShop backend (provided) + editor + terminal; AI tool optional
-- **AI allowed — but cross-check every suggestion** (a test that passes on the mutant kills nothing)
-- One minute-paper per team at the end (attendance credit)
-
-**Speaker notes (VN)**
-
-- Nêu điều kiện: nhóm 3–4, 1 người ghi. Sandbox + server.js đã refactor mình cung cấp sẵn, không cần internet sau setup. AI được dùng nhưng phải kiểm tay. Cuối buổi mỗi nhóm nộp 1 minute-paper lấy điểm chuyên cần.
-
----
-
-## Slide 11 — Activity steps  · ⏱ 22:00–22:30 (then run 22:30–40:00)
-
-**On-slide**
-
-| Time | Step |
-|---|---|
-| 0:00–0:03 | Facilitator shows 5 mutant diffs |
-| 0:03–0:13 | Each team writes 5 candidate assertions |
-| 0:13–0:18 | Swap & review with a partner team |
-| 0:18–0:22 | Facilitator runs them in the sandbox; tally kills |
-| 0:22–0:25 | Winning team explains its design |
-
-**Speaker notes (VN)**
-
-- Chiếu bảng thời gian, bám sát đồng hồ (Timekeeper hỗ trợ). 3' giới thiệu 5 diff → 10' viết → 5' đổi chéo review → 4' mình chạy sandbox tally → 1' nhóm thắng giải thích. Lưu ý mutant boundary (min-order, max-uses) cần đúng giá trị biên mới giết được.
+- Coverage scoped to the 4 committed routes (`BASELINE.md` §2, recomputed 2026-07-31 via `apps/backend/scripts/coverage-by-route.js`): **97% line (74/76), 90% branch (52/58)**.
+- Per route: FR-02 `POST /api/login` 100%/92% · FR-09 `POST /api/apply-coupon` 93%/85% · FR-08 `POST /api/cart` + `POST /api/checkout` 100%/75% · FR-10 `PUT /api/admin/orders/:id/status` 100%/95%.
+- Mutation, identical scope (`BASELINE.md` §3b, recomputed 2026-07-31 via `mutation-by-route.js`, sharing the same route-boundary detector): 215 mutants, 156 Killed, 43 Survived, **16 NoCoverage** → covered = 199, kill rate 78.39%.
+- **Why the whole-file numbers are deliberately not on this slide:** `server.js` overall is 52% line / 46% branch, with 293 of 541 mutants NoCoverage — but that gap belongs to routes outside our assignment (register, forgot-password, admin products/categories). Putting it next to the 43 survivors invites the wrong conclusion, that the survivors are a coverage gap. At this scope only 16 of 215 mutants are NoCoverage, so they are not.
+- If asked about the whole file anyway: whole-file mutation score is 32.35% versus 78.39% scoped — same suite, same run, different denominator. That contrast is the payload of slide 6b, not slide 3.
+- **Naming decision (revision 2026-08-01):** this slide no longer uses the word "mutant", in either the visual or the script. The deck's own sequencing rule is that a term arrives only when the argument needs it, and slide 3 needs the *number*, not the vocabulary. Saying "215 single-line wrong versions" costs nothing and makes slide 5 land harder — it answers a question the audience has already formed.
+- Route boundaries are auto-detected by bracket balancing from each `app.<method>(...)` line, not hand-picked ranges. The earlier 28/06 hand-picked ranges wrongly attributed 3 extra routes to FR-08 (reporting 59%/29% instead of the real 100%/75%) and overran the end of the file for FR-10.
+- The 43 survivors are enumerable: each has a mutant ID, file, and line in the Stryker report.
 
 ---
 
-## Slide 12 — Debrief  · ⏱ 40:00–42:30
+## Slide 4 — Coverage Measures Execution, Not Verification
 
-**On-slide**
+**Purpose:**
+Explain the mechanism behind slide 3 — incidental coverage — using a test that everyone in the room has written at least once.
 
-- Q1: What surprised you most?
-- Q2: Where did AI save time vs add work?
-- Q3: One failure mode you'd prevent next time?
-- Q4: With one more hour, what next?
-- → write one answer each on the minute-paper
+**Outline Content:**
 
-**Speaker notes (VN)**
+```xml
+<slide id="4" section="why" time="1:30" script-words="200">
+  <title>Coverage measures execution. It does not measure verification.</title>
+  <code-example language="js" caption="This test reaches 100% coverage on createOrder()">
+    it('creates order', async () => {
+      expect(await service.createOrder(req)).not.toBeNull();
+    });
+  </code-example>
+  <analysis>
+    <executed>map → calculateTotal → save → publish(OrderCreated)</executed>
+    <verified>NONE OF THEM</verified>
+  </analysis>
+  <definition term="oracle" placement="beside the code example">
+    Whatever a test uses to decide pass or fail.
+    Here the oracle is one thing only: "not null".
+    <design-note>This term carries slides 6a, 7, 13, 14 and 15. It must be on screen the first
+      time it is spoken, not left as a spoken aside.</design-note>
+  </definition>
+  <contrast>
+    <question tool="coverage">Was this line executed?</question>
+    <question tool="mutation">If this line were wrong, would a test fail?  ← the question from slide 1</question>
+  </contrast>
+  <definition term="incidental coverage">
+    Code executed as a side effect of another test, while its behaviour is not part of that test's oracle.
+  </definition>
+  <visual>Same function shown twice: left, all 5 lines green "covered"; right, 4 of 5 lines red "unverified".</visual>
+</slide>
+```
 
-- Dẫn 4 câu debrief, mời 1–2 nhóm trả lời nhanh. Nhấn lại bài học: assertion `typeof`/`success` không giết được mutant giá trị; boundary là chỗ test hay sót; AI hữu ích nhưng phải validation gate.
+**Speaker Script:**
+"This is the mechanism.
 
----
+This test calls `createOrder`, gets an object back, and asserts that the object is not null. A coverage tool reports one hundred percent. All five lines executed.
 
-## Slide 13 — Takeaways  · ⏱ 42:30–43:30
+But look at what it actually **verifies**. It does not check whether the total was calculated correctly, whether the order was saved, whether the `OrderCreated` event was published, or what its payload contains. Delete the `publish` line completely — this test stays green. Change the total formula — still green.
 
-**On-slide**
+There is a word for what this test is missing: the **oracle** — whatever a test uses to decide pass or fail. Here the oracle is one thing only: 'not null'. Five lines executed, one trivial property checked.
 
-- ✓ Mutation score 70–80% is a strong target; 100% is usually unrealistic
-- ✓ Equivalent mutants are unavoidable noise — manual review still required
-- ✓ AI assertion generators are drafts — validation against the mutation report is mandatory
+The phenomenon has a name too: **incidental coverage**. Code runs as a side effect of a wider test, but its behaviour is not part of that test's oracle.
 
-**Speaker notes (VN)**
+And here is the dangerous part. The coverage dashboard paints this file green and reports it protected. Mutation testing reports the same file as unverified. Two tools, opposite conclusions, one file — because they answer different questions. That question on our title slide, 'if this line were wrong, would your tests complain?', is the mutation question. Coverage never asks it. Coverage is not wrong; it just answers something much narrower than what we infer from it."
 
-- 3 điều mang về. Mục tiêu 70–80% là tốt, đừng đuổi 100%. Equivalent mutant là nhiễu phải review tay. AI chỉ là nháp, bắt buộc validation. (Nếu còn giờ: nhắc 2 bug coupon EShop minh hoạ "mutation testing đo độ nhạy test, không nói baseline đúng — vẫn cần spec.")
+**Evidence:**
 
----
-
-## Slide 14 — References  · ⏱ 43:30–44:00
-
-**On-slide**
-
-- Jia & Harman (2011) · Petrović & Ivanković — *Mutation Testing at Google* (ICSE 2018)
-- StrykerJS docs — stryker-mutator.io · Jest · supertest
-- MuTAP (IST 2024) · MutGen (2025) · Tian et al. — Equivalent Mutant Detection (ISSTA 2024)
-- Full guide + worksheet: see our Moodle folder
-- Cite the original source — not the AI
-
-**Speaker notes (VN)**
-
-- Chỉ nguồn để các bạn đọc thêm; nhấn nguyên tắc trích nguồn gốc không trích AI. Trỏ về User_Guide + Worksheet trên Moodle.
-
----
-
-## Slide 15 — Q&A / Backup  · ⏱ 44:00–45:00
-
-**On-slide**
-
-- **Questions?**
-- Contact: *[team emails]*
-- Backup: equivalent-mutant deep dive · stryker.config.mjs · full mutation report
-
-**Speaker notes (VN)**
-
-- Mở Q&A. Nếu hỏi sâu: dùng slide backup (config, report đầy đủ, equivalent mutant). Trả lời trung thực — không chắc thì nói "mình kiểm lại". Cảm ơn lớp + nhắc nộp minute-paper.
+- `createOrder` example from `mutation_testing_and_test_effectiveness.md` §2.2 and `seminar_content.md` §Coverage vs Detection.
+- External, verified 30/07/2026: in MUTGEN, LLM-generated tests for subject `id_81` (HumanEval-Java, Llama-3.3) reached **100% line and branch coverage with a mutation score of 4%** — Wang, Xu, Briand & Liu, IEEE TSE (accepted), arXiv:2506.02954.
+- Stronger point from the same paper: across MUTGEN, EvoSuite and vanilla prompting, **mutation score differs significantly while coverage does not** — nearly every subject already reaches ~100% coverage.
+- Removed claim (do not use): the "banking microservice 96% line / 34% mutation score" case — no traceable primary source. If an industrial case is needed, cite *Mutation Testing as a QA Technique in a Fintech Company*, SBQS 2024, doi 10.1145/3701625.3701629.
 
 ---
 
-## Backup slides (chỉ dùng khi Q&A cần — không tính trong 15)
+## Slide 5 — Inject a Fake Fault, See If the Tests Complain
 
-- **B1 — `stryker.config.mjs`** full config + giải thích `coverageAnalysis: 'perTest'`, `mutate: ['server.js']`.
-- **B2 — Equivalent mutant** ví dụ + vì sao undecidable + cách dùng `// stryker-disable next-line`.
-- **B3 — EShop 2 seeded bugs** (min-order `>` vs `>=`; percent formula âm) đối chiếu FR-09.
-- **B4 — Full mutation report** screenshot (before/after) + bảng MS theo file.
+**Purpose:**
+Introduce the core vocabulary — mutant, mutation operator, killed, survived — exactly at the point where the argument needs it.
+
+**Outline Content:**
+
+```xml
+<slide id="5" section="what" time="1:30" script-words="200">
+  <title>Inject a fake fault into the code, then see if the tests complain</title>
+  <transformation>
+    <original>if (expiry &lt; now)</original>
+    <mutant>if (expiry &lt;= now)</mutant>
+    <operator>EqualityOperator</operator>
+  </transformation>
+  <outcome-tree>
+    <run>Run only the tests that execute this line</run>
+    <branch result="test FAIL">KILLED — the suite detected the fault (good)</branch>
+    <branch result="test PASS">SURVIVED — the suite is blind to it (bad)</branch>
+  </outcome-tree>
+  <key-idea>
+    A mutant is a CONTROLLED FAULT HYPOTHESIS, not a random bug:
+    "If a developer wrote &lt;= instead of &lt;, would the current suite catch it?"
+  </key-idea>
+  <callback to="slide 3">This is what we generated 215 of, two slides ago.</callback>
+  <safety-note placement="immediately under the transformation">Mutants never reach production.
+    Generated in an isolated sandbox, executed, thrown away.</safety-note>
+  <assumption>Competent programmer hypothesis</assumption>
+</slide>
+```
+
+**Speaker Script:**
+"The mechanism is almost crude in how simple it is.
+
+The tool takes the original code and applies a transformation rule at one specific location. The rule is called a **mutation operator**. Here the operator is `EqualityOperator` and it turns `<` into `<=`. The modified program is called a **mutant** — and that is the thing we generated two hundred and fifteen of, two slides ago. They never leave the test run: generated in an isolated sandbox, executed, thrown away. Nothing reaches production.
+
+Then the tool runs only the tests that execute that line. If any test fails, the mutant is **killed** — the suite detected the fault. If all tests still pass, the mutant **survived**. That is the bad outcome, even though the word 'pass' normally sounds good: we broke the code and nobody complained.
+
+One point that is often misunderstood. A mutant is not a random bug, and not a simulation of a real bug. It is a **controlled fault hypothesis**: if a developer accidentally wrote `<=` instead of `<`, would this suite catch it? That rests on the **competent programmer hypothesis** — real faults are usually small deviations from the correct program, not a completely rewritten function."
+
+**Evidence:**
+
+- Concrete line: `server.js:382` in route `POST /api/apply-coupon` — `if (expiry < now) return res.status(400)...`.
+- Mutant 355 in our Stryker report changes it to `expiry <= now`. It is currently **surviving**, even though 11 tests execute that line. It returns on slide 10b and in the demo (Claude Code audits and fixes it live).
+- Definitions from `NOTES.md` §3–4, §7–8 and `seminar_content.md` §Operating Mechanism.
+- Competent programmer hypothesis: `NOTES.md` §14.1.
+- Survivor list: `seminar/01-research/survivors.json`.
 
 ---
 
-## Checklist trước khi nộp `.pptx`
+## Slide 6a — Five Mutant States, and the One Distinction That Changes Your Fix
 
-- [ ] Đúng **≤ 15 slide** (B1–B4 để ở cuối, ngoài đếm).
-- [ ] Thay hết `📷/TODO`: bar coverage-vs-mutation (S2), sơ đồ AI 4 hộp (S7), report demo.
-- [ ] Verify số liệu anchor (96%/34%, ~4%, 94%, 86.6%) khớp User_Guide §7.
-- [ ] Điền tên thành viên (S1, S15) + email (S15).
-- [ ] Dùng template seminar của môn nếu được yêu cầu.
+**Purpose:**
+Let the audience read a mutation report without misinterpreting it. The whole slide exists for one distinction: Survived versus NoCoverage. Equivalent is flagged here and deliberately not explained — it gets slides 10a/10b, where it has examples.
+
+**Outline Content:**
+
+```xml
+<slide id="6a" section="what" time="1:20" script-words="180">
+  <title>Five states — and the one distinction that changes your fix</title>
+  <states>
+    <state name="KILLED" condition="at least 1 test fails" meaning="detected"/>
+    <state name="SURVIVED" condition="tests DID run, none failed" meaning="ORACLE gap → stronger assertion, or better data"/>
+    <state name="NO COVERAGE" condition="no test touches it" meaning="COVERAGE gap → a new test case"/>
+    <state name="TIMEOUT" condition="exceeds the time threshold" meaning="counted as detected"/>
+    <state name="INVALID" condition="does not compile / crashes" meaning="EXCLUDED from denominator"/>
+  </states>
+  <do-not-merge highlight="true">
+    SURVIVED and NO COVERAGE are both "not detected" — so tools and dashboards merge them.
+    Do not. Same symptom, opposite fix.
+  </do-not-merge>
+  <warning separate-from-table="true">
+    EQUIVALENT is NOT a sixth state. It is a MANUAL label on a subset of SURVIVED. → slide 10a
+  </warning>
+  <eshop-note>Our baseline run: RuntimeError / Timeout / CompileError = 0 / 0 / 0 — no noise in the numbers.</eshop-note>
+</slide>
+```
+
+**Speaker Script:**
+"Five states. Stryker reports all five by itself; three of them matter.
+
+Killed is clear. The distinction that needs care is **Survived** versus **No Coverage**. Survived means tests do execute that line, and none of them detects the change — that is a gap in the oracle. A weak assertion, poor test data, or something that cannot be observed. No Coverage means no test touches that line at all — a plain coverage gap.
+
+Both of them read as 'not detected', so tools and dashboards often merge them. Do not. Same symptom, opposite fix: one needs a new test case, the other needs a stronger assertion on a test you already have. Merge them and you throw away the diagnosis.
+
+Timeout counts as detected — practical reason: a mutant that creates an infinite loop would turn your CI red anyway. Invalid means the mutant does not compile, so it leaves the denominator. It was never a runnable program.
+
+And one warning I will only flag here: **Equivalent is not a sixth state.** It is a manual label applied to some Survived rows. It is the hardest part of this technique, so it gets its own slides later."
+
+**Evidence:**
+
+- Stryker state definitions: stryker-mutator.io, "Mutant states and metrics" (via `mutation-testing-reference.md` §2.4).
+- Run stability: RuntimeError / Timeout / CompileError = 0 / 0 / 0 — no noise in the baseline.
+- **Cut from this slide (revision 2026-08-01):** the undecidability argument and the "even textbooks teach this wrong" framing. Both were being said here *and* on slide 9 *and* on slide 10a — three times, and only the third had an example attached. Undecidability now lives on 10a only. Reference kept for Q&A: Budd & Angluin 1982.
+
+---
+
+## Slide 6b — Same Suite, Same Run, Two Different Scores
+
+**Purpose:**
+Pay off the scope rule promised on slide 3. This is the slide that makes a mutation score unusable as a bare number — and it does it with our own data, not a warning in the abstract.
+
+**Outline Content:**
+
+```xml
+<slide id="6b" section="what" time="1:15" script-words="170">
+  <title>Same suite, same run — two different scores</title>
+  <formulas>
+    <formula name="Mutation Score">Killed / (Total − Equivalent − Invalid)</formula>
+    <formula name="Test Strength">Killed / (Killed + Survived)  ← excludes NoCoverage</formula>
+  </formulas>
+  <same-suite-two-numbers highlight="true">
+    <scope name="whole server.js" score="32.35%" note="541 mutants — 293 of them NoCoverage, from routes nobody in our group was assigned"/>
+    <scope name="the 4 tested routes" score="78.39%" note="215 mutants — 16 NoCoverage. This is our actual test effectiveness."/>
+    <delta>Same suite. Same run. Same day. Only the denominator changed.</delta>
+  </same-suite-two-numbers>
+  <rule>Never compare two mutation scores unless tool, version, operator set, file scope, exclusion rules and formula all match. Six conditions, not one.</rule>
+  <visual>Two bars sharing one axis, with the two denominators drawn underneath as differently sized boxes. The bars are the conclusion; the boxes are the reason.</visual>
+</slide>
+```
+
+**Speaker Script:**
+"Two formulas. Mutation score is killed over all valid mutants — the denominator already excludes Invalid and Equivalent. Test strength drops NoCoverage from the denominator, so it measures only the code your tests actually reach.
+
+Why do you need both? Look at e-Shop. Measure the whole of `server.js` and our mutation score is thirty-two point three five percent. Measure only the four routes our group committed to test and the same suite scores seventy-eight point three nine. **Same test suite. Same run. Same day.** The only thing that changed is the denominator — the thirty-two percent is carrying two hundred and ninety-three mutants from routes nobody in our group was ever assigned.
+
+Both numbers are correct. Neither one means anything until you state the scope.
+
+So: never compare two mutation scores until you have confirmed the same tool, the same version, the same operator set, the same file scope, the same exclusion rules, and the same formula. Six conditions. Without all six, the number is just a number."
+
+**Evidence:**
+
+- `BASELINE.md` §3: full `server.js` = 541 mutants, 175 Killed, 73 Survived, 293 NoCoverage → 32.35%.
+- `BASELINE.md` §3b (recomputed 2026-07-31): 4 routes = 215 mutants, 156 Killed, 43 Survived, 16 NoCoverage → 78.39%.
+- Slide 3 deliberately withheld this contrast and promised it here; the `<scope-rule>` on slide 3 is the setup, this slide is the payoff.
+- Split rationale (revision 2026-08-01): the old slide 6 carried five ideas in 1:30 — five states, two formulas, the Equivalent warning, this contrast, and the comparison rule. The contrast is the heaviest payload and it was arriving last, after the audience had already absorbed a five-row table. It now has its own screen.
+
+---
+
+## Slide 7 — RIPR: Where Did the Chain Break?
+
+**Purpose:**
+Turn mutation testing from a score into a diagnostic tool. This is the pivot slide of the whole talk — each broken link maps to a different fix, and some fixes are not tests at all.
+
+**Outline Content:**
+
+```xml
+<slide id="7" section="diagnose" time="2:15" script-words="300">
+  <title>RIPR: why did this mutant survive?</title>
+  <chain>
+    <link name="Reachability">Does a test reach that line?</link>
+    <link name="Infection">Does the state actually change?</link>
+    <link name="Propagation">Does the difference reach an observable output?</link>
+    <link name="Revealability">Is the assertion strict enough to tell them apart?</link>
+  </chain>
+  <diagnosis-table caption="one criterion for the colour: can a test fix this?">
+    <group label="A RIPR LINK BROKE">
+      <row break="Reachability" fix="add a test case / precondition" fixable-by-test="yes"/>
+      <row break="Infection" fix="change test data (a=b=0 makes a+b and a−b identical)" fixable-by-test="yes"/>
+      <row break="Propagation (a) dead or redundant code" fix="FIX THE PRODUCTION CODE" fixable-by-test="no"/>
+      <row break="Propagation (b) masked by a clamp / rounding / validation" fix="move the test data out of the masked range" fixable-by-test="yes"/>
+      <row break="Revealability" fix="a precise assertion (assertEquals, not result >= 0)" fixable-by-test="yes"/>
+    </group>
+    <rule-line/>
+    <group label="NOT A RIPR BREAK — writing more tests is the WRONG reflex">
+      <row break="Equivalent mutant" fix="cannot be killed — document the reason, suppress narrowly" fixable-by-test="no"/>
+      <row break="Ambiguous requirement" fix="STOP. Ask the BA before touching the test." fixable-by-test="no"/>
+    </group>
+  </diagnosis-table>
+  <visual>Colour by one criterion only: fixable by a test, or not. The horizontal rule before the last
+    two rows is load-bearing — those two rows are the message of the slide, and they are not RIPR links.</visual>
+</slide>
+```
+
+**Speaker Script:**
+"To kill a mutant, a test has to complete four links in a chain.
+
+**Reachability**: does any test reach that line? **Infection**: does the mutation actually change the program state, with the data you are using? **Propagation**: does that difference travel somewhere observable, or is it overwritten on the way? **Revealability**: is the assertion strict enough to tell the two apart?
+
+Break any link and the mutant survives. This is where mutation testing stops being a number and becomes a diagnostic: each broken link maps to a different fix.
+
+Reachability breaks — you are missing a test case. Infection breaks — your test data is poor. The classic case: the mutant turns `a + b` into `a - b`, but the test passes zero and zero, so both sides return zero and the mutant lives. You fix the data, not the assertion.
+
+Propagation breaks for two different reasons, and mixing them up makes you fix the wrong thing. Either the mutated value is overwritten before it reaches the output — that means dead logic, and the fix is in the production code, not in the test. Or a clamp, a rounding step, a validation step erases the difference for the data you happen to be using — then you move the test data out of that range.
+
+Revealability breaks — the assertion is too loose. `assertTrue(result >= 0)` is the classic.
+
+Now the two rows below the line, where the reflex 'write more tests' is simply wrong. An equivalent mutant cannot be killed by any test — there is no behavioural difference for an assertion to attach to. And when the team cannot decide whether the original or the mutant is correct, the mutant has exposed an **ambiguous requirement**, not a weak test. You stop and ask the business analyst instead of bending the test to whatever the code does today.
+
+We classified our forty-three survivors with this model. Four repeating modes, each with concrete mutant IDs."
+
+**Evidence:**
+
+- Measured taxonomy on e-Shop (`BASELINE.md` §5): BOUNDARY_CONDITION_MISSED (mutant 355) · RETURN_VALUE_UNCHECKED (396, 405) · TRANSITION_PATH_UNTESTED (515, 510) · SEQUENTIAL_STATE_ASSUMPTION (268, 264).
+- Propagation (a), dead code, from source: `calculateDiscount()` computes `discount` through two conditions then returns a hard-coded 20 — mutating either condition always survives.
+- Propagation (b), masking: illustrative only, marked [I] — no natural masking case was found among the current 43 survivors. **Because of that it is now one clause in the script, not a paragraph** — it is the weakest row on the slide evidentially, and it was previously getting as much airtime as Propagation (a), which does have a real case. Row stays on the table (it is correct and useful when reading a report); expand only if asked.
+- Ambiguous requirement example: late fee "after seven days overdue" — is it `>= 7` or `> 7`? A survivor here signals an unclear spec.
+- RIPR model: Li, N. & Offutt, J. (2017), *Test Oracle Strategies for Model-Based Testing*, IEEE TSE 43(4), 372–395. RIPR extends RIP by adding Revealability. (Verified via abstract and secondary citation, full text not read.)
+
+---
+
+## Slide 8 — Put It at the Lowest Level Where the Behaviour Is Still Observable
+
+**Purpose:**
+Give a placement rule based on cost-to-signal ratio, and state the deliberate exception for business-critical logic.
+
+**Outline Content:**
+
+```xml
+<slide id="8" section="constraints" time="1:50" script-words="250">
+  <title>Put it at the lowest level where the behaviour is still observable</title>
+  <test-levels>
+    <level name="API / E2E" targets="public contracts, authorization, idempotency" policy="selective"/>
+    <level name="Integration" targets="transactions, locking, messaging, serialization" policy="selective"/>
+    <level name="Component" targets="workflows, state transitions, failure paths" policy="selective"/>
+    <level name="Unit" targets="business rules, calculations, validation, boundaries" policy="DEFAULT"/>
+  </test-levels>
+  <eshop-case route="FR-09  POST /api/apply-coupon" level="unit" render="callout beside the table">
+    5 sequential guards + 2 calculation branches, in ONE endpoint
+    → 81 mutants in a single route · kill rate 69.3% — the LOWEST of our four
+    <point>High logic density is exactly where this technique pays.</point>
+  </eshop-case>
+  <rationale>
+    Fewer intermediate systems → the RIPR chain completes more easily →
+    clean signal, and each survivor maps to exactly one fault hypothesis.
+  </rationale>
+  <blind-spot>Over-mocking hides real integration behaviour; side effects are verified as mock interactions, not real results.</blind-spot>
+  <exception scope="money / permissions / compliance / tenant isolation">
+    Defence in depth across levels. One survivor in authorization outweighs hundreds in formatting code.
+  </exception>
+  <operating-rule>Risk decides the number of defence layers — not the number of lines of code.</operating-rule>
+</slide>
+```
+
+**Speaker Script:**
+"The rule: put mutation testing at the **lowest level where the behaviour you care about is still observable**. That follows directly from RIPR. A mutant only dies when the difference completes all four links — and the fewer intermediate systems it has to cross, containers, databases, message brokers, the easier that chain completes and the cheaper each run is.
+
+So unit is the default. Not because it is easy, but because it has the best signal-to-cost ratio: fast, deterministic, almost no environment noise, and each survivor maps to exactly one fault hypothesis. Best candidates: calculations, validation, boundary rules, authorization policies, state transitions, pricing and tax logic.
+
+Our own coupon route is the textbook case. Five sequential guards and two calculation branches in one endpoint — **eighty-one mutants in a single route**, kill rate sixty-nine percent, the lowest of our four. High logic density is exactly where this technique pays.
+
+But unit has a known blind spot: mock too much and you hide the real integration behaviour — side effects get verified as interactions with a mock instead of real outcomes. That is why unit is the *first layer*, not the whole strategy.
+
+And there is a deliberate exception. For money, permissions, compliance or tenant isolation, a bug can pass every unit test and fail only at a real technical boundary — optimistic locking under concurrency, an authorization header dropped at the public contract. For that group you use defence in depth across all four levels.
+
+One sentence: **risk decides the number of defence layers, not the number of lines of code.** One survivor on an authorization branch outweighs a hundred in formatting code."
+
+**Evidence:**
+
+- On e-Shop, FR-09 (coupon) is a textbook "unit-level, high logic density" candidate: 5 sequential guards (`is_active`, `min_order_amount`, `expired_at`, `user_id`, `max_uses_per_user`) and 2 calculation branches (percent / fixed).
+- Measured: 81 mutants in that single route, kill rate 69.3% — the lowest of the four routes.
+- Placement principles: `seminar_content.md` §Placement Principle, §Unit-Level as Default, §Business-Critical Logic.
+- Module priority ranking: `mutation-testing-reference.md` §4.2.
+
+---
+
+## Slide 9 — Where This Technique Stops Being Cheap
+
+**Purpose:**
+State the limits **before** presenting the implementation, so the "How" section reads as a response to real constraints rather than as marketing.
+
+**Outline Content:**
+
+```xml
+<slide id="9" section="constraints" time="1:30" script-words="190">
+  <title>Where this technique stops being cheap</title>
+  <constraint n="1" name="EQUIVALENT MUTANT" render="pointer-only, one line">
+    <fact>Cannot be killed. Cannot be detected automatically. Reported rates 4%–39% → distorts the denominator.</fact>
+    <pointer>The biggest one — it gets the next two slides. Nothing more said here.</pointer>
+  </constraint>
+  <constraint n="2" name="COST">
+    <formula>≈ N_mutants × N_tests_per_mutant × time_per_test</formula>
+    <measured>e-Shop: 541 mutants, 40 tests → ~8 min 30 s at concurrency 1</measured>
+    <note>Without test selection this is a product, not a sum</note>
+  </constraint>
+  <constraint n="3" name="FLAKY TESTS">
+    <impact>False kills, fake timeouts, scores that jump between runs</impact>
+    <rule>A mutant killed only by a flaky test is NOT a clean kill — mark it indeterminate</rule>
+  </constraint>
+  <constraint n="4" name="SMALL SAMPLES">
+    <example>2 mutants, 1 killed = 50%. One mutant moves the score by 50 points.</example>
+    <rule>Fewer than 10 mutants in the diff: review them one by one, do NOT gate on a percentage</rule>
+  </constraint>
+</slide>
+```
+
+**Speaker Script:**
+"Four constraints, stated honestly before we talk about implementation.
+
+First, the **equivalent mutant** — a mutant no test can kill, that no tool can detect for you. Reported rates run from four to thirty-nine percent, and every one of them sitting in your denominator drags the score down artificially. That is all I will say here. It is the biggest constraint and it gets the next two slides.
+
+Second, **cost**. Roughly the number of mutants, times the tests per mutant, times the time per test. Multiplication, not addition. e-Shop has five hundred and forty-one mutants and forty tests — a tiny system — and it already took eight and a half minutes at concurrency one. Scale that to a real codebase: there is no way to run everything on every commit.
+
+Third, **flaky tests**. A mutant killed only by an unreliable test is not a clean kill — mark it indeterminate, do not count it in the numerator.
+
+Fourth, and this one gets ignored: **small samples**. Two mutants in a diff, one killed, and the score reads fifty percent; kill one more and it reads a hundred. One mutant, fifty points. The rule: fewer than ten mutants in the diff, review each one individually — do not gate on a percentage."
+
+**Evidence:**
+
+- Measured cost: `npm run stryker` on `server.js` (541 mutants, 40 tests, concurrency 1, Node v24.11.1) ≈ **8 min 30 s** wall-clock; report timestamp 2026-07-11 10:56:29 +07.
+- Concurrency 1 is a deliberate reproducibility choice (SQLite shares one file), not a performance ceiling.
+- Equivalent mutant rate 4–39%: Madeyski et al. 2013, cited in Tian et al., ISSTA 2024 (arXiv:2408.01760).
+- Undecidability: Budd & Angluin 1982.
+- Constraint 1 is deliberately left without an example here — slides 10a/10b cover it with three real mutants. **Revision 2026-08-01:** it is now a pointer of ~35 words, not a paragraph of ~110. The undecidability argument was previously being made on 6, on 9 and on 10; it is now made once, on 10a, where the examples are.
+
+---
+
+## Slide 10a — Equivalent Mutants: The Definition, and the One Question It Reduces To
+
+**Purpose:**
+Define the concept precisely — three clauses, not a paraphrase — and establish the single question that makes the next slide readable at a glance: *can the program reach the divergence point?* Nothing on this slide is an example; the examples get their own screen.
+
+**Outline Content:**
+
+```xml
+<slide id="10a" section="constraints" time="1:45" script-words="250">
+  <title>Equivalent mutants: when "survived" is not the test's fault</title>
+  <definition term="equivalent mutant">
+    <clause n="1">SYNTAX differs from the original — the source really changed</clause>
+    <clause n="2">BEHAVIOUR is identical for EVERY VALID INPUT</clause>
+    <clause n="3">⇒ NO test case, however strong, can kill it</clause>
+    <footnote>"Valid" = the input domain the real system can actually produce. Who decides that domain? A HUMAN, not the tool.</footnote>
+  </definition>
+  <why-no-tool>Detecting it reduces to program equivalence — UNDECIDABLE. In the report it looks
+    exactly like a weak test: both carry the label SURVIVED.</why-no-tool>
+  <observation highlight="true">
+    A relational-operator mutant differs from the original at EXACTLY ONE POINT:
+    where both sides are equal. Everywhere else they agree.
+    → The whole question collapses to: CAN THE PROGRAM REACH THAT POINT?
+  </observation>
+  <forward-pointer>Three real mutants from our report, one question each. → next slide</forward-pointer>
+</slide>
+```
+
+**Speaker Script:**
+"Two slides ago I said equivalent mutants distort the denominator. Now the definition — and then the practical question: when you look at a Survived row, how do you know whether it is a test gap or an equivalent mutant?
+
+**Three clauses.** One: the **syntax differs** from the original. The source really changed; this is not the tool missing something. Two: the **behaviour is identical for every valid input** — same output, same side effects, every run. Three, the consequence: **no test case can kill it**. Not because nobody has been clever enough, but because there is no behavioural difference for an assertion to attach to. Writing more tests is pointless.
+
+And no tool will find these for you. Deciding whether two programs are equivalent is undecidable. So in the report, an equivalent mutant and one that survived a weak test look identical — both say Survived. A human has to open the code.
+
+Now one word: **valid**. Not every input you can imagine — the domain the real system can actually produce. Widen it and a mutant that was equivalent becomes killable; narrow it and the reverse. The tool does not know your valid domain. A **human** decides. That is why, later, there is a gate that requires a reviewer to sign.
+
+One observation makes the next slide readable at a glance. When a mutation turns `>=` into `>`, or `<` into `<=`, the original and the mutant differ at **exactly one point** — where both sides are equal. Everywhere else they agree. So the whole question collapses into one: **can the program ever reach that point?**"
+
+**Evidence:**
+
+- Undecidability of mutant equivalence: Budd & Angluin 1982. This is the one place in the deck where the argument is made in full; slides 6a and 9 only flag it.
+- The three-clause definition and the "who decides the valid domain" point are marked in the original cut plan as **never cut** — they survive any time pressure.
+- Split rationale (revision 2026-08-01): the old slide 10 was 763 words against a 2:00 budget — 5.7 minutes, the worst overrun in the deck, on the deck's most load-bearing content. Splitting buys it 4:30 total instead of compressing it.
+
+---
+
+## Slide 10b — Three Real Mutants, One Question Each
+
+**Purpose:**
+Block the most dangerous misreading of a mutation report — treating every Survived as a test gap — by showing that Killed, a real gap, and Equivalent all come from **the same operator transformation**, and that the deciding factor is not in the mutant code at all.
+
+**Outline Content:**
+
+```xml
+<slide id="10b" section="constraints" time="2:45" script-words="360">
+  <title>Same transformation, three verdicts</title>
+  <shared-question>Can the program reach the divergence point?</shared-question>
+  <case verdict="KILLED" reachable="yes" tested="yes">
+    <mutant id="368" line="391">usage_count &gt;= max → &gt; max</mutant>
+    <divergence>usage_count == max</divergence>
+    <why>TC-BVA-05/06 sit exactly there (uses=1,max=1 and uses=2,max=2)</why>
+  </case>
+  <case verdict="SURVIVED = REAL GAP" reachable="yes" tested="no">
+    <mutant id="355" line="382">expiry &lt; now → expiry &lt;= now</mutant>
+    <divergence>expiry == now, to the millisecond</divergence>
+    <why>11 tests execute this line; none stands on that point. Freeze the clock and it is killable. → the demo</why>
+  </case>
+  <case verdict="EQUIVALENT" reachable="no" tested="n/a">
+    <mutant id="46" line="56">newAttempts &gt;= 3 → newAttempts &gt; 3</mutant>
+    <divergence>newAttempts == 3</divergence>
+    <why>login_attempts goes 0 → 2 → 4 … (step +2). newAttempts is ALWAYS EVEN. 3 never occurs.</why>
+  </case>
+  <control-pair line="56" mutator="EqualityOperator" highlight="true">
+    <mutant id="46">&gt;= 3 → &gt; 3 — Survived (equivalent candidate)</mutant>
+    <mutant id="47">&gt;= 3 → &lt; 3 — KILLED — this line is NOT missing tests</mutant>
+  </control-pair>
+  <two-caveats>
+    <caveat n="1">Seed login_attempts = 1 straight into SQLite and #46 becomes killable → the label is "equivalent CANDIDATE, awaiting sign-off"</caveat>
+    <caveat n="2">Dataflow says "equivalent". Only the SPEC says whether locking on the 2nd failure is a bug.</caveat>
+  </two-caveats>
+</slide>
+```
+
+**Speaker Script:**
+"Three examples. All three from our real Stryker report, all three the same kind of operator change. One question each: can the program reach the divergence point?
+
+**Case one — Killed.** Line 391, the coupon usage check `usage_count >= max`, mutated to `>`. The two differ only when usage equals max exactly — a completely ordinary state, the user has just spent their last allowed use. Two of our boundary tests stand exactly there. The mutant dies immediately.
+
+**Case two — Survived, and this really is a gap.** Line 382, the expiry check `expiry < now`, mutated to `<=`. The divergence point is `expiry` equal to `now`, to the millisecond. **Eleven** tests execute this line and not one of them stands on that point. But the point **is reachable** — you only have to freeze the clock inside the test. So this is not equivalent. This is a missing test, and the demo kills it.
+
+**Case three — a real equivalent.** Line 56, the login route: `newAttempts >= 3` locks the account, mutated to `> 3`. Divergence at exactly three. So trace the values. `login_attempts` starts at zero, a successful login resets it to zero, a failed login adds **two**. Two, not one. Zero, two, four, six — always even. Three is odd. **No path through the application ever produces three.**
+
+Now the line I want you to remember. Same line fifty-six, same operator: mutant forty-seven changes `>= 3` into `< 3` and it **gets killed**. Same line, same four covering tests — one mutant dies, one survives. So reading 'Survived' on forty-six and concluding 'this line needs more tests' is **wrong**. This line has tests, and they are strong enough to kill a different mutant on it.
+
+Two honest caveats. Seed `login_attempts = 1` straight into SQLite and forty-six becomes killable — the application never creates that state, but the label is still **equivalent candidate, awaiting sign-off**.
+
+And the one that matters. Everything I just did was pure dataflow — three assignment statements, no business knowledge. A machine can do that part. What it cannot do is the last step: **what does that number three actually mean?** If the spec says 'lock after three failed attempts', this code locks on the **second** — and the mutant has exposed a real bug, not a harmless equivalence. That needs a human who reads the spec. Which is why equivalent mutants never leave the denominator automatically."
+
+**Evidence:**
+
+- All four mutants extracted from `apps/backend/reports/mutation/mutation_baseline.html` (run 2026-07-11, StrykerJS 9.6.1, 541 mutants) via `node scripts/extract-mutants.js`.
+- Mutant 368 — line 391, EqualityOperator, `>= max → > max`, **Killed**, coveredBy 4, divergence `usage_count == max`, reachable.
+- Mutant 355 — line 382, `expiry < now → <= now`, **Survived**, coveredBy 11, divergence `expiry == now` (ms), reachable but needs a frozen clock.
+- Mutant 46 — line 56, `>= 3 → > 3`, **Survived**, coveredBy 4, divergence `newAttempts == 3`, **not reachable** (domain is {2, 4, 6, …}).
+- Mutant 47 — line 56, `>= 3 → < 3`, **Killed**, coveredBy 4 — the control case.
+- Dataflow proof, three write paths only: `database.js` (`login_attempts INTEGER DEFAULT 0`), `server.js:48` (success → set 0), `server.js:54` (failure → `login_attempts + 2`).
+- Independently reproduced 2026-07-31 with `npx stryker run --mutate "server.js:32-65"` (42 mutants) — same results at a different scope.
+- Correct status of mutant 46 is "equivalent candidate, pending reviewer sign-off"; see also mutants 535/536/537 in `BASELINE.md` §4.
+- Cut plan if rehearsal exceeds 2:45 — drop, in order: case one down to one sentence; the DB-seeding caveat down to the label only. Never cut: the `#46` / `#47` control pair, or the closing "what does 3 mean" paragraph — that is the handoff into the AI section.
+- The "pure dataflow, a machine can do this part" observation is retained but folded into caveat two rather than standing alone; it is the setup for slide 15's insertion point 2.
+
+---
+
+## Slide 11 — The Seven-Step Loop
+
+**Purpose:**
+Give the end-to-end process, stressing that step 1 is an absolute precondition and that step 6 is not always "write more tests".
+
+**Outline Content:**
+
+```xml
+<slide id="11" section="how" time="2:20" script-words="310">
+  <title>The seven-step loop</title>
+  <step n="1" actor="human" type="gate">
+    GREEN BASELINE — tests must pass 100% first. Not green → stop.
+    (Otherwise you cannot tell a mutant failure from a pre-existing failure.)
+  </step>
+  <tool-block label="THE TOOL DOES THIS">
+    <step n="2" name="GENERATE MUTANTS">AST or bytecode; mutation switching — instrument once, toggle each mutant, no recompilation</step>
+    <step n="3" name="DRY RUN">Run the original suite once: confirm green, record which test covers which mutant, measure baseline timing</step>
+    <step n="4" name="SELECTIVE RUN">For each mutant, run only the tests that cover it (naive = N × M → does not scale)</step>
+    <step n="5" name="CLASSIFY">Killed / Survived / NoCoverage / Timeout / Invalid</step>
+  </tool-block>
+  <note>StrykerJS, PIT and MutPy all automate steps 2–5. They differ in mutant generation and step-4 optimisation, not in the idea. <em>Details on the record in the Evidence block — Q&amp;A material, not slide material.</em></note>
+  <step n="6" actor="human" highlight="true">
+    FIX — the value is created here: assertion · test data · new test case ·
+    refactor production code · clarify the requirement · record an equivalent
+  </step>
+  <step n="7" actor="human">RE-RUN AND CONFIRM the target mutant moved to Killed</step>
+  <loop-back from="7" to="4">No need to regenerate mutants</loop-back>
+</slide>
+```
+
+**Speaker Script:**
+"Seven steps. I will point out which ones are the machine and which ones are you.
+
+Step one is an absolute gate: **the tests must be one hundred percent green on the original code first**. If your baseline is already red, a failing mutant run tells you nothing — you cannot separate the mutation from the failure that was already there. Everything after this step is meaningless without it.
+
+The next four steps go into one box, because StrykerJS, PIT and MutPy all do them for you. Steps two and three are mechanical: instrument the program once so each mutant can be switched on and off, then run the original suite exactly once — that dry run confirms the setup, records which test covers which line, and sets the timeout threshold.
+
+Step four is the one that decides whether any of this is feasible: for each mutant, **run only the tests that cover it**. The naive version costs N times M and does not scale. Our config uses `coverageAnalysis: perTest` — Stryker's default, so most people already have it on and do not know.
+
+Step five, classification. The machine does it. Label names differ between tools; the semantic groups do not: detected, undetected, invalid.
+
+Step six is the only place where value is actually created, and the only place that needs a human. You read the survivor list and choose: tighten an assertion, change the test data, add a test case, refactor the production code, record an equivalent, or stop and clarify the requirement. Six directions, picked using the RIPR diagnosis from slide 7. Seeing a survivor does not automatically mean writing another test.
+
+Step seven, re-run and confirm the target mutant is now Killed. You re-run the execution only — no need to regenerate the mutants."
+
+**Evidence:**
+
+- Our real config (`apps/backend/stryker.config.mjs`): `coverageAnalysis: "perTest"`, `timeoutMS: 60000`, `timeoutFactor: 2`, `concurrency: 1` (required because SQLite uses one shared file).
+- Step 1 confirmed: the full suite was 40/40 before the mutation run.
+- **Cut from the script (revision 2026-08-01), kept here as Q&A material:** ~200 words comparing the three tools. The slide has one `<note>` line; three engine architectures spoken aloud with no visual anchor was the densest unanchored passage in the deck, and it did not serve the slide's real message (step 1 and step 6 belong to the human).
+- Tool comparison for Q&A — StrykerJS: AST (Babel) + mutation switching via `__STRYKER_ACTIVE_MUTANT__`; perTest coverage default since v5.
+- PIT: bytecode (ASM, Gregor engine) + hot-swap into a running JVM; per-test block coverage, fast tests prioritised, early exit on kill; `allTestsGreen()` gate.
+- MutPy: AST (`ast` module); `--coverage` only limits the mutated region — public docs do not state whether it has mutation switching or per-mutant test selection, so we claim only what is verifiable.
+- Grouping steps 2–5 into one "TOOL" box is our presentation choice, not any tool's own phase model.
+
+---
+
+## Slide 12 — Into CI/CD: Cheap Enough to Run, Gated on Risk
+
+**Purpose:**
+Answer the cost constraint from slide 9 with four levers and a tiering model, establish the asymmetry that decides the whole design (full-repo cost scales with the codebase, diff-scoped cost scales with the change), and close the HOW section with the one gating rule that matters: block on risk, not on a percentage.
+
+**Outline Content:**
+
+```xml
+<slide id="12" section="how" time="3:00" script-words="420">
+  <title>Into CI/CD: cheap enough to run, gated on risk</title>
+  <cost-levers count="4">
+    <lever n="1" name="fewer mutants">diff scope, module rotation, a stable operator set</lever>
+    <lever n="2" name="fewer tests per mutant">coverage-based selection, bail on first kill</lever>
+    <lever n="3" name="cheaper tests">remove sleeps, inject the clock, deterministic fakes</lever>
+    <lever n="4" name="incremental" highlight="true">reuse previous results, run only what the diff affects</lever>
+  </cost-levers>
+  <incremental-condition>Reuse needs precise change detection: Jest = per test · Vitest/Mocha = per FILE
+    (touch one test → re-run every mutant that file covers). Your runner choice caps this lever.</incremental-condition>
+  <tiers>
+    <tier n="0" trigger="before commit" scope="1 file / 1 class" where="local"/>
+    <tier n="1" trigger="every PR" scope="changed code, unit tests, incremental"/>
+    <tier n="2" trigger="PR touches payment / auth / tenant" scope="+ component + selected integration"/>
+    <tier n="3" trigger="nightly" scope="module rotation, refresh the baseline"/>
+    <tier n="4" trigger="before release" scope="critical services + manual survivor review"/>
+  </tiers>
+  <asymmetry highlight="true">
+    Full-repo cost grows with the SIZE OF THE CODEBASE.
+    Diff-scoped cost is bounded by the SIZE OF THE CHANGE.
+    More workers only buy time on the first one.
+  </asymmetry>
+  <gate render="bottom band, two colours">
+    <wrong>ONE repo-wide percentage → the team optimises the NUMBER, not the risk</wrong>
+    <block>survivor on authorization or money logic · critical code changed with NoCoverage · a new survivor nobody can explain</block>
+    <warn>small score drop · equivalent candidates awaiting review · fewer than 10 mutants in the diff</warn>
+  </gate>
+  <closing-question>Which wrong behaviour is going undetected, where, how risky, and who owns fixing it?
+    NOT: what is the score?</closing-question>
+</slide>
+```
+
+**Speaker Script:**
+"**Four levers.** Generate fewer mutants: mutate only the diff, rotate modules, use a stable operator set. Run fewer tests per mutant: the coverage-based selection from step four, plus stopping at the first kill. Make the tests cheaper — this one matters more than people expect, because **mutation testing amplifies everything slow in your suite**. One two-second sleep becomes hundreds of two-second sleeps.
+
+The fourth is what actually makes CI viable: **incremental mode**. The tool stores the previous run and re-runs only what the diff affects. One condition — it needs to know precisely which tests changed. Jest matches per test; Vitest and Mocha match per file, so touching one test re-runs every mutant that file covers. Your runner choice caps this lever.
+
+Then tiering, and the shape is the message: scope grows as the trigger gets rarer. Every PR runs tier one on changed code only. Payment, auth and tenant isolation escalate to tier two. The full baseline waits for nightly.
+
+So: **do not run the whole repo on every commit.** Someone will say — just add more workers. True, the eight and a half minutes from slide 9 is single-threaded. But that is not the problem. Full-repo cost grows with the **size of the codebase**; diff-scoped cost is bounded by the **size of the change**. More workers buy time on the first one. The second stays stable forever.
+
+Now the gate, and this is where teams get it wrong. Do not set one repo-wide percentage. That does not reduce risk — it teaches the team to optimise the number: exclude the hard packages, disable the strong operators, add assertions purely to kill mutants.
+
+Gate on risk instead. **Block** the merge on a survivor in authorization or money logic, on critical code changed with nothing touching it, on a new survivor nobody can explain. **Warn** — do not block — on a small score drop, on equivalents awaiting review, on a diff too small for percentages to mean anything.
+
+Google does this at the largest scale there is. Their developers rated eighty-five percent of surfaced mutants unproductive, so they moved mutation testing onto changed code at review time. Median per changelist: eight hundred and twenty, down to seven.
+
+The question a healthy policy asks is: *which wrong behaviour is going undetected, where, how risky, and who owns fixing it.* Not: *what is the score.*
+
+All of that is **principle**. In a few minutes we run one real pipeline — that is the **reality**, and the two must match."
+
+**Evidence:**
+
+- e-Shop: full `server.js` ≈ 8 min 30 s (Stryker 9.6.1, concurrency 1 — a deliberate reproducible baseline, not a performance ceiling). Referenced back to slide 9 rather than restated as a new number.
+- Diff-scoped unit for tier 1: the coupon route `server.js:363-443`, 81 mutants — cost bounded by diff size, not repo size.
+- StrykerJS incremental (checked 01/08/2026): available since v6.2; stores `reports/stryker-incremental.json`. Granularity — Jest = Full (per test) · Vitest/Mocha/Tap = per file · Jasmine/Karma = test name only · Command runner = no change detection. e-Shop uses Jest, so we get Full.
+- Fixed (revision 2026-08-01): the script said "Three levers" while the slide showed four from the first second. Now four in both. The "3 then a surprise 4th" structure only works with a staged build; this deck does not use one.
+- Google (Petrović, Ivanković, Fraser & Just, IEEE TSE 2022, arXiv:2102.11378, full text checked 01/08/2026): ~2 billion lines of code, >500 million tests/day; they moved to mutation testing **on changed code during code review**, filter "arid" mutants, and generate **at most one mutant per line**.
+- Google's measured effect — median mutants per changelist: **820 → 77 (one per line) → 7 (arid filtering + one per line)**. Scale of evaluation: 776,740 changelists, >24,000 developers, >1,000 projects. Motivation: developers initially rated **85% of surfaced mutants as unproductive**. The script quotes only the 85% and the 820 → 7 endpoints; the intermediate 77 and the evaluation scale stay here for Q&A.
+- Removed claim (do not restore): "on >90% of lines all mutants share the same fate, so one per line is statistically sufficient" — not traceable in that paper; Google's stated reason is build/test cost and reviewer overload.
+- **Scope decision 2026-08-01 — slide 12b was cut, slide 8 was kept.** Rationale from the author: mutation testing only means something once the audience knows *where* to apply it, so the placement slide carries weight the gating slide does not. What survived the cut and folded back into this slide: the "one repo-wide percentage makes teams optimise the number" warning, the block/warn split, the closing question, and the principle-vs-reality handoff into the demo. What was dropped: the per-tier threshold table (critical 90 / high 80 / medium must-not-drop) and the full Google narrative. Both are recoverable from this Evidence block if a backup slide is wanted for Q&A.
+- Cut-cost note: the old slide 12 rendered 17 lines of text against a 1:30 budget — the worst "slide repeats the script" case in the deck. Splitting fixed the density; the scope decision then merged the halves back into one screen at 2:45, which is still under half the original text-per-minute.
+
+---
+
+## Slide 13 — AI-Written Tests: The Structure Is There, the Oracle Is Not
+
+**Purpose:**
+Build the **problem** that slide 14 will answer. When tests are no longer written by humans, the most common acceptance criteria — it runs, and coverage went up — are exactly the criteria slides 3 and 4 proved insufficient. And the thing agents get wrong is not the test structure; it is the oracle.
+
+**Outline Content:**
+
+```xml
+<slide id="13" section="ai-direction-A" time="2:35" script-words="350">
+  <title>AI-written tests: the structure is there, the oracle is not</title>
+  <content-budget>3 blocks + 1 footnote line. Exactly ONE number on screen (80.2%) —
+    and therefore exactly ONE number in the script. Sample sizes stay in the footnote and in Q&amp;A.</content-budget>
+  <current-practice>
+    <pipeline>agent writes tests → tests pass → coverage rises → merge</pipeline>
+    <callout>That is the entire acceptance criteria.</callout>
+    <link-back>Exactly the criteria slides 3–4 proved insufficient — now applied to hundreds of tests generated in seconds.</link-back>
+  </current-practice>
+  <headline-finding>
+    <stat value="80.2%">of agent-authored test patches have a weak oracle or no explicit oracle</stat>
+    <clarify>There IS a test file. There IS a test function. The code IS called. Nothing verifies whether the behaviour is right.</clarify>
+  </headline-finding>
+  <broken-oracles caption="All three look perfectly reasonable when you read the code">
+    <type n="1" name="SELF-CONFIRMING">asserts back the value the implementation just returned</type>
+    <type n="2" name="IMPLEMENTATION-BOUND">asserts iteration order or internal structure</type>
+    <type n="3" name="WRONG ORACLE">recalls buggy logic from training data and asserts it is correct</type>
+    <conclusion>Only one way to know: give the suite a KNOWN behavioural deviation and see if it catches it. → mutation testing</conclusion>
+    <canonical-home>These three are stated in full HERE and only here. Slide 14 calls back to them in one clause.</canonical-home>
+  </broken-oracles>
+  <footnote>Banik et al. 2026 (86k patches, 33k agent PRs, 5 tools) · MutGen, IEEE TSE · Alshahwan et al., Meta, FSE 2024</footnote>
+</slide>
+```
+
+**Speaker Script:**
+"Now the part most directly connected to how everyone here is working right now.
+
+The common workflow: the agent writes tests, they pass, coverage goes up, merge. For a lot of teams that is the *entire* acceptance criteria — exactly the criteria slides 3 and 4 proved insufficient, now applied to hundreds of tests generated in seconds instead of a few dozen written by hand over days.
+
+And someone measured it at scale. A study this year scanned agent-authored test patches across five tools — Codex, Copilot, Devin, Cursor and Claude Code — over tens of thousands of pull requests. **Eighty point two percent** had a weak oracle, or no explicit oracle at all.
+
+That does not mean 'no tests'. There is a test file, a test function, the code gets called, CI is green. Nothing verifies whether the behaviour is correct. The paper's conclusion is worth memorising: **coding agents generate test structure far more reliably than they generate oracle logic.**
+
+Why? This is the most important sentence on the slide: **a model optimises what is measured and rewarded.** Coverage is measurable and easy — you only have to call the function. A strong oracle has no signal rewarding it, not in training and not in review. If your acceptance criterion is coverage, you get exactly what is optimised for coverage.
+
+Three ways the oracle breaks. **Self-confirming**: the test asserts the result equals what it just took — passes on the original, passes on the mutant, kills nothing. **Implementation-bound**: asserting iteration order or internal structure — breaks on a harmless refactor, detects no behavioural fault. **Wrong oracle**: the model recalls buggy logic from training data and asserts it is correct.
+
+What all three share: **none is visible by reading the code.** A reviewer reads them and approves.
+
+So what is left? Give the suite a behavioural deviation you **already know about** and see whether it catches it. If it does, the oracle is real. If not, that assertion is decoration. That is exactly the definition of mutation testing, unchanged since slide 5 — only the thing being graded has changed, and with it the role: from a nice-to-have into an acceptance criterion, because generation is now faster than review.
+
+When tests are produced faster than you can read them, you need a machine to grade them. The next slide uses that same machine to make the agent write a decent oracle in the first place."
+
+**Evidence:**
+
+- The one number on screen — **80.2%** (full text verified 01/08/2026): Banik, Chowdhury & Shamim, *All Smoke, No Alarm: Oracle Signals in Agent-Authored Test Code*, arXiv:2606.18168. 86,156 test-file patches, 33,596 agent PRs, 2,807 repos, 5 tools, Dec 2024 – Jul 2025.
+- Same paper: strong value assertions (S1) 11.3%; multi-signal strong oracles (S3) 5.7%. On newly created test files, strong-oracle rate ranges 18% (Codex) → 67% (Claude Code), χ² = 810.2, p < 0.001. Labelling reliability: Cohen's κ = 0.77; classifier agreement with human labels 86.7%.
+- Three caveats if challenged: (a) the unit is a **patch**, not a test case; (b) repos filtered to 100+ stars; (c) Codex is 65% of the sample, so quote the 18–67% per-tool range if you want to be safe.
+- **Script change (revision 2026-08-01):** the sample sizes (86,156 patches / 33,596 PRs / 2,807 repos) are no longer spoken. The slide's own content-budget says one number on screen; reading four numbers when one is displayed gives the audience nothing to anchor to. They stay here and in the footnote for Q&A.
+- Hardest expected challenge: Yoshimoto et al. (NAIST), *Testing with AI Agents*, arXiv:2603.13724, AIDev dataset, 2,232 commits — AI tests show **higher assertion density** than humans (median 2 vs 1). Answer: counting assertions is not the same as evaluating what they verify; Banik's W1–W5 group includes "runs without error", non-null, mock and snapshot assertions. That paper's own future work says *"mutation testing should determine if the high assertion density of AI tests translates into superior fault-detection capabilities"*.
+- Q&A backup (verified 01/08/2026), MutGen — Wang, Xu, Briand & Liu, IEEE TSE, arXiv:2506.02954: subject `id_81` reached 100% coverage with 4% mutation score, caused by a missed leap-year corner case. **This is a motivating example in §II-A, one subject — NOT a benchmark average.** Never pair "4%" with "89.5%" as an improvement; they are different units.
+- MutGen Table I (204 subjects, 4 methods): line coverage spans 95.4%→98.3% and 96.3%→99.0% (under 3 points), while mutation score spans 67.4%→89.5% and 58.1%→89.1% (22–31 points). Best line: on Leetcode-Java the method with the **highest** coverage (EvoSuite, 99.0%) had the **lowest** mutation score (58.9%) — coverage ranks them backwards. A12 effect size 0.650–0.899.
+- Meta TestGen-LLM (Alshahwan et al., FSE 2024, arXiv:2402.09171): 75% build, 57% pass reliably, 25% increase coverage; 11.5% of classes improved; 73% of suggestions accepted into production.
+- Correction to an earlier draft: Meta's "assured improvement" signal **is** coverage. The lesson is "you need a mandatory, automated, measurable gate", **not** "industry already uses mutation score as that gate". Replacing coverage with mutation score is our proposal [I].
+- **Meta cut from the script (revision 2026-08-01)** for time. The "industry already gates automatically at scale" point is carried by the Google material on slide 12, which is stronger and already on a slide. Keep this as Q&A backup — it is the only source specifically about *LLM-generated* tests being gated, so use it if someone challenges whether slide 14's gate is realistic in production.
+- Honest limitation if asked: our group has **not** measured mutation score on a fully AI-generated suite. The 40 baseline tests are human-written; AI was used narrowly for assertion synthesis and equivalent-mutant triage (slides 14–15).
+
+---
+
+## Slide 14 — Mutation-Feedback Prompting: The Gate Is the Command You Just Ran
+
+**Purpose:**
+Give the audience a workflow they can run immediately after the seminar, using only two things they already have: an installed mutation testing CLI and an LLM chat window. No scripts, no plugins, no custom model.
+
+**Outline Content:**
+
+```xml
+<slide id="14" section="ai-direction-B" time="2:30" script-words="330">
+  <title>Mutation-feedback prompting: the gate is the command you just ran</title>
+  <prompt-contrast>
+    <weak>"Write tests for this function." → no correctness criterion. Not checkable.</weak>
+    <strong>"Write a test that PASSES on the original and FAILS on this mutant." → BINARY criterion. Machine-checkable.</strong>
+    <difference>The only difference: the second one ships a concrete deviation with it.</difference>
+  </prompt-contrast>
+  <same-loop reference="slide 11">
+    <steps range="1-4" actor="CLI">generate · run · classify — deterministic, AI does not touch this</steps>
+    <step n="5" actor="LLM">read the survivor → which RIPR link is broken?</step>
+    <step n="6" actor="LLM + human">suspected equivalent → LLM triage → HUMAN signs;
+      otherwise → LLM writes an assertion targeting the mutant</step>
+    <step n="7" actor="CLI">re-run ← THIS IS THE VALIDATION GATE</step>
+  </same-loop>
+  <validation-gate>
+    <definition>Re-run the exact command from step 1. Open the report, find that mutant ID: Survived → Killed?</definition>
+    <outcome condition="did not flip">the assertion is useless — reject</outcome>
+    <outcome condition="flipped but the oracle is not business-correct">human review blocks it (HG-3)</outcome>
+    <dual-role>Same gate, two roles: slide 13 grades agent-written tests; slide 14 grades the assertion the LLM just wrote.</dual-role>
+  </validation-gate>
+  <callback to="slide 13">The LLM's assertion fails in the SAME three ways — self-confirming ·
+    implementation-bound · wrong oracle. None visible by reading. Only the re-run separates them.</callback>
+  <footnote>MuTAP, Dakhel et al., IST 2024 — 93.57% vs 65.94% Pynguin (HumanEval) ·
+    Our data [I]: 5 assertions through the gate in week T6 — 3 used as-is, 2 hand-corrected, 0 rejected</footnote>
+</slide>
+```
+
+**Speaker Script:**
+"The process problem first. Tell an LLM 'write tests for this function' and you have no way of knowing whether what comes back is worth anything. Say instead: 'here is a mutant — write me a test that **passes on the original and fails on this mutant**' — and a vague task becomes one with a binary criterion. And that criterion is **machine-checkable**.
+
+This is not a new process. It is the seven-step loop from slide 11 with AI inserted at three points. Steps one to four — generate, run, classify — stay CLI and deterministic; AI does not touch them. At step five we ask the LLM one question: which RIPR link is broken. At step six, if we suspect an equivalent, the LLM triages and a human signs off; otherwise the LLM writes an assertion targeting that specific mutant. And step seven — the re-run — **is** the Validation Gate. Not a new system we built. The same command from step one, run once more.
+
+Why does it need a gate? Because the LLM's assertion fails in exactly the three ways from the previous slide — self-confirming, implementation-bound, wrong oracle — and **none of the three is visible by reading**. Only the re-run separates them.
+
+And 're-run' is literal: same file, same command, open the report, find that mutant ID, ask one question. Did Survived become Killed? If not, the assertion is useless — reject it. If it did but the oracle is not business-correct, the reviewer blocks it; that is HG-3. Either way: no merge. One gate, two roles — the previous slide graded agent-written tests, this one grades the assertion the LLM just wrote.
+
+Our own numbers, and they are small: five AI-proposed assertions through this gate in week six. Three used as written, two hand-corrected, none rejected. One turned mutant three ninety-seven from Survived to Killed — the assertion expected minus four and a half million, the mutant produced minus fifty-five thousand.
+
+At benchmark scale: MuTAP reached ninety-three point six percent on HumanEval against sixty-six for Pynguin — the result of exactly the loop you have just seen."
+
+**Evidence:**
+
+- Our Validation Gate accounting, week T6: 5 AI-proposed assertions — 3 used as-is, 2 hand-corrected, 0 rejected.
+- Gate example — Mutant 397 (`ArithmeticOperator`, `server.js:L420`): the new assertion passes on the original; on the mutant, `expected -4500000, received -55556` → `killedBy: ["1"]`.
+- MuTAP (Dakhel et al., *Information & Software Technology* 2024, arXiv:2308.16557, full text verified 30/07/2026): **93.57% vs 65.94%** on HumanEval; **94.91% vs 67.54%** on Refactory. Always name the benchmark — there are two pairs of numbers.
+- Caveat from the same source: these benchmarks are sensitive to model version, temperature and benchmark contamination (HumanEval is in many training sets), so they do not transfer directly to a real codebase.
+- Internal measurement (2026-07-30, `server.js:363-443`, 81 mutants, Stryker 9.6.1): adding one test without touching the source → **0/81 mutant IDs shifted** (matched on `mutatorName` + position + replacement).
+- Same run: `--incremental` after adding a test that kills mutant 74 → the mutant flipped Survived→Killed, and against a full non-incremental run on the same state there were **0 status differences across all 81 mutants**, but it finished in seconds instead of minutes.
+- **Resolved (revision 2026-08-01) — this line previously contradicted the script.** Final state: the Stryker configuration block (`coverageAnalysis: perTest`, `--incremental`, `// Stryker disable next-line`, `--reporters dashboard`) is **cut from the script**, kept here for Q&A — it is configuration detail and does not serve this slide's claim that the gate is a command you already run. `perTest` is mentioned once on slide 11 where it belongs; `disable next-line` is demonstrated on slide 15 where it is the point. The "one gate, two roles" block is **kept** in both slide and script — it is the only sentence connecting the two AI directions.
+- Also cut: the full restatement of the three broken-oracle types (~180 words), now a one-clause callback. They were previously enumerated in full on slide 13 and again here, same order, same closing sentence.
+
+---
+
+## Slide 15 — Where AI Plugs In — and Where the Line Is
+
+**Purpose:**
+Give the full map of the three insertion points with their very different maturity levels, then close with the list of things AI does **not** solve. This is the anti-hype slide of the talk.
+
+**Outline Content:**
+
+```xml
+<slide id="15" section="ai-map" time="2:15" script-words="310">
+  <title>Where AI plugs in — and where the line is</title>
+  <deterministic-core>
+    generate mutants → selective run → classify → compute score
+    (AI does not touch this — and that is a good thing)
+  </deterministic-core>
+  <insertion-points count="3" order="as spoken, most usable first">
+    <point n="1" name="FIX TESTS" task="write an assertion targeting a survivor"
+           usable-now="YES — chat + CLI" main-risk="must pass the gate (slide 14)"/>
+    <point n="2" name="SCREEN EQUIVALENTS" task="LLM triages equivalent candidates"
+           usable-now="YES — chat, LOW CONFIDENCE" main-risk="FALSE NEGATIVE → the score improves artificially"/>
+    <point n="3" name="GENERATE / PRIORITISE MUTANTS" task="LLM proposes realistic-bug mutants · rank by kill history"
+           usable-now="NO — needs a plugin, or a history database" main-risk="LLMorpheus · Google, IEEE TSE 2022"/>
+  </insertion-points>
+  <numbering-note>Numbered in speaking order. The old 3 → 2 → 2b → 1 layout said "four" on screen
+    while the script said "three", and the spoken order matched neither.</numbering-note>
+  <existing-button>
+    // Stryker disable next-line ConditionalExpression: &lt;reason&gt; — signed: &lt;name&gt;
+    → the mutant becomes "Ignored" and leaves the denominator.
+    Missing reason or missing name: no merge.
+  </existing-button>
+  <ai-does-not-remove>
+    <item>the equivalent mutant problem (undecidable)</item>
+    <item>flaky tests</item>
+    <item>the cost of running mutants</item>
+    <item>the oracle problem</item>
+    <item>the need for a human to sign off (no source in this talk shows a working autonomous loop)</item>
+  </ai-does-not-remove>
+  <takeaway>AI shortens triage TIME. It does not shorten RESPONSIBILITY.</takeaway>
+</slide>
+```
+
+**Speaker Script:**
+"This slide is the map. First, what AI does **not** touch: the core — generate mutants, run selectively, classify, compute the score — is fully deterministic. Same input, same output. That is a good property. Do not trade it away.
+
+AI plugs in at three points, and they are at very different levels of maturity.
+
+**Point one, fixing tests.** That was the previous slide. Usable today, chat window plus CLI, with a gate that catches it when it goes wrong.
+
+**Point two, screening equivalent candidates.** Also usable today — and this is the dangerous one. Remember slide 10b: tracing that the login counter is always even was pure dataflow, and a machine can do pure dataflow. But **false negatives are the worst kind of error here.** Label a killable mutant 'equivalent' and you remove a real test gap from the report. It does not make the score worse. It makes the score **look better than it is**.
+
+And that mechanism already has a button: `// Stryker disable next-line`. We verified it directly — one comment line moves the mutant to Ignored, out of the denominator, and the score improves. So the control has to be procedural, not technical: the reason must be written out, it appears in the report, and it carries the name of whoever signed. Missing either one, no merge.
+
+**Point three, generating or prioritising mutants.** Not usable from a chat window. LLM-generated mutants need a plugin. Prioritising by kill history is what Google runs, but that is a heuristic over a history database we do not have.
+
+Then the list on the right, and I will only say two of them out loud. AI does not remove the equivalent mutant problem — that is a mathematical property, not a tooling limitation. And it does not remove the human sign-off: none of the sources in this talk shows evidence of a working autonomous loop. The rest are on the slide.
+
+The takeaway: AI shortens triage **time**. It does not shorten **responsibility**."
+
+**Evidence:**
+
+- Real triage in our repo: mutants 535/536/537 at `server.js:L570` mutate the `require.main === module` guard. AI helped identify this as a startup guard, not `order-status` or `cart/checkout` logic. Recorded in `BASELINE.md` as Equivalent / dead-code candidate, **needs reviewer sign-off before leaving the denominator**.
+- Internal measurement for the suppression mechanism (2026-07-30, `server.js:363-443`, Stryker 9.6.1): adding `// Stryker disable next-line ConditionalExpression: <reason>` above an `if` moved exactly the 2 `ConditionalExpression` mutants on that line to `status: "Ignored"`, with `statusReason` carrying the literal reason, visible in both `mutation.json` and `mutation.html`. A `BooleanLiteral` mutant on the same line was unaffected — filtering is by mutator name, not by line.
+- Tian et al., ISSTA 2024 (arXiv:2408.01760): fine-tuned UniXCoder for equivalent mutant detection — Precision 94.33%, Recall 81.81%, **F1 86.58%**, averaging **+35.69% F1** over 10 prior EMD techniques on 3,302 Java mutant pairs. The headline figure is F1, not precision — and it does not transfer to chat-based use.
+- LLMorpheus: Tip, Bell & Schäfer, arXiv:2404.09952. ⚠️ The "IEEE TSE 2025" venue could not be confirmed on arXiv or DBLP — cite the arXiv ID only. Trade-offs: one API call per mutation, non-deterministic across runs, some mutants are equivalent refactorings.
+- Google: Petrović, Ivanković, Fraser & Just, IEEE TSE 2022 (arXiv:2102.11378) — 85% of mutants rated unproductive by developers.
+- The "usable now?" column replaces the four-level maturity axis (established / emerging / experimental / speculative), which is retained in appendix §4.8 and backup slide B8.
+- Moved to backup B8 to fit the 1:45 budget: the 535/536/537 triage detail, the UniXCoder F1 figure, and the LLMorpheus trade-off detail.
+
+---
+
+## Slide 16 — Demo: One Surviving Mutant, Audited and Fixed by AI
+
+**Purpose:**
+Introduce the live demo that follows: the SUT, the baseline that "looks fine," and the two tools that run everything from here on — StrykerJS and Claude Code. No diagnosis happens on this slide. That is all live, right after it, with no slide of its own.
+
+**Outline Content:**
+
+```xml
+<slide id="16" section="demo" time="1:30" script-words="210">
+  <title>Demo: one surviving mutant, audited and fixed by AI</title>
+  <sut>
+    <route>POST /api/apply-coupon (FR-09, server.js:363-443)</route>
+    <shape>5 sequential guards: is_active · min_order · expired_at · user_id · max_uses</shape>
+    <shape>2 calculation branches: percent / fixed</shape>
+  </sut>
+  <baseline render="three real terminal blocks, stacked">
+    <command result="40/40 pass">npm test</command>
+    <command result="server.js: 51.66% lines, 45.8% branches">npm run test:coverage</command>
+    <command result="81 mutants · 52 killed · 23 survived · 6 no-coverage · kill rate 69.3% — LOWEST of our 4 routes">npx stryker run --mutate "server.js:363-443"</command>
+  </baseline>
+  <tooling>
+    <tool status="already installed, unchanged all talk">StrykerJS 9.6.1</tool>
+    <tool status="chat / agent CLI, no extra infrastructure">Claude Code</tool>
+  </tooling>
+  <coming-up render="live, no slide">
+    <step n="1">Claude Code AUDITS one surviving mutant — diagnoses it with RIPR</step>
+    <step n="2">Claude Code WRITES an assertion targeting that exact mutant</step>
+    <step n="3">Validation Gate — the same Stryker command above, re-run — decides if it merges</step>
+  </coming-up>
+</slide>
+```
+
+**Speaker Script:**
+"This is the SUT. e-Shop's coupon route — FR-09. We picked it because it is the textbook case from slide 8: high logic density, five guards in a row, two calculation branches, and it is money logic. Exactly the kind of code where one survivor is expensive.
+
+Existing tests: seventeen for this route, written with supertest and Jest.
+
+Run `npm test`: forty out of forty pass. Run coverage: about fifty-one percent of lines. At this point every signal is green or acceptable. If we only looked at these two commands, we would sign off.
+
+Then Stryker, scoped to exactly the coupon route's lines. Eighty-one mutants. Fifty-two killed. Twenty-three survived. Kill rate on the covered part is sixty-nine point three percent — the **lowest of our four routes**.
+
+From here we leave the slide. Only two tools run the rest of this demo, and both are already installed: StrykerJS — the exact command you just saw — and Claude Code, a chat-based agent CLI. No new infrastructure.
+
+We will pick one of the twenty-three survivors and let Claude Code do two things. First, read the report and diagnose it with the RIPR model from slide 7 — which link is broken, and why. That is the **audit**. Second, write an assertion that targets exactly that mutant — that is the **fix**. Finally, this same Stryker command runs one more time as the Validation Gate, and that decides whether the assertion gets merged. Not the model's opinion of its own work — the re-run."
+
+**Evidence:**
+
+- `BASELINE.md` §3b per-route breakdown (recomputed 2026-07-31): FR-09 `POST /api/apply-coupon` — 81 total, 52 killed, 23 survived, 6 NoCoverage, covered 75, kill rate 69.3% (lowest of the four; compare FR-08 88.2%, FR-10 86.2%, FR-02 78.6%).
+- Coverage: `baseline-completion-evidence-2026-07-11.md` — `server.js` 51.66% lines, 45.8% branches; suite 40/40 pass in 1.167s.
+- Full operational detail for the live demo that follows (the specific mutant, both prompts, per-step timing, three-layer fallback if something breaks) lives in the design doc's runbook (§5.9–§5.16), not repeated on this slide or in this script.
+- **Scope decision carried over from the design doc (2026-08-01):** the old plan had a human write the fix by hand on one slide, then AI write a fix on a second slide. Both are now one live demo, with Claude Code doing the diagnosis step a human used to narrate from a table. The two mandatory human checkpoints (an ambiguous requirement, and an oracle-correctness review) stay — see the live demo section below.
+
+**Transition:**
+"We're picking this one. It survives even though eleven tests execute exactly its line. Now let Claude Code open the report itself."
+
+---
+
+## Live Demo (no slide) — Claude Code Audits and Fixes Mutant 355
+
+**Purpose:**
+Close the whole argument with one real loop, before-numbers and after-numbers — except this time a human does not diagnose the survivor or write its fix by hand. Claude Code does both. The human keeps exactly two sign-off points: whether the code's ambiguous behaviour should be pinned as-is (HG-2), and whether a green gate is actually business-correct (HG-3).
+
+**Why there is no slide:** the same reason Demo C has none — this is a terminal activity, meant to be watched, not read off a screen.
+
+**What happens on the terminal (summarised here, not shown as an on-screen block):**
+
+```
+MUTANT 355 · EqualityOperator · server.js:382 · coveredBy: 11 tests
+  -  if (expiry <  now)   return 400 "Coupon has expired";
+  +  if (expiry <= now)   return 400 "Coupon has expired";
+  → 11 tests execute this line. NONE of them fails.
+
+STEP 1 — AUDIT (prompt Claude Code with the report + source + mutant 355's
+          diff; ask it to diagnose with RIPR — which link is broken?)
+  Claude Code answers: Reachability holds (11 tests reach the line) — broken
+  at Infection, because no test uses expired_at EXACTLY EQUAL to now (only
+  "clearly expired" and "clearly still valid" exist, nothing at the ON-point)
+  → Mode 1: BOUNDARY_CONDITION_MISSED
+
+  ⚠️ HUMAN STOPS HERE (HG-2): does expiry == now mean the coupon is still
+     valid, or expired? The spec does not say → an AMBIGUOUS REQUIREMENT,
+     not a weak test. The presenter decides (Claude Code does not get to):
+     pin the current behaviour — still valid — as a regression guard.
+
+STEP 2 — FIX (prompt Claude Code to write one ON-point test with a frozen
+         clock, pinning the "still valid" decision just made)
+  Claude Code returns an assertion — pasted live, not pre-written
+
+STEP 3 — VALIDATION GATE (the exact Stryker command from slide 16, re-run)
+  $ npm test -t '<test name>'                                  → PASS on the original?
+  $ npx stryker run --mutate "server.js:363-443" --incremental
+  → mutant 355:  Survived → Killed ?
+
+  ⚠️ HUMAN CLOSES HERE (HG-3): a green gate does NOT prove the oracle is
+     business-correct. Real example from our repo: mutant 397 — an
+     assertion that pins the exact value of a known bug, BUG-09-001,
+     passes the gate, but the oracle is wrong. A reviewer still blocks it.
+```
+
+**Speaker Script (summary — the full script and per-step timing live in the design doc's runbook, §5.14 and §5.16):**
+"Mutant 355. Eleven tests execute line 382, none of them fails. Instead of diagnosing it ourselves, we hand that to Claude Code — give it the report, the source, and the mutant's diff, and ask one question: which RIPR link is broken.
+
+[call Claude Code live — audit]
+
+It answers: Reachability holds, broken at Infection — no test stands exactly on `expiry == now`. Exactly what slide 7's model predicts.
+
+But before we let it write a test, there is a question it cannot answer on its own: does `expiry == now` mean the coupon is still valid, or expired? The spec does not say. This is an **ambiguous requirement**, not a weak test — and this is exactly where a human decides, not the AI. We pin the current behaviour as a regression guard.
+
+[call Claude Code live — fix, paste the assertion it returns]
+
+Now the Validation Gate — the same Stryker command from the previous slide, nothing new. Does it pass on the original? Does mutant 355 flip from Survived to Killed?
+
+And one thing before we leave this: even a green gate is not enough. Mutant 397 in our repo is a real example — an assertion that pins the exact value of a known bug, passes the gate, but the oracle is wrong. A reviewer still has to block it. The gate proves the test can *tell the mutant apart*. It does not prove the oracle is *business-correct*.
+
+We ran this gate on five AI-proposed assertions in week six: three used as written, two hand-corrected, zero rejected. This was not one lucky run."
+
+**Evidence:**
+
+- Mutant 355 (`seminar/01-research/survivors.json`, run 2026-07-11): `id: "355"`, `mutatorName: "EqualityOperator"`, line 382, `status: "Survived"`, `coveredBy`: 11 tests, `killedBy: []`. Classification: `BASELINE.md` §5, Mode 1.
+- Verified precedent for the same frozen-clock technique, mutant 28 (FR-02 login, `server.js:L40`): Survived → **Killed**, `killedBy: ["25"]`, after adding a test with `global.Date = FrozenDate`.
+- Gate accounting, week T6 (`BASELINE.md` §6): 5 AI-proposed assertions — 3 used as-is, 2 hand-corrected, 0 rejected. Gate example — mutant 397 (`ArithmeticOperator`, `server.js:L420`): new assertion passes on the original; on the mutant, `expected -4500000, received -55556` → `killedBy: ["1"]`.
+
+> ⚠️ The rerun result for mutant 355 — both the audit and the fix, produced live by Claude Code — is an **expectation, not yet measured**. Must be rehearsed at least three times, with the best response from each prompt saved as a pasteable fallback, before this is presented as fact. If the rerun does not kill the mutant, or the RIPR diagnosis comes out wrong, that is still a valid lesson and must be stated plainly — never silently rewritten to match the expectation.
