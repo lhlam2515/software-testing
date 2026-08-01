@@ -24,14 +24,14 @@ Example: `BUG-B3-001` = first defect found on screen B3 (registration form).
 
 | Metric | Count |
 | ------ | ----- |
-| Total findings | 8 |
-| — Type: Bug | 7 |
-| — Type: Usability | 1 |
-| From Task 1B (checklist run) | 8 |
+| Total findings | 14 |
+| — Type: Bug | 12 |
+| — Type: Usability | 2 |
+| From Task 1B (checklist run) | 14 |
 | From Task 2 (user testing) | 0 |
 | From Task 3 (cross-platform) | 0 |
 | Submitted to Google Form | 0 |
-| **Log rows == form submissions?** | No — 8 rows logged, 0 submitted to the Google Form so far |
+| **Log rows == form submissions?** | No — 14 rows logged, 0 submitted to the Google Form so far |
 
 ---
 
@@ -47,6 +47,12 @@ Example: `BUG-B3-001` = first defect found on screen B3 (registration form).
 | BUG-B1-005 | B — B1 Home/Event Listing | Bug | Browser Back from event detail loses the active status filter and list scroll position | IA-03-05; Nielsen #3 — User control and freedom | Major | Persist filter + scroll state (e.g. in the router/query string or a client cache) and restore it on back-navigation | artifacts/screens/B1-home-event-list/screenshots/IA-03-05-back-nav-loses-filter-scroll.png | |
 | BUG-B1-006 | B — B1 Home/Event Listing | Bug | Status-filter toggle buttons (Upcoming/Ongoing/Ended) don't expose selected state to assistive tech | IA-04-08; WCAG 2.2 AA SC 4.1.2 | Minor | Add `aria-pressed` (or `role="tab"` + `aria-selected` if treated as a tablist) to the three toggle buttons | artifacts/screens/B1-home-event-list/screenshots/IA-04-08-filter-chip-no-aria-state.png | |
 | BUG-B1-007 | B — B1 Home/Event Listing | Bug | "Save event" success confirmation is not announced to assistive tech | IA-04-09; WCAG 2.2 AA SC 4.1.3 | Minor | Wrap the save/saved state change in an `aria-live="polite"` region (or add a toast with `role="status"`) | artifacts/screens/B1-home-event-list/screenshots/IA-04-09-save-no-aria-live.png | |
+| BUG-B2-001 | B — B2 Event Detail | Bug | Category/campus tag chip text fails WCAG contrast minimum | IA-01-06; WCAG 2.2 AA SC 1.4.3 | Minor | Darken the chip text colors (orange/teal) until measured contrast is >= 4.5:1 against white | artifacts/screens/B2-event-detail/screenshots/IA-01-06-category-chip-contrast.png | |
+| BUG-B2-002 | B — B2 Event Detail | Bug | Info-card borders (Event date/Registration period/Check-in period) fail WCAG non-text contrast minimum | IA-01-07; WCAG 2.2 AA SC 1.4.11 | Minor | Swap `border-cyan-200` for a darker cyan (>= 3:1 against the card background) on all three info cards | artifacts/screens/B2-event-detail/screenshots/IA-01-07-card-border-contrast.png | |
+| BUG-B2-003 | B — B2 Event Detail | Bug | Guest role label stays untranslated after switching UI language to Vietnamese | IA-01-14; S13 Challenges (Localization) | Minor | Localize the fixed role-name strings (Guest/Student/Lecturer) the same way other chrome strings are localized | artifacts/screens/B2-event-detail/screenshots/IA-01-14-guest-role-not-translated.png | |
+| USA-B2-001 | B — B2 Event Detail | Usability | Event date/registration/check-in times show no explicit time-zone label | IA-01-16; Nielsen #2 — Match between system and the real world | Nielsen severity 2 | Append a fixed timezone label (e.g. "GMT+7") next to every displayed date/time range on this screen | artifacts/screens/B2-event-detail/screenshots/IA-01-16-no-timezone.png | |
+| BUG-B2-004 | B — B2 Event Detail | Bug | "Share event" gives no feedback on click | IA-04-01; Shneiderman #3 — Offer informative feedback | Minor | Show a toast/inline confirmation (e.g. "Link copied") once the share action completes | artifacts/screens/B2-event-detail/screenshots/IA-04-01-share-event-no-feedback.png | |
+| BUG-B2-005 | B — B2 Event Detail | Bug | Registration-approved confirmation is not announced to assistive tech | IA-04-09; WCAG 2.2 AA SC 4.1.3 | Minor | Wrap the "Registration status" badge update in an `aria-live="polite"` region (or add a toast with `role="status"`) | artifacts/screens/B2-event-detail/screenshots/IA-04-09-registration-approved-no-aria-live.png | |
 
 ---
 
@@ -306,9 +312,13 @@ The dashboard returns with the "Ongoing" filter still active and the list scroll
 
 The filter resets to the default "Upcoming" and the scroll position resets to the top — both pieces of state are lost.
 
+**Root cause (confirmed via `window.location.href` and storage inspection)**
+
+The active filter is never written anywhere durable: `window.location.href` stays a bare `/dashboard` with no query string at every step (before the filter click, after it, and after Back), and neither `localStorage` nor `sessionStorage` holds a filter key. The selection lives only in the dashboard route component's in-memory React state. A browser Back navigation causes that component to mount fresh, so it re-initializes to its default state ("Upcoming", scroll 0) — this is a state-persistence gap in the component, not the URL being overwritten or reset by a router push (there is no push to begin with). Independently reproduced from B2 (`/events/39` -> Back) with the same result — see `artifacts/screens/B2-event-detail/checklist-run.md` IA-03-05.
+
 **Suggested fix**
 
-Persist filter and scroll state (e.g. in the URL query string or a client-side cache keyed by the list route) and restore it on back-navigation.
+Lift the filter into the URL query string (e.g. `/dashboard?status=ongoing`) so it survives a fresh mount, and either restore scroll from a client-side cache keyed by the list route or rely on the browser's native scroll restoration once the list renders with the correct filter applied before paint.
 
 **Evidence**
 
@@ -439,6 +449,274 @@ But a page-wide scan for any live-region mechanism returns zero matches — not 
 ```
 
 (`document.querySelectorAll('[aria-live]')`, `[role=status]`, `[role=alert]` all empty; `document.body.innerHTML.includes('aria-live')` is `false` — the string does not exist anywhere in the rendered page, confirming this isn't a scoping/selector miss.)
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `BUG-B2-001` — Category/campus tag chip text fails contrast
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B2 — Event Detail |
+| Type | Bug |
+| Source task | Task 1B (checklist run, IA-01-06) |
+| Severity | Minor |
+| Heuristic violated (usability only) | — |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/events/39` while logged in.
+2. Look at the "Conferences & Seminars" and "Cho Quan Campus" tag chips under the event title.
+
+**Expected**
+
+Tag text meets the WCAG 2.2 AA 4.5:1 minimum contrast ratio against its background (SC 1.4.3).
+
+**Actual**
+
+Sampling the rendered pixels: "Conferences & Seminars" text ~rgb(245,74,0) on white measures ~3.58:1; "Cho Quan Campus" text ~rgb(0,153,102) on white measures ~3.65:1 — both below the 4.5:1 minimum.
+
+**Suggested fix**
+
+Darken both chip text colors (orange and teal variants) until the measured ratio is >= 4.5:1.
+
+**Evidence**
+
+`artifacts/screens/B2-event-detail/screenshots/IA-01-06-category-chip-contrast.png`
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `BUG-B2-002` — Info-card borders fail non-text contrast
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B2 — Event Detail |
+| Type | Bug |
+| Source task | Task 1B (checklist run, IA-01-07) |
+| Severity | Minor |
+| Heuristic violated (usability only) | — |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/events/39` while logged in.
+2. Inspect the border of the "Event date" / "Registration period" / "Check-in period" info cards.
+
+**Expected**
+
+Non-text UI element borders meet the WCAG 2.2 AA 3:1 minimum contrast ratio (SC 1.4.11).
+
+**Actual**
+
+The cards use `border-cyan-200` (~rgb(162,244,253)) against a white/cyan-gradient background — measured ratio ~1.25:1, sampled directly from the border pixel row of a cropped screenshot. All three info cards on the screen share this class.
+
+**Suggested fix**
+
+Swap `border-cyan-200` for a darker cyan (e.g. `cyan-400`/`cyan-500`) that clears 3:1 against the card background.
+
+**Evidence**
+
+`artifacts/screens/B2-event-detail/screenshots/IA-01-07-card-border-contrast.png`
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `BUG-B2-003` — Guest role label not translated to Vietnamese
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B2 — Event Detail |
+| Type | Bug |
+| Source task | Task 1B (checklist run, IA-01-14) |
+| Severity | Minor |
+| Heuristic violated (usability only) | — |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/events/39` while logged in.
+2. Switch the UI language from English to Vietnamese via the header switcher.
+3. Look at the "Guest roles" section's role name.
+
+**Expected**
+
+Every chrome string, including fixed system role names (Guest/Student/Lecturer), is rendered in the selected language.
+
+**Actual**
+
+All surrounding chrome strings translate correctly ("Registration roles" -> "Vai trò đăng ký", "Approved" -> "Đã đồng ý", "Guest roles" -> "Vai trò khách"), but the role name "Guest" itself stays in English in both languages.
+
+**Suggested fix**
+
+Add the role-name strings (Guest/Student/Lecturer) to the localization dictionary the same way other chrome strings are handled.
+
+**Evidence**
+
+`artifacts/screens/B2-event-detail/screenshots/IA-01-14-guest-role-not-translated.png`
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `USA-B2-001` — Event date/registration/check-in times show no time-zone label
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B2 — Event Detail |
+| Type | Usability |
+| Source task | Task 1B (checklist run, IA-01-16) |
+| Severity | Nielsen severity 2 |
+| Heuristic violated (usability only) | Nielsen #2 — Match between system and the real world |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/events/39` while logged in.
+2. Read the "Event date" / "Registration period" / "Check-in period" From/To values.
+
+**Expected**
+
+Displayed times carry an explicit time-zone label so users outside the local timezone know how to interpret them.
+
+**Actual**
+
+Times are shown as `DD/MM/YYYY HH:mm` (e.g. "01/08/2026 19:08") with no timezone indicator anywhere on the screen — same defect class as `USA-B1-001`, reproduced independently on this screen.
+
+**Suggested fix**
+
+Append a fixed timezone label (e.g. "(GMT+7)") next to every displayed date/time value on this screen.
+
+**Evidence**
+
+`artifacts/screens/B2-event-detail/screenshots/IA-01-16-no-timezone.png`
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `BUG-B2-004` — "Share event" gives no feedback on click
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B2 — Event Detail |
+| Type | Bug |
+| Source task | Task 1B (checklist run, IA-04-01) |
+| Severity | Minor |
+| Heuristic violated (usability only) | — |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/events/39` while logged in.
+2. Click the "Share event" button.
+
+**Expected**
+
+An asynchronous action confirms success or failure once it completes (e.g. a "Link copied" toast), per Shneiderman #3.
+
+**Actual**
+
+Clicking "Share event" produces no toast, inline message, or any observable UI change — the button state and page content are identical before and after the click. A page-wide scan for the words "copied"/"link copied" returns nothing, and `playwright-cli requests` shows no network call triggered by the click, confirming the action (if it does anything, e.g. a silent clipboard write) gives the user no confirmation either way.
+
+**Suggested fix**
+
+Show a toast or inline confirmation message (e.g. "Link copied to clipboard") immediately after the share action completes.
+
+**Evidence**
+
+`artifacts/screens/B2-event-detail/screenshots/IA-04-01-share-event-no-feedback.png`
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `BUG-B2-005` — Registration-approved confirmation not announced to assistive tech
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B2 — Event Detail |
+| Type | Bug |
+| Source task | Task 1B (checklist run, IA-04-09) |
+| Severity | Minor |
+| Heuristic violated (usability only) | — |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/events/39` while logged in, tick the "Select Guest" checkbox, and click "Register (Guest)".
+2. Inspect the DOM for an `aria-live`, `role="status"`, or `role="alert"` region around the resulting "Registration status: Approved" badge.
+
+**Expected**
+
+The success confirmation is announced to assistive technology without forcing a keyboard focus change (WCAG 2.2 AA SC 4.1.3).
+
+**Actual**
+
+The "Registration status" badge appears immediately showing "Approved", but no `aria-live`/`role="status"`/`role="alert"` region wraps the change anywhere in the DOM — screen reader users get no announcement that the registration succeeded.
+
+**Suggested fix**
+
+Wrap the registration-status badge update in an `aria-live="polite"` region, or fire a toast component with `role="status"` alongside it.
+
+**Evidence**
+
+`artifacts/screens/B2-event-detail/screenshots/IA-04-09-registration-approved-no-aria-live.png` (visual location/context only — the absence of a live region has no visual signature; the actual defect proof is the DOM excerpt below).
+
+**DOM / accessibility-tree evidence**
+
+Accessibility-tree snapshot of the badge shows a named `generic` node but no live-region role:
+
+```yaml
+- generic [ref=e163]:
+  - heading "Registration roles" [level=3] [ref=e164]
+  - generic "Registration status" [ref=e165]:
+    - generic [ref=e166]: Approved
+```
+
+Matching `outerHTML` (no `role="status"`/`role="alert"`, no `aria-live`):
+
+```html
+<div class="relative max-w-fit min-w-min inline-flex items-center justify-between box-border whitespace-nowrap px-1 h-6 text-tiny rounded-full bg-emerald-100 text-emerald-700 font-semibold" aria-label="Registration status">
+  <span class="flex-1 text-inherit font-normal px-1">Approved</span>
+</div>
+```
+
+A page-wide scan for any live-region mechanism returns zero matches, confirming this isn't a scoping/selector miss:
+
+```json
+{ "live": 0, "status": 0, "bodyHasAriaLive": false }
+```
+
+(`document.querySelectorAll('[aria-live]')`, `[role=status]`, `[role=alert]` all empty.)
 
 **Google Form submission**
 
