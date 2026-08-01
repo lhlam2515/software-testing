@@ -77,10 +77,14 @@ playwright-cli run-code "async page => {
 
 ### Delayed Response
 
+Use `page.waitForTimeout()`, not a raw `setTimeout` Promise — `setTimeout` is undefined
+in the route handler's execution context and throws, leaving the request (and the whole
+page) hung. See [troubleshooting.md](troubleshooting.md#route-handler-hangs-the-whole-browser-session).
+
 ```bash
 playwright-cli run-code "async page => {
   await page.route('**/api/slow', async route => {
-    await new Promise(r => setTimeout(r, 3000));
+    await page.waitForTimeout(3000);
     route.fulfill({ body: JSON.stringify({ data: 'loaded' }) });
   });
 }"

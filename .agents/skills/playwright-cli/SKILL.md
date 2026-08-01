@@ -433,3 +433,4 @@ playwright-cli show --annotate
 - **Tracing** — capture Playwright trace for step-by-step replay in trace viewer → [references/tracing.md](references/tracing.md)
 - **Video recording** — record session video with chapter markers for bug reports → [references/video-recording.md](references/video-recording.md)
 - **Inspecting element attributes** — get `id`, `class`, `data-testid`, aria attributes from element refs → [references/element-attributes.md](references/element-attributes.md)
+- **Troubleshooting** — route handlers that hang the whole session (`setTimeout` misuse), locator strict-mode violations from duplicate responsive DOM → [references/troubleshooting.md](references/troubleshooting.md)
