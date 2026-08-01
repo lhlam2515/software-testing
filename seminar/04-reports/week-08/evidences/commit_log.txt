@@ -1,0 +1,64 @@
+* commit 9bff08f0ce6a1b9e3788856bc34af22c6e9d34d4
+| Author:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| AuthorDate: 2026-08-01T23:43:17+07:00
+| Commit:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| CommitDate: 2026-08-01T23:43:17+07:00
+| 
+|     docs(seminar): finalize slide 1-15 script and export PDF deck
+|     
+|     - rewrite Seminar_Slides_content.md into full English delivery script per slide (purpose, outline XML, speaker script, evidence)
+|     - ground every e-Shop metric in the script to measured repo values (stryker.config.mjs, package.json)
+|     - remove superseded outline draft Seminar_Slides.md
+|     - add built Seminar_Slides.pdf as submission deliverable
+| 
+|  seminar/03-deliverables/Seminar_Slides.md         | 1120 ------------------
+|  seminar/03-deliverables/Seminar_Slides.pdf        |  Bin 0 -> 1343016 bytes
+|  seminar/03-deliverables/Seminar_Slides_content.md | 1129 ++++++++++++++++---
+|  3 files changed, 970 insertions(+), 1279 deletions(-)
+| 
+* commit 696e3509b6b9cc3971bf625686540f2dcf978a7f
+| Author:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| AuthorDate: 2026-07-31T09:28:40+07:00
+| Commit:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| CommitDate: 2026-07-31T09:28:40+07:00
+| 
+|     feat(seminar): recompute coverage/mutation baseline via deterministic scripts
+|     
+|     - add coverage-by-route.js: auto-detects Express route code blocks via
+|       paren/brace balance instead of hand-picked line ranges, recomputes
+|       per-route line/branch % from lcov.info
+|     - add mutation-by-route.js: reuses the same route-boundary detector to
+|       filter mutants from mutation_baseline.html per route
+|     - update BASELINE.md section 2 and 3b with corrected numbers; old FR-08
+|       range accidentally included 3 unrelated routes (inflated NoCoverage to
+|       57%), old FR-10 range overshot the file length into the startup guard
+|     - document delta vs the manual 28/06 measurement so the evidence trail
+|       stays traceable
+| 
+|  apps/backend/scripts/coverage-by-route.js | 175 ++++++++++++++++++++++++++++
+|  apps/backend/scripts/mutation-by-route.js | 161 +++++++++++++++++++++++++
+|  seminar/01-research/BASELINE.md           |  93 ++++++++-------
+|  3 files changed, 388 insertions(+), 41 deletions(-)
+| 
+* commit 1b8e6b4efeeb38762e859af12b12eaa466ad738a
+  Author:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+  AuthorDate: 2026-07-27T12:47:00+07:00
+  Commit:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+  CommitDate: 2026-07-27T12:47:00+07:00
+  
+      docs(seminar): add week 07 progress report and evidence
+      
+      - add Group02.md weekly report for week 07
+      - attach evidences: slide content, mutation testing draft, seminar content, commit log, wip manifest
+  
+   seminar/04-reports/week-07/Group02.md             |  132 ++
+   .../week-07/evidences/Seminar_Slides_content.md   |  272 +++
+   .../04-reports/week-07/evidences/commit_log.txt   |   31 +
+   .../mutation_testing_and_test_effectiveness.md    | 2164 +++++++++++++++++++
+   .../week-07/evidences/seminar_content.md          |  232 ++
+   .../04-reports/week-07/evidences/wip-manifest.txt |   21 +
+   6 files changed, 2852 insertions(+)
+
+=== Cumulative shortlog (branch seminar, all-time) ===
+    45	SoJDev | Hoàng Lâm
+     3	VVVu1511

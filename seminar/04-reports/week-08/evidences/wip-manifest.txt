@@ -1,0 +1,81 @@
+Uncommitted working-tree snapshot for week-08 report (2026-07-27 to 2026-08-01)
+Captured: 2026-08-01, ~23:50 +07:00
+Scope: files touched or created 2026-07-27 through 2026-08-01, relevant to seminar T10.
+No raw content included below by design (see report body for summarized content).
+
+=== NEW THIS WEEK (mtime within reporting window, content did not exist last report) ===
+
+ai-workflow-revision-notes.md
+  101 lines / 9,620 bytes / mtime 2026-07-30 22:17:49
+  User-authored critique of the old AI section (slides 12-14): maturity-level
+  axis (Established/Emerging/Experimental/Speculative) is not reproducible by
+  the audience without matching infrastructure.
+
+ai-workflow-revision-plan.md
+  221 lines / 17,964 bytes / mtime 2026-07-30 23:55:51
+  Claude Code revision plan responding to the notes above. Locks: slide 14
+  keeps "boundary + AI cannot remove it" framing (rejects turning it into a
+  6-step workflow); Stryker feature table + practical workflow moved to
+  slide 13 as a delta on slide 10's 7-step loop; 4-level maturity axis
+  demoted to appendix S18/B8. Includes 3 verification tasks V1-V3, all
+  confirmed against the running Stryker/Jest setup (see report body).
+
+seminar-structure-revision-plan.md
+  176 lines / 13,293 bytes / mtime 2026-07-31 06:05:20
+  Restructures the deck to 19-20 slide positions (adds a Demo B slide for
+  live LLM assertion generation, keeps Demo C slide-less), holds the 40-min
+  standalone timing budget, fixes 9 section-label inconsistencies (C1-C9).
+
+slides-1-15-revision-plan.md
+  177 lines / 11,050 bytes / mtime 2026-08-01 14:20:21
+  Word-count/timing audit of slides 1-15: original script measured at 5,577
+  words / 135 wpm = 41.3 min against a 25-min budget (1.7x overload); found
+  4 internal contradictions (S15 "three points" lists four, S12 "three
+  levers" shows four, S14 references a cut that was still present, S3 uses
+  "mutant" before the term is introduced). Final revision: 4,562 words,
+  approx. 33.8 min script + 4 min demo = 37.8 min against a 37-min budget.
+
+seminar_presentation_design.md
+  2,039 lines / 201,419 bytes / mtime 2026-08-01 22:48:00
+  Master design source (grew from approx. 1,760 lines at start of week per
+  handoff note). Sections: 1 Presentation Strategy, 2 Slide Map, 3 Detailed
+  Slide Design + Speaker Script, 4 AI-Enhanced Mutation Testing Workflow,
+  5 Demo Runbook, 6 Presentation Timing, 7 Final Quality Review,
+  8 Reference List. This is the file the committed Seminar_Slides_content.md
+  (slides 1-15) was distilled from.
+
+.agents/handoffs/session-handoff-2026-07-30-2310.md
+  52 lines, written 2026-07-30 23:10
+  Session handoff recording the AI-workflow and structure decisions above;
+  flags open verification items V4/V5 (real rehearsal timing for Demo A/B,
+  not yet measured) and U1 (backup screenshots for Demo C, not yet done).
+
+.claude/skills/marp-slide-designer/ (directory, still untracked)
+  Skill scaffold first introduced in week-07, still not committed as of this
+  report. Contains the Marp build for the deck:
+  slides/mutation-testing-seminar.marp.pdf, 592,966 bytes, built 2026-08-01
+  22:00 -- a separate build artifact from the final committed
+  seminar/03-deliverables/Seminar_Slides.pdf (1,343,016 bytes, built 23:30
+  same day, committed in 9bff08f).
+
+Seminar_Slides_content.md (root-level duplicate, NOT the committed copy)
+  98,079 bytes / mtime 2026-08-01 23:33:55
+  Stale staging duplicate of the file committed to
+  seminar/03-deliverables/Seminar_Slides_content.md in 9bff08f
+  (89,529 bytes / mtime 23:41). `diff` shows 109 differing lines between the
+  two -- this root copy predates the final edit pass and should be deleted
+  to avoid confusion about which copy is authoritative.
+
+=== STALE CARRYOVER (already flagged as WIP in week-07 report; byte/line counts unchanged, not new work this week) ===
+
+NOTES.md                                     1,433 lines / 36,467 bytes
+mutation_testing_and_test_effectiveness.md   2,164 lines / 53,489 bytes
+seminar_content.md                             232 lines / 18,567 bytes
+seminar/NOTES.md                                 1 line  /    333 bytes
+
+=== EXCLUDED FROM THIS EVIDENCE (not seminar T10 content) ===
+
+.claude/hooks/pending/*.json        -- async hook capture buffers, tooling internals
+context/MEMORY.md                   -- POLARIS workspace memory, not seminar deliverable
+commit f3e5410 (branch feature/HW03, 2026-07-28) -- unrelated HW03 GUI/usability deck,
+  confirmed on a different branch, not seminar
