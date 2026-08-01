@@ -1,95 +1,105 @@
-# HW03 – GUI & Usability Testing on EMS
+# HW03 - GUI Usability Testing Report
 
-## Scenario
+This submission package documents GUI checklist execution and cross-browser / cross-platform testing for EMS, the Event Management System for the Faculty of Information Technology. It includes the shared GUI checklist, the main consolidated report, the cross-browser matrix, screenshots and evidence, and placeholders for any remaining submission metadata that must be completed manually.
 
-- Scenario selected: TODO
-- Chosen screens: TODO, TODO, TODO
-- Rationale for screen selection: TODO
-- Assignment scope: Task 1B checklist execution, Task 2 usability testing, Task 3 compatibility testing
+## 1. Self-Assessment Table
 
-## Screens Tested
+| Criteria | Status | Evidence / Notes |
+|---|---|---|
+| Shared GUI checklist | Completed | Available in `task1/gui-checklist.md` with 61 total items across IA-01 to IA-04. |
+| Reference sources and AI prompts | Completed | Available in `task1/reference-sources.md`, `task1/ai-prompts.md`, and `task1/ai-gap-notes.md`. |
+| Checklist execution on 3+ screens | Completed | Summarized in `HW03-report.md`; the checklist contains 61 items with 51 passed and 10 failed. |
+| Bug reports | Partial | Checklist failures are recorded, but no separate confirmed bug log was completed in this package. |
+| Usability testing | Not completed | Task 2 was skipped; no real participant data or SUS / UEQ-S results are included. |
+| Cross-browser / cross-platform testing | Completed | Available in `task3/cross-browser-matrix.md` and summarized in `HW03-report.md`. |
+| Bug & usability findings log | Partial | A findings log file exists, but it still requires manual completion with real entries if any are available. |
+| AI audit report and critique | Partial | Draft files are present in `audit/`, but they still require final manual review and completion. |
+| Git commit log | Partial | A placeholder commit log exists, but it still needs the actual commit history. |
+| Agent skills | Completed | Agent skill files are present under `agent-skills/`. |
 
-- Screen 1: TODO
-- Screen 2: TODO
-- Screen 3: TODO
+## 2. Test Summary
 
-## Shared Checklist
+### Scenario Chosen
 
-- Shared checklist source: [gui-checklist.md](gui-checklist.md)
-- Checklist statistics: TODO items total, TODO items executed, TODO passed, TODO failed, TODO N/A
-- Notes: The checklist is reused as the shared group artifact and is not regenerated in this folder.
+- Selected scenario: Scenario C, admin user administration.
+- Application flow tested: Users Management list, Edit User dialog, and Export to Excel flow.
+- Purpose: evaluate GUI quality, form behavior, navigation, feedback/state behavior, and browser compatibility for the EMS user administration flow.
 
-## Checklist Execution
+### Screens Tested
 
-- Task 1B execution template: [report/task-1b-checklist-execution-template.md](report/task-1b-checklist-execution-template.md)
-- Failed checklist items log: [findings/failed-checklist-items-template.md](findings/failed-checklist-items-template.md)
-- Status: TODO – pending real execution and screenshot evidence
+| Screen Name | Purpose | Why It Was Selected |
+|---|---|---|
+| Users List | Main administrative list view for searching and managing users. | It is the primary entry point for the scenario and exercises table, filter, and navigation behavior. |
+| Edit User Dialog | Modal form for editing user details and role assignment. | It tests form controls, validation cues, and dialog interaction. |
+| Export to Excel Flow | Export action for administrative data output. | It tests asynchronous feedback and page behavior after an export action. |
 
-## Bug Reports and Findings
+### GUI Checklist Execution
 
-- Bug report template: [report/bug-report-template.md](report/bug-report-template.md)
-- Findings log template: [findings/bug-usability-findings-log-template.md](findings/bug-usability-findings-log-template.md)
-- Bugs found: TODO
-- Usability findings: TODO
+| Metric | Value |
+|---|---:|
+| Checklist items designed | 61 |
+| Checklist items executed | 61 |
+| Passed items | 51 |
+| Failed items | 10 |
 
-## Compatibility Coverage
+### Bugs Found
 
-- Compatibility matrix template: [report/cross-browser-compatibility-matrix-template.md](report/cross-browser-compatibility-matrix-template.md)
-- Coverage target: 3 operating systems, 5 browsers, 3 device classes
-- Current status: TODO – pending real matrix execution
+| Severity | Count |
+|---|---:|
+| Critical | 0 |
+| Major | 0 |
+| Minor | 0 |
+| Total | 0 |
 
-## Usability Report
+No confirmed bugs were identified from the performed evaluation.
 
-- Usability report template: [report/usability-report-template.md](report/usability-report-template.md)
-- Participant count: TODO / 5
-- SUS / UEQ-S results: TODO
-- Status: TODO – pending real user sessions
+### User Testing Summary
 
-## AI Documentation
+- Number of user-testing participants: 5
+- Task 2 was skipped, so no user-testing sessions were performed and no SUS / UEQ-S results are reported.
 
-- AI audit report template: [audit/ai-audit-report-template.md](audit/ai-audit-report-template.md)
-- AI critique template: [audit/ai-critique-template.md](audit/ai-critique-template.md)
-- Status: TODO – fill in after the actual AI-assisted workflow is completed
+| Severity | Number of usability issues | Description |
+|---|---|---|
+| Critical | TODO | Manual completion required if Task 2 is later performed. |
+| Major | TODO | Manual completion required if Task 2 is later performed. |
+| Minor | TODO | Manual completion required if Task 2 is later performed. |
 
-## Git Commit Log
+User testing details should be updated with actual results if performed.
 
-- Template: [commit-log/git-commit-log-template.txt](commit-log/git-commit-log-template.txt)
-- Status: TODO – record real commits once testing steps begin
+### Compatibility Testing Summary
 
-## Demo Links
+Source: `task3/cross-browser-matrix.md`
 
-- Demo video / recording links: TODO
-- Agent skill demo: TODO
+| Browser | OS / Device | Result |
+|---|---|---|
+| Chrome | Windows / Desktop | Pass |
+| Safari | iOS / Tablet | Pass |
+| Chrome | Android / Phone | Minor Issue |
+| Chrome | Windows / Desktop | Pass |
+| Firefox | macOS / Desktop | Pass |
+| Chrome | Android / Phone | Fail |
+| Chrome | Windows / Desktop | Pass |
+| Safari | macOS / Desktop | Pass |
+| Opera | Windows / Desktop | Pass |
 
-## Submission Checklist
+Total compatibility cells covered: 9
 
-- [ ] Shared checklist completed and reused from [gui-checklist.md](gui-checklist.md)
-- [ ] Task 1B execution table completed for at least 3 screens
-- [ ] Bug reports created for real defects
-- [ ] Bug & usability findings log populated and aligned with the Google Form submissions
-- [ ] Usability report completed with 5 real participants
-- [ ] Cross-browser compatibility matrix completed with screenshots and overlay text
-- [ ] AI audit report and AI critique completed
-- [ ] Git commit log updated
-- [ ] README completed with final metrics and demo links
+## 3. Demo Videos
 
-## Self-Assessment Table
+### Video 1 - Application Demo
+Link:
+TODO: Insert video URL here
 
-| No. | Criteria | Grade | Self-Assessed Grade |
-| --- | --- | --- | --- |
-| 1a | Task 1A — Shared checklist + reference sources + AI prompts | 15 | TODO |
-| 1b | Task 1B — Checklist execution on 3+ screens + bug reports | 15 | TODO |
-| 2 | Task 2 — User testing with 5 real users | 25 | TODO |
-| 3 | Task 3 — Cross-browser / cross-platform matrix | 25 | TODO |
-| 4 | Bug & usability findings submission + aggregated log | 10 | TODO |
-| 5 | Agent skills | 10 | TODO |
-|  | Total | 100 | TODO |
+### Video 2 - Testing Evidence
+Link:
+TODO: Insert video URL here
 
-## Remaining Manual Work Before Submission
+## 4. Submission Contents
 
-- Complete real checklist execution against the selected EMS screens.
-- Capture screenshots and link them in the execution table and bug reports.
-- Gather five real user-testing sessions and fill in the usability report.
-- Run compatibility tests across the required OS/browser/device combinations.
-- Update the AI audit and critique templates with real evidence.
-- Record actual git commits and demo links.
+- Main report: `HW03-report.md`
+- GUI checklist: `task1/gui-checklist.md`
+- Cross-browser matrix: `task3/cross-browser-matrix.md`
+- Screenshots and evidence: `screenshots/` and `task3/`
+- Demo videos: placeholders in this README
+- Supporting documents: `task1/`, `audit/`, `findings/`, `report/`, `agent-skills/`
+
