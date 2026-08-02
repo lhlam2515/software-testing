@@ -24,14 +24,14 @@ Example: `BUG-B3-001` = first defect found on screen B3 (registration form).
 
 | Metric | Count |
 | ------ | ----- |
-| Total findings | 14 |
-| — Type: Bug | 12 |
-| — Type: Usability | 2 |
-| From Task 1B (checklist run) | 14 |
+| Total findings | 30 |
+| — Type: Bug | 24 |
+| — Type: Usability | 6 |
+| From Task 1B (checklist run) | 30 |
 | From Task 2 (user testing) | 0 |
 | From Task 3 (cross-platform) | 0 |
 | Submitted to Google Form | 0 |
-| **Log rows == form submissions?** | No — 14 rows logged, 0 submitted to the Google Form so far |
+| **Log rows == form submissions?** | No — 30 rows logged, 0 submitted to the Google Form so far |
 
 ---
 
@@ -53,6 +53,22 @@ Example: `BUG-B3-001` = first defect found on screen B3 (registration form).
 | USA-B2-001 | B — B2 Event Detail | Usability | Event date/registration/check-in times show no explicit time-zone label | IA-01-16; Nielsen #2 — Match between system and the real world | Nielsen severity 2 | Append a fixed timezone label (e.g. "GMT+7") next to every displayed date/time range on this screen | artifacts/screens/B2-event-detail/screenshots/IA-01-16-no-timezone.png | |
 | BUG-B2-004 | B — B2 Event Detail | Bug | "Share event" gives no feedback on click | IA-04-01; Shneiderman #3 — Offer informative feedback | Minor | Show a toast/inline confirmation (e.g. "Link copied") once the share action completes | artifacts/screens/B2-event-detail/screenshots/IA-04-01-share-event-no-feedback.png | |
 | BUG-B2-005 | B — B2 Event Detail | Bug | Registration-approved confirmation is not announced to assistive tech | IA-04-09; WCAG 2.2 AA SC 4.1.3 | Minor | Wrap the "Registration status" badge update in an `aria-live="polite"` region (or add a toast with `role="status"`) | artifacts/screens/B2-event-detail/screenshots/IA-04-09-registration-approved-no-aria-live.png | |
+| BUG-B4-001 | B — B4 My Registrations / Ticket | Bug | Search input border fails WCAG non-text contrast minimum | IA-01-07; WCAG 2.2 AA SC 1.4.11 | Minor | Swap `border-gray-300` for a darker gray (>= 3:1 against white) — same systemic gap as BUG-B1-002 | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-07-search-border-contrast.png | |
+| BUG-B4-002 | B — B4 My Registrations / Ticket | Bug | Pagination prev/next buttons have no accessible name | IA-01-08; WCAG 2.2 AA SC 1.1.1 / 4.1.2 | Major | Add `aria-label="Previous page"` / `aria-label="Next page"` to the two chevron buttons | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-08-pagination-icon-no-name.png | |
+| BUG-B4-003 | B — B4 My Registrations / Ticket | Bug | "Approved" and "Cancelled" registration-status badges share the identical gray color, hiding the state distinction | IA-01-11; S13 Checklist (Color scheme) | Major | Give each registration status its own semantic color (e.g. green for Approved, red/gray for Cancelled) instead of reusing `bg-gray-100 text-gray-700` for both | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-11-approved-cancelled-same-gray-badge.png | |
+| BUG-B4-004 | B — B4 My Registrations / Ticket | Bug | "Roles:" chip value stays untranslated after switching UI language to Vietnamese | IA-01-14; S13 Challenges (Localization) | Minor | Localize the role-chip values ("Guest"/"Participant") through the same i18n path already used for the participation-type badge above them | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-14-roles-chip-not-translated.png | |
+| USA-B4-001 | B — B4 My Registrations / Ticket | Usability | Activity cards carry no at-rest visual signifier of interactivity | IA-01-12; Norman — Signifiers | Nielsen severity 1 | Add a static affordance (chevron icon, subtle shadow, or border-color change) to clickable activity cards so they read as interactive without requiring hover | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-12-cards-no-rest-signifier.png | |
+| USA-B4-002 | B — B4 My Registrations / Ticket | Usability | Activity date/time ranges show no explicit time-zone label | IA-01-16; Nielsen #2 — Match between system and the real world | Nielsen severity 2 | Append a fixed timezone label (e.g. "GMT+7") next to every displayed activity time range — same gap as USA-B1-001 | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-16-no-timezone.png | |
+| USA-B4-003 | B — B4 My Registrations / Ticket | Usability | "Change Password" required fields carry no visible required-field indicator | IA-02-01; Per-Control — Text Box (red asterisk on mandatory fields) | Nielsen severity 1 | Add a red asterisk next to "Current Password", "New Password", and "Confirm Password" labels | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-01-no-required-asterisk.png | |
+| BUG-B4-005 | B — B4 My Registrations / Ticket | Bug | Avatar upload accepts a non-image file with no error message | IA-02-04; S13 Bugs (data validation gaps) | Major | Validate the selected file's MIME type client-side (and re-validate server-side) before accepting it into the pending-avatar preview state; show a specific "Only image files are allowed" error otherwise | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-04-avatar-upload-no-type-validation.png | |
+| BUG-B4-006 | B — B4 My Registrations / Ticket | Bug | Whitespace-only search query is treated as valid input, not empty | IA-02-05; Per-Control — Text Box (rejects spaces-only input) | Minor | Trim the query client-side before dispatching the search, or ignore whitespace-only input as if the field were empty — same gap as BUG-B1-004 | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-05-whitespace-search-not-rejected.png | |
+| BUG-B4-007 | B — B4 My Registrations / Ticket | Bug | "Confirm Password" validation error names the wrong field | IA-02-12; WCAG 2.2 AA SC 3.3.1 | Major | Fix the empty-submit validation logic so the message under "Confirm Password" reads "Confirm password is required", not "New password is required" | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-12-confirm-password-wrong-error-text.png | |
+| USA-B4-004 | B — B4 My Registrations / Ticket | Usability | Long activity title is clipped to one line with no way to recover the hidden text | IA-02-18; ISTQB Checklist (item 9 — long field text does not break layout) | Nielsen severity 1 | Either wrap the title to 2 lines (as B1 already does for long event titles) or add a `title` attribute so the full text is available on hover | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-18-long-title-truncated-no-tooltip.png | |
+| BUG-B4-008 | B — B4 My Registrations / Ticket | Bug | Browser Back from an activity's event-detail page loses the active search query and list scroll position | IA-03-05; Nielsen #3 — User control and freedom | Major | Persist search + scroll state (e.g. in the router/query string or a client cache) and restore it on back-navigation — same gap as BUG-B1-005 | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-03-05-back-nav-loses-search-scroll.png | |
+| BUG-B4-009 | B — B4 My Registrations / Ticket | Bug | Avatar-upload control is not reachable via keyboard | IA-03-07; WCAG 2.2 AA SC 2.1.1 | Major | Give the wrapping `<label>` (or the file input itself) a `tabindex="0"` and an Enter/Space key handler so the control is keyboard-operable | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-03-07-avatar-upload-not-keyboard-reachable.png | |
+| BUG-B4-010 | B — B4 My Registrations / Ticket | Bug | "Edit Profile" save gives no visible feedback on success | IA-04-01; Shneiderman #3 — Offer informative feedback | Minor | Show a toast/inline confirmation (e.g. "Profile updated") once the save completes | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-04-01-edit-profile-save-no-toast.png | |
+| BUG-B4-011 | B — B4 My Registrations / Ticket | Bug | "Filters" disclosure button never exposes its expanded state to assistive tech | IA-04-08; WCAG 2.2 AA SC 4.1.2 | Minor | Add `aria-expanded` (true/false) and `aria-controls` pointing at the filters panel to the "Filters" button | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-04-08-filters-button-no-aria-expanded.png | |
+| BUG-B4-012 | B — B4 My Registrations / Ticket | Bug | "Edit Profile" save confirmation is not announced to assistive tech | IA-04-09; WCAG 2.2 AA SC 4.1.3 | Minor | Wrap the save-success state in an `aria-live="polite"` region (or add a toast with `role="status"`) | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-04-01-edit-profile-save-no-toast.png | |
 
 ---
 
@@ -717,6 +733,723 @@ A page-wide scan for any live-region mechanism returns zero matches, confirming 
 ```
 
 (`document.querySelectorAll('[aria-live]')`, `[role=status]`, `[role=alert]` all empty.)
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `BUG-B4-001` — Search input border fails non-text contrast
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B4 — My Registrations / Ticket |
+| Type | Bug |
+| Source task | Task 1B (checklist run, IA-01-07) |
+| Severity | Minor |
+| Heuristic violated (usability only) | — |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/profile` while logged in.
+2. Inspect the border of the "Search activities..." input against its white background.
+
+**Expected**
+
+Non-text UI element borders meet the WCAG 2.2 AA 3:1 minimum contrast ratio (SC 1.4.11).
+
+**Actual**
+
+Cropping and sampling the rendered pixels gives a border color ~rgb(209,213,220) on white — measured ratio ~1.47:1. This is the same `border-gray-300`-class gap already logged as BUG-B1-002, reused here on the search input.
+
+**Suggested fix**
+
+Swap `border-gray-300` for a darker gray (e.g. Tailwind `gray-400`/`gray-500`) that clears 3:1 against white, applied wherever the class is reused.
+
+**Evidence**
+
+`artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-07-search-border-contrast.png`
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `BUG-B4-002` — Pagination prev/next buttons have no accessible name
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B4 — My Registrations / Ticket |
+| Type | Bug |
+| Source task | Task 1B (checklist run, IA-01-08) |
+| Severity | Major |
+| Heuristic violated (usability only) | — |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/profile` while logged in, scroll to the "My Activities" pagination row.
+2. Inspect the prev/next chevron buttons with a screen reader or the accessibility tree.
+
+**Expected**
+
+Every icon-only button exposes an accessible name conveying its purpose (WCAG 2.2 AA SC 1.1.1 / 4.1.2).
+
+**Actual**
+
+Both buttons render only an `<svg aria-hidden="true">` chevron with no `aria-label` or visible text — the accessibility tree reports no name for either control.
+
+**Suggested fix**
+
+Add `aria-label="Previous page"` and `aria-label="Next page"` to the two buttons.
+
+**Evidence**
+
+`artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-08-pagination-icon-no-name.png` (visual location/context only — a screenshot cannot show a missing `aria-label`; the actual defect proof is the DOM/accessibility-tree excerpt below).
+
+**DOM / accessibility-tree evidence**
+
+Playwright's accessibility-tree snapshot of the pagination row shows a named page button but none for prev/next:
+
+```yaml
+- generic [ref=e616]:
+  - spinbutton "Go to page" [ref=e1295]
+  - generic [ref=e622]: / 1
+  - button [disabled] [ref=e623]:    # <- prev: no accessible name
+    - img [ref=e624]
+  - button "1" [ref=e1296] [cursor=pointer]
+  - button [disabled] [ref=e628]:    # <- next: no accessible name
+    - img [ref=e629]
+```
+
+Matching `outerHTML` (`aria-label` absent on both; icon carries `aria-hidden="true"`):
+
+```html
+<!-- prev -->
+<button disabled="" class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
+  <svg class="lucide lucide-chevron-left" aria-hidden="true">...</svg>
+</button>
+<!-- next -->
+<button disabled="" class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
+  <svg class="lucide lucide-chevron-right" aria-hidden="true">...</svg>
+</button>
+```
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `BUG-B4-003` — "Approved" and "Cancelled" registration badges share the same color
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B4 — My Registrations / Ticket |
+| Type | Bug |
+| Source task | Task 1B (checklist run, IA-01-11) |
+| Severity | Major |
+| Heuristic violated (usability only) | — |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/profile` while logged in.
+2. Compare the status badge on the first "My Activities" card ("Approved") against the second card ("Cancelled").
+
+**Expected**
+
+Per S13's color-scheme checklist item, the same color should never represent two different states in different contexts — a positive outcome (Approved) and a negative one (Cancelled) should be visually distinguishable by color, not only by text.
+
+**Actual**
+
+Both badges render with the identical class `bg-gray-100 text-gray-700` — confirmed via DOM inspection of both `<span>` elements. Only the text label ("Approved" vs. "Cancelled") differentiates them; a user scanning by color alone cannot tell them apart.
+
+**Suggested fix**
+
+Give each registration status its own semantic color (e.g. green/emerald for Approved, red/rose for Cancelled), consistent with how "Ongoing"/"Upcoming" already use distinct cyan/violet tones.
+
+**Evidence**
+
+`artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-11-approved-cancelled-same-gray-badge.png`
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `BUG-B4-004` — "Roles:" chip value not translated to Vietnamese
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B4 — My Registrations / Ticket |
+| Type | Bug |
+| Source task | Task 1B (checklist run, IA-01-14) |
+| Severity | Minor |
+| Heuristic violated (usability only) | — |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/profile` while logged in, with English selected.
+2. Switch the UI language to Tiếng Việt via the header language switcher.
+3. Compare the "participation type" badge (e.g. "Guest participation") against the "ROLES:" chip below it on the same card.
+
+**Expected**
+
+Every chrome string on the screen, including enum-style badge/chip values, renders in the selected language after switching (per the group's own IA-01-14 item).
+
+**Actual**
+
+The "participation type" badge correctly translates ("Guest participation" → "Khách tham gia"), but the "ROLES:" chip directly below it keeps the untranslated English value ("Guest", "Participant") on both the first and second activity cards.
+
+**Suggested fix**
+
+Route the role-chip values through the same i18n translation path already used for the participation-type badge, so both update together on language switch.
+
+**Evidence**
+
+`artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-14-roles-chip-not-translated.png`
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `USA-B4-001` — Activity cards have no at-rest signifier of interactivity
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B4 — My Registrations / Ticket |
+| Type | Usability |
+| Source task | Task 1B (checklist run, IA-01-12) |
+| Severity | Nielsen severity 1 |
+| Heuristic violated (usability only) | Norman — Signifiers |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/profile` while logged in.
+2. Compare an activity card in "My Activities" (clickable, links to `/events/:id`) against a stat card ("Registered Activities" etc., not clickable) at rest, without hovering either.
+
+**Expected**
+
+Interactive elements are visually distinguishable from static panels at a glance, without requiring a hover to reveal (Norman — Signifiers).
+
+**Actual**
+
+Both the clickable activity card and the non-clickable stat card use the identical `rounded-2xl border border-gray-200` panel treatment at rest. The activity card's only interactivity cues (`cursor-pointer`, `hover:bg-gray-50`) are hover-only — nothing distinguishes it as clickable until the pointer is already over it.
+
+**Suggested fix**
+
+Add a static affordance to activity cards — a trailing chevron icon, a subtle shadow, or a distinct border/accent color — so they read as interactive without requiring hover.
+
+**Evidence**
+
+`artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-12-cards-no-rest-signifier.png`
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `USA-B4-002` — Activity times show no explicit time-zone label
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B4 — My Registrations / Ticket |
+| Type | Usability |
+| Source task | Task 1B (checklist run, IA-01-16) |
+| Severity | Nielsen severity 2 |
+| Heuristic violated (usability only) | Nielsen #2 — Match between system and the real world |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/profile` while logged in.
+2. Read any "My Activities" card's date/time range (e.g. "01/08/2026 19:08 - 03/08/2026 19:08").
+
+**Expected**
+
+Displayed activity times carry an explicit time-zone label so users know how to interpret them.
+
+**Actual**
+
+Times are shown as `DD/MM/YYYY HH:mm - DD/MM/YYYY HH:mm` with no timezone indicator anywhere on the card — same gap already logged as USA-B1-001 and USA-B2-001.
+
+**Suggested fix**
+
+Append a fixed timezone label (e.g. "(GMT+7)") next to every displayed activity time range.
+
+**Evidence**
+
+`artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-16-no-timezone.png`
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `USA-B4-003` — "Change Password" required fields have no visible required indicator
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B4 — My Registrations / Ticket |
+| Type | Usability |
+| Source task | Task 1B (checklist run, IA-02-01) |
+| Severity | Nielsen severity 1 |
+| Heuristic violated (usability only) | Per-Control — Text Box (red asterisk on mandatory fields) |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/profile` while logged in, click "Change Password".
+2. Look at the "Current Password", "New Password", and "Confirm Password" labels.
+
+**Expected**
+
+Every required field is marked with a visible indicator (e.g. a red asterisk) next to its label.
+
+**Actual**
+
+All 3 fields are mandatory (confirmed: submitting empty blocks submission with a per-field error), but none carries a red asterisk or any other visible required-field marker.
+
+**Suggested fix**
+
+Add a red asterisk next to each of the 3 field labels.
+
+**Evidence**
+
+`artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-01-no-required-asterisk.png`
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `BUG-B4-005` — Avatar upload accepts a non-image file with no error
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B4 — My Registrations / Ticket |
+| Type | Bug |
+| Source task | Task 1B (checklist run, IA-02-04) |
+| Severity | Major |
+| Heuristic violated (usability only) | — |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/profile` while logged in, click the camera icon on the avatar.
+2. In the file picker, select a plain `.txt` file (bypassing the soft `accept="image/*"` filter, which most OS file pickers allow via an "All Files" option).
+
+**Expected**
+
+Attempting to upload a file that violates the stated type constraint shows an error message naming the specific constraint violated (IA-02-04).
+
+**Actual**
+
+The `.txt` file is accepted with no error. The app enters a pending-avatar-change state (Save/Cancel buttons appear) with a blank/broken avatar preview. The only type gate is the `accept="image/*"` attribute on the `<input>`, which is a soft UI hint, not an enforced constraint after a file is selected.
+
+**Suggested fix**
+
+Validate the selected file's MIME type (and re-validate server-side) before accepting it into the pending-avatar preview state; show a specific "Only image files are allowed" error otherwise.
+
+**Evidence**
+
+`artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-04-avatar-upload-no-type-validation.png`
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `BUG-B4-006` — Whitespace-only search query accepted as valid content
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B4 — My Registrations / Ticket |
+| Type | Bug |
+| Source task | Task 1B (checklist run, IA-02-05) |
+| Severity | Minor |
+| Heuristic violated (usability only) | — |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/profile` while logged in.
+2. Fill "Search activities..." with only spaces ("   ").
+
+**Expected**
+
+Whitespace-only input is treated as if the field were empty (Per-Control — Text Box).
+
+**Actual**
+
+The spaces-only query is accepted as valid content and triggers a real search, rendering "No activities found" instead of the full unfiltered list — same gap already logged as BUG-B1-004.
+
+**Suggested fix**
+
+Trim the query client-side before dispatching the search, or ignore whitespace-only input as if the field were empty.
+
+**Evidence**
+
+`artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-05-whitespace-search-not-rejected.png`
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `BUG-B4-007` — "Confirm Password" validation error names the wrong field
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B4 — My Registrations / Ticket |
+| Type | Bug |
+| Source task | Task 1B (checklist run, IA-02-12) |
+| Severity | Major |
+| Heuristic violated (usability only) | — |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/profile` while logged in, click "Change Password".
+2. Leave all 3 fields empty and click "Update Password".
+3. Read the error message rendered under "Confirm Password".
+
+**Expected**
+
+Each failed-validation field shows an explicit text error message associated with that specific field (WCAG 2.2 AA SC 3.3.1).
+
+**Actual**
+
+The "Current Password" field correctly shows "Current password is required", and "New Password" shows "Password must be at least 8 characters" — but "Confirm Password" shows "New password is required", which names the wrong field. (Note: this mislabeling is specific to the fully-empty-submit case — a separate mismatch test, correct current password + differing new/confirm values, correctly shows "Passwords do not match" under Confirm Password.)
+
+**Suggested fix**
+
+Fix the empty-submit validation logic so the message under "Confirm Password" reads "Confirm password is required" in this specific case.
+
+**Evidence**
+
+`artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-12-confirm-password-wrong-error-text.png`
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `USA-B4-004` — Long activity title clipped with no way to recover the hidden text
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B4 — My Registrations / Ticket |
+| Type | Usability |
+| Source task | Task 1B (checklist run, IA-02-18) |
+| Severity | Nielsen severity 1 |
+| Heuristic violated (usability only) | ISTQB Checklist (item 9 — long field text does not break layout) |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/profile` while logged in.
+2. Scroll to the third "My Activities" card ("Đăng ký tham gia Trường hè FIT@HCMUS Summer School on Intelligent Agents and Agentic AI năm 2026").
+
+**Expected**
+
+An unusually long title does not break layout — either it wraps cleanly (as B1's equivalent long-title case does) or the hidden portion remains recoverable (e.g. via a `title` tooltip).
+
+**Actual**
+
+The title uses Tailwind's `truncate` class (`scrollWidth` 936px vs. `clientWidth` 640px — confirmed genuinely clipped) with no `title` attribute. Layout itself doesn't break, but roughly a third of the title is permanently hidden from sighted mouse users with no hover fallback to recover it — the only way to read the full title is to click into the event detail page.
+
+**Suggested fix**
+
+Either wrap the title to 2 lines (matching B1's existing pattern for long event titles) or add a `title` attribute carrying the full text so it's available on hover.
+
+**Evidence**
+
+`artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-18-long-title-truncated-no-tooltip.png`
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `BUG-B4-008` — Browser Back loses active search query and scroll position
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B4 — My Registrations / Ticket |
+| Type | Bug |
+| Source task | Task 1B (checklist run, IA-03-05) |
+| Severity | Major |
+| Heuristic violated (usability only) | — |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/profile` while logged in, search "My Activities" for "AI", scroll the list down.
+2. Click into an activity card (navigates to `/events/:id`).
+3. Use the browser Back button.
+
+**Expected**
+
+Returning via Back restores the prior screen's filter/search state and scroll position (Nielsen #3 — User control and freedom).
+
+**Actual**
+
+`/profile` reloads with the search box empty and scroll position reset to the top — neither the "AI" query nor the scroll position is preserved. Same gap already logged as BUG-B1-005.
+
+**Suggested fix**
+
+Persist search + scroll state (e.g. in the router/query string or a client cache) and restore it on back-navigation.
+
+**Evidence**
+
+`artifacts/screens/B4-my-registrations-ticket/screenshots/IA-03-05-back-nav-loses-search-scroll.png`
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `BUG-B4-009` — Avatar-upload control is not reachable via keyboard
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B4 — My Registrations / Ticket |
+| Type | Bug |
+| Source task | Task 1B (checklist run, IA-03-07) |
+| Severity | Major |
+| Heuristic violated (usability only) | — |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/profile` while logged in.
+2. Starting from the page top, press Tab repeatedly and track which control receives focus after "User menu".
+
+**Expected**
+
+Every interactive element, including the avatar-upload control, is reachable and operable using only the keyboard (WCAG 2.2 AA SC 2.1.1).
+
+**Actual**
+
+Tab order jumps directly from "User menu" to "QR Code" — the avatar-upload camera icon is skipped entirely. It cannot be reached or activated via keyboard at all, only by mouse click.
+
+**Suggested fix**
+
+Give the wrapping `<label>` (or the file input itself) a `tabindex="0"` and an Enter/Space key handler so the control is keyboard-operable.
+
+**Evidence**
+
+`artifacts/screens/B4-my-registrations-ticket/screenshots/IA-03-07-avatar-upload-not-keyboard-reachable.png` (visual location/context only — a screenshot cannot show a missing tab stop; the actual defect proof is the DOM excerpt below).
+
+**DOM / accessibility-tree evidence**
+
+The avatar-upload control's `outerHTML` confirms neither the wrapping `<label>` nor the `<input>` it contains carries a `tabindex`, and the input is `display:none` (natively removed from tab order):
+
+```html
+<label class="absolute -bottom-1 -right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[#1bc2f5] text-white shadow-md hover:bg-[#15a8d6]">
+  <svg class="lucide lucide-camera" aria-hidden="true">...</svg>
+  <input accept="image/*" aria-label="Upload avatar" class="hidden" type="file">
+</label>
+```
+
+Targeted attribute dump confirming the tab-order gap directly:
+
+```json
+{ "labelTabindex": null, "labelTag": "LABEL", "inputDisplay": "none", "inputTabindex": null }
+```
+
+(The hidden input does carry `aria-label="Upload avatar"`, so the control would have an accessible *name* if it were ever reachable — the defect here is specifically that it is never reachable.)
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `BUG-B4-010` — "Edit Profile" save gives no visible feedback on success
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B4 — My Registrations / Ticket |
+| Type | Bug |
+| Source task | Task 1B (checklist run, IA-04-01) |
+| Severity | Minor |
+| Heuristic violated (usability only) | — |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/profile` while logged in, click "Edit Profile".
+2. Change the Phone Number value and click "Save Changes".
+
+**Expected**
+
+An asynchronous action confirms success or failure via a toast or inline message once it completes (Shneiderman #3 — Offer informative feedback).
+
+**Actual**
+
+The dialog closes and the Phone field silently updates to the new value — no toast, banner, or inline message ever appears. The only way to notice the save succeeded is to compare the field's new value against what was typed.
+
+**Suggested fix**
+
+Show a toast/inline confirmation (e.g. "Profile updated") once the save completes.
+
+**Evidence**
+
+`artifacts/screens/B4-my-registrations-ticket/screenshots/IA-04-01-edit-profile-save-no-toast.png`
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `BUG-B4-011` — "Filters" disclosure button never exposes its expanded state
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B4 — My Registrations / Ticket |
+| Type | Bug |
+| Source task | Task 1B (checklist run, IA-04-08) |
+| Severity | Minor |
+| Heuristic violated (usability only) | — |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/profile` while logged in.
+2. Inspect the "Filters" button's attributes both before and after clicking it to open the filter panel.
+
+**Expected**
+
+A custom (non-native) disclosure control exposes its expanded/collapsed state programmatically (WCAG 2.2 AA SC 4.1.2 Name, Role, Value).
+
+**Actual**
+
+`aria-expanded`, `aria-controls`, and `aria-pressed` are all `null` on the "Filters" button in both its collapsed and expanded states — confirmed by re-reading the same attributes immediately after opening the panel (visually confirmed open via the rendered "Start date range" fields).
+
+**Suggested fix**
+
+Add `aria-expanded` (true/false) and `aria-controls` pointing at the filters panel to the "Filters" button.
+
+**Evidence**
+
+`artifacts/screens/B4-my-registrations-ticket/screenshots/IA-04-08-filters-button-no-aria-expanded.png` (visual location/context only — a screenshot cannot show a missing `aria-expanded`; the actual defect proof is the DOM excerpt below).
+
+**DOM / accessibility-tree evidence**
+
+`outerHTML` of the "Filters" button (no `aria-expanded`/`aria-controls`/`aria-pressed` anywhere in the attribute list):
+
+```html
+<button type="button" tabindex="0" data-react-aria-pressable="true" class="z-0 group relative inline-flex items-center justify-center box-border appearance-none select-none subpixel-antialiased overflow-hidden tap-highlight-transparent transform-gpu data-[pressed=true]:scale-[0.97] cursor-pointer ...">
+  Filters
+</button>
+```
+
+Targeted attribute dump, read once with the panel collapsed and again with it expanded — identical both times:
+
+```json
+{ "ariaExpanded": null, "ariaControls": null, "ariaPressed": null }
+```
+
+**Google Form submission**
+
+| Submitted at | Confirmation |
+| ------------ | ------------ |
+| Not yet submitted | — |
+
+---
+
+### `BUG-B4-012` — "Edit Profile" save confirmation not announced to assistive tech
+
+| Field | Value |
+| ----- | ----- |
+| Screen | B4 — My Registrations / Ticket |
+| Type | Bug |
+| Source task | Task 1B (checklist run, IA-04-09) |
+| Severity | Minor |
+| Heuristic violated (usability only) | — |
+| Environment (OS / browser / device) | Linux, Chromium (playwright-cli), 1920x1080 |
+
+**Steps to reproduce**
+
+1. Open `/profile` while logged in, click "Edit Profile".
+2. Change the Phone Number value and click "Save Changes".
+3. Inspect the DOM for an `aria-live`, `role="status"`, or `role="alert"` region anywhere on the page.
+
+**Expected**
+
+The success confirmation is announced to assistive technology without forcing a keyboard focus change (WCAG 2.2 AA SC 4.1.3).
+
+**Actual**
+
+The Phone field updates silently (see BUG-B4-010) with no `aria-live`/`role="status"`/`role="alert"` region wrapping the change anywhere in the DOM — screen reader users get no announcement that the save succeeded.
+
+**Suggested fix**
+
+Wrap the save-success state (or the toast added to fix BUG-B4-010) in an `aria-live="polite"` region, or use a toast component with `role="status"`.
+
+**Evidence**
+
+`artifacts/screens/B4-my-registrations-ticket/screenshots/IA-04-01-edit-profile-save-no-toast.png` (visual location/context only — the absence of a live region has no visual signature; the actual defect proof is the DOM scan below).
+
+**DOM / accessibility-tree evidence**
+
+A page-wide scan for any live-region mechanism, run immediately after the save completed, returns zero matches:
+
+```json
+{ "liveCount": 0, "statusCount": 0 }
+```
+
+(`document.querySelectorAll('[aria-live]')` and `[role=status],[role=alert]` both empty — confirming this isn't a scoping/selector miss but a genuine absence of any live-region mechanism on the page.)
 
 **Google Form submission**
 
