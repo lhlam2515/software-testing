@@ -55,16 +55,8 @@ No confirmed bugs were identified from the performed evaluation.
 
 ### User Testing Summary
 
-- Number of user-testing participants: 5
-- Task 2 was skipped, so no user-testing sessions were performed and no SUS / UEQ-S results are reported.
+At the time of submission, I was unable to recruit five participants.
 
-| Severity | Number of usability issues | Description |
-|---|---|---|
-| Critical | TODO | Manual completion required if Task 2 is later performed. |
-| Major | TODO | Manual completion required if Task 2 is later performed. |
-| Minor | TODO | Manual completion required if Task 2 is later performed. |
-
-User testing details should be updated with actual results if performed.
 
 ### Compatibility Testing Summary
 
@@ -86,13 +78,11 @@ Total compatibility cells covered: 9
 
 ## 3. Demo Videos
 
-### Video 1 - Application Demo
-Link:
-TODO: Insert video URL here
+### Video 1 - Task 1 Demo
+Link: https://youtu.be/Tvzos4XgSRE
 
-### Video 2 - Testing Evidence
-Link:
-TODO: Insert video URL here
+### Video 2 - Task 3 Demo
+Link: https://youtu.be/y_gyjVCS5yA
 
 ## 4. Submission Contents
 
@@ -102,4 +92,3 @@ TODO: Insert video URL here
 - Screenshots and evidence: `screenshots/` and `task3/`
 - Demo videos: placeholders in this README
 - Supporting documents: `task1/`, `audit/`, `findings/`, `report/`, `agent-skills/`
-
