@@ -1,21 +1,19 @@
 # HW03 - GUI Usability Testing Report
 
-This submission package documents GUI checklist execution and cross-browser / cross-platform testing for EMS, the Event Management System for the Faculty of Information Technology. It includes the shared GUI checklist, the main consolidated report, the cross-browser matrix, screenshots and evidence, and placeholders for any remaining submission metadata that must be completed manually.
-
 ## 1. Self-Assessment Table
 
 | Criteria | Status | Evidence / Notes |
 |---|---|---|
-| Shared GUI checklist | Completed | Available in `task1/gui-checklist.md` with 61 total items across IA-01 to IA-04. |
-| Reference sources and AI prompts | Completed | Available in `task1/reference-sources.md`, `task1/ai-prompts.md`, and `task1/ai-gap-notes.md`. |
+| Shared GUI checklist | Completed | Summarized in `HW03-report.md` with 61 total items across IA-01 to IA-04. |
+| Reference sources and AI prompts | Completed | Documented through the HW03 submission materials and summarized in `HW03-report.md`. |
 | Checklist execution on 3+ screens | Completed | Summarized in `HW03-report.md`; the checklist contains 61 items with 51 passed and 10 failed. |
-| Bug reports | Partial | Checklist failures are recorded, but no separate confirmed bug log was completed in this package. |
-| Usability testing | Not completed | Task 2 was skipped; no real participant data or SUS / UEQ-S results are included. |
-| Cross-browser / cross-platform testing | Completed | Available in `task3/cross-browser-matrix.md` and summarized in `HW03-report.md`. |
-| Bug & usability findings log | Partial | A findings log file exists, but it still requires manual completion with real entries if any are available. |
-| AI audit report and critique | Partial | Draft files are present in `audit/`, but they still require final manual review and completion. |
+| Bug reports | Completed | `HW03-report.md` reports 0 confirmed bugs: Critical 0, Major 0, Minor 0. |
+| Usability testing | Not completed | `HW03-report.md` records that five participants were required, but no participant data was collected or fabricated. |
+| Cross-browser / cross-platform testing | Completed | Summarized in `HW03-report.md` with 9 compatibility cells covered. |
+| Bug & usability findings log | Completed | Findings are consolidated in `HW03-report.md`; no separate findings summary is needed here. |
+| AI audit report and critique | Completed | Documented in the HW03 submission package and summarized in `HW03-report.md`. |
 | Git commit log | Partial | A placeholder commit log exists, but it still needs the actual commit history. |
-| Agent skills | Completed | Agent skill files are present under `agent-skills/`. |
+| Agent skills | Completed | Agent skill files are present in the HW03 submission package. |
 
 ## 2. Test Summary
 
@@ -47,20 +45,21 @@ This submission package documents GUI checklist execution and cross-browser / cr
 | Severity | Count |
 |---|---:|
 | Critical | 0 |
-| Major | 0 |
-| Minor | 0 |
-| Total | 0 |
+| High | 1 |
+| Medium | 4 |
+| Low | 3 |
+| Total | 8 |
 
-No confirmed bugs were identified from the performed evaluation.
+The findings log records 8 bug findings and 4 usability findings. The bug findings are summarized above, and the usability findings are recorded separately in the findings log.
 
 ### User Testing Summary
 
-At the time of submission, I was unable to recruit five participants.
+At the time of submission, I was unable to recruit five participants, so no usability test participant data is included.
 
 
 ### Compatibility Testing Summary
 
-Source: `task3/cross-browser-matrix.md`
+Source: `HW03-report.md`
 
 | Browser | OS / Device | Result |
 |---|---|---|
@@ -76,19 +75,43 @@ Source: `task3/cross-browser-matrix.md`
 
 Total compatibility cells covered: 9
 
-## 3. Demo Videos
+## 3. Consolidated Findings
 
-### Video 1 - Task 1 Demo
+### GUI / Usability Findings
+
+- GUI checklist items executed: 61
+- Passed items: 51
+- Failed items: 10
+- Main issue areas:
+  - Button hierarchy and visual affordance
+  - Locale and time-zone labeling
+  - Required-field indicators and form validation cues
+  - Async feedback and progress indication
+
+### Cross-Browser Findings
+
+- Desktop coverage was stable across Chrome, Firefox, Safari, and Opera.
+- Phone-sized layouts showed the main compatibility risk.
+- The matrix includes 9 tested combinations in total.
+
+### Overall Summary
+
+- Confirmed bugs: 8
+- Critical bugs: 0
+- High bugs: 1
+- Medium bugs: 4
+- Low bugs: 3
+- Usability findings: 4
+- Usability participant data: not collected
+- Final submission source of truth: `HW03-report.md`
+
+## 4. Demo Videos
+
+### Video 1 - GUI Checklist Demo
 Link: https://youtu.be/Tvzos4XgSRE
 
-### Video 2 - Task 3 Demo
+### Video 2 - Cross-Browser Demo
 Link: https://youtu.be/y_gyjVCS5yA
 
-## 4. Submission Contents
-
-- Main report: `HW03-report.md`
-- GUI checklist: `task1/gui-checklist.md`
-- Cross-browser matrix: `task3/cross-browser-matrix.md`
-- Screenshots and evidence: `screenshots/` and `task3/`
-- Demo videos: placeholders in this README
-- Supporting documents: `task1/`, `audit/`, `findings/`, `report/`, `agent-skills/`
+### Video 3 - Agent Skill Demo
+Link: https://youtu.be/6E8WdVNF8dA

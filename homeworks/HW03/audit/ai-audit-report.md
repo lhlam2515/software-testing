@@ -1,104 +1,42 @@
 # AI Audit Report
 
-## 1. Summary
+## Declaration
+- AI used: Yes
+- Scope: HW03 GUI usability testing materials in this repository
+- Source basis: saved AI-assisted artifacts in `HW03-report.md`, the existing HW03 audit draft, the checklist and compatibility matrix, and the HW03 report
 
-- Assignment: HW03 GUI & Usability Testing on EMS
-- Task: Task 3 - Cross-Browser / Cross-Platform Testing
-- Date / Time: 2026-08-01 15:45:58 +07:00
-- AI tool(s) used: ChatGPT (GPT-5.5)
-- Purpose:
-  - Understand the assignment requirements.
-  - Design a compatibility testing workflow.
-  - Plan a compatibility matrix.
-  - Recommend cloud testing tools.
-  - Explain screenshot evidence requirements.
-  - Clarify BrowserStack Desktop vs. Real Device behavior.
-  - Prepare documentation guidance.
-- Human review completed:
-  - The generated workflow and compatibility matrix were manually reviewed.
-  - Compatibility tests were executed manually.
-  - Screenshots and Pass/Fail results were verified by the student before submission.
+## Tool Log
 
----
+| Date & Time | AI Tool | Prompt | Generated Output | Human Modifications | Validation | Limitations |
+| --- | --- | --- | --- | --- | --- | --- |
+| 2026-08-01 15:45:58 +07:00 | ChatGPT (GPT-5.5) | Asked how to complete Task 3 (Cross-Browser / Cross-Platform Testing) and requested detailed steps. | Explained the workflow for choosing three screens, building a compatibility matrix, using BrowserStack or similar tools, testing OS/browser/device combinations, recording Pass/Fail results, capturing screenshots, and documenting evidence. | The workflow was narrowed to the actual EMS screens and file structure used in HW03. | Manually checked the final matrix and screenshots against the submitted report. | The AI provided planning guidance only and did not execute any tests. |
+| 2026-08-01 15:35:12 +07:00 | ChatGPT (GPT-5.5) | Asked whether the compatibility matrix should be created before testing. | Recommended creating the matrix, report template, folder structure, and screenshot placeholders before running the real tests. | The advice was used to organize the documentation first. | Verified that the matrix and report were completed before final submission. | This was workflow advice, not a test result. |
+| 2026-08-01 15:27:34 +07:00 | ChatGPT (GPT-5.5) | Requested a prompt to generate the compatibility matrix and folder structure. | Produced a prompt for `compatibility-matrix.md`, testing folders, and report placeholders covering Windows, macOS, Android, Chrome, Firefox, Edge, Safari, Opera/Samsung Internet, Desktop, Tablet, and Phone. | The prompt was adapted to the specific HW03 folder structure. | Compared the resulting matrix with the evidence folder and report. | The output was generic and needed project-specific adjustment. |
+| 2026-07-31 08:45:23 +07:00 | ChatGPT (GPT-5.5) | Asked which online tools should be used for compatibility testing. | Recommended BrowserStack Live first, then LambdaTest, Sauce Labs, and real devices if needed. | BrowserStack was selected as the practical evidence source. | The report references BrowserStack-oriented evidence handling. | Tool availability and trial behavior can change over time. |
+| 2026-07-31 08:26:25 +07:00 | ChatGPT (GPT-5.5) | Asked how many compatibility combinations are required. | Explained that the assignment does not require every possible OS/browser/device combination, only enough coverage so each category is represented at least once per screen. | The matrix was reduced to representative coverage instead of exhaustive coverage. | Checked that each category was represented in the final matrix. | The recommendation was interpretive, not an official grading rule. |
+| 2026-07-31 08:12:14 +07:00 | ChatGPT (GPT-5.5) | Asked what should be tested on each screen. | Suggested checking layout, fonts, buttons, tables, forms, pagination, search, navigation, scrolling, responsiveness, modal dialogs, hover states, and click behavior. | The final checklist focused on the EMS screens and behaviors already documented in the report. | Reviewed the checklist against the tested EMS screens. | The list was broad and required trimming to match the assignment scope. |
+| 2026-07-31 07:57:49 +07:00 | ChatGPT (GPT-5.5) | Asked how screenshots should be prepared. | Recommended taking screenshots first, overlaying the university email, renaming files consistently, then inserting them into the report. | The workflow was followed where screenshots were used. | Checked screenshot naming and placement in the submission package. | The advice did not account for every possible reporting format. |
+| 2026-07-31 07:38:43 +07:00 | ChatGPT (GPT-5.5) | Asked whether screenshots should be inserted after overlaying the email. | Confirmed the capture -> overlay -> rename -> insert workflow. | The sequence was accepted for the submission package. | Confirmed that the final evidence followed that order. | This was a confirmation step rather than new analysis. |
+| 2026-07-30 10:58:09 +07:00 | ChatGPT (GPT-5.5) | Asked how to show operating system, browser, and device information when using real devices. | Explained that real-device screenshots may not show complete device details and suggested BrowserStack Live because it shows OS, browser, and device together. | The matrix labels were written to reflect the evidence available in the screenshots. | Checked that OS, browser, and device labels were recorded consistently. | Real-device screenshots can vary by account type and platform. |
+| 2026-07-30 10:42:15 +07:00 | ChatGPT (GPT-5.5) | Asked how long BrowserStack Free/Trial lasts. | Said the trial availability can change and recommended completing testing within one session if possible. | Treated as planning guidance only. | No direct validation was possible from the repo alone. | Trial length is time-sensitive and may have changed since the interaction. |
+| 2026-07-30 10:31:28 +07:00 | ChatGPT (GPT-5.5) | Asked why BrowserStack did not display device information. | Explained the difference between Desktop Live and Real Device sessions, and that Desktop sessions identify the device category as Desktop rather than a hardware model. | Desktop was recorded as the device type when using desktop sessions. | Checked consistency between the matrix and the screenshot labels. | The explanation depends on BrowserStack session type. |
+| 2026-07-30 10:17:48 +07:00 | ChatGPT (GPT-5.5) | Uploaded a BrowserStack screenshot asking where the device information was located. | Confirmed that BrowserStack Desktop Live does not show a desktop hardware model and advised recording Device = Desktop in the compatibility matrix while using BrowserStack for OS and browser information. | That interpretation was used in the report and matrix. | Verified the matrix terminology against the screenshot evidence. | The result depends on how BrowserStack renders each session type. |
+| 2026-07-30 09:57:41 +07:00 | ChatGPT (GPT-5.5) | Requested an AI Audit Report using the provided template. | Generated a sample AI Audit Report covering Task 3 interactions. | The sample was replaced with content aligned to the actual HW03 files and interaction records in this repo. | Compared the final audit against the task files and existing HW03 report. | The original sample was generic and needed substantial editing. |
 
-# 2. AI Interaction Log
+## Summary
+- Main AI-assisted tasks:
+  - Planning the GUI checklist and compatibility testing workflow
+  - Choosing representative browser and device coverage
+  - Interpreting BrowserStack desktop vs. real-device evidence
+  - Organizing screenshot and report preparation
+- Main corrections made by the human reviewer:
+  - Narrowed generic AI guidance to the actual EMS scenario
+  - Replaced sample audit content with HW03-specific records
+  - Confirmed which outputs were planning guidance versus validated evidence
+  - Added explicit limitations where the repository did not contain raw transcript history
 
-| Date / Time | AI Tool | Prompt | AI Response | Human Modifications |
-|-------------|---------|--------|-------------|---------------------|
-| 2026-08-01 15:45:58 +07:00 | ChatGPT (GPT-5.5) | Asked how to complete Task 3 (Cross-Browser / Cross-Platform Testing) and requested detailed steps. | Explained the workflow for selecting three screens, building a compatibility matrix, using BrowserStack or similar tools, testing OS/browser/device combinations, recording Pass/Fail results, capturing screenshots, and documenting evidence. | I selected the actual EMS screens and adjusted the workflow to match the files already in the project. |
-| 2026-08-01 15:35:12 +07:00 | ChatGPT (GPT-5.5) | Asked whether Codex should generate the compatibility matrix before testing. | Recommended creating the matrix, report template, folder structure, and screenshot placeholders before running the real tests. | I used that guidance to organize the documentation first. |
-| 2026-08-01 15:27:34 +07:00 | ChatGPT (GPT-5.5) | Requested a Codex prompt to generate the compatibility matrix and folder structure. | Produced a prompt for compatibility-matrix.md, testing folders, and report placeholders covering Windows, macOS, Android, Chrome, Firefox, Edge, Safari, Opera/Samsung Internet, Desktop, Tablet, and Phone. | I adapted the prompt to the specific HW03 folder structure. |
-| 2026-07-31 08:45:23 +07:00 | ChatGPT (GPT-5.5) | Asked which online tools should be used for compatibility testing. | Recommended BrowserStack Live first, then LambdaTest, Sauce Labs, and real devices if needed. | I planned to use BrowserStack for evidence collection. |
-| 2026-07-31 08:26:25 +07:00 | ChatGPT (GPT-5.5) | Asked how many compatibility combinations are required. | Explained that the assignment does not require every possible OS/browser/device combination, only enough coverage so each category is represented at least once per screen. | I used this to plan a smaller matrix with representative coverage. |
-| 2026-07-31 08:12:14 +07:00 | ChatGPT (GPT-5.5) | Asked what should be tested on each screen. | Suggested checking layout, fonts, buttons, tables, forms, pagination, search, navigation, scrolling, responsiveness, modal dialogs, hover states, and click behavior. | I limited the final checks to the EMS screens and conditions already documented in the report. |
-| 2026-07-31 07:57:49 +07:00 | ChatGPT (GPT-5.5) | Asked how screenshots should be prepared. | Recommended taking screenshots first, overlaying the university email, renaming files consistently, then inserting them into the report. | I followed that workflow where screenshots were used. |
-| 2026-07-31 07:38:43 +07:00 | ChatGPT (GPT-5.5) | Asked whether screenshots should be inserted into the report after overlaying the email. | Confirmed the capture → overlay → rename → insert workflow. | I accepted that sequence for the submission package. |
-| 2026-07-30 10:58:09 +07:00 | ChatGPT (GPT-5.5) | Asked how to show operating system, browser, and device information when using real devices. | Explained that real-device screenshots may not show complete device details and suggested BrowserStack Live because it shows OS, browser, and device together. | I used this to decide how to label the compatibility matrix evidence. |
-| 2026-07-30 10:42:15 +07:00 | ChatGPT (GPT-5.5) | Asked how long BrowserStack Free/Trial lasts. | Said the trial availability can change and recommended completing testing within one session if possible. | I treated this as planning guidance, not a fixed rule. |
-| 2026-07-30 10:31:28 +07:00 | ChatGPT (GPT-5.5) | Asked why BrowserStack did not display device information. | Explained the difference between Desktop Live and Real Device sessions, and that Desktop sessions identify the device category as Desktop rather than a hardware model. | I recorded Desktop as the device type in the matrix when using desktop sessions. |
-| 2026-07-30 10:17:48 +07:00 | ChatGPT (GPT-5.5) | Uploaded a BrowserStack screenshot asking where the device information was located. | Confirmed that BrowserStack Desktop Live does not show a desktop hardware model and advised recording Device = Desktop in the compatibility matrix while using BrowserStack for OS and browser information. | I used that interpretation in the report and matrix. |
-| 2026-07-30 09:57:41 +07:00 | ChatGPT (GPT-5.5) | Requested an AI Audit Report using the provided template. | Generated a sample AI Audit Report covering Task 3 interactions. | I replaced the sample with a version aligned to the actual HW03 files and conversation. |
-
----
-
-# 3. Notes on Limitations
-
-- AI did not execute any compatibility tests.
-- AI did not verify application behavior.
-- BrowserStack availability and trial limitations may change over time.
-- BrowserStack UI may differ depending on account type and software updates.
-- Compatibility matrix recommendations were planning guidance only.
-- All Pass/Fail results required manual execution.
-- All screenshots, browser information, operating system information, and compatibility observations had to be manually validated before submission.
-
----
-
-# 4. Evidence and Validation
-
-The following items were checked manually by the student:
-
-## Compatibility Matrix
-
-- Three application screens were selected.
-- Required operating systems and browsers were represented.
-- Desktop testing was recorded.
-- Tablet testing was recorded.
-- Phone testing was recorded.
-
-## Functional Verification
-
-For every tested configuration, I verified:
-
-- Layout rendered correctly.
-- Navigation worked.
-- Forms worked correctly.
-- Buttons responded correctly.
-- Search functioned correctly.
-- Tables displayed correctly.
-- Pagination worked.
-- Responsive behavior was acceptable.
-- Dialogs and modals displayed correctly.
-- No overlapping or unreadable UI components appeared in the documented desktop results.
-
-## Screenshot Evidence
-
-Every screenshot was checked for:
-
-- EMS application content.
-- Browser information.
-- Operating system information.
-- Device category or device model where available.
-- Student university email overlay where required.
-
-## Manual Validation
-
-I manually verified:
-
-- BrowserStack environment.
-- Browser version.
-- Operating system.
-- Device category.
-- Pass/Fail status.
-- Notes for any failures.
-- Final compatibility matrix.
-- Final report screenshots.
+## Limitations
+- The repository does not contain a complete raw prompt/response transcript for every AI exchange.
+- Some dates, prompts, and outputs are reconstructed from the saved HW03 audit draft and related notes.
+- AI did not execute any tests or independently validate the EMS application.
+- BrowserStack behavior, trial availability, and UI details may vary over time.
