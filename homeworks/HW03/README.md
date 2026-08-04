@@ -15,7 +15,7 @@
 
 | Document | Description |
 | -------- | ------------ |
-| [REPORT.md](./REPORT.md) | Main report — selected scenario, per-screen checklist run, Usability Report, cross-platform report, AI Critique |
+| [REPORT.md](./REPORT.md) | Main report — selected scenario, per-screen checklist run, AI Critique |
 | [FINDINGS_LOG.md](./FINDINGS_LOG.md) | Consolidated Bug & Usability Findings Log, consistent with the Google Form submissions |
 | [prompt_log.md](./prompt_log.md) | Full AI prompt log with timestamps |
 | [[AI-02]_AI_Audit_Report.md](./%5BAI-02%5D_AI_Audit_Report.md) | Per-artifact AI audit (prompt, output, verdict, reasoning, student fix) |
@@ -23,8 +23,6 @@
 | [[AI-05]_AI_Privacy_Checklist.md](./%5BAI-05%5D_AI_Privacy_Checklist.md) | AI privacy and responsible-use checklist |
 | [group/](./group/) | Group deliverable — shared GUI checklist, references, checklist prompts, AI gap notes |
 | [artifacts/screens/](./artifacts/screens/) | Task 1B — per-screen checklist run + screenshots of failed items |
-| [artifacts/usability/](./artifacts/usability/) | Task 2 — task scenario, participants, session notes, SUS scores, metrics, findings |
-| [artifacts/compatibility/](./artifacts/compatibility/) | Task 3 — per-screen compatibility matrix + cross-platform screenshots |
 | [assets/](./assets/) | Signature image and commit log |
 | [refs/](./refs/) | Original assignment handouts (PDF/DOCX) and the EMS admin E2E flow document |
 
@@ -75,38 +73,6 @@
 | B4 — My Registrations / ticket |  |  |  |  |
 | **Total** |  |  |  |  |
 
-### Task 2 — User Testing (5 real participants)
-
-| Metric | Value |
-| ------ | ----- |
-| Participants recruited (target: 5) |  |
-| Pilot sessions run |  |
-| Task success rate (complete / partial / fail) |  |
-| Average time on task |  |
-| Total errors / hesitations observed |  |
-| Average SUS (or UEQ-S) score |  |
-
-| Usability findings by severity | Count |
-| ------------------------------ | ----- |
-| 4 — Usability catastrophe |  |
-| 3 — Major |  |
-| 2 — Minor |  |
-| 1 — Cosmetic |  |
-| 0 — Not a usability problem |  |
-| **Total** |  |
-
-### Task 3 — Cross-Browser / Cross-Platform
-
-| Metric | Value |
-| ------ | ----- |
-| Matrix cells covered (total across screens) |  |
-| Operating systems covered (≥ 3) |  |
-| Browsers covered (≥ 5) |  |
-| Device types covered (≥ 3) |  |
-| Cells passed |  |
-| Cells failed |  |
-| Tool(s) used (BrowserStack / LambdaTest / real device) |  |
-
 ### Findings Submission (§7)
 
 | Metric | Count |
@@ -143,9 +109,7 @@
 
 - [ ] Main report — Markdown + PDF
 - [ ] Group deliverable: shared GUI checklist (> 40 items), references list, checklist prompts
-- [ ] User-testing evidence: task scenario, participant table (masked), per-session notes, SUS/UEQ-S responses, metrics table, recordings (if any)
 - [ ] Bug & Usability Findings Log, consistent with the Google Form
-- [ ] Cross-browser / cross-platform screenshots with MSSV overlay
 - [ ] AI Critique + AI Audit Report (Markdown + PDF)
 - [ ] Git commit log (`assets/commit-log.txt`)
 - [ ] Agent Skill + demo video link
