@@ -111,5 +111,5 @@ Not applicable — no Agent Skill was submitted for this assignment, so there is
 - [x] Group deliverable: shared GUI checklist (> 40 items), references list, checklist prompts
 - [x] Bug & Usability Findings Log, consistent with the Google Form (30/30 submitted)
 - [ ] AI Critique + AI Audit Report (Markdown + PDF)
-- [ ] Git commit log (`assets/commit-log.txt`)
+- [x] Git commit log (`assets/commit-log.txt`)
 - [ ] Zip named `23127216_HW03_AI_GUIUsability_EMS_040.zip`

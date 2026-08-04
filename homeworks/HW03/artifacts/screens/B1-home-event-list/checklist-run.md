@@ -103,6 +103,4 @@
 
 ---
 
-> **TODO:** paste one row per checklist item, keeping the IDs from the shared checklist.
-
 > Legend: **Passed** / **Failed** = the item applies to this screen and was exercised. **N/A** = the item's control class (data list, form field, tab control, upload, …) does not exist here.

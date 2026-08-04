@@ -1458,5 +1458,3 @@ A page-wide scan for any live-region mechanism, run immediately after the save c
 | 2026-08-04 21:36 | assets/form-submissions/BUG-B4-012.png |
 
 ---
-
-> **TODO:** duplicate the entry block above for every finding.
