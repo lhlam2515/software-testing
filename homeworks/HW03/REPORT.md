@@ -32,10 +32,10 @@ _TBD_
 | --------- | ------ | ---------- | -------------------- |
 | B1 | Home / event listing | _TBD_ | _TBD_ |
 | B2 | Event detail | _TBD_ | _TBD_ |
-| B3 | Registration form | _TBD_ | _TBD_ |
 | B4 | My Registrations / ticket | _TBD_ | _TBD_ |
 
 > **TODO:** ≥ 3 screens required. Justify any screen chosen outside the suggested list in §5 of the assignment.
+> **B3 (Registration form) excluded (decided 2026-08-03):** no dedicated route — it is an in-page panel on `/events/{id}` (B2) — and was never executed in Task 1B. Task 1B/2/3 run on B1, B2, B4 only.
 
 ### 2.3 Non-overlap declaration (§5)
 
@@ -109,22 +109,7 @@ _TBD — summarize `group/ai-gap-notes.md`: what AI systematically missed and wh
 | ------------ | ---- | ------------- | ---------- | ---------- |
 |  |  |  |  |  |
 
-### 4.3 B3 — Registration form
-
-| Field | Value |
-| ----- | ----- |
-| URL | _TBD_ |
-| Run date / build | _TBD_ |
-| Items run / Passed / Failed | _TBD_ |
-| Detailed run | [artifacts/screens/B3-registration-form/checklist-run.md](artifacts/screens/B3-registration-form/checklist-run.md) |
-
-**Failed items summary**
-
-| Checklist ID | Item | Why it failed | Finding ID | Screenshot |
-| ------------ | ---- | ------------- | ---------- | ---------- |
-|  |  |  |  |  |
-
-### 4.4 B4 — My Registrations / ticket
+### 4.3 B4 — My Registrations / ticket
 
 | Field | Value |
 | ----- | ----- |
@@ -139,7 +124,7 @@ _TBD — summarize `group/ai-gap-notes.md`: what AI systematically missed and wh
 | ------------ | ---- | ------------- | ---------- | ---------- |
 |  |  |  |  |  |
 
-### 4.5 Bugs found in Task 1B
+### 4.4 Bugs found in Task 1B
 
 > Each bug: screen · repro steps · expected vs actual · severity · screenshot. Full entries in [FINDINGS_LOG.md](FINDINGS_LOG.md).
 
@@ -210,10 +195,10 @@ Raw scoring: [artifacts/usability/sus-scores.md](artifacts/usability/sus-scores.
 | Operating systems | ≥ 3 |  |
 | Browsers | ≥ 5 |  |
 | Device types | ≥ 3 (desktop, tablet, phone) |  |
-| Screens tested | 3+ |  |
+| Screens tested | 3 (B1, B2, B4 — B3 excluded, §2.2) |  |
 | Tool(s) | BrowserStack / LambdaTest / real device |  |
 
-> Every screenshot must overlay `23127216@student.hcmus.edu.vn` next to the EMS URL and identify browser / OS / device.
+> Every Task 3 screenshot must overlay `23127216@student.hcmus.edu.vn` next to the EMS URL and identify browser / OS / device. This overlay requirement is scoped to Task 3 cross-platform evidence only — it does not apply to the Task 1B per-screen checklist screenshots.
 > **TODO:** confirm the exact MSSV email format required by the course before capturing screenshots.
 
 ### 6.2 Per-screen matrices
@@ -222,7 +207,6 @@ Raw scoring: [artifacts/usability/sus-scores.md](artifacts/usability/sus-scores.
 | ------ | ------ | ----- | ---- | ---- |
 | B1 | [matrix-B1.md](artifacts/compatibility/matrix-B1.md) |  |  |  |
 | B2 | [matrix-B2.md](artifacts/compatibility/matrix-B2.md) |  |  |  |
-| B3 | [matrix-B3.md](artifacts/compatibility/matrix-B3.md) |  |  |  |
 | B4 | [matrix-B4.md](artifacts/compatibility/matrix-B4.md) |  |  |  |
 
 ### 6.3 Compatibility defects

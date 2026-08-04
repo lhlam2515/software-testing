@@ -40,10 +40,9 @@
 | --------- | ------ | ---------- | --------------- |
 | B1 | Home / event listing — featured carousel, category, search & filter | `/dashboard` (behind login) | _TBD_ |
 | B2 | Event detail — banner, schedule, register button, waitlist notice | `/events/{id}` | _TBD_ |
-| B3 | Registration form — role selection, additional role, confirmation | _TBD — no separate route found; "Select Participant" / "Register (Student/Lecturer)" is an in-page panel on `/events/{id}` (B2), not a distinct screen. Confirm before Task 1B whether B3 stays a separate row or folds into B2._ | _TBD_ |
 | B4 | My Registrations / ticket — status and barcode/QR | _TBD — not in the top nav (Events / Calendar / Saved Events / User guide); likely under the user-menu dropdown (top-right avatar), not yet surveyed_ | _TBD_ |
 
-> **TODO:** keep at least 3 rows; drop or replace a row only with a stated reason (§5 allows other screens within the same pool if justified).
+> **Decision (2026-08-03):** B3 (Registration form) is **excluded** from the 3 screens under test. It has no dedicated route — the "Select Participant" / "Register (Student/Lecturer)" panel is an in-page section of `/events/{id}` (B2), not a distinct screen — and it was never executed in Task 1B (no findings-log, no captured screenshots). Task 1B/2/3 all run on **B1, B2, B4**. §5 permits choosing screens other than the suggested list when justified; B3 was considered and dropped for the reason above.
 > **Note (2026-07-28):** the whole app now sits behind a login wall — root `/` and every route redirect to `/login` when unauthenticated. This differs from the "public discovery" premise this scenario was originally framed around; confirm with the group/TA whether that still holds for the redeployed build before finalizing screen descriptions.
 
 ---
@@ -73,7 +72,6 @@
 | ------ | --------- | ------ | ------ | ---- |
 | B1 — Home / event listing |  |  |  |  |
 | B2 — Event detail |  |  |  |  |
-| B3 — Registration form |  |  |  |  |
 | B4 — My Registrations / ticket |  |  |  |  |
 | **Total** |  |  |  |  |
 
