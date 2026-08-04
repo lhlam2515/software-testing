@@ -34,7 +34,6 @@ Scenario B covers the participant side of EMS end to end: discover an event, act
 | B2 | Event detail | `/events/{id}` | Holds the actual registration action, exercises IA-02 (role-selection control) and IA-04 (register/cancel/share feedback) on a status-dependent detail page. |
 | B4 | My Registrations / ticket | `/profile` (no dedicated route; reached via the hamburger menu, "View profile") | End state of the flow and the participant's own data view, exercises IA-01 (status badges, i18n) plus IA-02 (Change Password form, avatar upload) on a personal-record pattern the other two screens do not cover. |
 
-> **TODO:** ≥ 3 screens required. Justify any screen chosen outside the suggested list in §5 of the assignment.
 > **B3 (Registration form) excluded (decided 2026-08-03):** no dedicated route — it is an in-page panel on `/events/{id}` (B2) — and was never executed in Task 1B. Task 1B/2/3 run on B1, B2, B4 only.
 
 ### 2.3 Non-overlap declaration (§5)
@@ -161,53 +160,57 @@ Across the 11 human-added items and the 6 changes to the AI draft, `group/ai-gap
 
 | Finding ID | Screen | Description | Severity | Form submitted |
 | ---------- | ------ | ----------- | -------- | -------------- |
-| BUG-B1-001 | B1 Home/Event Listing | Spotlight banner "View details" link text fails WCAG contrast minimum | Minor | Pending |
-| BUG-B1-002 | B1 Home/Event Listing | Search input border fails WCAG non-text contrast minimum | Minor | Pending |
-| BUG-B1-003 | B1 Home/Event Listing | Pagination prev/next buttons have no accessible name | Major | Pending |
-| USA-B1-001 | B1 Home/Event Listing | Event date/time strings show no explicit time-zone label | Nielsen severity 2 | Pending |
-| BUG-B1-004 | B1 Home/Event Listing | Whitespace-only search query is treated as valid input, not empty | Minor | Pending |
-| BUG-B1-005 | B1 Home/Event Listing | Browser Back from event detail loses the active status filter and list scroll position | Major | Pending |
-| BUG-B1-006 | B1 Home/Event Listing | Status-filter toggle buttons (Upcoming/Ongoing/Ended) don't expose selected state to assistive tech | Minor | Pending |
-| BUG-B1-007 | B1 Home/Event Listing | "Save event" success confirmation is not announced to assistive tech | Minor | Pending |
-| BUG-B2-001 | B2 Event Detail | Category/campus tag chip text fails WCAG contrast minimum | Minor | Pending |
-| BUG-B2-002 | B2 Event Detail | Info-card borders (Event date/Registration period/Check-in period) fail WCAG non-text contrast minimum | Minor | Pending |
-| BUG-B2-003 | B2 Event Detail | Guest role label stays untranslated after switching UI language to Vietnamese | Minor | Pending |
-| USA-B2-001 | B2 Event Detail | Event date/registration/check-in times show no explicit time-zone label | Nielsen severity 2 | Pending |
-| BUG-B2-004 | B2 Event Detail | "Share event" gives no feedback on click | Minor | Pending |
-| BUG-B2-005 | B2 Event Detail | Registration-approved confirmation is not announced to assistive tech | Minor | Pending |
-| BUG-B4-001 | B4 My Registrations / Ticket | Search input border fails WCAG non-text contrast minimum | Minor | Pending |
-| BUG-B4-002 | B4 My Registrations / Ticket | Pagination prev/next buttons have no accessible name | Major | Pending |
-| BUG-B4-003 | B4 My Registrations / Ticket | "Approved" and "Cancelled" registration-status badges share the identical gray color, hiding the state distinction | Major | Pending |
-| BUG-B4-004 | B4 My Registrations / Ticket | "Roles:" chip value stays untranslated after switching UI language to Vietnamese | Minor | Pending |
-| USA-B4-001 | B4 My Registrations / Ticket | Activity cards carry no at-rest visual signifier of interactivity | Nielsen severity 1 | Pending |
-| USA-B4-002 | B4 My Registrations / Ticket | Activity date/time ranges show no explicit time-zone label | Nielsen severity 2 | Pending |
-| USA-B4-003 | B4 My Registrations / Ticket | "Change Password" required fields carry no visible required-field indicator | Nielsen severity 1 | Pending |
-| BUG-B4-005 | B4 My Registrations / Ticket | Avatar upload accepts a non-image file with no error message | Major | Pending |
-| BUG-B4-006 | B4 My Registrations / Ticket | Whitespace-only search query is treated as valid input, not empty | Minor | Pending |
-| BUG-B4-007 | B4 My Registrations / Ticket | "Confirm Password" validation error names the wrong field | Major | Pending |
-| USA-B4-004 | B4 My Registrations / Ticket | Long activity title is clipped to one line with no way to recover the hidden text | Nielsen severity 1 | Pending |
-| BUG-B4-008 | B4 My Registrations / Ticket | Browser Back from an activity's event-detail page loses the active search query and list scroll position | Major | Pending |
-| BUG-B4-009 | B4 My Registrations / Ticket | Avatar-upload control is not reachable via keyboard | Major | Pending |
-| BUG-B4-010 | B4 My Registrations / Ticket | "Edit Profile" save gives no visible feedback on success | Minor | Pending |
-| BUG-B4-011 | B4 My Registrations / Ticket | "Filters" disclosure button never exposes its expanded state to assistive tech | Minor | Pending |
-| BUG-B4-012 | B4 My Registrations / Ticket | "Edit Profile" save confirmation is not announced to assistive tech | Minor | Pending |
+| BUG-B1-001 | B1 Home/Event Listing | Spotlight banner "View details" link text fails WCAG contrast minimum | Minor | Submitted |
+| BUG-B1-002 | B1 Home/Event Listing | Search input border fails WCAG non-text contrast minimum | Minor | Submitted |
+| BUG-B1-003 | B1 Home/Event Listing | Pagination prev/next buttons have no accessible name | Major | Submitted |
+| USA-B1-001 | B1 Home/Event Listing | Event date/time strings show no explicit time-zone label | Nielsen severity 2 | Submitted |
+| BUG-B1-004 | B1 Home/Event Listing | Whitespace-only search query is treated as valid input, not empty | Minor | Submitted |
+| BUG-B1-005 | B1 Home/Event Listing | Browser Back from event detail loses the active status filter and list scroll position | Major | Submitted |
+| BUG-B1-006 | B1 Home/Event Listing | Status-filter toggle buttons (Upcoming/Ongoing/Ended) don't expose selected state to assistive tech | Minor | Submitted |
+| BUG-B1-007 | B1 Home/Event Listing | "Save event" success confirmation is not announced to assistive tech | Minor | Submitted |
+| BUG-B2-001 | B2 Event Detail | Category/campus tag chip text fails WCAG contrast minimum | Minor | Submitted |
+| BUG-B2-002 | B2 Event Detail | Info-card borders (Event date/Registration period/Check-in period) fail WCAG non-text contrast minimum | Minor | Submitted |
+| BUG-B2-003 | B2 Event Detail | Guest role label stays untranslated after switching UI language to Vietnamese | Minor | Submitted |
+| USA-B2-001 | B2 Event Detail | Event date/registration/check-in times show no explicit time-zone label | Nielsen severity 2 | Submitted |
+| BUG-B2-004 | B2 Event Detail | "Share event" gives no feedback on click | Minor | Submitted |
+| BUG-B2-005 | B2 Event Detail | Registration-approved confirmation is not announced to assistive tech | Minor | Submitted |
+| BUG-B4-001 | B4 My Registrations / Ticket | Search input border fails WCAG non-text contrast minimum | Minor | Submitted |
+| BUG-B4-002 | B4 My Registrations / Ticket | Pagination prev/next buttons have no accessible name | Major | Submitted |
+| BUG-B4-003 | B4 My Registrations / Ticket | "Approved" and "Cancelled" registration-status badges share the identical gray color, hiding the state distinction | Major | Submitted |
+| BUG-B4-004 | B4 My Registrations / Ticket | "Roles:" chip value stays untranslated after switching UI language to Vietnamese | Minor | Submitted |
+| USA-B4-001 | B4 My Registrations / Ticket | Activity cards carry no at-rest visual signifier of interactivity | Nielsen severity 1 | Submitted |
+| USA-B4-002 | B4 My Registrations / Ticket | Activity date/time ranges show no explicit time-zone label | Nielsen severity 2 | Submitted |
+| USA-B4-003 | B4 My Registrations / Ticket | "Change Password" required fields carry no visible required-field indicator | Nielsen severity 1 | Submitted |
+| BUG-B4-005 | B4 My Registrations / Ticket | Avatar upload accepts a non-image file with no error message | Major | Submitted |
+| BUG-B4-006 | B4 My Registrations / Ticket | Whitespace-only search query is treated as valid input, not empty | Minor | Submitted |
+| BUG-B4-007 | B4 My Registrations / Ticket | "Confirm Password" validation error names the wrong field | Major | Submitted |
+| USA-B4-004 | B4 My Registrations / Ticket | Long activity title is clipped to one line with no way to recover the hidden text | Nielsen severity 1 | Submitted |
+| BUG-B4-008 | B4 My Registrations / Ticket | Browser Back from an activity's event-detail page loses the active search query and list scroll position | Major | Submitted |
+| BUG-B4-009 | B4 My Registrations / Ticket | Avatar-upload control is not reachable via keyboard | Major | Submitted |
+| BUG-B4-010 | B4 My Registrations / Ticket | "Edit Profile" save gives no visible feedback on success | Minor | Submitted |
+| BUG-B4-011 | B4 My Registrations / Ticket | "Filters" disclosure button never exposes its expanded state to assistive tech | Minor | Submitted |
+| BUG-B4-012 | B4 My Registrations / Ticket | "Edit Profile" save confirmation is not announced to assistive tech | Minor | Submitted |
 
 ---
 
-## 6. AI Critique (200–300 words)
+## 5. AI Critique (200–300 words)
 
-> **Must be written entirely by the student.** Where was AI wrong, biased, or incomplete? Why did it miss the issue? What principle about collaborating with AI did this assignment teach?
+Even with a detailed, fully-scoped prompt, the AI still failed in two opposite directions on Task 1A.
 
-_TBD_
+It under-delivered on breadth: `gui-checklist.prompt.md` pasted all six per-control checklists in full (Text Box, Date, Dropdown/Combo, Checkbox/Radio, Hyperlink/Image/Grid/List, Input-field validation), but the draft only cited 3 of 6. Dropdown/Combo and Checkbox/Radio went completely unused, despite Checkbox/Radio being the exact control behind EMS's registration role picker. The same pattern hit the ISTQB 12-item form checklist: only 5 of 12 items survived into the draft. Complete source material did not produce complete source usage; the model kept whatever recurs most often in generic checklist writing and silently dropped the rest, with no signal that anything was cut.
+
+It over-delivered on scope: 4 draft items had to be removed during review, not because they were wrong facts, but because they tested things a rendered screen cannot answer, such as a user's subjective read of icon conventions, whether a submit flow has a review step, or a duplicate rule restated under a second interface aspect. The AI does not reliably know where "GUI defect" stops and "flow design" or "user perception" begins unless the prompt draws that line explicitly.
+
+Neither failure was random; both were consistent across a re-run, which points to the actual principle: a capable agent is not the same as a stable one. For a repeatable task governed by a fixed spec, the bottleneck is not the model's raw capability but how precisely the guideline constrains it. Every implicit boundary left unstated becomes either a silent omission or an unwanted addition, and writing that boundary down explicitly, once, is cheaper than catching it after the fact on every run.
 
 ---
 
-## 7. References
+## 6. References
 
 - ISTQB Foundation Level Syllabus (latest edition).
-- Nielsen, J. *10 Usability Heuristics for User Interface Design.*
-- Norman, D. *The Design of Everyday Things* (6 principles).
-- Shneiderman, B. *Eight Golden Rules of Interface Design.*
-- Course slides: *GUI + Usability + Compatibility Testing (AI-First, Combined).*
+- Nielsen, J. _10 Usability Heuristics for User Interface Design._
+- Norman, D. _The Design of Everyday Things_ (6 principles).
+- Shneiderman, B. _Eight Golden Rules of Interface Design._
+- Course slides: _GUI + Usability + Compatibility Testing (AI-First, Combined)._
 - BrowserStack / LambdaTest documentation — cross-browser & cross-platform testing.
-- Hardman, P. (2025). *A Post-AI Learning Taxonomy.*
+- Hardman, P. (2025). _A Post-AI Learning Taxonomy._
