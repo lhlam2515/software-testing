@@ -134,90 +134,7 @@ _TBD — summarize `group/ai-gap-notes.md`: what AI systematically missed and wh
 
 ---
 
-## 5. Task 2 — Usability Report (5 real users)
-
-### 5.1 Phase 1 — Design & preparation
-
-| Item | Location / Value |
-| ---- | ---------------- |
-| Task scenario (goal-oriented) | [artifacts/usability/task-scenario.md](artifacts/usability/task-scenario.md) |
-| Metrics collected | task success · time on task · errors/hesitations · SUS or UEQ-S |
-| Participant table (masked contacts) | [artifacts/usability/participants.md](artifacts/usability/participants.md) |
-| Pilot run + refinements | [artifacts/usability/pilot-session.md](artifacts/usability/pilot-session.md) |
-
-_TBD — summarize the scenario and what changed after the pilot._
-
-### 5.2 Phase 2 — Sessions
-
-| # | Participant | Profile | Date | Session notes |
-| - | ----------- | ------- | ---- | ------------- |
-| 1 | P1 |  |  | [P1-notes.md](artifacts/usability/sessions/P1-notes.md) |
-| 2 | P2 |  |  | [P2-notes.md](artifacts/usability/sessions/P2-notes.md) |
-| 3 | P3 |  |  | [P3-notes.md](artifacts/usability/sessions/P3-notes.md) |
-| 4 | P4 |  |  | [P4-notes.md](artifacts/usability/sessions/P4-notes.md) |
-| 5 | P5 |  |  | [P5-notes.md](artifacts/usability/sessions/P5-notes.md) |
-
-### 5.3 Phase 3 — Metrics
-
-| Participant | Task success | Time on task | Errors | Hesitations | SUS / UEQ-S |
-| ----------- | ------------ | ------------ | ------ | ----------- | ----------- |
-| P1 |  |  |  |  |  |
-| P2 |  |  |  |  |  |
-| P3 |  |  |  |  |  |
-| P4 |  |  |  |  |  |
-| P5 |  |  |  |  |  |
-| **Average / total** |  |  |  |  |  |
-
-Raw scoring: [artifacts/usability/sus-scores.md](artifacts/usability/sus-scores.md) · [artifacts/usability/metrics.md](artifacts/usability/metrics.md)
-
-### 5.4 Ranked findings (severity 0–4)
-
-> Group similar pain points; separate one-off slips from systemic design problems. Full analysis: [artifacts/usability/findings.md](artifacts/usability/findings.md)
-
-| ID | Screen | Finding | Participants affected | Severity (0–4) | Evidence |
-| -- | ------ | ------- | --------------------- | -------------- | -------- |
-|  |  |  |  |  |  |
-
-### 5.5 Prioritized recommendations
-
-| Priority | Recommendation | Addresses finding(s) | Expected effect |
-| -------- | -------------- | -------------------- | --------------- |
-|  |  |  |  |
-
----
-
-## 6. Task 3 — Cross-Browser / Cross-Platform
-
-### 6.1 Coverage summary
-
-| Requirement | Target | Covered |
-| ----------- | ------ | ------- |
-| Operating systems | ≥ 3 |  |
-| Browsers | ≥ 5 |  |
-| Device types | ≥ 3 (desktop, tablet, phone) |  |
-| Screens tested | 3 (B1, B2, B4 — B3 excluded, §2.2) |  |
-| Tool(s) | BrowserStack / LambdaTest / real device |  |
-
-> Every Task 3 screenshot must overlay `23127216@student.hcmus.edu.vn` next to the EMS URL and identify browser / OS / device. This overlay requirement is scoped to Task 3 cross-platform evidence only — it does not apply to the Task 1B per-screen checklist screenshots.
-> **TODO:** confirm the exact MSSV email format required by the course before capturing screenshots.
-
-### 6.2 Per-screen matrices
-
-| Screen | Matrix | Cells | Pass | Fail |
-| ------ | ------ | ----- | ---- | ---- |
-| B1 | [matrix-B1.md](artifacts/compatibility/matrix-B1.md) |  |  |  |
-| B2 | [matrix-B2.md](artifacts/compatibility/matrix-B2.md) |  |  |  |
-| B4 | [matrix-B4.md](artifacts/compatibility/matrix-B4.md) |  |  |  |
-
-### 6.3 Compatibility defects
-
-| ID | Screen | OS / Browser / Device | Defect (overflow, overlap, broken layout, unreadable text, unresponsive control…) | Severity | Screenshot |
-| -- | ------ | --------------------- | -------------------------------------------------------------------------------- | -------- | ---------- |
-|  |  |  |  |  |  |
-
----
-
-## 7. AI Critique (200–300 words)
+## 6. AI Critique (200–300 words)
 
 > **Must be written entirely by the student.** Where was AI wrong, biased, or incomplete? Why did it miss the issue? What principle about collaborating with AI did this assignment teach?
 
@@ -225,7 +142,7 @@ _TBD_
 
 ---
 
-## 8. References
+## 7. References
 
 - ISTQB Foundation Level Syllabus (latest edition).
 - Nielsen, J. *10 Usability Heuristics for User Interface Design.*
