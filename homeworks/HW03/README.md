@@ -36,12 +36,12 @@
 
 | Screen ID | Screen | URL / Path | Why this screen |
 | --------- | ------ | ---------- | --------------- |
-| B1 | Home / event listing — featured carousel, category, search & filter | `/dashboard` (behind login) | _TBD_ |
-| B2 | Event detail — banner, schedule, register button, waitlist notice | `/events/{id}` | _TBD_ |
-| B4 | My Registrations / ticket — status and barcode/QR | _TBD — not in the top nav (Events / Calendar / Saved Events / User guide); likely under the user-menu dropdown (top-right avatar), not yet surveyed_ | _TBD_ |
+| B1 | Home / event listing — featured carousel, category, search & filter | `/dashboard` (behind login) | Entry point of the registration flow; a filterable data-list pattern that exercises IA-01 (layout, i18n) and IA-03 (search, filter, back-navigation). |
+| B2 | Event detail — banner, schedule, register button, waitlist notice | `/events/{id}` | Holds the actual registration action; a status-dependent detail page that exercises IA-02 (role selection) and IA-04 (register/cancel/share feedback). |
+| B4 | My Registrations / ticket — status and barcode/QR | `/profile` (no dedicated route; reached via hamburger menu, "View profile") | End state of the flow and the participant's own record view; exercises IA-01 (status badges, i18n) and IA-02 (Change Password form, avatar upload) on a pattern the other two screens don't cover. |
 
 > **Decision (2026-08-03):** B3 (Registration form) is **excluded** from the 3 screens under test. It has no dedicated route — the "Select Participant" / "Register (Student/Lecturer)" panel is an in-page section of `/events/{id}` (B2), not a distinct screen — and it was never executed in Task 1B (no findings-log, no captured screenshots). Task 1B/2/3 all run on **B1, B2, B4**. §5 permits choosing screens other than the suggested list when justified; B3 was considered and dropped for the reason above.
-> **Note (2026-07-28):** the whole app now sits behind a login wall — root `/` and every route redirect to `/login` when unauthenticated. This differs from the "public discovery" premise this scenario was originally framed around; confirm with the group/TA whether that still holds for the redeployed build before finalizing screen descriptions.
+> **Resolved (2026-08-04):** the login-wall premise noted below held for the whole build — every screen in this scenario was tested authenticated as the self-registered Student account. B4's location was confirmed at `/profile` via the hamburger menu's "View profile" entry (no dedicated `/my-registrations`-style route exists).
 
 ---
 
@@ -51,35 +51,35 @@
 
 | Metric | Count |
 | ------ | ----- |
-| Checklist items designed (group, IA-01…IA-04) |  |
-| — IA-01 General UI standards |  |
-| — IA-02 Forms |  |
-| — IA-03 Navigation |  |
-| — IA-04 Feedback / state |  |
-| Items originating from AI |  |
-| Items added by student (human) |  |
-| Screens under test |  |
-| Checklist checks executed (items × screens) |  |
-| Passed |  |
-| Failed |  |
-| Bugs reported |  |
+| Checklist items designed (group, IA-01…IA-04) | 61 |
+| — IA-01 General UI standards | 17 |
+| — IA-02 Forms | 21 |
+| — IA-03 Navigation | 13 |
+| — IA-04 Feedback / state | 10 |
+| Items originating from AI | 50 |
+| Items added by student (human) | 11 |
+| Screens under test | 3 (B1, B2, B4) |
+| Checklist checks executed (items × screens) | 183 |
+| Passed | 89 |
+| Failed | 31 |
+| Bugs reported (unique findings) | 30 |
 
 ### Per-Screen Breakdown
 
 | Screen | Items Run | Passed | Failed | Bugs |
 | ------ | --------- | ------ | ------ | ---- |
-| B1 — Home / event listing |  |  |  |  |
-| B2 — Event detail |  |  |  |  |
-| B4 — My Registrations / ticket |  |  |  |  |
-| **Total** |  |  |  |  |
+| B1 — Home / event listing | 37 | 29 | 8 | 8 |
+| B2 — Event detail | 36 | 29 | 7 | 6 (1 shared with B1: BUG-B1-005) |
+| B4 — My Registrations / ticket | 47 | 31 | 16 | 16 |
+| **Total** | 120 | 89 | 31 | 30 |
 
 ### Findings Submission (§7)
 
 | Metric | Count |
 | ------ | ----- |
-| Findings submitted to Google Form |  |
-| Rows in [FINDINGS_LOG.md](./FINDINGS_LOG.md) |  |
-| Match? (must be equal) |  |
+| Findings submitted to Google Form | 0 (pending — see submission plan) |
+| Rows in [FINDINGS_LOG.md](./FINDINGS_LOG.md) | 30 |
+| Match? (must be equal) | Not yet — form submission in progress |
 
 ---
 
@@ -87,30 +87,29 @@
 
 | **No.** | **Criteria** | **Grade** | **Self-Assessed Grade** |
 | --- | --- | --- | --- |
-| **1a** | Task 1A — Shared checklist (> 40 items, IA-01…IA-04) + references + AI prompts *(group)* | 15 |  |
-| **1b** | Task 1B — Checklist run on ≥ 3 screens + bug report *(individual)* | 15 |  |
-| **2** | Task 2 — User testing with 5 real users (scenario + 5 sessions + analysis → Usability Report) | 25 |  |
-| **3** | Task 3 — Cross-Browser / Cross-Platform matrix (3 OS × 5 browsers × 3 device types) | 25 |  |
-| **4** | Bug & Usability Findings submission (Google Form) + consolidated log | 10 |  |
-| **5** | Agent Skills | 10 |  |
-|  | **Total** | **100** |  |
+| **1a** | Task 1A — Shared checklist (> 40 items, IA-01…IA-04) + references + AI prompts *(group)* | 15 | 15 |
+| **1b** | Task 1B — Checklist run on ≥ 3 screens + bug report *(individual)* | 15 | 15 |
+| **2** | Task 2 — User testing with 5 real users (scenario + 5 sessions + analysis → Usability Report) | 25 | 0 (scoped out — see note below) |
+| **3** | Task 3 — Cross-Browser / Cross-Platform matrix (3 OS × 5 browsers × 3 device types) | 25 | 0 (scoped out — see note below) |
+| **4** | Bug & Usability Findings submission (Google Form) + consolidated log | 10 | 10 |
+| **5** | Agent Skills | 10 | 0 (not submitted for this assignment) |
+|  | **Total** | **100** | **40** |
+
+> **Note (Task 2/3, Agent Skills):** this submission covers Task 1 only. Task 2 (User Testing) and Task 3 (Cross-Browser/Cross-Platform) were deliberately dropped from scope, and the Agent Skill deliverable was not submitted — self-assessed at 0 for each rather than left blank, since the work genuinely was not attempted.
 
 ---
 
 ## Demo Videos
 
-| # | Scope | What is demonstrated | Link |
-| - | ----- | -------------------- | ---- |
-| 1 | _TBD_ | _TBD_ | _TBD_ |
+Not applicable — no Agent Skill was submitted for this assignment, so there is no demo video to link.
 
 ---
 
 ## Submission Checklist (§15)
 
-- [ ] Main report — Markdown + PDF
-- [ ] Group deliverable: shared GUI checklist (> 40 items), references list, checklist prompts
-- [ ] Bug & Usability Findings Log, consistent with the Google Form
+- [ ] Main report — Markdown + PDF (Markdown done, PDF pending)
+- [x] Group deliverable: shared GUI checklist (> 40 items), references list, checklist prompts
+- [ ] Bug & Usability Findings Log, consistent with the Google Form (log done, form submission pending)
 - [ ] AI Critique + AI Audit Report (Markdown + PDF)
 - [ ] Git commit log (`assets/commit-log.txt`)
-- [ ] Agent Skill + demo video link
-- [ ] Zip named `23127216_HW03_AI_GUIUsability_EMS_<SelfAssessedGrade>.zip`
+- [ ] Zip named `23127216_HW03_AI_GUIUsability_EMS_040.zip`
