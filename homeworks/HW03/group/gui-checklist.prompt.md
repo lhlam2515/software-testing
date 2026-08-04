@@ -2,7 +2,7 @@
 
 **Purpose:** paste the block inside `<prompt>` verbatim into the chosen AI tool as the **first** prompt for generating the shared GUI checklist draft. Do not edit it ad hoc mid-conversation — if you need to change scope, revise this file, log the change, and start a fresh Round 1.
 
-**Status:** ✅ SUT back online as of 2026-07-28 at `https://prod-dev.ems-fitus.cloud/` (redeployed on stable infra, replacing the old ngrok tunnel — see [sut-issue-report.md](sut-issue-report.md) Resolution note). This prompt is deliberately scenario/pool-agnostic (see Design notes below), so it runs from the written spec (REQUIREMENTS.md §4) rather than screenshots of one pool's screens. General exploration screenshots exist in [exploration/](exploration/) (dashboard, two event-detail states) — useful background on the EMS look-and-feel, not a grounding requirement for this prompt. See "Known gaps" at the bottom before you run this.
+**Status:** ✅ SUT back online as of 2026-07-28 at `https://prod-dev.ems-fitus.cloud/` (redeployed on stable infra, replacing the old ngrok tunnel). This prompt is deliberately scenario/pool-agnostic (see Design notes below), so it runs from the written spec (REQUIREMENTS.md §4) rather than screenshots of one pool's screens. See "Known gaps" at the bottom before you run this.
 
 **After running it:** paste the tool name, exact timestamp, this prompt, and the verbatim output into [checklist-prompts.md](checklist-prompts.md) (Round 1 entry) and [../prompt_log.md](../prompt_log.md). Do not paraphrase the output when logging it.
 
