@@ -32,4 +32,4 @@ Verbatim, identical to `group/checklist-prompts.md` Round 1 — 54 items (IA-01=
 
 ---
 
-> **TODO:** add Entry 002+ for Task 1B / 2 / 3 AI interactions as they happen, numbered sequentially.
+> **Scope note:** Entry 001 is the only single-prompt interaction of this assignment. Task 1B execution (B1/B2/B4) ran as multi-turn agentic sessions rather than discrete prompts — see `[AI-02]_AI_Audit_Report.md` Artifact #2 and `[AI-05]_AI_Privacy_Checklist.md` section 2 for how that scope decision is disclosed.

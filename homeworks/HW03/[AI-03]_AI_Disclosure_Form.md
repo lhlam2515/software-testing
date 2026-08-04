@@ -20,7 +20,7 @@
 
 ### 1. AI tool(s) used
 
-Claude Code (Anthropic, Sonnet 5 model), used both as a drafting assistant and as an agentic testing tool via two project-local Claude Code skills: `playwright-cli` (browser automation for the live checklist runs) and `agent-browser` (Google Form submission of the findings log).
+Claude Code (Anthropic, Sonnet 5 model), used both as a drafting assistant and as an agentic testing tool via two local Claude Code skills: `playwright-cli` and `agent-browser` (Vercel Labs, https://github.com/vercel-labs/agent-browser), both used only for GUI test automation (driving a real browser against the live EMS SUT).
 
 ---
 
@@ -66,7 +66,7 @@ The per-screen checklist execution (Task 1B, B1/B2/B4) was not a single prompt b
 
 ### 6. Citation
 
-Claude Code (Anthropic), Sonnet 5 model, accessed via the Claude Code CLI. `playwright-cli` and `agent-browser` are project-local Claude Code skills (not third-party AI services) used to give the model live browser control during test execution.
+Claude Code (Anthropic), Sonnet 5 model, accessed via the Claude Code CLI. `playwright-cli` is a project-local Claude Code skill; `agent-browser` is a third-party open-source browser automation CLI by Vercel Labs (https://github.com/vercel-labs/agent-browser), invoked as a local Claude Code skill. Both were used only to give the model live browser control during GUI test execution against the live EMS SUT.
 
 ---
 
