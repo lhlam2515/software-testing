@@ -30,8 +30,8 @@ Example: `BUG-B3-001` = first defect found on screen B3 (registration form).
 | From Task 1B (checklist run) | 30 |
 | From Task 2 (user testing) | 0 |
 | From Task 3 (cross-platform) | 0 |
-| Submitted to Google Form | 0 |
-| **Log rows == form submissions?** | No — 30 rows logged, 0 submitted to the Google Form so far |
+| Submitted to Google Form | 30 |
+| **Log rows == form submissions?** | Yes — 30 rows logged, 30 submitted to the Google Form |
 
 ---
 
@@ -39,36 +39,36 @@ Example: `BUG-B3-001` = first defect found on screen B3 (registration form).
 
 | ID | Scenario / Screen | Type (Bug \| Usability) | Description | Repro steps / Heuristic | Severity | Suggested fix | Screenshot ref | Form submitted at |
 | -- | ----------------- | ----------------------- | ----------- | ----------------------- | -------- | ------------- | -------------- | ----------------- |
-| BUG-B1-001 | B — B1 Home/Event Listing | Bug | Spotlight banner "View details" link text fails WCAG contrast minimum | IA-01-06; WCAG 2.2 AA SC 1.4.3 | Minor | Darken the link text or the gradient stop under it until measured contrast is >= 4.5:1 | artifacts/screens/B1-home-event-list/screenshots/IA-01-06-view-details-contrast.png | |
-| BUG-B1-002 | B — B1 Home/Event Listing | Bug | Search input border fails WCAG non-text contrast minimum | IA-01-07; WCAG 2.2 AA SC 1.4.11 | Minor | Swap `border-gray-300` for a darker gray (>= 3:1 against white) on all bordered controls reusing this class | artifacts/screens/B1-home-event-list/screenshots/IA-01-07-search-border-contrast.png | |
-| BUG-B1-003 | B — B1 Home/Event Listing | Bug | Pagination prev/next buttons have no accessible name | IA-01-08; WCAG 2.2 AA SC 1.1.1 / 4.1.2 | Major | Add `aria-label="Previous page"` / `aria-label="Next page"` to the two chevron buttons | artifacts/screens/B1-home-event-list/screenshots/IA-01-08-pagination-icon-no-name.png | |
-| USA-B1-001 | B — B1 Home/Event Listing | Usability | Event date/time strings show no explicit time-zone label | IA-01-16; Nielsen #2 — Match between system and the real world | Nielsen severity 2 | Append a fixed timezone label (e.g. "GMT+7") next to every displayed event time | artifacts/screens/B1-home-event-list/screenshots/IA-01-16-no-timezone.png | |
-| BUG-B1-004 | B — B1 Home/Event Listing | Bug | Whitespace-only search query is treated as valid input, not empty | IA-02-05; Per-Control — Text Box (rejects spaces-only input) | Minor | Trim the query client-side before dispatching the search, or ignore whitespace-only input as if the field were empty | artifacts/screens/B1-home-event-list/screenshots/IA-02-05-whitespace-search-not-rejected.png | |
-| BUG-B1-005 | B — B1 Home/Event Listing | Bug | Browser Back from event detail loses the active status filter and list scroll position | IA-03-05; Nielsen #3 — User control and freedom | Major | Persist filter + scroll state (e.g. in the router/query string or a client cache) and restore it on back-navigation | artifacts/screens/B1-home-event-list/screenshots/IA-03-05-back-nav-loses-filter-scroll.png | |
-| BUG-B1-006 | B — B1 Home/Event Listing | Bug | Status-filter toggle buttons (Upcoming/Ongoing/Ended) don't expose selected state to assistive tech | IA-04-08; WCAG 2.2 AA SC 4.1.2 | Minor | Add `aria-pressed` (or `role="tab"` + `aria-selected` if treated as a tablist) to the three toggle buttons | artifacts/screens/B1-home-event-list/screenshots/IA-04-08-filter-chip-no-aria-state.png | |
-| BUG-B1-007 | B — B1 Home/Event Listing | Bug | "Save event" success confirmation is not announced to assistive tech | IA-04-09; WCAG 2.2 AA SC 4.1.3 | Minor | Wrap the save/saved state change in an `aria-live="polite"` region (or add a toast with `role="status"`) | artifacts/screens/B1-home-event-list/screenshots/IA-04-09-save-no-aria-live.png | |
-| BUG-B2-001 | B — B2 Event Detail | Bug | Category/campus tag chip text fails WCAG contrast minimum | IA-01-06; WCAG 2.2 AA SC 1.4.3 | Minor | Darken the chip text colors (orange/teal) until measured contrast is >= 4.5:1 against white | artifacts/screens/B2-event-detail/screenshots/IA-01-06-category-chip-contrast.png | |
-| BUG-B2-002 | B — B2 Event Detail | Bug | Info-card borders (Event date/Registration period/Check-in period) fail WCAG non-text contrast minimum | IA-01-07; WCAG 2.2 AA SC 1.4.11 | Minor | Swap `border-cyan-200` for a darker cyan (>= 3:1 against the card background) on all three info cards | artifacts/screens/B2-event-detail/screenshots/IA-01-07-card-border-contrast.png | |
-| BUG-B2-003 | B — B2 Event Detail | Bug | Guest role label stays untranslated after switching UI language to Vietnamese | IA-01-14; S13 Challenges (Localization) | Minor | Localize the fixed role-name strings (Guest/Student/Lecturer) the same way other chrome strings are localized | artifacts/screens/B2-event-detail/screenshots/IA-01-14-guest-role-not-translated.png | |
-| USA-B2-001 | B — B2 Event Detail | Usability | Event date/registration/check-in times show no explicit time-zone label | IA-01-16; Nielsen #2 — Match between system and the real world | Nielsen severity 2 | Append a fixed timezone label (e.g. "GMT+7") next to every displayed date/time range on this screen | artifacts/screens/B2-event-detail/screenshots/IA-01-16-no-timezone.png | |
-| BUG-B2-004 | B — B2 Event Detail | Bug | "Share event" gives no feedback on click | IA-04-01; Shneiderman #3 — Offer informative feedback | Minor | Show a toast/inline confirmation (e.g. "Link copied") once the share action completes | artifacts/screens/B2-event-detail/screenshots/IA-04-01-share-event-no-feedback.png | |
-| BUG-B2-005 | B — B2 Event Detail | Bug | Registration-approved confirmation is not announced to assistive tech | IA-04-09; WCAG 2.2 AA SC 4.1.3 | Minor | Wrap the "Registration status" badge update in an `aria-live="polite"` region (or add a toast with `role="status"`) | artifacts/screens/B2-event-detail/screenshots/IA-04-09-registration-approved-no-aria-live.png | |
-| BUG-B4-001 | B — B4 My Registrations / Ticket | Bug | Search input border fails WCAG non-text contrast minimum | IA-01-07; WCAG 2.2 AA SC 1.4.11 | Minor | Swap `border-gray-300` for a darker gray (>= 3:1 against white) — same systemic gap as BUG-B1-002 | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-07-search-border-contrast.png | |
-| BUG-B4-002 | B — B4 My Registrations / Ticket | Bug | Pagination prev/next buttons have no accessible name | IA-01-08; WCAG 2.2 AA SC 1.1.1 / 4.1.2 | Major | Add `aria-label="Previous page"` / `aria-label="Next page"` to the two chevron buttons | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-08-pagination-icon-no-name.png | |
-| BUG-B4-003 | B — B4 My Registrations / Ticket | Bug | "Approved" and "Cancelled" registration-status badges share the identical gray color, hiding the state distinction | IA-01-11; S13 Checklist (Color scheme) | Major | Give each registration status its own semantic color (e.g. green for Approved, red/gray for Cancelled) instead of reusing `bg-gray-100 text-gray-700` for both | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-11-approved-cancelled-same-gray-badge.png | |
-| BUG-B4-004 | B — B4 My Registrations / Ticket | Bug | "Roles:" chip value stays untranslated after switching UI language to Vietnamese | IA-01-14; S13 Challenges (Localization) | Minor | Localize the role-chip values ("Guest"/"Participant") through the same i18n path already used for the participation-type badge above them | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-14-roles-chip-not-translated.png | |
-| USA-B4-001 | B — B4 My Registrations / Ticket | Usability | Activity cards carry no at-rest visual signifier of interactivity | IA-01-12; Norman — Signifiers | Nielsen severity 1 | Add a static affordance (chevron icon, subtle shadow, or border-color change) to clickable activity cards so they read as interactive without requiring hover | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-12-cards-no-rest-signifier.png | |
-| USA-B4-002 | B — B4 My Registrations / Ticket | Usability | Activity date/time ranges show no explicit time-zone label | IA-01-16; Nielsen #2 — Match between system and the real world | Nielsen severity 2 | Append a fixed timezone label (e.g. "GMT+7") next to every displayed activity time range — same gap as USA-B1-001 | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-16-no-timezone.png | |
-| USA-B4-003 | B — B4 My Registrations / Ticket | Usability | "Change Password" required fields carry no visible required-field indicator | IA-02-01; Per-Control — Text Box (red asterisk on mandatory fields) | Nielsen severity 1 | Add a red asterisk next to "Current Password", "New Password", and "Confirm Password" labels | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-01-no-required-asterisk.png | |
-| BUG-B4-005 | B — B4 My Registrations / Ticket | Bug | Avatar upload accepts a non-image file with no error message | IA-02-04; S13 Bugs (data validation gaps) | Major | Validate the selected file's MIME type client-side (and re-validate server-side) before accepting it into the pending-avatar preview state; show a specific "Only image files are allowed" error otherwise | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-04-avatar-upload-no-type-validation.png | |
-| BUG-B4-006 | B — B4 My Registrations / Ticket | Bug | Whitespace-only search query is treated as valid input, not empty | IA-02-05; Per-Control — Text Box (rejects spaces-only input) | Minor | Trim the query client-side before dispatching the search, or ignore whitespace-only input as if the field were empty — same gap as BUG-B1-004 | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-05-whitespace-search-not-rejected.png | |
-| BUG-B4-007 | B — B4 My Registrations / Ticket | Bug | "Confirm Password" validation error names the wrong field | IA-02-12; WCAG 2.2 AA SC 3.3.1 | Major | Fix the empty-submit validation logic so the message under "Confirm Password" reads "Confirm password is required", not "New password is required" | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-12-confirm-password-wrong-error-text.png | |
-| USA-B4-004 | B — B4 My Registrations / Ticket | Usability | Long activity title is clipped to one line with no way to recover the hidden text | IA-02-18; ISTQB Checklist (item 9 — long field text does not break layout) | Nielsen severity 1 | Either wrap the title to 2 lines (as B1 already does for long event titles) or add a `title` attribute so the full text is available on hover | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-18-long-title-truncated-no-tooltip.png | |
-| BUG-B4-008 | B — B4 My Registrations / Ticket | Bug | Browser Back from an activity's event-detail page loses the active search query and list scroll position | IA-03-05; Nielsen #3 — User control and freedom | Major | Persist search + scroll state (e.g. in the router/query string or a client cache) and restore it on back-navigation — same gap as BUG-B1-005 | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-03-05-back-nav-loses-search-scroll.png | |
-| BUG-B4-009 | B — B4 My Registrations / Ticket | Bug | Avatar-upload control is not reachable via keyboard | IA-03-07; WCAG 2.2 AA SC 2.1.1 | Major | Give the wrapping `<label>` (or the file input itself) a `tabindex="0"` and an Enter/Space key handler so the control is keyboard-operable | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-03-07-avatar-upload-not-keyboard-reachable.png | |
-| BUG-B4-010 | B — B4 My Registrations / Ticket | Bug | "Edit Profile" save gives no visible feedback on success | IA-04-01; Shneiderman #3 — Offer informative feedback | Minor | Show a toast/inline confirmation (e.g. "Profile updated") once the save completes | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-04-01-edit-profile-save-no-toast.png | |
-| BUG-B4-011 | B — B4 My Registrations / Ticket | Bug | "Filters" disclosure button never exposes its expanded state to assistive tech | IA-04-08; WCAG 2.2 AA SC 4.1.2 | Minor | Add `aria-expanded` (true/false) and `aria-controls` pointing at the filters panel to the "Filters" button | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-04-08-filters-button-no-aria-expanded.png | |
-| BUG-B4-012 | B — B4 My Registrations / Ticket | Bug | "Edit Profile" save confirmation is not announced to assistive tech | IA-04-09; WCAG 2.2 AA SC 4.1.3 | Minor | Wrap the save-success state in an `aria-live="polite"` region (or add a toast with `role="status"`) | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-04-01-edit-profile-save-no-toast.png | |
+| BUG-B1-001 | B — B1 Home/Event Listing | Bug | Spotlight banner "View details" link text fails WCAG contrast minimum | IA-01-06; WCAG 2.2 AA SC 1.4.3 | Minor | Darken the link text or the gradient stop under it until measured contrast is >= 4.5:1 | artifacts/screens/B1-home-event-list/screenshots/IA-01-06-view-details-contrast.png | 2026-08-04 20:31 |
+| BUG-B1-002 | B — B1 Home/Event Listing | Bug | Search input border fails WCAG non-text contrast minimum | IA-01-07; WCAG 2.2 AA SC 1.4.11 | Minor | Swap `border-gray-300` for a darker gray (>= 3:1 against white) on all bordered controls reusing this class | artifacts/screens/B1-home-event-list/screenshots/IA-01-07-search-border-contrast.png | 2026-08-04 20:53 |
+| BUG-B1-003 | B — B1 Home/Event Listing | Bug | Pagination prev/next buttons have no accessible name | IA-01-08; WCAG 2.2 AA SC 1.1.1 / 4.1.2 | Major | Add `aria-label="Previous page"` / `aria-label="Next page"` to the two chevron buttons | artifacts/screens/B1-home-event-list/screenshots/IA-01-08-pagination-icon-no-name.png | 2026-08-04 20:53 |
+| USA-B1-001 | B — B1 Home/Event Listing | Usability | Event date/time strings show no explicit time-zone label | IA-01-16; Nielsen #2 — Match between system and the real world | Nielsen severity 2 | Append a fixed timezone label (e.g. "GMT+7") next to every displayed event time | artifacts/screens/B1-home-event-list/screenshots/IA-01-16-no-timezone.png | 2026-08-04 20:55 |
+| BUG-B1-004 | B — B1 Home/Event Listing | Bug | Whitespace-only search query is treated as valid input, not empty | IA-02-05; Per-Control — Text Box (rejects spaces-only input) | Minor | Trim the query client-side before dispatching the search, or ignore whitespace-only input as if the field were empty | artifacts/screens/B1-home-event-list/screenshots/IA-02-05-whitespace-search-not-rejected.png | 2026-08-04 |
+| BUG-B1-005 | B — B1 Home/Event Listing | Bug | Browser Back from event detail loses the active status filter and list scroll position | IA-03-05; Nielsen #3 — User control and freedom | Major | Persist filter + scroll state (e.g. in the router/query string or a client cache) and restore it on back-navigation | artifacts/screens/B1-home-event-list/screenshots/IA-03-05-back-nav-loses-filter-scroll.png | 2026-08-04 21:02 |
+| BUG-B1-006 | B — B1 Home/Event Listing | Bug | Status-filter toggle buttons (Upcoming/Ongoing/Ended) don't expose selected state to assistive tech | IA-04-08; WCAG 2.2 AA SC 4.1.2 | Minor | Add `aria-pressed` (or `role="tab"` + `aria-selected` if treated as a tablist) to the three toggle buttons | artifacts/screens/B1-home-event-list/screenshots/IA-04-08-filter-chip-no-aria-state.png | 2026-08-04 21:02 |
+| BUG-B1-007 | B — B1 Home/Event Listing | Bug | "Save event" success confirmation is not announced to assistive tech | IA-04-09; WCAG 2.2 AA SC 4.1.3 | Minor | Wrap the save/saved state change in an `aria-live="polite"` region (or add a toast with `role="status"`) | artifacts/screens/B1-home-event-list/screenshots/IA-04-09-save-no-aria-live.png | 2026-08-04 21:05 |
+| BUG-B2-001 | B — B2 Event Detail | Bug | Category/campus tag chip text fails WCAG contrast minimum | IA-01-06; WCAG 2.2 AA SC 1.4.3 | Minor | Darken the chip text colors (orange/teal) until measured contrast is >= 4.5:1 against white | artifacts/screens/B2-event-detail/screenshots/IA-01-06-category-chip-contrast.png | 2026-08-04 21:06 |
+| BUG-B2-002 | B — B2 Event Detail | Bug | Info-card borders (Event date/Registration period/Check-in period) fail WCAG non-text contrast minimum | IA-01-07; WCAG 2.2 AA SC 1.4.11 | Minor | Swap `border-cyan-200` for a darker cyan (>= 3:1 against the card background) on all three info cards | artifacts/screens/B2-event-detail/screenshots/IA-01-07-card-border-contrast.png | 2026-08-04 21:07 |
+| BUG-B2-003 | B — B2 Event Detail | Bug | Guest role label stays untranslated after switching UI language to Vietnamese | IA-01-14; S13 Challenges (Localization) | Minor | Localize the fixed role-name strings (Guest/Student/Lecturer) the same way other chrome strings are localized | artifacts/screens/B2-event-detail/screenshots/IA-01-14-guest-role-not-translated.png | 2026-08-04 21:08 |
+| USA-B2-001 | B — B2 Event Detail | Usability | Event date/registration/check-in times show no explicit time-zone label | IA-01-16; Nielsen #2 — Match between system and the real world | Nielsen severity 2 | Append a fixed timezone label (e.g. "GMT+7") next to every displayed date/time range on this screen | artifacts/screens/B2-event-detail/screenshots/IA-01-16-no-timezone.png | 2026-08-04 21:09 |
+| BUG-B2-004 | B — B2 Event Detail | Bug | "Share event" gives no feedback on click | IA-04-01; Shneiderman #3 — Offer informative feedback | Minor | Show a toast/inline confirmation (e.g. "Link copied") once the share action completes | artifacts/screens/B2-event-detail/screenshots/IA-04-01-share-event-no-feedback.png | 2026-08-04 21:11 |
+| BUG-B2-005 | B — B2 Event Detail | Bug | Registration-approved confirmation is not announced to assistive tech | IA-04-09; WCAG 2.2 AA SC 4.1.3 | Minor | Wrap the "Registration status" badge update in an `aria-live="polite"` region (or add a toast with `role="status"`) | artifacts/screens/B2-event-detail/screenshots/IA-04-09-registration-approved-no-aria-live.png | 2026-08-04 21:12 |
+| BUG-B4-001 | B — B4 My Registrations / Ticket | Bug | Search input border fails WCAG non-text contrast minimum | IA-01-07; WCAG 2.2 AA SC 1.4.11 | Minor | Swap `border-gray-300` for a darker gray (>= 3:1 against white) — same systemic gap as BUG-B1-002 | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-07-search-border-contrast.png | 2026-08-04 21:13 |
+| BUG-B4-002 | B — B4 My Registrations / Ticket | Bug | Pagination prev/next buttons have no accessible name | IA-01-08; WCAG 2.2 AA SC 1.1.1 / 4.1.2 | Major | Add `aria-label="Previous page"` / `aria-label="Next page"` to the two chevron buttons | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-08-pagination-icon-no-name.png | 2026-08-04 21:14 |
+| BUG-B4-003 | B — B4 My Registrations / Ticket | Bug | "Approved" and "Cancelled" registration-status badges share the identical gray color, hiding the state distinction | IA-01-11; S13 Checklist (Color scheme) | Major | Give each registration status its own semantic color (e.g. green for Approved, red/gray for Cancelled) instead of reusing `bg-gray-100 text-gray-700` for both | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-11-approved-cancelled-same-gray-badge.png | 2026-08-04 21:15 |
+| BUG-B4-004 | B — B4 My Registrations / Ticket | Bug | "Roles:" chip value stays untranslated after switching UI language to Vietnamese | IA-01-14; S13 Challenges (Localization) | Minor | Localize the role-chip values ("Guest"/"Participant") through the same i18n path already used for the participation-type badge above them | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-14-roles-chip-not-translated.png | 2026-08-04 21:16 |
+| USA-B4-001 | B — B4 My Registrations / Ticket | Usability | Activity cards carry no at-rest visual signifier of interactivity | IA-01-12; Norman — Signifiers | Nielsen severity 1 | Add a static affordance (chevron icon, subtle shadow, or border-color change) to clickable activity cards so they read as interactive without requiring hover | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-12-cards-no-rest-signifier.png | 2026-08-04 21:18 |
+| USA-B4-002 | B — B4 My Registrations / Ticket | Usability | Activity date/time ranges show no explicit time-zone label | IA-01-16; Nielsen #2 — Match between system and the real world | Nielsen severity 2 | Append a fixed timezone label (e.g. "GMT+7") next to every displayed activity time range — same gap as USA-B1-001 | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-01-16-no-timezone.png | 2026-08-04 21:20 |
+| USA-B4-003 | B — B4 My Registrations / Ticket | Usability | "Change Password" required fields carry no visible required-field indicator | IA-02-01; Per-Control — Text Box (red asterisk on mandatory fields) | Nielsen severity 1 | Add a red asterisk next to "Current Password", "New Password", and "Confirm Password" labels | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-01-no-required-asterisk.png | 2026-08-04 21:21 |
+| BUG-B4-005 | B — B4 My Registrations / Ticket | Bug | Avatar upload accepts a non-image file with no error message | IA-02-04; S13 Bugs (data validation gaps) | Major | Validate the selected file's MIME type client-side (and re-validate server-side) before accepting it into the pending-avatar preview state; show a specific "Only image files are allowed" error otherwise | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-04-avatar-upload-no-type-validation.png | 2026-08-04 21:24 |
+| BUG-B4-006 | B — B4 My Registrations / Ticket | Bug | Whitespace-only search query is treated as valid input, not empty | IA-02-05; Per-Control — Text Box (rejects spaces-only input) | Minor | Trim the query client-side before dispatching the search, or ignore whitespace-only input as if the field were empty — same gap as BUG-B1-004 | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-05-whitespace-search-not-rejected.png | 2026-08-04 21:25 |
+| BUG-B4-007 | B — B4 My Registrations / Ticket | Bug | "Confirm Password" validation error names the wrong field | IA-02-12; WCAG 2.2 AA SC 3.3.1 | Major | Fix the empty-submit validation logic so the message under "Confirm Password" reads "Confirm password is required", not "New password is required" | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-12-confirm-password-wrong-error-text.png | 2026-08-04 21:27 |
+| USA-B4-004 | B — B4 My Registrations / Ticket | Usability | Long activity title is clipped to one line with no way to recover the hidden text | IA-02-18; ISTQB Checklist (item 9 — long field text does not break layout) | Nielsen severity 1 | Either wrap the title to 2 lines (as B1 already does for long event titles) or add a `title` attribute so the full text is available on hover | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-02-18-long-title-truncated-no-tooltip.png | 2026-08-04 21:29 |
+| BUG-B4-008 | B — B4 My Registrations / Ticket | Bug | Browser Back from an activity's event-detail page loses the active search query and list scroll position | IA-03-05; Nielsen #3 — User control and freedom | Major | Persist search + scroll state (e.g. in the router/query string or a client cache) and restore it on back-navigation — same gap as BUG-B1-005 | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-03-05-back-nav-loses-search-scroll.png | 2026-08-04 21:31 |
+| BUG-B4-009 | B — B4 My Registrations / Ticket | Bug | Avatar-upload control is not reachable via keyboard | IA-03-07; WCAG 2.2 AA SC 2.1.1 | Major | Give the wrapping `<label>` (or the file input itself) a `tabindex="0"` and an Enter/Space key handler so the control is keyboard-operable | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-03-07-avatar-upload-not-keyboard-reachable.png | 2026-08-04 21:33 |
+| BUG-B4-010 | B — B4 My Registrations / Ticket | Bug | "Edit Profile" save gives no visible feedback on success | IA-04-01; Shneiderman #3 — Offer informative feedback | Minor | Show a toast/inline confirmation (e.g. "Profile updated") once the save completes | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-04-01-edit-profile-save-no-toast.png | 2026-08-04 21:34 |
+| BUG-B4-011 | B — B4 My Registrations / Ticket | Bug | "Filters" disclosure button never exposes its expanded state to assistive tech | IA-04-08; WCAG 2.2 AA SC 4.1.2 | Minor | Add `aria-expanded` (true/false) and `aria-controls` pointing at the filters panel to the "Filters" button | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-04-08-filters-button-no-aria-expanded.png | 2026-08-04 21:36 |
+| BUG-B4-012 | B — B4 My Registrations / Ticket | Bug | "Edit Profile" save confirmation is not announced to assistive tech | IA-04-09; WCAG 2.2 AA SC 4.1.3 | Minor | Wrap the save-success state in an `aria-live="polite"` region (or add a toast with `role="status"`) | artifacts/screens/B4-my-registrations-ticket/screenshots/IA-04-01-edit-profile-save-no-toast.png | 2026-08-04 21:36 |
 
 ---
 
@@ -112,7 +112,7 @@ Darken the link text color or the gradient stop directly under it until the meas
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 20:31 | assets/form-submissions/BUG-B1-001.png |
 
 ---
 
@@ -152,7 +152,7 @@ Swap `border-gray-300` for a darker gray (e.g. Tailwind `gray-400`/`gray-500`) t
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 20:53 | assets/form-submissions/BUG-B1-002.png |
 
 ---
 
@@ -219,7 +219,7 @@ Matching `outerHTML` (attribute `aria-label` absent on both; icon carries `aria-
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 20:53 | assets/form-submissions/BUG-B1-003.png |
 
 ---
 
@@ -259,7 +259,7 @@ Append a fixed timezone label (e.g. "(GMT+7)") next to every displayed event tim
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 20:55 | assets/form-submissions/USA-B1-001.png |
 
 ---
 
@@ -299,7 +299,7 @@ Trim the query client-side before dispatching the search, or short-circuit to "n
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:41 | assets/form-submissions/BUG-B1-004.png |
 
 ---
 
@@ -344,7 +344,7 @@ Lift the filter into the URL query string (e.g. `/dashboard?status=ongoing`) so 
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:02 | assets/form-submissions/BUG-B1-005.png |
 
 ---
 
@@ -406,7 +406,7 @@ The only place the active/inactive distinction exists is in the Tailwind class l
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:02 | assets/form-submissions/BUG-B1-006.png |
 
 ---
 
@@ -470,7 +470,7 @@ But a page-wide scan for any live-region mechanism returns zero matches — not 
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:05 | assets/form-submissions/BUG-B1-007.png |
 
 ---
 
@@ -510,7 +510,7 @@ Darken both chip text colors (orange and teal variants) until the measured ratio
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:06 | assets/form-submissions/BUG-B2-001.png |
 
 ---
 
@@ -550,7 +550,7 @@ Swap `border-cyan-200` for a darker cyan (e.g. `cyan-400`/`cyan-500`) that clear
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:07 | assets/form-submissions/BUG-B2-002.png |
 
 ---
 
@@ -591,7 +591,7 @@ Add the role-name strings (Guest/Student/Lecturer) to the localization dictionar
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:08 | assets/form-submissions/BUG-B2-003.png |
 
 ---
 
@@ -631,7 +631,7 @@ Append a fixed timezone label (e.g. "(GMT+7)") next to every displayed date/time
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:09 | assets/form-submissions/USA-B2-001.png |
 
 ---
 
@@ -671,7 +671,7 @@ Show a toast or inline confirmation message (e.g. "Link copied to clipboard") im
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:11 | assets/form-submissions/BUG-B2-004.png |
 
 ---
 
@@ -738,7 +738,7 @@ A page-wide scan for any live-region mechanism returns zero matches, confirming 
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:12 | assets/form-submissions/BUG-B2-005.png |
 
 ---
 
@@ -778,7 +778,7 @@ Swap `border-gray-300` for a darker gray (e.g. Tailwind `gray-400`/`gray-500`) t
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:13 | assets/form-submissions/BUG-B4-001.png |
 
 ---
 
@@ -846,7 +846,7 @@ Matching `outerHTML` (`aria-label` absent on both; icon carries `aria-hidden="tr
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:14 | assets/form-submissions/BUG-B4-002.png |
 
 ---
 
@@ -886,7 +886,7 @@ Give each registration status its own semantic color (e.g. green/emerald for App
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:15 | assets/form-submissions/BUG-B4-003.png |
 
 ---
 
@@ -927,7 +927,7 @@ Route the role-chip values through the same i18n translation path already used f
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:16 | assets/form-submissions/BUG-B4-004.png |
 
 ---
 
@@ -967,7 +967,7 @@ Add a static affordance to activity cards — a trailing chevron icon, a subtle 
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:18 | assets/form-submissions/USA-B4-001.png |
 
 ---
 
@@ -1007,7 +1007,7 @@ Append a fixed timezone label (e.g. "(GMT+7)") next to every displayed activity 
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:20 | assets/form-submissions/USA-B4-002.png |
 
 ---
 
@@ -1047,7 +1047,7 @@ Add a red asterisk next to each of the 3 field labels.
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:21 | assets/form-submissions/USA-B4-003.png |
 
 ---
 
@@ -1087,7 +1087,7 @@ Validate the selected file's MIME type (and re-validate server-side) before acce
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:24 | assets/form-submissions/BUG-B4-005.png |
 
 ---
 
@@ -1127,7 +1127,7 @@ Trim the query client-side before dispatching the search, or ignore whitespace-o
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:25 | assets/form-submissions/BUG-B4-006.png |
 
 ---
 
@@ -1168,7 +1168,7 @@ Fix the empty-submit validation logic so the message under "Confirm Password" re
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:27 | assets/form-submissions/BUG-B4-007.png |
 
 ---
 
@@ -1208,7 +1208,7 @@ Either wrap the title to 2 lines (matching B1's existing pattern for long event 
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:29 | assets/form-submissions/USA-B4-004.png |
 
 ---
 
@@ -1249,7 +1249,7 @@ Persist search + scroll state (e.g. in the router/query string or a client cache
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:31 | assets/form-submissions/BUG-B4-008.png |
 
 ---
 
@@ -1308,7 +1308,7 @@ Targeted attribute dump confirming the tab-order gap directly:
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:33 | assets/form-submissions/BUG-B4-009.png |
 
 ---
 
@@ -1348,7 +1348,7 @@ Show a toast/inline confirmation (e.g. "Profile updated") once the save complete
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:34 | assets/form-submissions/BUG-B4-010.png |
 
 ---
 
@@ -1404,7 +1404,7 @@ Targeted attribute dump, read once with the panel collapsed and again with it ex
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:36 | assets/form-submissions/BUG-B4-011.png |
 
 ---
 
@@ -1455,7 +1455,7 @@ A page-wide scan for any live-region mechanism, run immediately after the save c
 
 | Submitted at | Confirmation |
 | ------------ | ------------ |
-| Not yet submitted | — |
+| 2026-08-04 21:36 | assets/form-submissions/BUG-B4-012.png |
 
 ---
 

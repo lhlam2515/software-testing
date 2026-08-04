@@ -77,9 +77,9 @@
 
 | Metric | Count |
 | ------ | ----- |
-| Findings submitted to Google Form | 0 (pending — see submission plan) |
+| Findings submitted to Google Form | 30 |
 | Rows in [FINDINGS_LOG.md](./FINDINGS_LOG.md) | 30 |
-| Match? (must be equal) | Not yet — form submission in progress |
+| Match? (must be equal) | Yes |
 
 ---
 
@@ -109,7 +109,7 @@ Not applicable — no Agent Skill was submitted for this assignment, so there is
 
 - [ ] Main report — Markdown + PDF (Markdown done, PDF pending)
 - [x] Group deliverable: shared GUI checklist (> 40 items), references list, checklist prompts
-- [ ] Bug & Usability Findings Log, consistent with the Google Form (log done, form submission pending)
+- [x] Bug & Usability Findings Log, consistent with the Google Form (30/30 submitted)
 - [ ] AI Critique + AI Audit Report (Markdown + PDF)
 - [ ] Git commit log (`assets/commit-log.txt`)
 - [ ] Zip named `23127216_HW03_AI_GUIUsability_EMS_040.zip`
