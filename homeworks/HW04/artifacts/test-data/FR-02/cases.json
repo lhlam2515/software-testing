@@ -97,7 +97,8 @@
       "ui": { "genericErrorVisible": true, "errorRevealsReason": false },
       "api": { "hasToken": false }
     },
-    "knownDefect": null
+    "note": "Xác nhận bằng chạy thật (A4): PASS ở tầng UI vì Login.jsx:17-19 nuốt mọi lỗi API vào 1 message tĩnh \"Đăng nhập thất bại...\", không render error.response — nên rò rỉ KHÔNG lộ qua UI. Nhưng server.js:40-44 vẫn trả message riêng \"Tài khoản đã bị khóa. Vui lòng thử lại sau.\" + HTTP 403 (khác 401 \"Invalid email or password\" của sai mật khẩu thường) — rò rỉ ở TẦNG API. Pattern #1 (UI) không bắt được; A5 phải thêm assert.api.status=403 cho case này để pattern #2 (network) lộ ra. Chưa có Issue trong HW02/HW04 BUG_REPORT.md — ứng viên bug mới, cần triage ở P6.",
+    "knownDefect": "PENDING-NEW-lockout-message-enumeration"
   },
   {
     "id": "TC-BVA-01",
@@ -111,7 +112,8 @@
       "api": { "hasToken": false },
       "db": { "login_attempts": 3, "locked_untilNotNull": true }
     },
-    "knownDefect": null
+    "note": "login_attempts thực tế sẽ là 4, không phải 3 — server.js:54 tăng +2/lần thay vì +1 (BUG-02-003, đã cross-ref TC-06). HW02 BUG_REPORT.md dòng 105 đã liệt kê TC-BVA-01 là 1 trong 2 TC phát hiện bug này.",
+    "knownDefect": "BUG-02-003"
   },
   {
     "id": "TC-BVA-02",
@@ -207,6 +209,7 @@
     "assert": {
       "ui": { "genericErrorVisible": true, "errorRevealsReason": false }
     },
-    "knownDefect": null
+    "note": "Cùng root cause với TC-07 — xác nhận PASS ở tầng UI (chạy thật A4), rò rỉ chỉ lộ ở tầng API (403 + message riêng). Xem note đầy đủ ở TC-07.",
+    "knownDefect": "PENDING-NEW-lockout-message-enumeration"
   }
 ]
