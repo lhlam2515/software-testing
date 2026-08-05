@@ -22,10 +22,10 @@
 | [[AI-02]_AI_Audit_Report.md](./%5BAI-02%5D_AI_Audit_Report.md) | Per-artifact AI audit (prompt, output, verdict, reasoning, student fix) |
 | [[AI-03]_AI_Disclosure_Form.md](./%5BAI-03%5D_AI_Disclosure_Form.md) | Mandatory AI usage disclosure |
 | [[AI-05]_AI_Privacy_Checklist.md](./%5BAI-05%5D_AI_Privacy_Checklist.md) | AI privacy and responsible-use checklist |
-| [tests/](./tests/) | Playwright automation scripts, one folder per feature (FR-02, FR-09, FR-16) |
-| [test-data/](./test-data/) | External `.csv` / `.json` test data — no hardcoded arrays in scripts |
+| [artifacts/tests/](./artifacts/tests/) | Playwright automation scripts, one folder per feature (FR-02, FR-09, FR-16) |
+| [artifacts/test-data/](./artifacts/test-data/) | External `.csv` / `.json` test data — no hardcoded arrays in scripts |
 | [artifacts/html-reports/](./artifacts/html-reports/) | Multi-browser HTML reports (Chromium / Firefox / WebKit) per feature, showing `Run by: {StudentID}` |
-| [skills/](./skills/) | Agent Skill submission — reusable data-driven, multi-browser automation workflow |
+| [artifacts/skills/](./artifacts/skills/) | Agent Skill submission — reusable data-driven, multi-browser automation workflow |
 | [assets/](./assets/) | Signature image and Git commit log |
 
 ---
@@ -79,7 +79,7 @@ Same three web features selected in HW02 — one per Pool A/B/C.
 - [ ] Genuine defects are recorded in Markdown ([BUG_REPORT.md](./bugs/BUG_REPORT.md)) and on GitHub Issues with screenshots.
 - [ ] Public GitHub repository has ≥ 8 commits touching test-script files, spread over ≥ 4 days.
 - [ ] Git commit log exported to [assets/git-commit-log.txt](./assets/git-commit-log.txt).
-- [ ] Agent Skill submitted under [skills/](./skills/) with a demo video link.
+- [ ] Agent Skill submitted under [artifacts/skills/](./artifacts/skills/) with a demo video link.
 - [ ] Unlisted YouTube demo video (≥ 5 min, Vietnamese narration, face-cam or `whoami`/`hostname`) link included.
 - [ ] Zip named `23127216_HW04_AI_Automation_<SelfAssessedGrade>.zip`.
 

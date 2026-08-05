@@ -29,7 +29,7 @@
 - [ ] All AI-generated artifacts are tagged in the [AI Audit Report](<[AI-02]_AI_Audit_Report.md>).
 - [ ] Every automation script was actually executed against the live SUT — no fabricated
       pass/fail results or invented HTML reports.
-- [ ] Test data lives in separate `.csv`/`.json` files under `test-data/` — no hardcoded
+- [ ] Test data lives in separate `.csv`/`.json` files under `artifacts/test-data/` — no hardcoded
       inline arrays or objects in the scripts.
 - [ ] Each script uses at least 3 distinct assertion patterns.
 - [ ] Each feature ran on Chromium, Firefox, and WebKit (≥ 9 browser runs total), and
@@ -40,7 +40,7 @@
 - [ ] The Mandatory Disclosure paragraph is completed in `[AI-02]_AI_Audit_Report.md` §6.
 - [ ] I attached the AI Use Disclosure Form ([AI-03](<[AI-03]_AI_Disclosure_Form.md>)).
 - [ ] Git commit log has ≥ 8 commits touching test-script files, spread over ≥ 4 days.
-- [ ] The Agent Skill under `skills/automation-workflow/` is included with its demo video link.
+- [ ] The Agent Skill under `artifacts/skills/automation-workflow/` is included with its demo video link.
 - [ ] README.md test summary metrics are filled with final numbers.
 - [ ] I am ready for a 5–7-min random oral defense the week after submission.
 

@@ -46,7 +46,7 @@
 
 #### Automation Evidence
 
-`<Failing spec path + assertion that caught it, e.g. tests/FR-XX/<file>.spec.ts>`
+`<Failing spec path + assertion that caught it, e.g. artifacts/tests/FR-XX/<file>.spec.ts>`
 
 #### Screenshot
 

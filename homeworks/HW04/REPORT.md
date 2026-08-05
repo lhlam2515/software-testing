@@ -84,13 +84,13 @@ _TBD — Playwright version, language (TS/JS), project layout, how the AI tool w
 
 ### 4.2 Data-driven Design
 
-_TBD — how `.csv` / `.json` files under `test-data/<feature>/` are loaded into the specs, why no data is hardcoded inline._
+_TBD — how `.csv` / `.json` files under `artifacts/test-data/<feature>/` are loaded into the specs, why no data is hardcoded inline._
 
 | Feature | Data file | Format | Rows |
 | ------- | --------- | ------ | ---: |
-| FR-02 | [test-data/FR-02/cases.json](test-data/FR-02/cases.json) | JSON | _TBD_ |
-| FR-09 | [test-data/FR-09/cases.json](test-data/FR-09/cases.json) | JSON | _TBD_ |
-| FR-16 | [test-data/FR-16/cases.json](test-data/FR-16/cases.json) + [fixtures/](test-data/FR-16/fixtures/) | JSON + CSV fixtures | _TBD_ |
+| FR-02 | [artifacts/test-data/FR-02/cases.json](artifacts/test-data/FR-02/cases.json) | JSON | _TBD_ |
+| FR-09 | [artifacts/test-data/FR-09/cases.json](artifacts/test-data/FR-09/cases.json) | JSON | _TBD_ |
+| FR-16 | [artifacts/test-data/FR-16/cases.json](artifacts/test-data/FR-16/cases.json) + [fixtures/](artifacts/test-data/FR-16/fixtures/) | JSON + CSV fixtures | _TBD_ |
 
 ### 4.3 Assertion Patterns
 
@@ -116,7 +116,7 @@ _TBD — how `.csv` / `.json` files under `test-data/<feature>/` are loaded into
 
 ## 5. Automation Results
 
-> Full specs live under `tests/<feature>/`. Full HTML reports live under `artifacts/html-reports/<feature>/<browser>/`.
+> Full specs live under `artifacts/tests/<feature>/`. Full HTML reports live under `artifacts/html-reports/<feature>/<browser>/`.
 
 ### 5.1 FR-02 — Login & Account Lockout
 
@@ -125,7 +125,7 @@ _TBD — how `.csv` / `.json` files under `test-data/<feature>/` are loaded into
 | Test cases automated | _TBD_ |
 | Executed / Passed / Failed | _TBD_ |
 | Browser runs | _TBD_ |
-| Spec location | [tests/FR-02/](tests/FR-02/) |
+| Spec location | [artifacts/tests/FR-02/](artifacts/tests/FR-02/) |
 | HTML reports | [artifacts/html-reports/FR-02/](artifacts/html-reports/FR-02/) |
 
 ### 5.2 FR-09 — Discount Coupons
@@ -135,7 +135,7 @@ _TBD — how `.csv` / `.json` files under `test-data/<feature>/` are loaded into
 | Test cases automated | _TBD_ |
 | Executed / Passed / Failed | _TBD_ |
 | Browser runs | _TBD_ |
-| Spec location | [tests/FR-09/](tests/FR-09/) |
+| Spec location | [artifacts/tests/FR-09/](artifacts/tests/FR-09/) |
 | HTML reports | [artifacts/html-reports/FR-09/](artifacts/html-reports/FR-09/) |
 
 ### 5.3 FR-16 — CSV Import
@@ -145,7 +145,7 @@ _TBD — how `.csv` / `.json` files under `test-data/<feature>/` are loaded into
 | Test cases automated | _TBD_ |
 | Executed / Passed / Failed | _TBD_ |
 | Browser runs | _TBD_ |
-| Spec location | [tests/FR-16/](tests/FR-16/) |
+| Spec location | [artifacts/tests/FR-16/](artifacts/tests/FR-16/) |
 | HTML reports | [artifacts/html-reports/FR-16/](artifacts/html-reports/FR-16/) |
 
 ### 5.4 Consolidated Test Summary
@@ -234,7 +234,7 @@ _TBD — prompt quality, model limitations, or feature characteristics that expl
 
 ## 10. Agent Skill
 
-> §7 — reusable Agent Skill for the data-driven, multi-browser automation workflow (script generation and maintenance). Source lives in [skills/automation-workflow/](skills/automation-workflow/).
+> §7 — reusable Agent Skill for the data-driven, multi-browser automation workflow (script generation and maintenance). Source lives in [artifacts/skills/automation-workflow/](artifacts/skills/automation-workflow/).
 
 | Field | Value |
 | ----- | ----- |
