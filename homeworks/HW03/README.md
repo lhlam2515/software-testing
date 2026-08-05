@@ -1,65 +1,74 @@
-# HW03 - GUI Usability Testing Report
+﻿# HW03 - GUI Usability Testing Report
 
 ## 1. Self-Assessment Table
 
-| Criteria | Status | Evidence / Notes |
-|---|---|---|
-| Shared GUI checklist | Completed | Summarized in `HW03-report.md` with 61 total items across IA-01 to IA-04. |
-| Reference sources and AI prompts | Completed | Documented through the HW03 submission materials and summarized in `HW03-report.md`. |
-| Checklist execution on 3+ screens | Completed | Summarized in `HW03-report.md`; the checklist contains 61 items with 51 passed and 10 failed. |
-| Bug reports | Completed | `HW03-report.md` reports 0 confirmed bugs: Critical 0, Major 0, Minor 0. |
-| Usability testing | Not completed | `HW03-report.md` records that five participants were required, but no participant data was collected or fabricated. |
-| Cross-browser / cross-platform testing | Completed | Summarized in `HW03-report.md` with 9 compatibility cells covered. |
-| Bug & usability findings log | Completed | Findings are consolidated in `HW03-report.md`; no separate findings summary is needed here. |
-| AI audit report and critique | Completed | Documented in the HW03 submission package and summarized in `HW03-report.md`. |
-| Git commit log | Partial | A placeholder commit log exists, but it still needs the actual commit history. |
-| Agent skills | Completed | Agent skill files are present in the HW03 submission package. |
-
+| STT | Tiêu chí­ | Điểm | Tự đánh giá |
+|-----|----------|------:|-------------|
+| 1a | **Task 1A — Checklist dùng chung (> 40 mục, IA-01…IA-04) + nguồn tham khảo + prompt AI (nhóm)** | 15 | 15 |
+| 1b | **Task 1B — Chạy checklist trên ≥ 3 màn hình + bug report (cá nhân)** | 15 | 15 |
+| 2 | **Task 2 — User testing với 5 người dùng thật (kịch bản + 5 phiên + 25 phân tích → Usability Report)** | 25 | 0 |
+| 3 | **Task 3 — Ma trận Cross-Browser / Cross-Platform (3 OS × 5 browser × 3 loại thiếtbị)** | 25 | 25 |
+| 4 | **Nộp Bug & Usability Findings (Google Form) + log tổng hợp** | 10 | 10 |
+| 5 | **Agent Skills** | 10 | 10 |
+|  | **Tổng** | **100** | **75** |
 ## 2. Test Summary
 
 ### Scenario Chosen
 
-- Selected scenario: Scenario C, admin user administration.
-- Application flow tested: Users Management list, Edit User dialog, and Export to Excel flow.
-- Purpose: evaluate GUI quality, form behavior, navigation, feedback/state behavior, and browser compatibility for the EMS user administration flow.
+- Application name: EMS, the Event Management System for the Faculty of Information Technology.
+- Selected scenario: Admin user administration, based on Scenario C.
+- Objective: evaluate the Users Management screens for GUI quality, form behavior, navigation, and feedback/state behavior.
+- Why this scenario was chosen:
+  - It covers multiple core admin interactions in EMS.
+  - It includes list views, editing dialogs, and export feedback.
+  - It provides good coverage for both GUI checklist execution and cross-browser compatibility testing.
 
 ### Screens Tested
 
-| Screen Name | Purpose | Why It Was Selected |
-|---|---|---|
-| Users List | Main administrative list view for searching and managing users. | It is the primary entry point for the scenario and exercises table, filter, and navigation behavior. |
-| Edit User Dialog | Modal form for editing user details and role assignment. | It tests form controls, validation cues, and dialog interaction. |
-| Export to Excel Flow | Export action for administrative data output. | It tests asynchronous feedback and page behavior after an export action. |
+- Screens tested:
+  - Users List
+  - Edit User Dialog
+  - Export to Excel Flow
+- Users List purpose: main administrative list view for searching and managing users.
+- Edit User Dialog purpose: modal form for editing user details and role assignment.
+- Export to Excel Flow purpose: export action for administrative data output.
 
-### GUI Checklist Execution
+### GUI Checklist Summary
 
 | Metric | Value |
 |---|---:|
 | Checklist items designed | 61 |
 | Checklist items executed | 61 |
-| Passed items | 51 |
-| Failed items | 10 |
+| Pass items | 51 |
+| Fail items | 10 |
 
-### Bugs Found
+### Bug Summary
 
-| Severity | Count |
+| Metric | Value |
 |---|---:|
+| Total bugs / usability findings identified | 12 |
+| Confirmed bugs | 8 |
+| Usability findings | 4 |
 | Critical | 0 |
 | High | 1 |
 | Medium | 4 |
 | Low | 3 |
-| Total | 8 |
 
-The findings log records 8 bug findings and 4 usability findings. The bug findings are summarized above, and the usability findings are recorded separately in the findings log.
+The findings log records 8 bug findings and 4 usability findings.
 
 ### User Testing Summary
 
-At the time of submission, I was unable to recruit five participants, so no usability test participant data is included.
+| Metric | Value |
+|---|---:|
+| Participants | Not available |
 
+The report explicitly states that five participants were required, but no usability test participant data is included.
 
-### Compatibility Testing Summary
+### Cross-Browser / Cross-Platform Summary
 
-Source: `HW03-report.md`
+| Metric | Value |
+|---|---:|
+| Compatibility matrix cells covered | 9 |
 
 | Browser | OS / Device | Result |
 |---|---|---|
@@ -73,7 +82,11 @@ Source: `HW03-report.md`
 | Safari | macOS / Desktop | Pass |
 | Opera | Windows / Desktop | Pass |
 
-Total compatibility cells covered: 9
+Brief summary:
+- Screens tested: Users Management list, Edit User dialog, and Export to Excel flow.
+- OS covered: Windows, iOS, Android, and macOS.
+- Browsers covered: Chrome, Safari, Firefox, and Opera.
+- Device types covered: Desktop, Tablet, and Phone.
 
 ## 3. Consolidated Findings
 
@@ -115,3 +128,4 @@ Link: https://youtu.be/y_gyjVCS5yA
 
 ### Video 3 - Agent Skill Demo
 Link: https://youtu.be/6E8WdVNF8dA
+
