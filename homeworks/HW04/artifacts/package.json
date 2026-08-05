@@ -1,0 +1,21 @@
+{
+  "name": "hw04-automation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HW04 - Playwright automation suite for EShop SUT (FR-02, FR-09, FR-16)",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:fr02": "playwright test tests/FR-02",
+    "test:fr09": "playwright test tests/FR-09",
+    "test:fr16": "playwright test tests/FR-16",
+    "test:chromium": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:webkit": "playwright test --project=webkit",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^26.1.2"
+  }
+}
