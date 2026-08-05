@@ -1,1 +1,212 @@
-[]
+[
+  {
+    "id": "TC-01",
+    "hw02Ref": "domain-testing.md#tc-01",
+    "title": "Happy path — successful login resets counter",
+    "layer": "hybrid",
+    "type": "positive",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 1, "setLockedUntil": null },
+    "act": { "email": "test@eshop.com", "password": "Test1234!" },
+    "assert": {
+      "ui": { "noErrorVisible": true, "navigatesAwayFromLogin": true },
+      "api": { "status": 200, "hasToken": true },
+      "db": { "login_attempts": 0, "locked_until": null }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-02",
+    "hw02Ref": "domain-testing.md#tc-02",
+    "title": "Empty email blocked by HTML5 validation",
+    "layer": "ui",
+    "type": "negative",
+    "arrange": {},
+    "act": { "email": "", "password": "Test1234!" },
+    "assert": {
+      "ui": { "staysOnLoginPage": true, "html5ValidationOnUsername": true },
+      "api": { "requestSent": false }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-03",
+    "hw02Ref": "domain-testing.md#tc-03",
+    "title": "Invalid email format blocked by HTML5 type=email validation",
+    "layer": "ui",
+    "type": "negative",
+    "arrange": {},
+    "act": { "email": "invalid_no_at_sign", "password": "Test1234!" },
+    "assert": {
+      "ui": { "staysOnLoginPage": true, "html5ValidationOnUsername": true },
+      "api": { "requestSent": false }
+    },
+    "knownDefect": "BUG-02-001"
+  },
+  {
+    "id": "TC-04",
+    "hw02Ref": "domain-testing.md#tc-04",
+    "title": "Unregistered email returns generic error, no enumeration",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": {},
+    "act": { "email": "notfound@example.com", "password": "Test1234!" },
+    "assert": {
+      "ui": { "genericErrorVisible": true, "errorRevealsReason": false },
+      "api": { "status": 401, "hasToken": false }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-05",
+    "hw02Ref": "domain-testing.md#tc-05",
+    "title": "Empty password rejected without granting a token",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 0, "setLockedUntil": null },
+    "act": { "email": "test@eshop.com", "password": "" },
+    "assert": {
+      "ui": { "staysOnLoginPage": true },
+      "api": { "hasToken": false }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-06",
+    "hw02Ref": "domain-testing.md#tc-06",
+    "title": "Wrong password increments counter by exactly 1",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 0, "setLockedUntil": null },
+    "act": { "email": "test@eshop.com", "password": "WrongPass1!" },
+    "assert": {
+      "ui": { "genericErrorVisible": true, "errorRevealsReason": false },
+      "api": { "status": 401, "hasToken": false },
+      "db": { "login_attempts": 1 }
+    },
+    "knownDefect": "BUG-02-003"
+  },
+  {
+    "id": "TC-07",
+    "hw02Ref": "domain-testing.md#tc-07",
+    "title": "Locked account rejects even correct credentials",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 3, "setLockedUntilOffsetSeconds": 25 },
+    "act": { "email": "test@eshop.com", "password": "Test1234!" },
+    "assert": {
+      "ui": { "genericErrorVisible": true, "errorRevealsReason": false },
+      "api": { "hasToken": false }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-BVA-01",
+    "hw02Ref": "bva.md#tc-bva-01",
+    "title": "3rd failure (2->3) triggers lock immediately (ON point)",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 2, "setLockedUntil": null },
+    "act": { "email": "test@eshop.com", "password": "WrongPass1!" },
+    "assert": {
+      "api": { "hasToken": false },
+      "db": { "login_attempts": 3, "locked_untilNotNull": true }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-BVA-02",
+    "hw02Ref": "bva.md#tc-bva-02",
+    "title": "Success at UB of valid class (login_attempts=2) fully resets counter",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 2, "setLockedUntil": null },
+    "act": { "email": "test@eshop.com", "password": "Test1234!" },
+    "assert": {
+      "api": { "status": 200, "hasToken": true },
+      "db": { "login_attempts": 0, "locked_until": null }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-BVA-03",
+    "hw02Ref": "bva.md#tc-bva-03",
+    "title": "1 second remaining in lock window — still rejected (UB-1)",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 3, "setLockedUntilOffsetSeconds": 1 },
+    "act": { "email": "test@eshop.com", "password": "Test1234!" },
+    "assert": {
+      "ui": { "genericErrorVisible": true },
+      "api": { "hasToken": false }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-BVA-04",
+    "hw02Ref": "bva.md#tc-bva-04",
+    "title": "Exact expiry boundary (locked_until = NOW) unlocks account (OFF point)",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 3, "setLockedUntilOffsetSeconds": 0 },
+    "act": { "email": "test@eshop.com", "password": "Test1234!" },
+    "assert": {
+      "ui": { "noErrorVisible": true },
+      "api": { "status": 200, "hasToken": true }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-BVA-05",
+    "hw02Ref": "bva.md#tc-bva-05",
+    "title": "1 second past expiry (UB+1) — clearly unlocked, baseline confirmation",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 3, "setLockedUntilOffsetSeconds": -1 },
+    "act": { "email": "test@eshop.com", "password": "Test1234!" },
+    "assert": {
+      "ui": { "noErrorVisible": true },
+      "api": { "status": 200, "hasToken": true }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-UI-01",
+    "hw02Ref": "TEST_PLAN.md#1.1-tc-ui-01",
+    "title": "Password field must mask input (type=password)",
+    "layer": "ui",
+    "type": "negative",
+    "arrange": {},
+    "act": { "email": "test@eshop.com", "password": "Test1234!" },
+    "assert": {
+      "ui": { "passwordInputType": "password" }
+    },
+    "knownDefect": "PENDING-NEW-password-field-not-masked"
+  },
+  {
+    "id": "TC-UI-02",
+    "hw02Ref": "TEST_PLAN.md#1.1-tc-ui-02",
+    "title": "Submitting via Enter key behaves the same as clicking Sign In",
+    "layer": "ui",
+    "type": "positive",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 0, "setLockedUntil": null },
+    "act": { "email": "test@eshop.com", "password": "Test1234!", "submitVia": "enter" },
+    "assert": {
+      "ui": { "noErrorVisible": true, "navigatesAwayFromLogin": true },
+      "api": { "status": 200, "hasToken": true }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-UI-03",
+    "hw02Ref": "TEST_PLAN.md#1.1-tc-ui-03",
+    "title": "After lock, UI reflects lockout state, not only the API",
+    "layer": "ui",
+    "type": "negative",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 3, "setLockedUntilOffsetSeconds": 25 },
+    "act": { "email": "test@eshop.com", "password": "Test1234!" },
+    "assert": {
+      "ui": { "genericErrorVisible": true, "errorRevealsReason": false }
+    },
+    "knownDefect": null
+  }
+]
