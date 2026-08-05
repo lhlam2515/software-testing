@@ -1,0 +1,13 @@
+HW04 — Git Commit Log
+=====================
+
+TODO: generate before submission (assignment §12 requires >= 8 commits over
+>= 4 days that touch test-script files — .spec.js/.spec.ts or equivalent;
+README/PDF/doc-only commits do not count).
+
+Suggested command (run from the repository root):
+
+    git log --oneline --decorate --date=short \
+        --pretty=format:'%h %ad %s' -- 'homeworks/HW04/tests/**/*.spec.*' \
+        > homeworks/HW04/assets/git-commit-log.txt
+
