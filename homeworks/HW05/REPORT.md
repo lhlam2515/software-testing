@@ -106,13 +106,19 @@ Each endpoint group has its own CSV. No file is shared between groups (section 6
 
 ### 4.4 Report views used
 
-| Scenario | Report view | Why this view fits this scenario |
-| -------- | ----------- | -------------------------------- |
-| Load | TBD | TBD |
-| Stress | TBD | TBD |
-| Spike | TBD | TBD |
+k6 has no listener concept, so the requirement for three distinct listener types is met with three distinct analysis views, one per scenario.
+
+| Scenario | Report view | k6 mechanism | Why this view fits this scenario |
+| -------- | ----------- | ------------ | -------------------------------- |
+| Load | Aggregate HTML summary report | `handleSummary()` writing an HTML file | Load asks whether the system holds a steady expected load. That is a single verdict per endpoint over the whole run, so one aggregate row per endpoint (count, error rate, p50/p90/p95/p99, throughput) is the right granularity. Per-request detail adds nothing to the verdict. |
+| Stress | Raw per-request log with percentiles recomputed from it | `--out csv=` plus a post-run script over the raw rows | Stress asks where the system breaks. The answer is a VU level, not a run-wide average, so the raw rows are grouped by load stage and percentiles and error codes are recomputed per stage. A run-wide summary averages the healthy stages together with the failing ones and hides the breaking point. |
+| Spike | Time-series view | `--out json=` plus a chart over the timestamped stream | Spike asks whether the system recovers after a surge. Recovery is a shape over time (latency spike, then decay back to baseline, or not), which no aggregate number carries. Only a timestamped series distinguishes "recovered in 20s" from "never recovered". |
 
 No view type repeats.
+
+> Raw logs and HTML reports are produced for all three scenarios, since section 14 requires both for each run. This table records which view each scenario is analysed and reported through, which is what the "do not repeat a type" rule constrains.
+
+TBD: the chart images and the post-run scripts, once the runs exist.
 
 ### 4.5 Human review: what the AI got wrong
 

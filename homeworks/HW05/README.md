@@ -47,13 +47,17 @@ Section 8 of the assignment allows k6 as a bonus alternative. Section 14 asks fo
 
 **Three distinct report views (section 6, Task 1):**
 
-| Scenario | Report view | k6 mechanism |
-| -------- | ----------- | ------------ |
-| Load | TBD | TBD |
-| Stress | TBD | TBD |
-| Spike | TBD | TBD |
+k6 has no listener concept, so "three distinct listener / report types" is realised as three distinct *analysis views*, one per scenario, each answering the question that scenario actually asks:
 
-*Fill after Task 1. No view type may repeat across the three scenarios.*
+| Scenario | Report view | k6 mechanism | What this view is for |
+| -------- | ----------- | ------------ | --------------------- |
+| Load | Aggregate HTML summary report | `handleSummary()` writing an HTML file | One aggregate row per endpoint (count, error rate, p50/p90/p95/p99, throughput) for the whole run. JMeter analogue: Aggregate Report / HTML dashboard. |
+| Stress | Raw per-request log with percentiles recomputed from it | `--out csv=` plus a post-run script over the raw rows | Percentiles and error codes recomputed from the raw rows rather than read off a summary, grouped by load stage, so the breaking point lands on a specific VU level. JMeter analogue: Summary Report over a raw `.jtl`. |
+| Spike | Time-series view | `--out json=` plus a chart over the timestamped stream | Metrics plotted against elapsed time. A spike is defined by recovery behaviour after the surge, which no aggregate number shows. JMeter analogue: graph listener. |
+
+No view type repeats.
+
+> **Note on section 14 vs this table.** Section 14 requires a raw log and an HTML report folder for *all three* scenarios, so both are produced for every run regardless of which view that run is presented through. The table above records the view each scenario is *analysed and reported through*, which is what the "do not repeat a type" rule constrains.
 
 ---
 
