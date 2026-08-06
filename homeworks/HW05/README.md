@@ -22,6 +22,7 @@
 | [[AI-02]_AI_Audit_Report.md](./%5BAI-02%5D_AI_Audit_Report.md) | Per-artifact AI audit (prompt, output, verdict, reasoning, student fix) |
 | [[AI-03]_AI_Disclosure_Form.md](./%5BAI-03%5D_AI_Disclosure_Form.md) | Mandatory AI usage disclosure |
 | [[AI-05]_AI_Privacy_Checklist.md](./%5BAI-05%5D_AI_Privacy_Checklist.md) | AI privacy and responsible-use checklist |
+| [group/endpoint-split-note.md](./group/endpoint-split-note.md) | Endpoint split agreed with the other Group 02 member (section 5 non-overlap) |
 | [artifacts/test-plans/](./artifacts/test-plans/) | The three test plans (Load / Stress / Spike) plus the endurance script |
 | [artifacts/test-data/](./artifacts/test-data/) | One CSV input file per endpoint group |
 | [artifacts/results/raw/](./artifacts/results/raw/) | Raw per-request logs (the `.jtl` equivalent) and end-of-test summaries |
@@ -65,15 +66,33 @@ No view type repeats.
 
 Three endpoint groups, one scenario each, no overlap with other group members (section 5).
 
-| Group | Endpoint / workflow | Scenario paired | Why this pairing | Test plan | CSV input |
-| ----- | ------------------- | --------------- | ---------------- | --------- | --------- |
-| Read-heavy | TBD | TBD | TBD | TBD | TBD |
-| Auth-heavy | TBD | TBD | TBD | TBD | TBD |
-| Transactional | TBD | TBD | TBD | TBD | TBD |
+| Group | Endpoint | SRS | Scenario paired | Why this pairing | Test plan | CSV input |
+| ----- | -------- | --- | --------------- | ---------------- | --------- | --------- |
+| Read-heavy | `GET /api/products?search={keyword}` | FR-05 | **Stress** | Creates no state, so it can be pushed to the breaking point and re-run indefinitely. An unindexed `LIKE` scan is where SQLite gives out first, which makes the breaking point explainable rather than merely observed. | `23127216_Stress_YYYYMMDD.js` | `read_keywords.csv` |
+| Auth-heavy | `POST /api/login` | FR-02 | **Spike** | The 3-fail lockout holds for 30 seconds, so it is visible only on a time axis: error rate jumps, stays up for the lockout window, then decays. That recovery shape is exactly what a spike scenario asks about and what an aggregate number cannot carry. | `23127216_Spike_YYYYMMDD.js` | `auth_credentials.csv` |
+| Transactional | `POST /api/cart` | FR-07 | **Load** | Writes to the database under a per-user token, but upserts the quantity on an existing cart row instead of inserting a new one, so a sustained run does not inflate the schema. Suits a steady expected load rather than a push to failure. | `23127216_Load_YYYYMMDD.js` | `cart_payloads.csv` |
+
+**Why not the full cart to checkout workflow.** `POST /api/checkout` inserts one order row per request, so a 10 to 15 minute soak leaves tens of thousands of orphan orders behind and every run needs the cart re-seeded for the whole account pool beforehand. `POST /api/cart` is the same transactional shape (authenticated write, per-user state) without the cleanup cost, and section 5 names add-to-cart as a transactional example in its own right. Checkout is left to the other group member, who covered FR-08 in HW02.
+
+**Why FR-09, FR-16, and FR-20 from HW02 were not reused.**
+
+| HW02 feature | Verdict | Reason |
+| ------------ | ------- | ------ |
+| FR-02 Login and lockout | reused | Section 5 names the lockout behaviour explicitly for the auth-heavy group |
+| FR-09 Coupon | dropped | `max_uses_per_user` is 1 or 2. Either the limit is hit within seconds and the rest of the run returns C5 errors, making the measurements meaningless, or it is not hit, which means the invariant breaks under concurrency. Neither branch measures performance |
+| FR-16 CSV import | dropped | An admin batch job, outside all three required groups. Load testing it measures bulk write speed, not read / auth / transactional behaviour |
+| FR-20 Cancel order | dropped | Not idempotent: each order cancels once, so a 10 minute run needs tens of thousands of pre-seeded orders. Seeding cost exceeds what the measurement returns |
 
 ### Non-overlap declaration
 
-TBD: list which endpoint / workflow each other member of Group 02 is testing, and confirm no duplication.
+Group 02 has two members. Split agreed on 2026-08-06, recorded in [group/endpoint-split-note.md](./group/endpoint-split-note.md).
+
+| Member | Read-heavy | Auth-heavy | Transactional |
+| ------ | ---------- | ---------- | ------------- |
+| Lê Hoàng Lâm (23127216) | `GET /api/products?search=` | `POST /api/login` | `POST /api/cart` |
+| Other member | `GET /api/admin/orders` (proposed) | `POST /api/register` (proposed) | `POST /api/checkout` (proposed) |
+
+No endpoint appears twice. Status: TBD, pending the other member's confirmation.
 
 ---
 

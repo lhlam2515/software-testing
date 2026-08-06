@@ -52,23 +52,34 @@ TBD: how the database was seeded before each run, how it was reset between runs,
 
 ### 3.1 Selected endpoint groups
 
-| Group | Endpoint / workflow | Method + path | Why representative of the group |
-| ----- | ------------------- | ------------- | ------------------------------- |
-| Read-heavy | TBD | TBD | TBD |
-| Auth-heavy | TBD | TBD | TBD |
-| Transactional | TBD | TBD | TBD |
+| Group | Method + path | SRS | Why representative of the group |
+| ----- | ------------- | --- | ------------------------------- |
+| Read-heavy | `GET /api/products?search={keyword}` | FR-05 | Search over the product name is the only read path in the SUT whose cost grows with the data volume. Every other read resolves by primary key or returns a small fixed table, so search is the read that can actually saturate something. |
+| Auth-heavy | `POST /api/login` | FR-02 | Password verification plus JWT issuance, guarded by a counter-based lockout after 3 consecutive failures. Section 5 names the lockout behaviour explicitly for this group. |
+| Transactional | `POST /api/cart` | FR-07 | An authenticated write that mutates per-user state and must keep one row per product per user (adding the same product raises the quantity instead of creating a second row). Section 5 names add-to-cart as a transactional example. |
 
 ### 3.2 Scenario pairing and justification
 
 | Scenario | Endpoint group | Why this pairing |
 | -------- | -------------- | ---------------- |
-| Load | TBD | TBD |
-| Stress | TBD | TBD |
-| Spike | TBD | TBD |
+| Load | Transactional, `POST /api/cart` | Every request here is a database write, so the scenario has to be one that runs at a steady expected rate rather than one that pushes to failure. Load is the only scenario of the three whose question ("does the system hold the expected rate") does not require driving the system past its limit, which matches the endpoint that is most expensive to clean up after. |
+| Stress | Read-heavy, `GET /api/products?search=` | Stress asks where the system breaks, which means driving it past the point of failure repeatedly. Only an endpoint that creates no state can be pushed that way without a reset between attempts. An unindexed `LIKE` scan also gives a failure mode that can be named, not just observed. |
+| Spike | Auth-heavy, `POST /api/login` | Spike asks whether the system recovers after a surge. The lockout holds an account for 30 seconds after 3 failures, which is itself a recovery curve: error rate rises during the surge, stays elevated for the lockout window, then returns to baseline. The endpoint's own behaviour supplies the phenomenon the scenario is designed to measure. |
+
+Each pairing also matches the report view chosen for that scenario in section 4.4: the aggregate view fits the steady run, the per-stage percentile view fits the search for a breaking point, and the time-series view fits the recovery curve.
 
 ### 3.3 Non-overlap declaration (section 5)
 
-TBD: which endpoint or workflow each other member of Group 02 is testing, and the confirmation that no two members share one.
+Group 02 has two members. The split was agreed on 2026-08-06; the note sent to the other member is at `group/endpoint-split-note.md`.
+
+| Member | Read-heavy | Auth-heavy | Transactional |
+| ------ | ---------- | ---------- | ------------- |
+| Lê Hoàng Lâm (23127216) | `GET /api/products?search=` | `POST /api/login` | `POST /api/cart` |
+| TBD (other member) | `GET /api/admin/orders` | `POST /api/register` | `POST /api/checkout` |
+
+No endpoint appears twice. The full cart to checkout workflow was deliberately narrowed to `POST /api/cart` so that `POST /api/checkout` (FR-08, which the other member covered in HW02) stays available to them.
+
+Status: TBD, pending the other member's confirmation of their three endpoints.
 
 ---
 
