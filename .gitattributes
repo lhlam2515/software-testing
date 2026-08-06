@@ -1,0 +1,2 @@
+homeworks/HW05/artifacts/results/raw/raw_*.csv filter=lfs diff=lfs merge=lfs -text
+homeworks/HW05/artifacts/results/raw/ts_*.json filter=lfs diff=lfs merge=lfs -text

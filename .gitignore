@@ -80,6 +80,9 @@ reports/
 .turbo/
 .cache/
 
+# ===== HOMEWORK REFERENCE MATERIAL (lecturer-provided, not deliverables) =====
+homeworks/HW05/ref/
+
 # ===== CLAUDE CONFIG =====
 audit_config.json
 context/transcripts/
