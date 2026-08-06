@@ -12,8 +12,9 @@
       ]
     },
     "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "1/1", "errorsCount": 0 },
       "api": { "status": 200, "inserted": 1, "errorsCount": 0 },
-      "db": { "productExists": "Basic Men's T-Shirt" }
+      "db": { "productExists": "Basic Men's T-Shirt", "productCountDelta": 1, "persistedRowsMatchInput": true }
     },
     "knownDefect": null
   },
@@ -32,8 +33,9 @@
       ]
     },
     "assert": {
+      "ui": { "previewCount": 3, "resultTextIncludes": "3/3", "errorsCount": 0 },
       "api": { "status": 200, "inserted": 3, "errorsCount": 0 },
-      "db": { "productCountDelta": 3 }
+      "db": { "productCountDelta": 3, "persistedRowsMatchInput": true }
     },
     "knownDefect": null
   },
@@ -49,7 +51,8 @@
       "rawBody": { "products": [{ "name": "Test", "price": 10000, "description": "", "imageUrl": "", "category_id": 1 }] }
     },
     "assert": {
-      "api": { "status": 401, "hasError": true }
+      "api": { "status": 401, "hasError": true },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["Test"] }
     },
     "knownDefect": null
   },
@@ -57,7 +60,7 @@
     "id": "TC-04",
     "hw02Ref": "domain-testing.md#tc-04",
     "title": "Valid JWT but not an admin must be rejected",
-    "layer": "hybrid",
+    "layer": "api",
     "type": "negative",
     "arrange": { "loginAs": "test@eshop.com" },
     "act": {
@@ -65,7 +68,8 @@
       "csvRows": [{ "name": "Test", "price": 10000, "category_id": 1 }]
     },
     "assert": {
-      "api": { "status": 403, "hasError": true, "inserted": 0 }
+      "api": { "status": 403, "hasError": true },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["Test"] }
     },
     "knownDefect": "BUG-16-001"
   },
@@ -78,7 +82,8 @@
     "arrange": { "loginAs": "admin@eshop.com" },
     "act": { "rawBody": {} },
     "assert": {
-      "api": { "status": 400, "hasError": true }
+      "api": { "status": 400, "hasError": true },
+      "db": { "productCountDelta": 0 }
     },
     "knownDefect": null
   },
@@ -93,7 +98,9 @@
       "csvRows": [{ "name": "", "price": 50000, "description": "desc", "category_id": 1 }]
     },
     "assert": {
-      "api": { "inserted": 0, "errorsCount": 1, "errorMentions": "name" }
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1, "errorMentions": "name" },
+      "db": { "productCountDelta": 0 }
     },
     "knownDefect": null
   },
@@ -105,10 +112,13 @@
     "type": "negative",
     "arrange": { "loginAs": "admin@eshop.com" },
     "act": {
-      "csvRows": [{ "price": 50000, "description": "desc", "category_id": 1 }]
+      "csvRows": [{ "price": 50000, "description": "desc", "category_id": 1 }],
+      "csvColumns": ["price", "description", "imageUrl", "category_id"]
     },
     "assert": {
-      "api": { "inserted": 0, "errorsCount": 1, "errorMentions": "name" }
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1, "errorMentions": "name" },
+      "db": { "productCountDelta": 0 }
     },
     "knownDefect": null
   },
@@ -123,7 +133,9 @@
       "csvRows": [{ "name": "Test zero price", "price": 0, "category_id": 1 }]
     },
     "assert": {
-      "api": { "inserted": 0, "errorsCount": 1, "errorMentions": "price" }
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1, "errorMentions": "price" },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["Test zero price"] }
     },
     "knownDefect": "BUG-16-002"
   },
@@ -138,7 +150,9 @@
       "csvRows": [{ "name": "Test negative price", "price": -1, "category_id": 1 }]
     },
     "assert": {
-      "api": { "inserted": 0, "errorsCount": 1, "errorMentions": "price" }
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1, "errorMentions": "price" },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["Test negative price"] }
     },
     "knownDefect": "BUG-16-002"
   },
@@ -153,7 +167,9 @@
       "csvRows": [{ "name": "Test bad price", "price": "abc", "category_id": 1 }]
     },
     "assert": {
-      "api": { "inserted": 0, "errorsCount": 1, "errorMentions": "price" }
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1, "errorMentions": "price" },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["Test bad price"] }
     },
     "knownDefect": "BUG-16-002"
   },
@@ -165,10 +181,13 @@
     "type": "negative",
     "arrange": { "loginAs": "admin@eshop.com" },
     "act": {
-      "csvRows": [{ "name": "Test no price", "category_id": 1 }]
+      "csvRows": [{ "name": "Test no price", "category_id": 1 }],
+      "csvColumns": ["name", "description", "imageUrl", "category_id"]
     },
     "assert": {
-      "api": { "inserted": 0, "errorsCount": 1, "errorMentions": "price" }
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1, "errorMentions": "price" },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["Test no price"] }
     },
     "knownDefect": "BUG-16-002"
   },
@@ -187,7 +206,8 @@
       ]
     },
     "assert": {
-      "api": { "inserted": 0 },
+      "ui": { "previewCount": 3, "resultTextIncludes": "0/3", "errorsCount": 1, "errorRows": [3], "errorRowsMention": "price" },
+      "api": { "inserted": 0, "errorsCount": 1, "errorRows": [3], "errorRowsMention": "price" },
       "db": { "productCountDelta": 0, "productsNotCreated": ["Valid Product 1", "Valid Product 2"] }
     },
     "knownDefect": "BUG-16-002",
@@ -202,7 +222,8 @@
     "arrange": { "loginAs": "admin@eshop.com" },
     "act": { "rawBody": { "products": [] } },
     "assert": {
-      "api": { "status": 400, "hasError": true }
+      "api": { "status": 400, "hasError": true },
+      "db": { "productCountDelta": 0 }
     },
     "knownDefect": null
   },
@@ -217,7 +238,9 @@
       "csvRows": [{ "nameFillChar": "x", "nameLength": 256, "price": 50000, "category_id": 1 }]
     },
     "assert": {
-      "api": { "inserted": 0, "errorsCount": 1 }
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1 },
+      "db": { "productCountDelta": 0 }
     },
     "knownDefect": "BUG-16-004"
   },
@@ -232,7 +255,9 @@
       "csvRows": [{ "name": "Test invalid category", "price": 50000, "category_id": 99999 }]
     },
     "assert": {
-      "api": { "inserted": 0, "errorsCount": 1 }
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1 },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["Test invalid category"] }
     },
     "knownDefect": "BUG-16-003"
   },
@@ -247,8 +272,9 @@
       "csvRows": [{ "name": "Test price as string", "price": "10000", "category_id": 1 }]
     },
     "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "1/1", "errorsCount": 0 },
       "api": { "status": 200, "inserted": 1 },
-      "db": { "productExists": "Test price as string" }
+      "db": { "productExists": "Test price as string", "productCountDelta": 1, "persistedRowsMatchInput": true }
     },
     "knownDefect": null
   },
@@ -256,14 +282,20 @@
     "id": "TC-17",
     "hw02Ref": "domain-testing.md#tc-17",
     "title": "Import report response schema exposes message, inserted, errors",
-    "layer": "hybrid",
+    "layer": "api",
     "type": "positive",
     "arrange": { "loginAs": "admin@eshop.com" },
     "act": {
       "csvRows": [{ "name": "Schema Probe Product", "price": 75000, "category_id": 1 }]
     },
     "assert": {
-      "api": { "status": 200, "hasFields": ["message", "inserted", "errors"], "inserted": 1 }
+      "api": {
+        "status": 200,
+        "hasFields": ["message", "inserted", "errors"],
+        "fieldTypes": { "message": "string", "inserted": "number", "errors": "array" },
+        "inserted": 1
+      },
+      "db": { "productCountDelta": 1, "persistedRowsMatchInput": true }
     },
     "knownDefect": null
   },
@@ -282,8 +314,9 @@
       ]
     },
     "assert": {
-      "api": { "inserted": 0, "errorsCount": 3 },
-      "db": { "productCountDelta": 0 }
+      "ui": { "previewCount": 3, "resultTextIncludes": "0/3", "errorsCount": 3, "errorRows": [2, 3, 4], "errorRowsMention": "price" },
+      "api": { "inserted": 0, "errorsCount": 3, "errorRows": [2, 3, 4], "errorRowsMention": "price" },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["Invalid Row 1", "Invalid Row 2", "Invalid Row 3"] }
     },
     "knownDefect": "BUG-16-002",
     "note": "Same non-atomicity caveat as TC-12 — deferred per TEST_PLAN.md §11."
@@ -292,12 +325,19 @@
     "id": "TC-19",
     "hw02Ref": "domain-testing.md#tc-19",
     "title": "Gap Probe: Admin UI must enforce the .csv file extension",
-    "layer": "ui",
+    "layer": "hybrid",
     "type": "edge",
     "arrange": { "loginAs": "admin@eshop.com" },
-    "act": { "fileName": "products.txt", "fileContentIsValidCsv": true },
+    "act": {
+      "fileName": "products.txt",
+      "fileContentIsValidCsv": true,
+      "validCsvComparison": true,
+      "csvRows": [{ "name": "FR16 text extension probe", "price": 50000, "category_id": 1 }]
+    },
     "assert": {
-      "ui": { "fileRejectedBeforeUpload": true }
+      "ui": { "acceptCsvOnly": true, "fileRejectedBeforeUpload": true, "validResultTextIncludes": "1/1" },
+      "api": { "status": 200, "requestContentType": "application/json", "requestProductsCount": 1 },
+      "db": { "productCountDelta": 1, "persistedRowsMatchInput": true }
     },
     "knownDefect": "BUG-16-005"
   },
@@ -312,7 +352,9 @@
       "csvRows": [{ "name": "BVA price zero", "price": 0, "category_id": 1 }]
     },
     "assert": {
-      "api": { "inserted": 0, "errorsCount": 1 }
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1 },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["BVA price zero"] }
     },
     "knownDefect": "BUG-16-002"
   },
@@ -327,8 +369,9 @@
       "csvRows": [{ "name": "BVA price one", "price": 1, "category_id": 1 }]
     },
     "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "1/1", "errorsCount": 0 },
       "api": { "status": 200, "inserted": 1 },
-      "db": { "productExists": "BVA price one" }
+      "db": { "productExists": "BVA price one", "productCountDelta": 1, "persistedRowsMatchInput": true }
     },
     "knownDefect": null
   },
@@ -343,8 +386,9 @@
       "csvRows": [{ "nameFillChar": "A", "nameLength": 254, "price": 50000, "category_id": 1 }]
     },
     "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "1/1", "errorsCount": 0 },
       "api": { "status": 200, "inserted": 1 },
-      "db": { "productNameLength": 254 }
+      "db": { "productCountDelta": 1, "productNameLength": 254, "persistedRowsMatchInput": true }
     },
     "knownDefect": null
   },
@@ -359,8 +403,9 @@
       "csvRows": [{ "nameFillChar": "B", "nameLength": 255, "price": 50000, "category_id": 1 }]
     },
     "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "1/1", "errorsCount": 0 },
       "api": { "status": 200, "inserted": 1 },
-      "db": { "productNameLength": 255 }
+      "db": { "productCountDelta": 1, "productNameLength": 255, "persistedRowsMatchInput": true }
     },
     "knownDefect": null
   },
@@ -375,7 +420,9 @@
       "csvRows": [{ "nameFillChar": "C", "nameLength": 256, "price": 50000, "category_id": 1 }]
     },
     "assert": {
-      "api": { "inserted": 0, "errorsCount": 1 }
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1 },
+      "db": { "productCountDelta": 0 }
     },
     "knownDefect": "BUG-16-004"
   }

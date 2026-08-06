@@ -14,7 +14,9 @@ export class AdminImportPage {
   readonly productsMenuItem: Locator;
   readonly fileInput: Locator;
   readonly importButton: Locator;
+  readonly previewSummary: Locator;
   readonly resultMessage: Locator;
+  readonly resultErrors: Locator;
 
   constructor(private readonly page: Page) {
     this.emailInput = page.getByRole('textbox', { name: 'Email' });
@@ -23,7 +25,11 @@ export class AdminImportPage {
     this.productsMenuItem = page.getByText('Sản phẩm', { exact: true });
     this.fileInput = page.locator('input[type="file"]');
     this.importButton = page.getByRole('button', { name: /Import \d+ sản phẩm/ });
+    this.previewSummary = page.getByText(/Xem trước \(\d+ dòng\):/);
     this.resultMessage = page.getByText(/Import hoàn tất/);
+    this.resultErrors = page
+      .getByRole('listitem')
+      .filter({ hasText: /^Hàng \d+:/ });
   }
 
   async gotoLogin(): Promise<void> {
@@ -41,13 +47,14 @@ export class AdminImportPage {
   }
 
   async uploadCsv(filePath: string): Promise<void> {
-    const chooserPromise = this.page.waitForEvent('filechooser');
-    await this.fileInput.click();
-    const chooser = await chooserPromise;
-    await chooser.setFiles(filePath);
+    await this.fileInput.setInputFiles(filePath);
   }
 
   async clickImport(): Promise<void> {
     await this.importButton.click();
+  }
+
+  resultErrorForRow(rowNumber: number): Locator {
+    return this.resultErrors.filter({ hasText: new RegExp(`^Hàng ${rowNumber}:`) });
   }
 }

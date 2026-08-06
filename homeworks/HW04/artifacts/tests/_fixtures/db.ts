@@ -199,6 +199,15 @@ export function getProductByName(name: string) {
   }
 }
 
+export function categoryExists(id: number): boolean {
+  const db = open();
+  try {
+    return Boolean(db.prepare('SELECT 1 FROM categories WHERE id = ?').get(id));
+  } finally {
+    db.close();
+  }
+}
+
 export function deleteProductsByName(names: string[]): void {
   if (names.length === 0) return;
   const db = open();

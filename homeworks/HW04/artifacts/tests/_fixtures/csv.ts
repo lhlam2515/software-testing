@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const CSV_COLUMNS = ['name', 'price', 'description', 'imageUrl', 'category_id'] as const;
+export const CSV_COLUMNS = ['name', 'price', 'description', 'imageUrl', 'category_id'] as const;
+export type CsvColumn = (typeof CSV_COLUMNS)[number];
 
 export interface CsvRow {
   name?: string;
@@ -26,12 +27,13 @@ export function writeCsvFixture(
   fileName: string,
   rows?: CsvRow[],
   rawContent?: string,
+  columns: readonly CsvColumn[] = CSV_COLUMNS,
 ): string {
   ensureDir();
   const filePath = path.join(GENERATED_DIR, fileName);
   const content =
     rawContent ??
-    [CSV_COLUMNS.join(','), ...(rows ?? []).map((r) => CSV_COLUMNS.map((c) => r[c] ?? '').join(','))].join(
+    [columns.join(','), ...(rows ?? []).map((r) => columns.map((c) => r[c] ?? '').join(','))].join(
       '\n',
     );
   fs.writeFileSync(filePath, content, 'utf-8');
