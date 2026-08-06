@@ -1,6 +1,13 @@
 import { test } from '../_fixtures/run-meta';
 import { LoginPage } from '../_fixtures/pom/login.page';
-import { loadCases, applyArrange, actLogin, assertUi } from '../_fixtures/fr02-helpers';
+import {
+  loadCases,
+  applyArrange,
+  actLogin,
+  assertUi,
+  assertApi,
+  assertDb,
+} from '../_fixtures/fr02-helpers';
 
 /**
  * FR-02 — BVA cases (TC-BVA-01..05) around the login_attempts / locked_until boundary.
@@ -24,20 +31,22 @@ test.describe('FR-02 — Lockout boundary (BVA)', () => {
       }
       if (!tc.assert.ui) {
         testInfo.annotations.push({
-          type: 'pending',
-          description: 'No UI-observable assertion for this TC — api/db assertions added in A5',
+          type: 'note',
+          description: 'No UI-observable assertion for this TC — covered by api/db assertions',
         });
       }
 
       // Arrange
       applyArrange(tc.arrange);
 
-      // Act
+      // Act — captures the /api/login network response for pattern #2.
       const loginPage = new LoginPage(page);
-      await actLogin(loginPage, tc.act);
+      const apiCapture = await actLogin(page, loginPage, tc.act);
 
-      // Assert — pattern #1 (UI) only; pattern #2/#3 added in A5.
+      // Assert — pattern #1 (UI), #2 (network/response), #3 (DB state).
       await assertUi(page, loginPage, tc.assert.ui);
+      assertApi(apiCapture, tc.assert.api);
+      await assertDb(tc.act.email, tc.assert.db);
     });
   }
 });

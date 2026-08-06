@@ -1,6 +1,13 @@
 import { test } from '../_fixtures/run-meta';
 import { LoginPage } from '../_fixtures/pom/login.page';
-import { loadCases, applyArrange, actLogin, assertUi } from '../_fixtures/fr02-helpers';
+import {
+  loadCases,
+  applyArrange,
+  actLogin,
+  assertUi,
+  assertApi,
+  assertDb,
+} from '../_fixtures/fr02-helpers';
 
 /**
  * FR-02 — EP cases (TC-01..07) + UI-layer extension cases (TC-UI-01..03).
@@ -23,12 +30,14 @@ test.describe('FR-02 — Login (EP + UI-layer)', () => {
       // Arrange
       applyArrange(tc.arrange);
 
-      // Act
+      // Act — captures the /api/login network response for pattern #2.
       const loginPage = new LoginPage(page);
-      await actLogin(loginPage, tc.act);
+      const apiCapture = await actLogin(page, loginPage, tc.act);
 
-      // Assert — pattern #1 (UI) only; pattern #2/#3 added in A5.
+      // Assert — pattern #1 (UI), #2 (network/response), #3 (DB state).
       await assertUi(page, loginPage, tc.assert.ui);
+      assertApi(apiCapture, tc.assert.api);
+      await assertDb(tc.act.email, tc.assert.db);
     });
   }
 });

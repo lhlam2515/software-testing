@@ -3,12 +3,12 @@ import path from 'node:path';
 import type { Page } from '@playwright/test';
 import { expect } from './run-meta';
 import { LoginPage } from './pom/login.page';
-import { resetUserLoginState, setUserLoginState } from './db';
+import { resetUserLoginState, setUserLoginState, getUserLoginState } from './db';
 
 /**
- * Shared A4 helpers for FR-02 specs (login.spec.ts + lockout.bva.spec.ts).
- * A4 scope only: arrange (DB seed) + act (POM) + UI assertion (pattern #1).
- * Network (#2) and DB-state (#3) assertions are added in A5.
+ * Shared helpers for FR-02 specs (login.spec.ts + lockout.bva.spec.ts).
+ * Arrange (DB seed) + act (POM, captures /api/login response) + assert
+ * across all 3 patterns: UI (#1), network/response (#2), DB state (#3).
  */
 
 export const TEST_USER_EMAIL = 'test@eshop.com';
@@ -28,7 +28,7 @@ export interface LoginCase {
   act: {
     email: string;
     password: string;
-    submitVia?: 'click' | 'enter';
+    submitVia?: 'click' | 'enter' | 'none';
   };
   assert: {
     ui?: {
@@ -40,11 +40,25 @@ export interface LoginCase {
       errorRevealsReason?: boolean;
       passwordInputType?: string;
     };
-    api?: Record<string, unknown>;
-    db?: Record<string, unknown>;
+    api?: {
+      status?: number;
+      hasToken?: boolean;
+      requestSent?: boolean;
+    };
+    db?: {
+      login_attempts?: number;
+      locked_until?: string | null;
+      locked_untilNotNull?: boolean;
+    };
   };
   note?: string;
   knownDefect: string | null;
+}
+
+export interface ApiCapture {
+  requestSent: boolean;
+  status?: number;
+  body?: Record<string, unknown>;
 }
 
 export function loadCases(fixture: 'FR-02'): LoginCase[] {
@@ -70,14 +84,42 @@ export function applyArrange(arrange: LoginCase['arrange']): void {
   }
 }
 
-export async function actLogin(loginPage: LoginPage, act: LoginCase['act']): Promise<void> {
+/**
+ * Fills + submits the login form and captures the /api/login network
+ * response (assertion pattern #2). TC-02/TC-03 block submission via HTML5
+ * validation before any request fires — for those, the response wait times
+ * out and this resolves to `{ requestSent: false }` instead of hanging.
+ *
+ * `submitVia: 'none'` stops after filling — for TCs asserting a static DOM
+ * property (e.g. TC-UI-01 password masking) that submitting would destroy by
+ * navigating away on a successful login.
+ */
+export async function actLogin(
+  page: Page,
+  loginPage: LoginPage,
+  act: LoginCase['act'],
+): Promise<ApiCapture> {
   await loginPage.goto();
+  await loginPage.fillCredentials(act.email, act.password);
+  if (act.submitVia === 'none') return { requestSent: false };
+
+  const responsePromise = page
+    .waitForResponse(
+      (res) => res.url().includes('/api/login') && res.request().method() === 'POST',
+      { timeout: 2000 },
+    )
+    .catch(() => null);
+
   if (act.submitVia === 'enter') {
-    await loginPage.fillCredentials(act.email, act.password);
     await loginPage.passwordInput.press('Enter');
   } else {
-    await loginPage.login(act.email, act.password);
+    await loginPage.submit();
   }
+
+  const response = await responsePromise;
+  if (!response) return { requestSent: false };
+  const body = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+  return { requestSent: true, status: response.status(), body };
 }
 
 export async function assertUi(
@@ -111,5 +153,57 @@ export async function assertUi(
   }
   if (ui.passwordInputType) {
     await expect(loginPage.passwordInput).toHaveAttribute('type', ui.passwordInputType);
+  }
+}
+
+/** Assertion pattern #2 — network/response (status + body from actLogin's capture). */
+export function assertApi(capture: ApiCapture, api: LoginCase['assert']['api']): void {
+  if (!api) return;
+
+  if (api.requestSent !== undefined) {
+    expect(capture.requestSent).toBe(api.requestSent);
+  }
+  if (!capture.requestSent) return;
+
+  if (api.status !== undefined) {
+    expect(capture.status).toBe(api.status);
+  }
+  if (api.hasToken !== undefined) {
+    expect(Boolean(capture.body?.token)).toBe(api.hasToken);
+  }
+}
+
+/**
+ * Assertion pattern #3 — DB state (`users.login_attempts` / `locked_until`).
+ *
+ * `server.js`'s /api/login handler fires `db.run(UPDATE ...)` without
+ * awaiting its callback before responding — the HTTP response can arrive
+ * before the write lands on disk. `expect.poll()` retries the read (same
+ * web-first-retry idea as UI assertions), which absorbs that race without a
+ * fixed sleep.
+ */
+export async function assertDb(email: string, db: LoginCase['assert']['db']): Promise<void> {
+  if (!db) return;
+
+  if (db.login_attempts !== undefined) {
+    await expect
+      .poll(() => getUserLoginState(email).login_attempts, {
+        message: `login_attempts for ${email}`,
+      })
+      .toBe(db.login_attempts);
+  }
+  if (db.locked_until !== undefined) {
+    await expect
+      .poll(() => getUserLoginState(email).locked_until, {
+        message: `locked_until for ${email}`,
+      })
+      .toBe(db.locked_until);
+  }
+  if (db.locked_untilNotNull) {
+    await expect
+      .poll(() => getUserLoginState(email).locked_until, {
+        message: `locked_until for ${email}`,
+      })
+      .not.toBeNull();
   }
 }

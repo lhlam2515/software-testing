@@ -178,7 +178,7 @@
     "layer": "ui",
     "type": "negative",
     "arrange": {},
-    "act": { "email": "test@eshop.com", "password": "Test1234!" },
+    "act": { "email": "test@eshop.com", "password": "Test1234!", "submitVia": "none" },
     "assert": {
       "ui": { "passwordInputType": "password" }
     },

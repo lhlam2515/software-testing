@@ -5,7 +5,14 @@ const DB_PATH =
   process.env.DB_PATH ?? path.resolve(process.cwd(), '../../../apps/backend/database.sqlite');
 
 function open() {
-  return new DatabaseSync(DB_PATH);
+  const db = new DatabaseSync(DB_PATH);
+  // The backend server holds its own connection to the same file. Without WAL
+  // + a busy timeout, a read/write here racing a server-side query throws
+  // "database is locked" instead of waiting — flaky, not a real assertion
+  // failure. See TEST_PLAN.md §8 risk #5 (tests must not depend on timing).
+  db.exec('PRAGMA journal_mode = WAL;');
+  db.exec('PRAGMA busy_timeout = 5000;');
+  return db;
 }
 
 export interface UserLoginState {
