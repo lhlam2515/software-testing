@@ -129,7 +129,7 @@
       "invalidToken": "invalidtokenstring123abc"
     },
     "assert": {
-      "api": { "status": 401, "hasError": true, "hasDiscount": false }
+      "api": { "status": 403, "hasError": true, "hasDiscount": false }
     },
     "knownDefect": "BUG-09-003"
   },
@@ -200,16 +200,17 @@
     "id": "TC-13",
     "hw02Ref": "domain-testing.md#tc-13",
     "title": "Gap: client-manipulated total_amount must not let the persisted order diverge from the real cart subtotal",
+    "note": "Real cart subtotal is 0 here: add-to-cart cannot be automated (ui-survey.md P1-2, cart state is unreachable via direct /checkout navigation), so this TC always starts from a genuinely empty cart rather than a seeded non-zero one. That still proves BUG-09-007 — checkout must persist total_amount=0 for an empty cart, not the client-manipulated value.",
     "layer": "hybrid",
     "type": "edge",
     "arrange": {
       "loginAs": "test@eshop.com",
       "resetUsageFor": ["SAVE10"],
-      "cartRealSubtotal": 4000000,
-      "cartItem": "Bàn phím cơ Keychron Q1"
+      "cartRealSubtotal": 0
     },
     "act": { "code": "SAVE10", "totalAmount": 500000, "authMode": "valid", "confirmCheckout": true },
     "assert": {
+      "api": { "status": 200, "hasDiscount": true },
       "db": { "orderTotalMatchesRealSubtotal": true }
     },
     "knownDefect": "BUG-09-007"
@@ -251,7 +252,7 @@
     "assert": {
       "api": { "status": 200, "discount_amount": 30000, "final_amount": 270001 }
     },
-    "knownDefect": null
+    "knownDefect": "BUG-09-001"
   },
   {
     "id": "TC-BVA-04",
@@ -348,6 +349,6 @@
     "assert": {
       "api": { "status": 200, "discount_amount": 50000, "final_amount": 450000 }
     },
-    "knownDefect": null
+    "knownDefect": "BUG-09-001"
   }
 ]

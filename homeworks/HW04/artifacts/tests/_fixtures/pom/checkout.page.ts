@@ -20,7 +20,11 @@ export class CheckoutPage {
     this.applyButton = page.getByRole('button', { name: 'Áp dụng' });
     this.successMessage = page.getByText(/Áp dụng thành công/);
     this.errorMessage = page.getByText(/thất bại|hết hạn|không tồn tại|chưa đủ|đã sử dụng/i);
-    this.savedAmount = page.getByText('Tiết kiệm:').locator('..').locator('strong');
+    // Scoped to the <p> itself, not its parent — the coupon-result panel has
+    // a sibling "Thành tiền: <strong>" line under the same parent, so going
+    // up to the parent (as `.locator('..')` from the text match would) pulls
+    // in both <strong> nodes and trips Playwright's strict mode.
+    this.savedAmount = page.locator('p', { hasText: 'Tiết kiệm:' }).locator('strong');
     this.finalTotal = page.getByText(/Tổng thanh toán:/);
     this.confirmButton = page.getByRole('button', { name: 'Xác Nhận Thanh Toán' });
   }

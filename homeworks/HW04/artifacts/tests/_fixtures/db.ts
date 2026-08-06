@@ -55,10 +55,102 @@ export function resetUserLoginState(email: string): void {
   setUserLoginState(email, { login_attempts: 0, locked_until: null });
 }
 
-export function getCouponByCode(code: string) {
+export interface CouponRow {
+  id: number;
+  code: string;
+  type: string;
+  discount_value: number;
+  min_order_amount: number;
+  expired_at: string;
+  is_active: number;
+  max_uses_per_user: number;
+}
+
+export function getCouponByCode(code: string): CouponRow | undefined {
   const db = open();
   try {
-    return db.prepare('SELECT * FROM coupons WHERE code = ?').get(code);
+    return db.prepare('SELECT * FROM coupons WHERE code = ?').get(code) as
+      | CouponRow
+      | undefined;
+  } finally {
+    db.close();
+  }
+}
+
+export interface NewCoupon {
+  code: string;
+  type: string;
+  discount_value: number;
+  min_order_amount: number;
+  expired_at: string;
+  max_uses_per_user: number;
+}
+
+/**
+ * Deletes any prior coupon (+ its usage rows) with the same code first, so
+ * re-running a case always starts from the exact coupon the TC declares —
+ * same idempotent-arrange idea as resetUserLoginState.
+ */
+export function createCoupon(coupon: NewCoupon): void {
+  const db = open();
+  try {
+    const existing = db.prepare('SELECT id FROM coupons WHERE code = ?').get(coupon.code) as
+      | { id: number }
+      | undefined;
+    if (existing) {
+      db.prepare('DELETE FROM coupon_usage WHERE coupon_id = ?').run(existing.id);
+      db.prepare('DELETE FROM coupons WHERE id = ?').run(existing.id);
+    }
+    db.prepare(
+      `INSERT INTO coupons (code, type, discount_value, min_order_amount, expired_at, is_active, max_uses_per_user)
+       VALUES (?, ?, ?, ?, ?, 1, ?)`,
+    ).run(
+      coupon.code,
+      coupon.type,
+      coupon.discount_value,
+      coupon.min_order_amount,
+      coupon.expired_at,
+      coupon.max_uses_per_user,
+    );
+  } finally {
+    db.close();
+  }
+}
+
+export function deactivateCoupon(code: string): void {
+  const db = open();
+  try {
+    db.prepare('UPDATE coupons SET is_active = 0 WHERE code = ?').run(code);
+  } finally {
+    db.close();
+  }
+}
+
+export function recordCouponUsage(couponId: number, userId: number): void {
+  const db = open();
+  try {
+    db.prepare('INSERT INTO coupon_usage (coupon_id, user_id) VALUES (?, ?)').run(
+      couponId,
+      userId,
+    );
+  } finally {
+    db.close();
+  }
+}
+
+export interface OrderRow {
+  id: number;
+  user_id: number;
+  total_amount: number;
+  status: string;
+}
+
+export function getLatestOrderForUser(userId: number): OrderRow | undefined {
+  const db = open();
+  try {
+    return db
+      .prepare('SELECT * FROM orders WHERE user_id = ? ORDER BY id DESC LIMIT 1')
+      .get(userId) as OrderRow | undefined;
   } finally {
     db.close();
   }
