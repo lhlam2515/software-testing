@@ -153,7 +153,8 @@
     "act": { "email": "test@eshop.com", "password": "Test1234!" },
     "assert": {
       "ui": { "noErrorVisible": true },
-      "api": { "status": 200, "hasToken": true }
+      "api": { "status": 200, "hasToken": true },
+      "db": { "login_attempts": 0, "locked_until": null }
     },
     "knownDefect": null
   },
@@ -167,7 +168,8 @@
     "act": { "email": "test@eshop.com", "password": "Test1234!" },
     "assert": {
       "ui": { "noErrorVisible": true },
-      "api": { "status": 200, "hasToken": true }
+      "api": { "status": 200, "hasToken": true },
+      "db": { "login_attempts": 0, "locked_until": null }
     },
     "knownDefect": null
   },
