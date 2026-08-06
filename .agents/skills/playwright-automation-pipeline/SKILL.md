@@ -78,7 +78,7 @@ partial state; a presence check is one cheap command.
 | Test config | look for `playwright.config.ts`/`.js` in the repo | Reuse an existing one's conventions; confirm before scaffolding a new one |
 | `@playwright/test` | `test -d node_modules/@playwright/test` | Show the install command, ask before running (mutating action) |
 | Browsers | `npx --no-install playwright install --dry-run` | Show `npx playwright install <browser>`, ask before running |
-| Live SUT | `curl -sf <base-url>` or the project's health check | Ask the user to start it, or start it only with a known command and authorization |
+| Live SUT | `curl -sf <base-url>` or the project's health check | Ask the user to start it, or start it only with a known command and authorization. If the project's start script bundles services this feature doesn't need, prefer starting only what's needed directly — a failure in an unrelated bundled service can take down the whole script |
 | `git` (if committing) | `command -v git` | Defer to the repo's own commit skill |
 
 Re-check anything not yet verified right before the phase that needs it —
@@ -95,7 +95,10 @@ behavior, never the SUT's currently observed behavior.** When unsure, read
 the SUT's source for that code path rather than trusting the design doc
 blindly. If the SUT will knowingly fail a case, tag it with
 `knownDefect`/`note` instead of loosening `expected` to match the bug — a
-suite that always passes has stopped testing anything.
+suite that always passes has stopped testing anything. If the doc is silent
+on a value (e.g. no documented status code for a given failure mode),
+derive it from the SUT's own established internal convention (how the same
+middleware/logic behaves elsewhere in the codebase) instead of guessing.
 
 Keep a `sourceRef` back to the originating design-doc TC where one exists.
 
@@ -141,6 +144,15 @@ Common trap: the server may respond before its own write to persisted state
 completes, so an immediate read after the response observes stale state.
 Use a polling/auto-retry assertion (`expect.poll()` or equivalent) instead
 of a one-shot read — never a fixed sleep.
+
+**Case data can be wrong too.** A real run here doesn't only surface SUT
+defects — it can surface an error in the Phase 2 case file itself: a
+`knownDefect` tag missing from a case that shares the same root cause as a
+tagged one, an `arrange` that can't actually reach the state it claims to
+(e.g. seeding data through a path that's broken elsewhere), or an `expected`
+inconsistent with the SUT's own convention. Fix the case data now, note why
+in the case itself — don't defer it to Phase 6 as if it were a review
+finding.
 
 ---
 
@@ -190,6 +202,11 @@ A failed item is a Phase 7-style fix, not a caveat to note and move past.
 - `npx playwright ...` silently installs the CLI on first use if missing —
   use `npx --no-install ...` for the Phase 1 check so a missing install
   surfaces clearly instead of triggering an unplanned network install.
+- `playwright install --dry-run` only confirms the browser binaries are
+  downloaded, not that the OS has the shared libraries to launch them —
+  a missing system dependency (e.g. `libicu`) only surfaces when a browser
+  actually launches. Before a multi-browser Phase 8 run, smoke-launch each
+  target project once (one trivial test) instead of trusting the dry-run.
 - A file-based DB shared with the running server (e.g. SQLite) needs a
   concurrency mode (WAL + busy_timeout on the fixture's connection) or reads
   will hit "database is locked."

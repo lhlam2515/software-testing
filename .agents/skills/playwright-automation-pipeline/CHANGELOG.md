@@ -1,5 +1,34 @@
 # CHANGELOG — playwright-automation-pipeline
 
+## v0.4 — 2026-08-06
+
+**Source: user retrospective** — after running the full pipeline for real on
+FR-09 (coupon apply, 21 cases, hybrid UI+API+DB), four gaps surfaced that
+cost real back-and-forth: no phase covered a case file that turns out to be
+wrong (only SUT defects), the browser-presence check didn't catch a missing
+OS-level dependency until the final multi-browser run, the SUT's bundled
+start script took down an unrelated service this feature didn't need, and
+the "assert per spec" rule had no answer for a status code the spec doc
+never documented.
+
+**Changes made in response:**
+
+- Phase 2: added a sentence to the non-negotiable rule — when the spec doc
+  is silent on a value, derive it from the SUT's own established internal
+  convention (e.g. consistent middleware behavior across routes) instead of
+  guessing
+- Phase 5: added "Case data can be wrong too" — a real run can surface an
+  error in the Phase 2 case file itself (missing `knownDefect`, an
+  unreachable `arrange`, an inconsistent `expected`); fix it immediately and
+  note why, don't defer to Phase 6 as if it were a review finding
+- Phase 1 "Live SUT" row: note that a bundled start script can fail as a
+  whole from one unrelated service erroring — prefer starting only what the
+  feature needs
+- Gotchas: `playwright install --dry-run` only confirms binaries are
+  downloaded, not that the OS can launch them — smoke-launch each target
+  browser project once before a multi-browser Phase 8 run instead of
+  trusting the dry-run
+
 ## v0.3 — 2026-08-06
 
 **Source: user feedback** — frontmatter `description` did not clearly signal
