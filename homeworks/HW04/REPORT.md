@@ -167,25 +167,29 @@ _TBD — how `.csv` / `.json` files under `artifacts/test-data/<feature>/` are l
 
 | # | Feature | AI-generated selector | Issue | Fix |
 | - | ------- | ---------------------- | ----- | --- |
-|  |  |  |  |  |
+| 1 | FR-02 | `errorMessage`: `.bg-red-100.text-red-700` in `login.page.ts`, a Tailwind utility class pair used as the only hook | SUT has no `data-testid` or accessible role on the error banner (ui-survey.md finding R1), so styling changes would silently break this locator | Accepted risk, no better hook exists in the SUT. Logged as a UI accessibility gap worth reporting, not a test defect. |
+| 2 | FR-02 | `usernameInput`/`passwordInput`: `form > div.filter({ hasText: 'Username' / 'Mat khau' }).locator('input')` | Coupled to exact label text and sibling DOM position, since the `<label>` has no `for`/`id` binding to its input (ui-survey.md finding R2). Any copy or markup change breaks it silently | Accepted risk, same root cause as row 1. Decided during P1 UI survey before A3 wrote any locator, so it is a deliberate tradeoff, not an AI guess. |
 
 ### 6.2 Weak or Missing Assertions
 
 | # | Feature | AI-generated assertion | Issue | Fix |
 | - | ------- | ------------------------ | ----- | --- |
-|  |  |  |  |  |
+| 1 | FR-02 | A4 draft asserted UI state only (no network or DB check) | TC-06's real defect (BUG-02-003, counter increments by 2 instead of 1) would have gone undetected, because the UI shows the same generic error either way | Added `assertApi` and `assertDb` in A5 (patterns 2 and 3) |
+| 2 | FR-02 | TC-BVA-03/04/05 assert UI plus `hasToken` only, no `db.login_attempts`/`locked_until` check | The DB-level state transition at the lockout boundary (counter reset on success, `server.js` lines 47 to 50) is inferred from login outcome, not verified directly | Added `db: { login_attempts: 0, locked_until: null }` to TC-BVA-04/05 (successful logins). TC-BVA-03 stays UI/API only, since it never reaches the reset branch |
+| 3 | FR-02 | `assertApi`'s `hasToken` check compares `Boolean(capture.body?.token)` | When `requestSent` is false, `capture.body` is undefined, so `Boolean(undefined)` also equals false. A case setting `hasToken: false` without also setting `requestSent` cannot distinguish "no request sent" from "request returned no token" | Not an issue for the current FR-02 cases, every `hasToken: false` case also pins `ui` or `requestSent`. Noted as a schema gap to watch when writing FR-09/FR-16 cases |
 
 ### 6.3 Missing Edge Cases
 
 | # | Feature | Edge case AI missed | Why it matters | Added TC |
 | - | ------- | --------------------- | --------------- | -------- |
-|  |  |  |  |  |
+| 1 | FR-02 | None found for this feature. TC-BVA-04 (exact expiry boundary, `locked_until = now`) was already present, seeded via `setLockedUntilOffsetSeconds: 0` | TEST_PLAN.md section 4.1 predicted the AI would likely skip this exact case since it needs DB seeding to set up. That predicted risk did not materialize for FR-02 | N/A |
 
 ### 6.4 Flaky Waits and Execution Stability
 
 | # | Feature | AI-generated wait/timing | Issue | Fix |
 | - | ------- | -------------------------- | ----- | --- |
-|  |  |  |  |  |
+| 1 | FR-02 | First A5 draft read `login_attempts`/`locked_until` once, immediately after the network response resolved | `server.js`'s `/api/login` handler calls `db.run(UPDATE ...)` without awaiting its callback before responding, so the HTTP response can arrive before the write lands on disk. Observed as sporadic stale reads, and, before WAL was enabled on the test's own connection, as outright "database is locked" errors | Enabled WAL journal mode plus `busy_timeout` on `db.ts`'s connection, and switched `assertDb` to `expect.poll()`, the same auto-retry idea already used for UI assertions, instead of a fixed sleep |
+| 2 | FR-02 | TC-UI-01 reused the shared `actLogin` helper, which always submits the form | Valid credentials were used to test password masking, so a successful submit navigated away from `/login` before the assertion ran, producing a misleading "element not found" failure instead of the real `type=text` defect | Added `submitVia: 'none'` so static DOM-property checks stop after filling, without submitting |
 
 ### 6.5 Test Cases Not Automated
 
