@@ -10,13 +10,18 @@ import {
 } from '../_fixtures/fr02-helpers';
 
 /**
- * FR-02 — EP cases (TC-01..07) + UI-layer extension cases (TC-UI-01..03).
- * BVA cases (TC-BVA-*) live in lockout.bva.spec.ts — see TEST_PLAN.md §3.
+ * FR-02 — all cases in one data-driven loop: EP (TC-01..07), UI-layer
+ * (TC-UI-01..03), and BVA (TC-BVA-01..05) around the login_attempts /
+ * locked_until boundary — see TEST_PLAN.md §3.
+ *
+ * locked_until for BVA cases is seeded directly via db.ts (never
+ * `waitForTimeout`) — see TEST_PLAN.md §8 risk #4 (real lockout duration
+ * is ~180s, BUG-02-004).
  */
 
-const cases = loadCases('FR-02').filter((tc) => !tc.id.startsWith('TC-BVA'));
+const cases = loadCases('FR-02');
 
-test.describe('FR-02 — Login (EP + UI-layer)', () => {
+test.describe('FR-02 — Login & Lockout Boundary (EP + UI-layer + BVA)', () => {
   for (const tc of cases) {
     test(`${tc.id} — ${tc.title}`, async ({ page }, testInfo) => {
       testInfo.annotations.push(
@@ -25,6 +30,12 @@ test.describe('FR-02 — Login (EP + UI-layer)', () => {
       );
       if (tc.knownDefect) {
         testInfo.annotations.push({ type: 'knownDefect', description: tc.knownDefect });
+      }
+      if (!tc.assert.ui) {
+        testInfo.annotations.push({
+          type: 'note',
+          description: 'No UI-observable assertion for this TC — covered by api/db assertions',
+        });
       }
 
       // Arrange
