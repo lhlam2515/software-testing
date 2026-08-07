@@ -90,9 +90,9 @@ Group 02 has two members. Split agreed on 2026-08-06, recorded in [group/endpoin
 | Member | Read-heavy | Auth-heavy | Transactional |
 | ------ | ---------- | ---------- | ------------- |
 | Lê Hoàng Lâm (23127216) | `GET /api/products?search=` | `POST /api/login` | `POST /api/cart` |
-| Other member | `GET /api/admin/orders` (proposed) | `POST /api/register` (proposed) | `POST /api/checkout` (proposed) |
+| Other member | `GET /api/admin/orders` | `POST /api/register` | `POST /api/checkout` |
 
-No endpoint appears twice. Status: TBD, pending the other member's confirmation.
+No endpoint appears twice. Status: confirmed by the other member on 2026-08-08.
 
 ---
 

@@ -75,11 +75,11 @@ Group 02 has two members. The split was agreed on 2026-08-06; the note sent to t
 | Member | Read-heavy | Auth-heavy | Transactional |
 | ------ | ---------- | ---------- | ------------- |
 | Lê Hoàng Lâm (23127216) | `GET /api/products?search=` | `POST /api/login` | `POST /api/cart` |
-| TBD (other member) | `GET /api/admin/orders` | `POST /api/register` | `POST /api/checkout` |
+| Other member | `GET /api/admin/orders` | `POST /api/register` | `POST /api/checkout` |
 
 No endpoint appears twice. The full cart to checkout workflow was deliberately narrowed to `POST /api/cart` so that `POST /api/checkout` (FR-08, which the other member covered in HW02) stays available to them.
 
-Status: TBD, pending the other member's confirmation of their three endpoints.
+Status: confirmed by the other member on 2026-08-08.
 
 ---
 
