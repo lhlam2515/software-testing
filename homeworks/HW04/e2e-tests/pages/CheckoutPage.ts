@@ -4,11 +4,11 @@ export class CheckoutPage {
   constructor(private readonly page: Page) {}
 
   async goto() {
-    await this.page.goto('/checkout');
+    await this.page.goto('http://localhost:5173/checkout');
   }
 
   couponInput() {
-    return this.page.getByLabel('Mã Giảm Giá');
+    return this.page.locator('label', { hasText: 'Mã Giảm Giá' }).locator('xpath=following-sibling::div//input');
   }
 
   applyCouponButton() {
@@ -16,7 +16,7 @@ export class CheckoutPage {
   }
 
   totalInput() {
-    return this.page.getByLabel('Tổng tiền thanh toán (VND)');
+    return this.page.locator('label', { hasText: 'Tổng tiền thanh toán (VND)' }).locator('xpath=following-sibling::input');
   }
 
   checkoutButton() {
@@ -36,4 +36,3 @@ export class CheckoutPage {
     await expect(this.page.getByRole('heading', { name: 'Xác Nhận Đơn Hàng' })).toBeVisible();
   }
 }
-

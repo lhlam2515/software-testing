@@ -1,6 +1,6 @@
 {
   "adminCredentials": {
-    "email": "admin@example.com",
+    "email": "admin@eshop.com",
     "password": "Admin123!"
   },
   "orderTransitions": [

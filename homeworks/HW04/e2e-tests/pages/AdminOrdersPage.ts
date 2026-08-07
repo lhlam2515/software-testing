@@ -4,7 +4,7 @@ export class AdminOrdersPage {
   constructor(private readonly page: Page) {}
 
   async goto() {
-    await this.page.goto('/');
+    await this.page.goto('http://localhost:5174/');
   }
 
   emailInput() {
@@ -33,4 +33,3 @@ export class AdminOrdersPage {
     await expect(this.page.getByRole('heading', { name: 'EShop Admin' })).toBeVisible();
   }
 }
-

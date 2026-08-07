@@ -18,7 +18,7 @@
       "description": "Percent coupon for standard basket"
     },
     {
-      "code": "FIX50000",
+      "code": "BIGBUY",
       "totalAmount": 1500000,
       "description": "Fixed coupon for standard basket"
     },

@@ -4,19 +4,19 @@ export class ProfilePage {
   constructor(private readonly page: Page) {}
 
   async goto() {
-    await this.page.goto('/profile');
+    await this.page.goto('http://localhost:5173/profile');
   }
 
   nameInput() {
-    return this.page.getByLabel('Họ Tên');
+    return this.page.locator('label', { hasText: 'Họ Tên' }).locator('xpath=following-sibling::input');
   }
 
   phoneInput() {
-    return this.page.getByLabel('Số điện thoại');
+    return this.page.locator('label', { hasText: 'Số điện thoại' }).locator('xpath=following-sibling::input');
   }
 
   addressInput() {
-    return this.page.getByLabel('Địa chỉ giao hàng');
+    return this.page.locator('label', { hasText: 'Địa chỉ giao hàng' }).locator('xpath=following-sibling::textarea');
   }
 
   updateButton() {
@@ -35,4 +35,3 @@ export class ProfilePage {
     await expect(this.page.getByRole('heading', { name: 'Lịch sử đơn hàng' })).toBeVisible();
   }
 }
-
