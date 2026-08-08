@@ -130,15 +130,15 @@ No endpoint appears twice. Status: confirmed by the other member on 2026-08-08.
 
 | Field | Value |
 | ----- | ----- |
-| Hostname | TBD (must match previous homework deployments, section 11) |
-| CPU | TBD |
-| RAM | TBD |
-| Storage | TBD |
-| OS / kernel | TBD |
+| Hostname | `FedoraOS` — HW01-HW04 did not require a hardware report, so no prior hostname declaration exists to match against (section 11); this is the first declaration and becomes the baseline for later assignments |
+| CPU | 11th Gen Intel(R) Core(TM) i5-11300H (8) @ 4.40 GHz |
+| RAM | 15.30 GiB |
+| Storage | 474.35 GiB (btrfs) |
+| OS / kernel | Fedora Linux 44 (Workstation Edition) x86_64, kernel 7.1.5-201.fc44.x86_64 |
 | Node.js version | v24.11.1 |
 | k6 version | v1.0.0 (commit/41b4984b75, go1.24.2, linux/amd64) |
 
-Evidence: `assets/screenshots/hardware/`.
+Evidence: `assets/screenshots/hardware/` — `fastfetch` screenshot pending; a manually-selected screen region is required so the capture does not include unrelated windows (other coursework, personal browsing) that were on screen during this session.
 
 ---
 
