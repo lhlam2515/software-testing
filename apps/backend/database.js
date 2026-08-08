@@ -10,7 +10,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
     }
 });
 
-function initDatabase() {
+function seedDatabase() {
     db.serialize(() => {
         db.run('DROP TABLE IF EXISTS coupon_usage');
         db.run('DROP TABLE IF EXISTS coupons');
@@ -114,6 +114,21 @@ function initDatabase() {
     });
 }
 
-initDatabase();
+// Perf testing (HW05) seeds hundreds/thousands of rows via a separate script
+// and expects them to survive a backend restart. Re-running the destructive
+// reseed above on every `require('./database')` would wipe that data, so the
+// reseed only runs when explicitly requested (RESET_DB=1) or when the
+// database has never been seeded (no products table / empty products table).
+if (process.env.RESET_DB === '1') {
+    seedDatabase();
+} else {
+    db.get("SELECT count(*) as c FROM products", [], (err, row) => {
+        if (err || !row || row.c === 0) {
+            seedDatabase();
+        } else {
+            console.log(`Database already seeded (${row.c} products), skipping reseed.`);
+        }
+    });
+}
 
 module.exports = db;
