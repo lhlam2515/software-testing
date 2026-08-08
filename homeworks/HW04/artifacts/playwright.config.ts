@@ -3,6 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 const STUDENT_ID = process.env.STUDENT_ID ?? '23127216';
 const RUN_AT = new Date().toISOString();
 const HTML_OUT = process.env.HTML_OUT ?? 'html-reports/_default';
+const JSON_OUT = process.env.JSON_OUT ?? 'test-results/_default/results.json';
 
 process.env.PLAYWRIGHT_HTML_TITLE = `EShop HW04 - Run by: ${STUDENT_ID} - ${RUN_AT}`;
 
@@ -20,6 +21,7 @@ export default defineConfig({
         outputFolder: HTML_OUT,
       },
     ],
+    ['json', { outputFile: JSON_OUT }],
     ['list'],
   ],
   metadata: {

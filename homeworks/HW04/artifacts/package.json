@@ -12,11 +12,14 @@
     "test:chromium": "playwright test --project=chromium",
     "test:firefox": "playwright test --project=firefox",
     "test:webkit": "playwright test --project=webkit",
-    "report": "playwright show-report"
+    "report": "playwright show-report",
+    "report:summary": "node scripts/gen-summary.cjs",
+    "report:pdf": "node scripts/build-report.cjs --in reports/markdown --out pdf/HW04_Test_Report.pdf --title \"EShop HW04 - Multi-browser Automation Report\" --meta \"Run by=23127216\""
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
     "@types/node": "^26.1.2",
+    "marked": "^12.0.0",
     "typescript": "^7.0.2"
   }
 }
