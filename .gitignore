@@ -85,3 +85,6 @@ audit_config.json
 context/transcripts/
 context/MEMORY.md
 .claude/hooks/pending/
+
+# ===== GIT WORKTREES (parallel homework tracks) =====
+.worktrees/

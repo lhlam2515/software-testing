@@ -1,0 +1,4 @@
+interface:
+  display_name: "Using Worktree"
+  short_description: "Prepare isolated Git worktrees for parallel homework tracks"
+  default_prompt: "Use $using-worktree to prepare an isolated worktree for this homework."
