@@ -14,16 +14,19 @@ async function loginAsAdmin(page, request) {
   await expect(page.getByRole('heading', { name: 'EShop Admin' })).toBeVisible();
 }
 
-async function seedOrder(page, request, emailSuffix) {
+async function seedOrder(request, emailSuffix) {
   const email = `admin-order-${Date.now()}-${emailSuffix}@eshop.com`;
   const password = 'Test1234!';
+
   await request.post('http://localhost:3000/api/register', {
     data: { name: 'Admin Order User', email, password },
   });
+
   const login = await request.post('http://localhost:3000/api/login', {
     data: { email, password },
   });
   const { token } = await login.json();
+
   const checkout = await request.post('http://localhost:3000/api/checkout', {
     data: {
       total_amount: 1500000,
@@ -32,7 +35,14 @@ async function seedOrder(page, request, emailSuffix) {
     headers: { Authorization: `Bearer ${token}` },
   });
   const { orderId } = await checkout.json();
-  return orderId;
+  return { orderId, userEmail: email, userPassword: password, token };
+}
+
+async function loginAndOpenOrders(page, request) {
+  await loginAsAdmin(page, request);
+  await page.getByText('Đơn hàng', { exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Quản lý Đơn hàng' })).toBeVisible();
+  await expect(page.getByRole('table')).toBeVisible();
 }
 
 test.describe('FR-18 Order management (admin)', () => {
@@ -46,61 +56,46 @@ test.describe('FR-18 Order management (admin)', () => {
   });
 
   test('opens orders tab', async ({ page, request }) => {
-    await loginAsAdmin(page, request);
-    await page.getByText('Đơn hàng', { exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Quản lý Đơn hàng' })).toBeVisible();
+    await loginAndOpenOrders(page, request);
   });
 
   test('shows customer name in order rows', async ({ page, request }) => {
-    const orderId = await seedOrder(page, request, 'customer');
-    await loginAsAdmin(page, request);
-    await page.getByText('Đơn hàng', { exact: true }).click();
+    await seedOrder(request, 'customer');
+    await loginAndOpenOrders(page, request);
     await expect(page.getByRole('table')).toContainText('Admin Order User');
-    await expect(page.getByRole('table')).toContainText(`#${orderId}`);
   });
 
   test('shows shipping address in order rows', async ({ page, request }) => {
-    await seedOrder(page, request, 'address');
-    await loginAsAdmin(page, request);
-    await page.getByText('Đơn hàng', { exact: true }).click();
+    const { orderId } = await seedOrder(request, 'address');
+    await loginAndOpenOrders(page, request);
     await expect(page.getByRole('table')).toContainText('12 Le Loi');
+    await expect(page.getByRole('table')).toContainText(`#${orderId}`);
   });
 
   test('shows status badge for pending order', async ({ page, request }) => {
-    await seedOrder(page, request, 'pending');
-    await loginAsAdmin(page, request);
-    await page.getByText('Đơn hàng', { exact: true }).click();
+    await seedOrder(request, 'pending');
+    await loginAndOpenOrders(page, request);
     await expect(page.getByRole('table')).toContainText('Chờ xác nhận');
   });
 
   test('shows confirm button for pending order', async ({ page, request }) => {
-    await seedOrder(page, request, 'confirm');
-    await loginAsAdmin(page, request);
-    await page.getByText('Đơn hàng', { exact: true }).click();
+    await seedOrder(request, 'confirm');
+    await loginAndOpenOrders(page, request);
     await expect(page.getByRole('button', { name: 'Xác nhận' }).first()).toBeVisible();
   });
 
   test('shows shipping action for confirmed order', async ({ page, request }) => {
-    const orderId = await seedOrder(page, request, 'shipping');
-    const login = await request.post('http://localhost:3000/api/login', {
-      data: { email: adminData.adminCredentials.email, password: adminData.adminCredentials.password },
-    });
-    const { token } = await login.json();
+    const { orderId, token } = await seedOrder(request, 'shipping');
     await request.put(`http://localhost:3000/api/admin/orders/${orderId}/status`, {
       data: { status: 'confirmed' },
       headers: { Authorization: `Bearer ${token}` },
     });
-    await loginAsAdmin(page, request);
-    await page.getByText('Đơn hàng', { exact: true }).click();
+    await loginAndOpenOrders(page, request);
     await expect(page.getByRole('button', { name: 'Giao hàng' }).first()).toBeVisible();
   });
 
   test('shows complete action for shipping order', async ({ page, request }) => {
-    const orderId = await seedOrder(page, request, 'complete');
-    const login = await request.post('http://localhost:3000/api/login', {
-      data: { email: adminData.adminCredentials.email, password: adminData.adminCredentials.password },
-    });
-    const { token } = await login.json();
+    const { orderId, token } = await seedOrder(request, 'complete');
     await request.put(`http://localhost:3000/api/admin/orders/${orderId}/status`, {
       data: { status: 'confirmed' },
       headers: { Authorization: `Bearer ${token}` },
@@ -109,15 +104,47 @@ test.describe('FR-18 Order management (admin)', () => {
       data: { status: 'shipping' },
       headers: { Authorization: `Bearer ${token}` },
     });
-    await loginAsAdmin(page, request);
-    await page.getByText('Đơn hàng', { exact: true }).click();
+    await loginAndOpenOrders(page, request);
     await expect(page.getByRole('button', { name: 'Hoàn thành' }).first()).toBeVisible();
   });
 
+  test('confirms pending orders through the dashboard', async ({ page, request }) => {
+    const { orderId } = await seedOrder(request, 'transition-confirm');
+    await loginAndOpenOrders(page, request);
+    await page.getByRole('table').getByRole('button', { name: 'Xác nhận' }).first().click();
+    await expect(page.getByRole('table')).toContainText(`#${orderId}`);
+    await expect(page.getByRole('table')).toContainText('Đã xác nhận');
+  });
+
+  test('moves confirmed orders to shipping', async ({ page, request }) => {
+    const { orderId, token } = await seedOrder(request, 'transition-shipping');
+    await request.put(`http://localhost:3000/api/admin/orders/${orderId}/status`, {
+      data: { status: 'confirmed' },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    await loginAndOpenOrders(page, request);
+    await page.getByRole('table').getByRole('button', { name: 'Giao hàng' }).first().click();
+    await expect(page.getByRole('table')).toContainText('Đang giao');
+  });
+
+  test('completes shipping orders from the dashboard', async ({ page, request }) => {
+    const { orderId, token } = await seedOrder(request, 'transition-complete');
+    await request.put(`http://localhost:3000/api/admin/orders/${orderId}/status`, {
+      data: { status: 'confirmed' },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    await request.put(`http://localhost:3000/api/admin/orders/${orderId}/status`, {
+      data: { status: 'shipping' },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    await loginAndOpenOrders(page, request);
+    await page.getByRole('table').getByRole('button', { name: 'Hoàn thành' }).first().click();
+    await expect(page.getByRole('table')).toContainText('Đã giao');
+  });
+
   test('shows order count in table', async ({ page, request }) => {
-    await seedOrder(page, request, 'count');
-    await loginAsAdmin(page, request);
-    await page.getByText('Đơn hàng', { exact: true }).click();
+    await seedOrder(request, 'count');
+    await loginAndOpenOrders(page, request);
     await expect(page.getByRole('table').locator('tbody tr').first()).toBeVisible();
   });
 });

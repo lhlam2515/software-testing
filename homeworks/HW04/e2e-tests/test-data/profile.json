@@ -2,12 +2,12 @@
   "validProfiles": [
     {
       "name": "Nguyen Van A",
-      "phone": "0912345678",
+      "phone": "912345678",
       "shippingAddress": "12 Le Loi, District 1, Ho Chi Minh City"
     },
     {
       "name": "Tran Thi B",
-      "phone": "0987654321",
+      "phone": "987654321",
       "shippingAddress": "45 Nguyen Hue, District 1, Ho Chi Minh City"
     }
   ],
