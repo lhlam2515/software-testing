@@ -11,6 +11,7 @@ import {
   deactivateCoupon,
   recordCouponUsage,
   getLatestOrderForUser,
+  resetUserLoginState,
 } from './db';
 
 /**
@@ -97,6 +98,10 @@ function resolveExpiredAt(c: NonNullable<CouponCase['arrange']['createCoupon']>)
 let cachedUserId: number | null = null;
 export async function resolveTestUserId(request: APIRequestContext): Promise<number> {
   if (cachedUserId !== null) return cachedUserId;
+  // FR-02 shares this same account and deliberately locks it out via wrong
+  // passwords. Reset before the first login so a prior FR-02 run in the same
+  // suite doesn't 423/401 every FR-09 case (TEST_PLAN.md §8 risk #5).
+  resetUserLoginState(TEST_USER_EMAIL);
   const result = await loginViaApi(request, TEST_USER_EMAIL, TEST_USER_PASSWORD);
   cachedUserId = result.user!.id;
   return cachedUserId;
