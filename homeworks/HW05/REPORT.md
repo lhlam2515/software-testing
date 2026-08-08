@@ -44,7 +44,7 @@ TBD: state that k6 and the backend share the same host, and what that means for 
 
 ### 2.3 Data seeding and reset procedure
 
-TBD: how the database was seeded before each run, how it was reset between runs, and how the 3-fail login lockout was cleared between Stress and Spike runs (section 6, Task 1).
+TBD: how the database was seeded before each run, how it was reset between runs, and how the account lockout (locks after 2 consecutive failures, for 180 seconds) was cleared between Stress and Spike runs (section 6, Task 1).
 
 ---
 
@@ -55,16 +55,16 @@ TBD: how the database was seeded before each run, how it was reset between runs,
 | Group | Method + path | SRS | Why representative of the group |
 | ----- | ------------- | --- | ------------------------------- |
 | Read-heavy | `GET /api/products?search={keyword}` | FR-05 | Search over the product name is the only read path in the SUT whose cost grows with the data volume. Every other read resolves by primary key or returns a small fixed table, so search is the read that can actually saturate something. |
-| Auth-heavy | `POST /api/login` | FR-02 | Password verification plus JWT issuance, guarded by a counter-based lockout after 3 consecutive failures. Section 5 names the lockout behaviour explicitly for this group. |
-| Transactional | `POST /api/cart` | FR-07 | An authenticated write that mutates per-user state and must keep one row per product per user (adding the same product raises the quantity instead of creating a second row). Section 5 names add-to-cart as a transactional example. |
+| Auth-heavy | `POST /api/login` | FR-02 | Password verification plus JWT issuance, guarded by a counter-based lockout: each failure adds 2 to `login_attempts`, and the account locks for 180 seconds once the counter reaches 3 (so 2 consecutive failures trigger it, not 3). Section 5 names the lockout behaviour explicitly for this group. |
+| Transactional | `POST /api/cart` | FR-07 | An authenticated write that mutates per-user state. In the current implementation it does not upsert: every call `push()`es a new entry onto an in-memory array keyed by user id, so adding the same product twice produces two array entries, not a quantity bump, and the whole array is lost on backend restart. Section 5 names add-to-cart as a transactional example. |
 
 ### 3.2 Scenario pairing and justification
 
 | Scenario | Endpoint group | Why this pairing |
 | -------- | -------------- | ---------------- |
-| Load | Transactional, `POST /api/cart` | Every request here is a database write, so the scenario has to be one that runs at a steady expected rate rather than one that pushes to failure. Load is the only scenario of the three whose question ("does the system hold the expected rate") does not require driving the system past its limit, which matches the endpoint that is most expensive to clean up after. |
+| Load | Transactional, `POST /api/cart` | This request does not touch the database at all — it pushes onto an in-memory array on the backend process, so a sustained run makes the process's own resident memory the thing under test rather than the database. Load is the only scenario of the three whose question ("does the system hold the expected rate") does not require driving the system past its limit, which matches a steady run long enough to watch that memory growth. |
 | Stress | Read-heavy, `GET /api/products?search=` | Stress asks where the system breaks, which means driving it past the point of failure repeatedly. Only an endpoint that creates no state can be pushed that way without a reset between attempts. An unindexed `LIKE` scan also gives a failure mode that can be named, not just observed. |
-| Spike | Auth-heavy, `POST /api/login` | Spike asks whether the system recovers after a surge. The lockout holds an account for 30 seconds after 3 failures, which is itself a recovery curve: error rate rises during the surge, stays elevated for the lockout window, then returns to baseline. The endpoint's own behaviour supplies the phenomenon the scenario is designed to measure. |
+| Spike | Auth-heavy, `POST /api/login` | Spike asks whether the system recovers after a surge. The lockout locks an account for 180 seconds after 2 consecutive failures (each failure adds 2 to the attempt counter, which locks at 3), which is itself a recovery curve: error rate rises during the surge, stays elevated for the lockout window, then returns to baseline. The endpoint's own behaviour supplies the phenomenon the scenario is designed to measure. |
 
 Each pairing also matches the report view chosen for that scenario in section 4.4: the aggregate view fits the steady run, the per-stage percentile view fits the search for a breaking point, and the time-series view fits the recovery curve.
 
@@ -169,7 +169,7 @@ Observations: TBD.
 
 ### 4.7 Account-lockout handling
 
-TBD: whether Stress or Spike runs triggered the 3-fail login lockout, how it was reset between runs, and the exact steps (section 6, Task 1). Required even if the answer is that lockout was never triggered, in which case explain why.
+TBD: whether Stress or Spike runs triggered the account lockout (2 consecutive failures, 180-second lock — see section 3.1), how it was reset between runs, and the exact steps (section 6, Task 1). Required even if the answer is that lockout was never triggered, in which case explain why.
 
 ### 4.8 Endurance threshold
 

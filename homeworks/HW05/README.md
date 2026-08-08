@@ -69,8 +69,8 @@ Three endpoint groups, one scenario each, no overlap with other group members (s
 | Group | Endpoint | SRS | Scenario paired | Why this pairing | Test plan | CSV input |
 | ----- | -------- | --- | --------------- | ---------------- | --------- | --------- |
 | Read-heavy | `GET /api/products?search={keyword}` | FR-05 | **Stress** | Creates no state, so it can be pushed to the breaking point and re-run indefinitely. An unindexed `LIKE` scan is where SQLite gives out first, which makes the breaking point explainable rather than merely observed. | `23127216_Stress_YYYYMMDD.js` | `read_keywords.csv` |
-| Auth-heavy | `POST /api/login` | FR-02 | **Spike** | The 3-fail lockout holds for 30 seconds, so it is visible only on a time axis: error rate jumps, stays up for the lockout window, then decays. That recovery shape is exactly what a spike scenario asks about and what an aggregate number cannot carry. | `23127216_Spike_YYYYMMDD.js` | `auth_credentials.csv` |
-| Transactional | `POST /api/cart` | FR-07 | **Load** | Writes to the database under a per-user token, but upserts the quantity on an existing cart row instead of inserting a new one, so a sustained run does not inflate the schema. Suits a steady expected load rather than a push to failure. | `23127216_Load_YYYYMMDD.js` | `cart_payloads.csv` |
+| Auth-heavy | `POST /api/login` | FR-02 | **Spike** | The lockout locks an account for 180 seconds after 2 consecutive failures (each failure adds 2 to `login_attempts`, which locks at 3), so it is visible only on a time axis: error rate jumps, stays up for the lockout window, then decays. That recovery shape is exactly what a spike scenario asks about and what an aggregate number cannot carry. | `23127216_Spike_YYYYMMDD.js` | `auth_credentials.csv` |
+| Transactional | `POST /api/cart` | FR-07 | **Load** | Does not touch the database — `push()`es onto an in-memory array per user, unbounded and lost on restart. A sustained run at steady rate makes backend RSS growth the primary observable, which suits Load's "does the system hold the expected rate" question better than a push to failure. | `23127216_Load_YYYYMMDD.js` | `cart_payloads.csv` |
 
 **Why not the full cart to checkout workflow.** `POST /api/checkout` inserts one order row per request, so a 10 to 15 minute soak leaves tens of thousands of orphan orders behind and every run needs the cart re-seeded for the whole account pool beforehand. `POST /api/cart` is the same transactional shape (authenticated write, per-user state) without the cleanup cost, and section 5 names add-to-cart as a transactional example in its own right. Checkout is left to the other group member, who covered FR-08 in HW02.
 
@@ -135,8 +135,8 @@ No endpoint appears twice. Status: confirmed by the other member on 2026-08-08.
 | RAM | TBD |
 | Storage | TBD |
 | OS / kernel | TBD |
-| Node.js version | TBD |
-| k6 version | TBD |
+| Node.js version | v24.11.1 |
+| k6 version | v1.0.0 (commit/41b4984b75, go1.24.2, linux/amd64) |
 
 Evidence: `assets/screenshots/hardware/`.
 
