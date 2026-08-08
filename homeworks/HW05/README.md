@@ -138,7 +138,7 @@ No endpoint appears twice. Status: confirmed by the other member on 2026-08-08.
 | Node.js version | v24.11.1 |
 | k6 version | v1.0.0 (commit/41b4984b75, go1.24.2, linux/amd64) |
 
-Evidence: `assets/screenshots/hardware/` — `fastfetch` screenshot pending; a manually-selected screen region is required so the capture does not include unrelated windows (other coursework, personal browsing) that were on screen during this session.
+Evidence: `assets/screenshots/hardware/fastfetch.png` — hostname `FedoraOS` visible in the prompt, matching the declaration above (section 11 hostname consistency).
 
 ---
 
