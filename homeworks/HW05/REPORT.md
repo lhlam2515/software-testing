@@ -167,9 +167,11 @@ Observations: TBD.
 
 *Same table structure as 4.6.1.*
 
-### 4.7 Account-lockout handling
+### 4.7 Test bed setup/teardown and account-lockout handling
 
-TBD: whether Stress or Spike runs triggered the account lockout (2 consecutive failures, 180-second lock — see section 3.1), how it was reset between runs, and the exact steps (section 6, Task 1). Required even if the answer is that lockout was never triggered, in which case explain why.
+Test bed procedure: `setup_testbed.sh` resets the database to a clean baseline (`RESET_DB=1`), snapshots it to `database.sqlite.baseline`, then loads the perf data volume via `seed_perf.js`. `teardown_testbed.sh` restores the database from that snapshot once the session's scenarios are done, so the app is handed back in its pre-test state rather than left holding thousands of perf rows. Run once per session (setup before the first scenario, teardown after the last), not per individual k6 run.
+
+TBD: whether Stress or Spike runs triggered the account lockout (2 consecutive failures, 180-second lock — see section 3.1), how it was reset between runs (`reset_lockout.js`, run between individual k6 runs within the session, distinct from the session-level teardown above), and the exact steps (section 6, Task 1). Required even if the answer is that lockout was never triggered, in which case explain why.
 
 ### 4.8 Endurance threshold
 

@@ -12,6 +12,9 @@ out/
 # ===== DATABASE =====
 *.sqlite
 *.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite.baseline
 *.db
 
 # ===== ENVIRONMENT =====

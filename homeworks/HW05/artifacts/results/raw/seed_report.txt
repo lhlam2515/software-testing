@@ -1,4 +1,4 @@
-seed_perf.js run at 2026-08-08T08:28:08.125Z
+seed_perf.js run at 2026-08-08T08:54:51.500Z
 products: 2005 (target inserted this run: 2000)
 users: 202 (target inserted this run: 200)
 orders: 3000 (target inserted this run: 3000)

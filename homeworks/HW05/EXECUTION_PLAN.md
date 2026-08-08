@@ -160,7 +160,8 @@ Cắt theo thứ tự này, dừng lại ngay khi đủ giờ:
 | - | ---- | ------ |
 | 1.1 | Cài k6: `sudo dnf install k6` (hoặc repo Grafana). Verify `k6 version` | version ghi vào `README.md` §Hardware |
 | 1.2 | Viết `artifacts/scripts/seed_perf.js`: seed **2.000 products** (tên có phân phối keyword thật, không random uuid), **200 users** password đã biết, **3.000 orders** cho `GET /api/admin/orders` của bạn cùng nhóm khỏi lệch | script + `seed_report.txt` ghi số dòng thực tế |
-| 1.3 | Viết `artifacts/scripts/reset_lockout.js`: `UPDATE users SET login_attempts=0, locked_until=NULL`. Thủ tục reset giữa run mà đề §6 bắt document | script + đoạn mô tả cho REPORT §4.7 |
+| 1.2b | Viết `artifacts/scripts/setup_testbed.sh` + `teardown_testbed.sh`: **test bed setup/teardown** đúng chuẩn (ISTQB ch.2) — `setup` reset DB về baseline sạch bằng `RESET_DB=1`, snapshot baseline đó ra `database.sqlite.baseline`, rồi mới chạy `seed_perf.js` chồng data test lên; `teardown` khôi phục DB từ snapshot đó, trả app về đúng trạng thái trước khi test, không để dữ liệu perf rò rỉ vào git hay vào lần seed sau. Cả hai từ chối chạy nếu backend đang giữ khóa file DB | 2 script + `.gitignore` chặn `*.sqlite.baseline` |
+| 1.3 | Viết `artifacts/scripts/reset_lockout.js`: `UPDATE users SET login_attempts=0, locked_until=NULL`. Thủ tục reset **giữa các run trong cùng một session** (khác với teardown — teardown chỉ chạy **cuối session**) mà đề §6 bắt document | script + đoạn mô tả cho REPORT §4.7 |
 | 1.4 | Viết `artifacts/scripts/monitor.sh`: sample `ps -o rss=,pcpu= -p <backend_pid>` mỗi 1s → CSV. Đây là bằng chứng định lượng **bổ sung** cho screenshot htop, không thay thế | `monitor.sh` + format CSV |
 | 1.5 | Smoke test 3 endpoint bằng `curl`: xác nhận response shape, status code, và đo latency baseline khi 1 VU | `artifacts/results/raw/baseline_smoke.txt` |
 | 1.6 | Hardware report: `fastfetch` screenshot (thay `dxdiag`/`screenfetch`) + bảng spec. Xử lý vấn đề hostname theo §4-bis bên dưới | `assets/screenshots/hardware/` + bảng trong README |
@@ -217,6 +218,7 @@ Cắt theo thứ tự này, dừng lại ngay khi đủ giờ:
 **Thủ tục chuẩn cho mỗi run (lặp 3 lần):**
 
 ```
+0. (đầu session, chạy 1 lần) setup_testbed.sh  — baseline sạch + seed perf data
 1. reset_lockout.js + restart backend  (xóa userCarts in-memory)
 2. Mở layout 2 pane: trái = terminal k6, phải = htop lọc theo PID backend
 3. Bật OBS ghi màn hình  (ghi luôn ở đây, không quay lại sau — tiết kiệm 1 buổi)
@@ -225,7 +227,10 @@ Cắt theo thứ tự này, dừng lại ngay khi đủ giờ:
 6. Chụp screenshot đỉnh tải (k6 + htop trong 1 khung)
 7. Dừng monitor, sinh HTML report từ handleSummary()
 8. commit
+9. (cuối session, sau scenario cuối cùng) dừng backend → teardown_testbed.sh — trả DB về baseline gốc
 ```
+
+> Bước 0 và 9 chạy **một lần cho cả session** (không lặp lại mỗi scenario) — `setup_testbed.sh` mở test bed, `teardown_testbed.sh` đóng nó lại. Bước 1 (`reset_lockout.js`) là reset **trong session**, giữa các run, không thay thế bước 9.
 
 **Ba report view — mỗi scenario một loại, không lặp** (đã chốt ở README):
 
@@ -385,6 +390,7 @@ Chi phí: ~15 phút. Đổi lại là gỡ hẳn một điểm nghi vấn anti-c
 | §6 T1 human review | REPORT §4.5 | M2 |
 | §6 T1 run + resource + hardware | screenshots, raw log, HTML report | M1, M3 |
 | §6 T1 lockout reset giữa run | `reset_lockout.js` + REPORT §4.7 | M1, M3 |
+| Test bed setup/teardown (vệ sinh môi trường, không rò dữ liệu perf) | `setup_testbed.sh` + `teardown_testbed.sh` + REPORT §4.7 | M1, M3 |
 | §6 T1 endurance threshold | README bảng threshold, REPORT §4.8 | M4 |
 | §6 T1 video ≥6 phút | link YouTube unlisted | M8 |
 | §6 T1 report issues | `BUG_REPORT.md` + GitHub Issues | M4 |
