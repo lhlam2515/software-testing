@@ -1,0 +1,5 @@
+GET /api/products?search=Laptop -> 200 524 rows
+POST /api/login (valid) -> 200 {"message":"Login successful","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6InVzZXIiLCJpYXQiOjE3ODYxNzc3Mjl9.bkrMvMo-LYiOsuAAzeT9l
+POST /api/login (invalid) -> 401 {"error":"Invalid email or password"}
+POST /api/cart -> 200 {"message":"Added to cart"}
+GET /api/cart after 2x POST (proves push(), not upsert) -> 200 [{"productId":1,"quantity":2},{"productId":1,"quantity":3}]
