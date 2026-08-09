@@ -95,9 +95,9 @@
     "act": { "email": "test@eshop.com", "password": "Test1234!" },
     "assert": {
       "ui": { "genericErrorVisible": true, "errorRevealsReason": false },
-      "api": { "hasToken": false }
+      "api": { "hasToken": false, "status": 401 }
     },
-    "note": "Xác nhận bằng chạy thật (A4): PASS ở tầng UI vì Login.jsx:17-19 nuốt mọi lỗi API vào 1 message tĩnh \"Đăng nhập thất bại...\", không render error.response — nên rò rỉ KHÔNG lộ qua UI. Nhưng server.js:40-44 vẫn trả message riêng \"Tài khoản đã bị khóa. Vui lòng thử lại sau.\" + HTTP 403 (khác 401 \"Invalid email or password\" của sai mật khẩu thường) — rò rỉ ở TẦNG API. Pattern #1 (UI) không bắt được; A5 phải thêm assert.api.status=403 cho case này để pattern #2 (network) lộ ra. Chưa có Issue trong HW02/HW04 BUG_REPORT.md — ứng viên bug mới, cần triage ở P6.",
+    "note": "P6 bug-triage fix (2026-08-09): trước bản sửa này, assert.api chỉ có hasToken:false (đúng cho cả 401 lẫn 403 nên không bắt được gì) và note cũ đề nghị thêm status=403 — nhưng 403 CHÍNH LÀ hành vi lỗi quan sát được, gán nó làm expected sẽ vi phạm nguyên tắc bất di bất dịch ở §3.1 (assert theo spec, không theo implementation) và làm case luôn xanh dù bug còn đó. srs.md dòng 42 (\"Hệ thống trả về thông báo lỗi phù hợp; không để lộ chi tiết nguyên nhân\") xác nhận status code KHÔNG được phân biệt lockout vs sai mật khẩu — do đó status theo spec phải bằng 401 (giống nhánh sai mật khẩu thường, server.js:63), không phải 403 (server.js:40-44). Assert status=401 khiến case FAIL đúng chỗ, lộ ra bug mới (account-lockout state enumeration qua HTTP status + message) — xem BUG_REPORT.md.",
     "knownDefect": "PENDING-NEW-lockout-message-enumeration"
   },
   {
