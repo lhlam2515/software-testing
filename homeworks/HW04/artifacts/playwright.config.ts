@@ -45,5 +45,21 @@ export default defineConfig({
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    // WebKit cannot launch on this Fedora host (missing libicu74/libjpeg-turbo8,
+    // playwright install-deps only supports Debian/Ubuntu, no non-interactive sudo).
+    // REQUIREMENTS.md line 83 explicitly allows the "Chrome / Edge / Firefox" set as
+    // a substitute for "Chromium / Firefox / WebKit" — Edge (flatpak, user-level
+    // install, Chromium engine) fills the 3rd-browser slot instead of WebKit.
+    {
+      name: 'edge',
+      use: {
+        ...devices['Desktop Edge'],
+        channel: undefined,
+        launchOptions: {
+          executablePath: `${process.env.HOME}/.local/share/flatpak/exports/bin/com.microsoft.Edge`,
+          args: ['--no-sandbox'],
+        },
+      },
+    },
   ],
 });
