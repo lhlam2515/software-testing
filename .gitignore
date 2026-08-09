@@ -86,6 +86,9 @@ reports/
 # ===== HOMEWORK REFERENCE MATERIAL (lecturer-provided, not deliverables) =====
 homeworks/HW05/ref/
 
+# ===== HOMEWORK INTERNAL PLANNING (not a graded deliverable) =====
+homeworks/HW05/EXECUTION_PLAN.md
+
 # ===== CLAUDE CONFIG =====
 audit_config.json
 context/transcripts/
