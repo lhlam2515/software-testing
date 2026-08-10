@@ -225,6 +225,7 @@
       "api": { "status": 400, "hasError": true },
       "db": { "productCountDelta": 0 }
     },
+    "note": "Gap probe (spec không định nghĩa hành vi cho products:[]) — domain-testing.md liệt kê 3 nhánh hợp lệ: HTTP 400 (SUT tự xử lý input rỗng) · HTTP 200 với imported=0 (chấp nhận batch rỗng) · HTTP 500 (BUG — crash). Chọn nhánh HTTP 400 làm expected vì đây là hành vi REST chuẩn cho input rỗng về mặt nghiệp vụ, và khớp với kết quả thực tế đã quan sát khi thiết kế HW02 (Status: PASS). Nếu SUT đổi sang 1 trong 2 nhánh còn lại, case sẽ đỏ — đó là tín hiệu hợp lệ để re-triage, không phải lỗi test.",
     "knownDefect": null
   },
   {
@@ -242,6 +243,7 @@
       "api": { "inserted": 0, "errorsCount": 1 },
       "db": { "productCountDelta": 0 }
     },
+    "note": "Gap probe (spec không định nghĩa giới hạn 255 ký tự cho name khi import qua FR-16, dù FR-15 có giới hạn này) — domain-testing.md liệt kê 3 nhánh: HTTP 4xx + 0 products (giới hạn được enforce) · HTTP 200 + name bị cắt (BUG — truncate âm thầm) · HTTP 200 + name đủ 256 ký tự (giới hạn không được enforce, gap với FR-15). Chọn nhánh 'giới hạn được enforce' làm expected value theo §3.1 (assert theo spec cross-ref FR-15, không theo implementation) — hành vi thực tế quan sát được là nhánh 3 (chấp nhận full 256 ký tự), nên case này FAIL có chủ đích để lộ BUG-16-004.",
     "knownDefect": "BUG-16-004"
   },
   {
@@ -259,6 +261,7 @@
       "api": { "inserted": 0, "errorsCount": 1 },
       "db": { "productCountDelta": 0, "productsNotCreated": ["Test invalid category"] }
     },
+    "note": "Gap probe (spec không định nghĩa việc validate category_id có tồn tại trong DB) — domain-testing.md liệt kê 3 nhánh: HTTP 4xx + 0 products (FK được validate) · HTTP 200 + product với category_id=99999 (CRITICAL BUG — dangling FK, dữ liệu hỏng) · HTTP 500 (BUG — exception không được handle). Chọn nhánh 'FK được validate' làm expected value vì đây là hành vi đúng đắn tối thiểu một hệ thống quản lý dữ liệu quan hệ phải có; hành vi thực tế quan sát được là nhánh 2 (dangling FK thực sự được tạo), nên case này FAIL có chủ đích để lộ BUG-16-003 (critical).",
     "knownDefect": "BUG-16-003"
   },
   {
@@ -276,6 +279,7 @@
       "api": { "status": 200, "inserted": 1 },
       "db": { "productExists": "Test price as string", "productCountDelta": 1, "persistedRowsMatchInput": true }
     },
+    "note": "Gap probe (spec không định nghĩa việc coerce price dạng chuỗi số như \"10000\") — domain-testing.md liệt kê 3 nhánh: HTTP 200 + price=10000 (coerce chuỗi sang số, chấp nhận lỏng lẻo) · HTTP 4xx (strict type-check, từ chối) · HTTP 200 + price=0/NaN (BUG — coerce sai). Chọn nhánh 'coerce hợp lệ' làm expected value vì đây là hành vi thực tế đã quan sát được (Status: PASS with deviation trong HW02) và không phải bug — CSV parsing luôn sinh ra string nên coerce là hành vi mong đợi hợp lý dù spec không nói rõ.",
     "knownDefect": null
   },
   {
