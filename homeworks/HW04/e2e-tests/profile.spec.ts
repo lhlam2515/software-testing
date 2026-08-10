@@ -159,31 +159,18 @@ test.describe('FR-04 Personal profile management', () => {
 
   test('allows saving shipping address changes', async ({ page }) => {
     await openProfile(page);
-    // let dialogMessage = '';
-    // page.once('dialog', (dialog) => {
-    //   dialogMessage = dialog.message();
-    //   dialog.accept();
-    // });
-    // await updateProfile(page, {
-    //   name: 'Profile Test User',
-    //   phone: '0912345678',
-    //   shippingAddress: '45 Nguyen Hue, District 1, Ho Chi Minh City',
-    // });
-    // expect(dialogMessage).toBe('Cập nhật thành công!');
-
-    const dialogPromise = page.waitForEvent('dialog');
-
-await updateProfile(page, {
+    let dialogMessage = '';
+    page.once('dialog', (dialog) => {
+      dialogMessage = dialog.message();
+      dialog.accept();
+    });
+    await updateProfile(page, {
       name: 'Profile Test User',
       phone: '0912345678',
       shippingAddress: '45 Nguyen Hue, District 1, Ho Chi Minh City',
     });
+    expect(dialogMessage).toBe('Cập nhật thành công!');
 
-const dialog = await dialogPromise;
-
-expect(dialog.message()).toBe('Cập nhật thành công!');
-
-await dialog.accept();
   });
 
   test('keeps name field editable', async ({ page }) => {

@@ -50,21 +50,25 @@ Relevant run commands from `package.json`:
 
 ### Execution evidence
 
-The Playwright HTML report is available at `playwright-report/index.html`. The latest execution artifacts show:
+The authoritative Playwright HTML report is `playwright-report/index.html`. The current execution evidence shows:
 
-- 41 test cases defined across 3 suites
-- 126 browser-executions inferred from 41 tests across 3 browser projects
-- 114 passed
-- 12 failed
-- 0 skipped seen in the available artifacts
+- 41 automated test cases
+- 126 executed test runs
+- 109 passed
+- 17 failed
+- 0 skipped
 
-The browser projects configured in `playwright.config.js` are:
+Browser/project results from the report evidence:
+
+- Chromium: 42 executed, 39 passed, 3 failed
+- Firefox: 42 executed, 39 passed, 3 failed
+- WebKit: 42 executed, 31 passed, 11 failed
+
+The browser projects configured in `playwright.config.js` and `playwright.config.ts` are:
 
 - Chromium
 - Firefox
 - WebKit
-
-The browser projects configured in `playwright.config.ts` are the same three browsers, though the main run evidence in this workspace is the HTML report under `playwright-report/`.
 
 ### Test data and assertion patterns
 
@@ -86,11 +90,11 @@ Assertion patterns visible in the tests:
 
 ### Browser/project coverage
 
-The repository configuration covers 3 browsers and 9 feature-browser combinations in the assignment sense:
+The repository configuration covers 3 browsers and 3 browser projects in the Playwright report:
 
-- 3 features x 3 browsers = 9 browser runs
-
-The failure artifacts explicitly show executions on Chromium, Firefox, and WebKit.
+- Chromium
+- Firefox
+- WebKit
 
 ## C. AI-Generated Script Review
 
@@ -106,14 +110,15 @@ What AI did well:
 
 Gaps and problems:
 
-- The valid profile-update tests rely on `page.once('dialog', ...)` and then immediately assert `dialogMessage`. The report shows the message stayed empty in the two visible valid-profile failures.
+- The valid profile-update tests rely on `page.once('dialog', ...)` and then immediately assert `dialogMessage`. The current evidence shows the message stays empty in the two valid-profile failures for both valid-profile names.
+- The shipping-address case is not an application bug by itself. The evidence shows the test submitted a phone value that the page rejected, so the failure is a test-data/setup issue rather than a proven defect in the profile save flow.
 - The same suite mixes backend setup with UI actions, but the failure evidence shows the UI state after update is not being verified in a stable way.
 - The selectors are functional, but several are fragile because they depend on translated label text and `xpath=following-sibling::...` chains instead of a more stable locator strategy.
 
 Human review/correction needed:
 
-- A tester should replace the immediate dialog-string assertion with a wait for the actual confirmation behavior, or verify the persisted profile state after save.
-- The current failures are inconclusive for the product behavior because the test stops at the assertion capture problem rather than proving the update flow is broken.
+- Replace the immediate dialog-string assertion with a wait for the actual confirmation behavior, or verify the persisted profile state after save.
+- Treat the shipping-address failure as a data/setup correction, not as proof that the application is broken.
 
 ### FR-08 Checkout
 
@@ -127,11 +132,11 @@ Gaps and problems:
 
 - `goToCheckout()` assumes that clicking the checkout button will always land on `/checkout`, but the failure evidence shows the page remains on `/login`.
 - Because the suite starts from a login helper, the tests appear to expect authentication to persist. The report indicates that assumption is not holding during execution.
-- At least one test, `updates total amount field`, fails before it reaches the intended field assertion because the checkout navigation never completes. That makes the result inconclusive for the field itself.
+- Several checkout failures stop before reaching the intended assertions because the navigation never completes. That makes those failures validation problems in the test flow, not confirmed product bugs.
 
 Human review/correction needed:
 
-- The setup should be checked for session persistence and the navigation should wait for the actual authenticated checkout state before asserting route changes.
+- Check the login/session setup and wait for the actual authenticated checkout state before asserting route changes.
 - The current failure pattern suggests the test is validating the wrong precondition first, so the checkout assertions are not yet trustworthy as feature verification.
 
 ### FR-18 Order management (admin)
@@ -144,13 +149,13 @@ What AI did well:
 
 Gaps and problems:
 
-- No failure evidence is present for this suite in the current report bundle, so the repository does not prove that all admin scenarios are stable.
+- No failure evidence is present for this suite in the current report bundle, so the repository does not prove that all admin scenarios are unstable.
 - The quality of the admin suite is still only partially verifiable because the current report evidence does not show a completed pass/fail matrix for each test.
 - Some assertions check table text and button visibility, which is useful, but they do not always prove a state transition occurred unless combined with stronger state verification.
 
 Human review/correction needed:
 
-- A reviewer should confirm whether the admin transition assertions are sufficient to prove the state machine behavior, or whether extra state checks are needed after each action.
+- Confirm whether the admin transition assertions are sufficient to prove the state machine behavior, or whether extra state checks are needed after each action.
 - Because there are no visible failures here, this feature is the strongest of the three, but the absence of failures is not proof that the tests are perfect.
 
 ### Gap Analysis Table
@@ -159,7 +164,7 @@ Human review/correction needed:
 | --- | --- | --- | --- | --- | --- |
 | Selectors | Relies on translated labels and `xpath=following-sibling::...` lookups in profile and checkout helpers | Fragile locator strategy visible in `profile.spec.ts` and `checkout.spec.ts` | Higher maintenance risk and possible selector breakage when the UI changes | Prefer role-, label-, or test-id-based locators where possible | Partial |
 | Authentication | Uses helper-based login and assumes the session survives through checkout and profile flows | Checkout failures stay on `/login` after checkout click | Checkout assertions become inconclusive because the intended page is never reached | Verify authenticated state before asserting navigation, and wait for the real post-login route | Gap |
-| Test data | Uses separate JSON files for profile, checkout, and admin cases | Profile data includes a phone value that triggers validation instead of a success path in one test | The saving shipping address case fails for data/setup reasons rather than proving the feature | Align test inputs with validation rules before asserting success | Partial |
+| Test data | Uses separate JSON files for profile, checkout, and admin cases | Profile shipping-address failure uses a phone value that is rejected by the UI | The save test fails for data/setup reasons rather than proving the feature | Align test inputs with validation rules before asserting success | Partial |
 | Assertions | Uses dialog-message equality checks and text-visibility checks | Profile success assertions capture an empty dialog message in the report | Weak synchronization makes the test fail before validating the intended behavior | Assert the actual UI confirmation or persisted state instead of a fragile captured string | Gap |
 | Synchronization | Uses immediate assertions after click actions | Visible profile and checkout failures fail at the assertion boundary | Tests can fail before reaching the intended feature behavior | Add waits for the real application state change or confirmation element | Gap |
 | Navigation/state | Assumes checkout flow reaches `/checkout` after clicking the payment button | Report shows `/login` instead of `/checkout` for checkout failures | The tests do not validate checkout behavior reliably | Check session/state setup and wait for the correct route transition | Gap |
@@ -169,11 +174,12 @@ Human review/correction needed:
 
 Overall assessment:
 
-- The AI-generated scripts provide useful initial coverage and are clearly better than a single generic ?one test per feature? draft.
+- The AI-generated scripts provide useful initial coverage and are clearly better than a single generic one-test-per-feature draft.
 - They are not trustworthy without human review.
-- The most important AI errors are the fragile dialog assertion in FR-04, the incorrect navigation assumption in FR-08, and the data/setup mismatch that turns the shipping-address case into a validation failure instead of a save confirmation.
+- The most important AI errors are the fragile dialog assertion in FR-04, the incorrect navigation assumption in FR-08, and the data/setup mismatch in the shipping-address case.
 - The current failures mean parts of FR-04 and FR-08 are still not reliably validated end to end.
 - Human review is necessary because the current suite structure is reasonable, but the execution evidence shows that several tests fail before proving the intended requirement.
+
 ## D. Test Results
 
 | Metric | Result |
@@ -181,10 +187,10 @@ Overall assessment:
 | Features | 3 |
 | Test cases automated | 41 |
 | Test cases executed | 126 |
-| Passed | 114 |
-| Failed | 12 |
+| Passed | 109 |
+| Failed | 17 |
 | Skipped | 0 |
-| Browser runs | 9 |
+| Browser runs | 3 |
 | Bugs | 0 confirmed application bugs |
 
 ## E. Bugs and Failures
@@ -194,12 +200,14 @@ The current evidence does not confirm an application defect.
 Observed failures:
 
 - FR-04 valid profile update assertions fail because the expected dialog message is empty.
+- FR-04 shipping-address save fails because the test submits a phone value that the UI rejects.
 - FR-08 checkout navigation assertions fail because the flow remains on `/login` instead of reaching `/checkout`.
 
 These failures are best classified as:
 
 - test synchronization / assertion issues
 - test setup or application-state issues
+- test-data issues
 - potentially incorrect assumptions about the UI flow
 
 ## F. Conclusion

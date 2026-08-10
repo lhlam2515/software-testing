@@ -18,8 +18,9 @@
 | Features             | 3 |
 | Test cases automated | 41 |
 | Test cases executed  | 126 |
-| Passed               | 114 |
-| Failed               | 12 |
-| Browser runs         | 9 |
+| Passed               | 109 |
+| Failed               | 17 |
+| Skipped              | 0 |
+| Browser runs         | 3 |
 | Bugs                 | 0 |
 | Demo video           | https://youtu.be/9gVplcWKBoA |
