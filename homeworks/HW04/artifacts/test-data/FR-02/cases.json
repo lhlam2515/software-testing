@@ -84,7 +84,7 @@
       "ui": { "staysOnLoginPage": true, "html5ValidationOnUsername": true },
       "api": { "requestSent": false }
     },
-    "note": "Bổ sung theo domain-testing.md#tc-03 verification point 4 — cùng lý do với TC-03b. Biến thể này dễ phát hiện browser-diff nhất vì các trình duyệt xử lý khoảng trắng trong type=email khác nhau.",
+    "note": "Bổ sung theo domain-testing.md#tc-03 verification point 4 — cùng lý do với TC-03b. Biến thể này giữ lại để phủ đúng 3 dạng lỗi domain-testing.md yêu cầu; không tạo browser-diff vì field Username là type=\"text\" (Login.jsx:30), không có type=\"email\" để browser xử lý khác nhau — root cause chung cho cả TC-03/03b/03c/03d là BUG-02-001 (checkValidity() luôn trả true vì không có HTML5 email-format validation nào chạy).",
     "knownDefect": "BUG-02-001"
   },
   {
@@ -111,10 +111,10 @@
     "act": { "email": "test@eshop.com", "password": "" },
     "assert": {
       "ui": { "staysOnLoginPage": true },
-      "api": { "requestSent": false, "hasToken": false },
+      "api": { "requestSent": false },
       "db": { "login_attempts": 0 }
     },
-    "note": "Gap fix (2026-08-10): domain-testing.md#tc-05 yêu cầu ghi nhận nhánh nào thực sự xảy ra (Branch A: HTML5 chặn / Branch B: server trả lỗi) và login_attempts có tăng ở Branch B hay không — bản gốc thiếu hoàn toàn assert.db, và assert.ui.staysOnLoginPage đúng ở cả 2 nhánh nên không phân biệt được. Đã chạy thử để xác định nhánh thực tế: trường password có thuộc tính `required` (xem TC-UI-01), khiến trình duyệt chặn submit trước khi request tới server — Branch A. Assert api.requestSent:false + db.login_attempts:0 theo đúng nhánh quan sát được (chạy thật, không phải suy đoán); nếu SUT sau này đổi hành vi (bỏ required, chuyển sang Branch B), case sẽ FAIL đúng chỗ và lộ ra sự thay đổi nhánh.",
+    "note": "Gap fix (2026-08-10): domain-testing.md#tc-05 yêu cầu ghi nhận nhánh nào thực sự xảy ra (Branch A: HTML5 chặn / Branch B: server trả lỗi) và login_attempts có tăng ở Branch B hay không — bản gốc thiếu hoàn toàn assert.db, và assert.ui.staysOnLoginPage đúng ở cả 2 nhánh nên không phân biệt được. Đã chạy thử để xác định nhánh thực tế: trường password có thuộc tính `required` (xem TC-UI-01), khiến trình duyệt chặn submit trước khi request tới server — Branch A. Assert api.requestSent:false + db.login_attempts:0 theo đúng nhánh quan sát được (chạy thật, không phải suy đoán); nếu SUT sau này đổi hành vi (bỏ required, chuyển sang Branch B), case sẽ FAIL đúng chỗ và lộ ra sự thay đổi nhánh. (`api.hasToken` đã bỏ khỏi assert — dead field vì assertApi() return sớm ngay sau requestSent:false, không bao giờ chạy tới nhánh hasToken.)",
     "knownDefect": null
   },
   {
