@@ -1,0 +1,36 @@
+Uncommitted working-tree snapshot for week-09 report (2026-08-03 to 2026-08-08)
+Captured: 2026-08-08, ~23:00 +07:00
+Scope: seminar-relevant untracked files as of report time (git status --short),
+excluding AI-OS workspace-level files (NOTES.md, context/MEMORY.md,
+.agents/handoffs/, .claude/hooks/pending/, .worktrees/) which are out of
+seminar scope.
+No raw content included below by design (see report body for summarized content).
+
+=== UNCOMMITTED (untracked, seminar-relevant) ===
+
+Seminar_Slides_redesign.md
+  1,806 lines / 104,412 bytes / mtime 2026-08-08 22:51:17 +07:00
+  Layout-spec working draft for a further slide-deck redesign (fixed
+  vocabulary for <layout>/<zone>/<example>/<build>/<emphasis> tags). Root-
+  level location and filename suggest a draft superseding or extending the
+  committed Seminar_Slides_content.md restructure; not yet merged/committed.
+
+seminar/01-research/mutation_testing_and_test_effectiveness.md
+  2,164 lines / 53,543 bytes / mtime 2026-08-08 15:42:58 +07:00
+  Standalone practical guide ("5W1H") on mutation testing and test
+  effectiveness, senior QA/QC perspective. Draft research artifact, not
+  referenced yet from mutation-testing-reference.md or the slide deck.
+
+=== NOT IN SCOPE (workspace-level, excluded from this report) ===
+
+NOTES.md, context/MEMORY.md, .agents/handoffs/, .claude/hooks/pending/,
+.worktrees/ — AI-OS operating files / other-homework worktrees, unrelated
+to the T10 seminar deliverables.
+
+=== DEMO VIDEO — NO GIT EVIDENCE ===
+
+No video file, screencast, or link was found in the repository as of this
+snapshot (checked: *.mp4, *screencast*, files touched since week-08 report).
+Per team confirmation at report time, the demo video was completed by Vu
+this week but is held outside the repository (local/Drive); this report
+records its completion on that verbal confirmation, not on repo evidence.

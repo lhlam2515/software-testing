@@ -1,0 +1,84 @@
+* commit 266c453106f186f2f13ad96fa363538f0c3656e1
+| Author:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| AuthorDate: 2026-08-08T22:33:05+07:00
+| Commit:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| CommitDate: 2026-08-08T22:33:05+07:00
+| 
+|     docs(seminar): add 30-minute delivery cut of the slide deck
+|     
+|     - reduce 45 screens to 29: drop 7, merge 9 pairs into 9 new screens
+|     - keep the other 20 screens byte-identical to the master, tagged with their
+|       master id for traceability
+|     - compress the live demo from 4:00 to 3:00 by pre-recording the audit step;
+|       both human gates stay spoken
+|     - add timekeeper checkpoints and a drop list worth 2:15 of recovery
+|     - record the remaining conflict with the S6 budget (pitch 10 min, deck <= 15
+|       slides) and the 15-screen selection that fits it
+| 
+|  .../Seminar_Slides_content_30min.md               | 2015 +++++++++++++++++++
+|  1 file changed, 2015 insertions(+)
+| 
+* commit 7db5e97219be7f5e1faba7a411fc84b3ec304bf9
+| Author:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| AuthorDate: 2026-08-08T22:33:00+07:00
+| Commit:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| CommitDate: 2026-08-08T22:33:00+07:00
+| 
+|     docs(seminar): expand slide script from 18 to 45 screens
+|     
+|     - split multi-payload screens so each carries one idea (five states, two
+|       formulas, and the score contrast now have their own screens)
+|     - add worked examples the original asked the audience to accept as aggregates:
+|       mutant 355 up close, the StrykerJS operator catalogue, three equivalent-mutant
+|       verdicts with a control pair
+|     - resequence the AI section into two labelled directions plus an insertion map
+|     - retarget the source header from seminar_presentation_design.md to
+|       Seminar_Slides_context_refactored.md PART D
+| 
+|  seminar/03-deliverables/Seminar_Slides_content.md | 2814 ++++++++++++++-----
+|  1 file changed, 2155 insertions(+), 659 deletions(-)
+| 
+* commit 8bcfe196639e2db7273b53a3b674bc5d9bcbe1a3
+| Author:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| AuthorDate: 2026-08-04T11:00:01+07:00
+| Commit:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| CommitDate: 2026-08-04T11:00:01+07:00
+| 
+|     docs(seminar): verify and correct citations in mutation-testing reference
+|     
+|     - add Source Index section: every external claim resolved to a row with
+|       verification status (checked 30 Jul 2026 / 01 Aug 2026)
+|     - correct MuTAP HumanEval scores from 94%/66% to verified 93.57%/65.94%
+|       (Refactory: 94.91%/67.54%)
+|     - split conflated Google papers: ICSE-SEIP 2018 vs IEEE TSE 2022, and
+|       correct MutGen venue to IEEE TSE (accepted)
+|     - flag unverified claims (Theodo banking case, LLMorpheus venue) and add
+|       peer-reviewed replacement for the Theodo citation
+|     - add reconciliation note for the apparently contradictory Banik et al.
+|       vs Yoshimoto et al. oracle-quality findings
+|     - add "Withdrawn / do not cite" table documenting corrected/retracted
+|       numbers from earlier drafts (unit mismatches, wrong percentages)
+| 
+|  seminar/01-research/mutation-testing-reference.md | 94 +++++++++++++++++----
+|  1 file changed, 76 insertions(+), 18 deletions(-)
+| 
+* commit 6bd8f26c850f53941b04c339e847297017a886fb
+  Author:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+  AuthorDate: 2026-08-02T00:03:18+07:00
+  Commit:     SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+  CommitDate: 2026-08-02T00:03:18+07:00
+  
+      docs(seminar): add week 08 progress report and evidence
+      
+      - add Group02.md weekly report for week 08 (2026-07-27 to 2026-08-01)
+      - attach evidences: commit log for the period, wip-manifest of uncommitted revision plans and design doc
+      - next-week plan and issues reflect team-confirmed status: demo video not yet recorded, due before 2026-08-05, followed by TA feedback and revision before the 2026-08-12 live date
+  
+   seminar/04-reports/week-08/Group02.md             | 136 ++++++++++++++++++++
+   .../04-reports/week-08/evidences/commit_log.txt   |  64 +++++++++
+   .../04-reports/week-08/evidences/wip-manifest.txt |  81 ++++++++++++
+   3 files changed, 281 insertions(+)
+    49	SoJDev | Hoàng Lâm
+     3	VVVu1511
+---
+command: git log --graph refs/heads/seminar --stat --since=2026-08-02T00:00:00+07:00 --until=2026-08-08T23:59:59+07:00 --date=iso-strict --pretty=fuller
