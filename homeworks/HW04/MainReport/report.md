@@ -8,27 +8,6 @@ This HW04 submission automates three web features from the EShop SUT:
 - FR-08 Checkout
 - FR-18 Order management (admin)
 
-The automation uses Playwright with data-driven tests. The repository contains:
-
-- `e2e-tests/profile.spec.ts`
-- `e2e-tests/checkout.spec.ts`
-- `e2e-tests/admin-orders.spec.ts`
-- `e2e-tests/test-data/profile.json`
-- `e2e-tests/test-data/checkout.json`
-- `e2e-tests/test-data/admin-orders.json`
-
-Playwright configuration is present in:
-
-- `playwright.config.js`
-- `playwright.config.ts`
-
-Relevant run commands from `package.json`:
-
-- `npm run test:e2e`
-- `npm run test:e2e:chromium`
-- `npm run test:e2e:firefox`
-- `npm run test:e2e:webkit`
-
 ## B. Automation Report
 
 ### Automated features
@@ -64,29 +43,12 @@ Browser/project results from the report evidence:
 - Firefox: 42 executed, 39 passed, 3 failed
 - WebKit: 42 executed, 31 passed, 11 failed
 
-The browser projects configured in `playwright.config.js` and `playwright.config.ts` are:
+The browser projects configured are:
 
 - Chromium
 - Firefox
 - WebKit
 
-### Test data and assertion patterns
-
-Test data files:
-
-- `e2e-tests/test-data/profile.json`
-- `e2e-tests/test-data/checkout.json`
-- `e2e-tests/test-data/admin-orders.json`
-
-Assertion patterns visible in the tests:
-
-- `toBeVisible()`
-- `toHaveURL()`
-- `toHaveValue()`
-- `toBeDisabled()`
-- `toBeEditable()`
-- `not.toHaveValue()`
-- `toContain()`
 
 ### Browser/project coverage
 
