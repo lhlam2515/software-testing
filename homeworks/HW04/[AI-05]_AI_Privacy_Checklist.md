@@ -32,14 +32,14 @@
 - [ ] Test data lives in separate `.csv`/`.json` files under `artifacts/test-data/` — no hardcoded
       inline arrays or objects in the scripts.
 - [ ] Each script uses at least 3 distinct assertion patterns.
-- [ ] Each feature ran on Chromium, Firefox, and WebKit (≥ 9 browser runs total), and
+- [ ] Each feature ran on Chromium, Firefox, and Edge (≥ 9 browser runs total), and
       every generated HTML report visibly shows `Run by: 23127216` and an ISO timestamp.
 - [ ] Every genuine defect is logged in [bugs/BUG_REPORT.md](bugs/BUG_REPORT.md) **and**
       filed on GitHub Issues with a screenshot.
 - [ ] My 200–300-word AI Critique is included in `REPORT.md` §12.
 - [ ] The Mandatory Disclosure paragraph is completed in `[AI-02]_AI_Audit_Report.md` §6.
 - [ ] I attached the AI Use Disclosure Form ([AI-03](<[AI-03]_AI_Disclosure_Form.md>)).
-- [ ] Git commit log has ≥ 8 commits touching test-script files, spread over ≥ 4 days.
+- [ ] Git commit log has ≥ 8 commits touching test-script files. *(4-day span requirement removed per TA update, 2026-08-10.)*
 - [ ] The Agent Skill under `artifacts/skills/automation-workflow/` is included with its demo video link.
 - [ ] README.md test summary metrics are filled with final numbers.
 - [ ] I am ready for a 5–7-min random oral defense the week after submission.

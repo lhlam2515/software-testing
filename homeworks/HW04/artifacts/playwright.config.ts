@@ -44,7 +44,6 @@ export default defineConfig({
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
     // WebKit cannot launch on this Fedora host (missing libicu74/libjpeg-turbo8,
     // playwright install-deps only supports Debian/Ubuntu, no non-interactive sudo).
     // REQUIREMENTS.md line 83 explicitly allows the "Chrome / Edge / Firefox" set as

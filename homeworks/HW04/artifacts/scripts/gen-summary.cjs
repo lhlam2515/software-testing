@@ -20,7 +20,7 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 const FEATURES = ['FR-02', 'FR-09', 'FR-16'];
-const BROWSERS = ['chromium', 'firefox', 'webkit'];
+const BROWSERS = ['chromium', 'firefox', 'edge'];
 const OUT_DIR = path.join(ROOT, 'reports', 'markdown');
 
 function loadJson(p) {
@@ -74,7 +74,7 @@ function buildFeatureSection(fr, ordinal) {
     return { tc, cells, browserDiff };
   });
 
-  const head = '| TC | Layer | Expected (spec) | Chromium | Firefox | WebKit | Known Defect |\n' +
+  const head = '| TC | Layer | Expected (spec) | Chromium | Firefox | Edge | Known Defect |\n' +
     '|----|-------|------------------|----------|---------|--------|--------------|';
   const body = rows.map(({ tc, cells, browserDiff }) => {
     const expected = summarizeExpected(tc);
@@ -116,7 +116,7 @@ function buildSummary(sections) {
   const diff = sections.reduce((n, s) => n + s.stats.diff, 0);
   return `# 2. Summary
 
-**${total} test cases** across 3 features, run on Chromium / Firefox / WebKit (up to ${total * 3} runs).
+**${total} test cases** across 3 features, run on Chromium / Firefox / Edge (up to ${total * 3} runs).
 **${fail} case(s)** deviate from spec on at least one browser. **${diff} case(s)** diverge between browsers — see §3–5 for the per-feature matrix.
 
 | Feature | TC | Failed (≥1 browser) | Browser-diff |

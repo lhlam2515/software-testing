@@ -15,7 +15,7 @@
 | Assignment | HW04-AI — Automation Testing |
 | SUT | EShop — `<Base URL>` (repo: [github.com/ttbhanh/eshop-sut](https://github.com/ttbhanh/eshop-sut)) |
 | Public GitHub repository | [github.com/lhlam2515/software-testing](https://github.com/lhlam2515/software-testing) |
-| Report date | _TBD_ |
+| Report date | 2026-08-10 |
 
 ---
 
@@ -106,7 +106,7 @@ _TBD — how `.csv` / `.json` files under `artifacts/test-data/<feature>/` are l
 
 > Each feature must run on all 3 browsers — at least 9 browser runs total. Every HTML report must visibly show `Run by: {StudentID}` and an ISO timestamp (§11 anti-cheat constraint).
 
-| Feature | Chromium | Firefox | WebKit |
+| Feature | Chromium | Firefox | Edge |
 | ------- | :------: | :-----: | :----: |
 | FR-02 | _TBD_ | _TBD_ | _TBD_ |
 | FR-09 | _TBD_ | _TBD_ | _TBD_ |
@@ -215,11 +215,11 @@ _TBD — prompt quality, model limitations, or feature characteristics that expl
 
 ## 8. Multi-browser HTML Reports
 
-| Feature | Chromium | Firefox | WebKit |
+| Feature | Chromium | Firefox | Edge |
 | ------- | -------- | ------- | ------ |
-| FR-02 | [report](artifacts/html-reports/FR-02/chromium/) | [report](artifacts/html-reports/FR-02/firefox/) | [report](artifacts/html-reports/FR-02/webkit/) |
-| FR-09 | [report](artifacts/html-reports/FR-09/chromium/) | [report](artifacts/html-reports/FR-09/firefox/) | [report](artifacts/html-reports/FR-09/webkit/) |
-| FR-16 | [report](artifacts/html-reports/FR-16/chromium/) | [report](artifacts/html-reports/FR-16/firefox/) | [report](artifacts/html-reports/FR-16/webkit/) |
+| FR-02 | [report](artifacts/html-reports/FR-02/chromium/) | [report](artifacts/html-reports/FR-02/firefox/) | [report](artifacts/html-reports/FR-02/edge/) |
+| FR-09 | [report](artifacts/html-reports/FR-09/chromium/) | [report](artifacts/html-reports/FR-09/firefox/) | [report](artifacts/html-reports/FR-09/edge/) |
+| FR-16 | [report](artifacts/html-reports/FR-16/chromium/) | [report](artifacts/html-reports/FR-16/firefox/) | [report](artifacts/html-reports/FR-16/edge/) |
 
 > Every report must show `Run by: 23127216` and an ISO timestamp — see [artifacts/html-reports/README.md](artifacts/html-reports/README.md).
 
@@ -253,7 +253,7 @@ _TBD — prompt quality, model limitations, or feature characteristics that expl
 | Field | Value |
 | ----- | ----- |
 | Public GitHub repository | [github.com/lhlam2515/software-testing](https://github.com/lhlam2515/software-testing) |
-| Commits touching test-script files | _TBD (≥ 8 required, spread over ≥ 4 days)_ |
+| Commits touching test-script files | _TBD (≥ 8 required; 4-day span requirement removed per TA update, 2026-08-10)_ |
 | Git commit log | [assets/git-commit-log.txt](assets/git-commit-log.txt) |
 
 ---

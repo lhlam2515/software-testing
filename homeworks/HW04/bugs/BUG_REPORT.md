@@ -19,9 +19,9 @@ neither of which exist under those names on Fedora), and installing them require
 this session does not have. `REQUIREMENTS.md` line 83 explicitly allows the **"Chrome / Edge / Firefox"** browser
 set as a substitute for "Chromium / Firefox / WebKit". Microsoft Edge was installed user-level via
 `flatpak install --user flathub-user com.microsoft.Edge` (no root needed) and wired into
-`artifacts/playwright.config.ts` as a 4th Playwright project (`edge`, Chromium engine, `executablePath` pointing at
-the flatpak wrapper). The `webkit` project definition is left in the config as-is (still fails the same way if run) —
-`edge` is the browser actually reported below as the 3rd browser slot. One follow-up fix was needed: Edge's flatpak
+`artifacts/playwright.config.ts` as a Playwright project (`edge`, Chromium engine, `executablePath` pointing at
+the flatpak wrapper). The `webkit` project definition and all its generated report/result artifacts have since been
+removed from the repo — `edge` is the browser actually reported below as the 3rd browser slot. One follow-up fix was needed: Edge's flatpak
 sandbox does not expose the project directory by default, so `artifacts/test-data/FR-16/fixtures/generated/*.csv`
 was invisible to the sandboxed browser and every FR-16 case failed at the file-upload step regardless of the SUT's
 real behavior; `flatpak override --user --filesystem=$HOME/AI-OS com.microsoft.Edge` fixed this, after which FR-16/Edge

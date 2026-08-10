@@ -11,7 +11,7 @@
     "test:fr16": "playwright test tests/FR-16",
     "test:chromium": "playwright test --project=chromium",
     "test:firefox": "playwright test --project=firefox",
-    "test:webkit": "playwright test --project=webkit",
+    "test:edge": "playwright test --project=edge",
     "report": "playwright show-report",
     "report:summary": "node scripts/gen-summary.cjs",
     "report:pdf": "node scripts/build-report.cjs --in reports/markdown --out pdf/HW04_Test_Report.pdf --title \"EShop HW04 - Multi-browser Automation Report\" --meta \"Run by=23127216\""

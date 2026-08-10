@@ -17,7 +17,8 @@
 ```bash
 cd homeworks/HW04/artifacts
 npm install
-npx playwright install chromium firefox webkit
+npx playwright install chromium firefox
+flatpak install --user flathub-user com.microsoft.Edge   # Edge substitutes for WebKit (see bugs/BUG_REPORT.md)
 
 # terminal khác:
 bash ../../../apps/run-servers.sh          # :3000 / :5173 / :5174
@@ -27,7 +28,7 @@ STUDENT_ID=23127216 \
 HTML_OUT=html-reports/FR-02/chromium \
 JSON_OUT=test-results/FR-02/chromium/results.json \
 npx playwright test tests/FR-02 --project=chromium
-# repeat for FR-09, FR-16 x chromium, firefox, webkit (9 runs total)
+# repeat for FR-09, FR-16 x chromium, firefox, edge (9 runs total)
 
 npm run report:summary   # reads all test-results/*/*/results.json -> reports/markdown/02,03,04,05,06_*.md
 npm run report:pdf       # concatenates reports/markdown/*.md -> pdf/HW04_Test_Report.pdf

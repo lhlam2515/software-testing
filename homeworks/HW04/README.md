@@ -24,7 +24,7 @@
 | [[AI-05]_AI_Privacy_Checklist.md](./%5BAI-05%5D_AI_Privacy_Checklist.md) | AI privacy and responsible-use checklist |
 | [artifacts/tests/](./artifacts/tests/) | Playwright automation scripts, one folder per feature (FR-02, FR-09, FR-16) |
 | [artifacts/test-data/](./artifacts/test-data/) | External `.csv` / `.json` test data — no hardcoded arrays in scripts |
-| [artifacts/html-reports/](./artifacts/html-reports/) | Multi-browser HTML reports (Chromium / Firefox / WebKit) per feature, showing `Run by: {StudentID}` |
+| [artifacts/html-reports/](./artifacts/html-reports/) | Multi-browser HTML reports (Chromium / Firefox / Edge — WebKit substituted per [BUG_REPORT.md](./bugs/BUG_REPORT.md)) per feature, showing `Run by: {StudentID}` |
 | [artifacts/skills/](./artifacts/skills/) | Agent Skill submission — reusable data-driven, multi-browser automation workflow |
 | [assets/](./assets/) | Signature image and Git commit log |
 
@@ -74,10 +74,10 @@ Same three web features selected in HW02 — one per Pool A/B/C.
 - [ ] Each feature contains at least 12 automated test cases (positive/negative/edge combined).
 - [ ] Test data is stored in separate `.csv` or `.json` files — no hardcoded inline arrays/objects.
 - [ ] Each script uses at least 3 distinct assertion patterns.
-- [ ] Each feature has Chromium, Firefox, and WebKit HTML reports (≥ 9 browser runs total).
+- [ ] Each feature has Chromium, Firefox, and Edge HTML reports (≥ 9 browser runs total).
 - [ ] Every generated HTML report displays `Run by: {StudentID}` and an ISO timestamp.
 - [ ] Genuine defects are recorded in Markdown ([BUG_REPORT.md](./bugs/BUG_REPORT.md)) and on GitHub Issues with screenshots.
-- [ ] Public GitHub repository has ≥ 8 commits touching test-script files, spread over ≥ 4 days.
+- [ ] Public GitHub repository has ≥ 8 commits touching test-script files. *(4-day span requirement removed per TA update, 2026-08-10.)*
 - [ ] Git commit log exported to [assets/git-commit-log.txt](./assets/git-commit-log.txt).
 - [ ] Agent Skill submitted under [artifacts/skills/](./artifacts/skills/) with a demo video link.
 - [ ] Unlisted YouTube demo video (≥ 5 min, Vietnamese narration, face-cam or `whoami`/`hostname`) link included.
