@@ -1,0 +1,35 @@
+# .github/workflows/perf.yml — shift-left performance gate.
+# Runs the short ci-gate.js smoke load test on every PR; a breached SLO
+# threshold makes k6 exit non-zero and FAILS the job → the PR is blocked.
+name: performance-gate
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  k6-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Start the SUT however your app is packaged. For the demo mock:
+      - name: Start eShop (mock)
+        run: |
+          node mock/server.js &
+          npx --yes wait-on http://localhost:5000/products
+
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+            --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+            | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update && sudo apt-get install -y k6
+
+      - name: Run performance gate
+        run: k6 run -e BASE_URL=http://localhost:5000 k6/ci-gate.js
+        # Exit code != 0 (a breached threshold) fails this step and blocks the PR.
+
+      # Nightly full stress/soak would live in a separate scheduled workflow.
