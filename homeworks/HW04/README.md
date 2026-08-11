@@ -70,19 +70,18 @@ Same three web features selected in HW02 — one per Pool A/B/C.
 
 ## Submission Checklist
 
-- [ ] Main report available in Markdown and PDF, including automation report + AI-gap review.
-- [ ] AI Audit Report available in Markdown and PDF.
-- [ ] AI Critique is 200–300 words, embedded in `REPORT.md` §12, and available in Markdown and PDF.
-- [ ] AI Use Disclosure Form ([AI-03]) and Privacy Checklist ([AI-05]) are completed.
-- [ ] Each feature contains at least 12 automated test cases (positive/negative/edge combined).
-- [ ] Test data is stored in separate `.csv` or `.json` files — no hardcoded inline arrays/objects.
-- [ ] Each script uses at least 3 distinct assertion patterns.
-- [ ] Each feature has Chromium, Firefox, and Edge HTML reports (≥ 9 browser runs total).
-- [ ] Every generated HTML report displays `Run by: {StudentID}` and an ISO timestamp.
-- [ ] Genuine defects are recorded in Markdown ([BUG_REPORT.md](./bugs/BUG_REPORT.md)) and on GitHub Issues with screenshots.
-- [ ] Public GitHub repository has ≥ 8 commits touching test-script files. *(4-day span requirement removed per TA update, 2026-08-10.)*
-- [ ] Git commit log exported to [assets/git-commit-log.txt](./assets/git-commit-log.txt).
-- [ ] Agent Skill submitted under [artifacts/skills/](./artifacts/skills/) with a demo video link.
-- [ ] Unlisted YouTube demo video (≥ 5 min, Vietnamese narration, face-cam or `whoami`/`hostname`) link included.
-- [ ] Zip named `23127216_HW04_AI_Automation_<SelfAssessedGrade>.zip`.
-
+- [ ] Main report available in Markdown and PDF, including automation report + AI-gap review. *(REPORT.md §1–11 filled; §12 (AI Critique) still `_TBD_` — re-export PDF after.)*
+- [ ] AI Audit Report available in Markdown and PDF. *(Markdown content complete; PDF export still pending.)*
+- [ ] AI Critique is 200–300 words, embedded in `REPORT.md` §12, and available in Markdown and PDF. *(Not yet written.)*
+- [ ] AI Use Disclosure Form ([AI-03]) and Privacy Checklist ([AI-05]) are completed. *([AI-03] mostly `_TBD_`; [AI-05] only missing signature date.)*
+- [x] Each feature contains at least 12 automated test cases (positive/negative/edge combined). *(18 / 21 / 24 — see Test Summary above.)*
+- [x] Test data is stored in separate `.csv` or `.json` files — no hardcoded inline arrays/objects. *(`artifacts/test-data/FR-02|FR-09|FR-16/cases.json`.)*
+- [x] Each script uses at least 3 distinct assertion patterns. *(See REPORT.md §4.3.)*
+- [x] Each feature has Chromium, Firefox, and Edge HTML reports (≥ 9 browser runs total). *(9 total — see Test Summary above.)*
+- [x] Every generated HTML report displays `Run by: {StudentID}` and an ISO timestamp. *(Set via `STUDENT_ID` in `artifacts/playwright.config.ts`.)*
+- [x] Genuine defects are recorded in Markdown ([BUG_REPORT.md](./bugs/BUG_REPORT.md)) and on GitHub Issues with screenshots. *(16 bugs, all cross-linked to Issues.)*
+- [x] Public GitHub repository has ≥ 8 commits touching test-script files. *(4-day span requirement removed per TA update, 2026-08-10. 9 commits — `.spec.ts` files plus `artifacts/tests/_fixtures/` page objects/helpers, which the specs import directly and cannot run without.)*
+- [ ] Git commit log exported to [assets/git-commit-log.txt](./assets/git-commit-log.txt). *(File still contains the TODO placeholder — export the 9-commit log above.)*
+- [x] Agent Skill submitted under [artifacts/skills/](./artifacts/skills/) with a demo video link. *([youtu.be/kcqyrRKTTz0](https://youtu.be/kcqyrRKTTz0) — FR-01 Registration, link in [skill README.md](./artifacts/skills/playwright-spec-generator/README.md#demo-video) and [REPORT.md §10](./REPORT.md).)*
+- [x] Unlisted YouTube demo video (≥ 5 min, Vietnamese narration, face-cam or `whoami`/`hostname`) link included. *([youtu.be/371g6eJhN88](https://youtu.be/371g6eJhN88) — FR-02 Login & Account Lockout, face-cam authorship.)*
+- [ ] Zip named `23127216_HW04_AI_Automation_<SelfAssessedGrade>.zip`. *(Pending — depends on final self-assessed grade.)*
