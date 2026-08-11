@@ -87,3 +87,6 @@ audit_config.json
 context/transcripts/
 context/MEMORY.md
 .claude/hooks/pending/
+
+# ===== INTERNAL WORKING DOCS (not part of submissions) =====
+homeworks/HW04/PROGRESS_CHECKLIST.md
