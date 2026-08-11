@@ -1,4 +1,91 @@
-# CHANGELOG — playwright-automation-pipeline
+# CHANGELOG — playwright-spec-generator
+
+## Artifact re-sync (post v0.6 rename) — 2026-08-11
+
+The live source (`.agents/skills/playwright-spec-generator/`) was renamed
+from `automation-workflow` in v0.6 (see below). Re-copied `SKILL.md`
+(frontmatter `name:` + H1 updated to `playwright-spec-generator`; all 9
+phases and `description` unchanged) into this artifact folder, and moved
+the whole artifact folder from `artifacts/skills/automation-workflow/` to
+`artifacts/skills/playwright-spec-generator/` so the path matches the
+current source. `references/` was already identical — no content change.
+`README.md` updated separately to point at the new source path.
+
+## Artifact re-sync (post v0.5 rename) — 2026-08-11
+
+The live source (`.agents/skills/automation-workflow/`) was renamed from
+`playwright-automation-pipeline` in v0.5 (see below). Re-copied `SKILL.md`
+(frontmatter `name:` + H1 updated to `automation-workflow`; all 9 phases and
+`description` unchanged) into this artifact folder so the snapshot matches
+the current source. `references/` was already identical — no content
+change. `README.md` in this artifact folder updated separately to point at
+`.agents/skills/automation-workflow/` instead of the old path.
+
+## Artifact snapshot — 2026-08-11
+
+**Source: HW04 §10 submission** — Task 1 required a reusable Agent Skill
+artifact for the data-driven, multi-browser automation workflow. The skill
+was already forged and iterated four times (v0.1–v0.4) at
+`.agents/skills/playwright-automation-pipeline/` (its name at the time), so
+this entry packages that skill as-is into
+`artifacts/skills/automation-workflow/` for grading, rather than forging a
+second, separate skill.
+
+**Changes made:**
+
+- Copied `SKILL.md` and `references/` (`cases-schema.md`,
+  `assertion-patterns.md`, `review-subagent-prompt.md`) verbatim from
+  `.agents/skills/playwright-automation-pipeline/` — no content changes
+- Rewrote `README.md` for this artifact: renamed the title, added a note
+  that this folder is a static snapshot for submission (edits belong in the
+  live source, not here), and added a "Những gì skill tự động hoá" section
+  summarizing the 9-phase pipeline for a grader who has not read `SKILL.md`
+- The history below (v0.1–v0.4) is copied unchanged from the live skill's
+  own `CHANGELOG.md` — it documents the real iteration history, not this
+  packaging step
+
+---
+
+## v0.6 — 2026-08-11
+
+**Source: user request** — `automation-workflow` still wasn't the right
+name. It reads as if the skill owns the whole test-automation lifecycle
+(design, run, report), when its actual job is narrower and more specific:
+turn an already-designed test case into a running Playwright + TypeScript
+spec. "Workflow" over-promised; the skill's own `description` already says
+it plainly — "the code-generation step of test automation, not manual
+execution or test design."
+
+**Changes made in response:**
+
+- Renamed `.agents/skills/automation-workflow/` →
+  `.agents/skills/playwright-spec-generator/` (`git mv`, preserving
+  history), and the `.claude/skills/` symlink accordingly
+- Updated frontmatter `name:` and the `SKILL.md` H1 to
+  `playwright-spec-generator` — `description` and all 9 phases unchanged
+- Updated cross-references in `README.md`/`CHANGELOG.md` to the new path
+
+## v0.5 — 2026-08-11
+
+**Source: user request** — the skill's name, `playwright-automation-pipeline`,
+no longer reflected its content. It read as a narrow code-generation
+pipeline, but the skill had grown through v0.2–v0.4 to also cover locating
+or designing test cases when none exist (Phase 0), an explicit
+tool/environment readiness check (Phase 1), a mandatory independent
+subagent review (Phase 6), and a final multi-browser run with a truthfulness
+checklist (Phase 8) — a full workflow, not just spec generation.
+
+**Changes made in response:**
+
+- Renamed `.agents/skills/playwright-automation-pipeline/` →
+  `.agents/skills/automation-workflow/` (`git mv`, preserving history), and
+  the `.claude/skills/` symlink accordingly
+- Updated frontmatter `name:` and the `SKILL.md` H1 to `automation-workflow`
+  — `description` and all 9 phases unchanged
+- Updated cross-references in `README.md`/`CHANGELOG.md` to the new path;
+  no other file in the repo referenced the old name outside this skill's own
+  folder and its `artifacts/skills/automation-workflow/` submission copy in
+  `homeworks/HW04`
 
 ## v0.4 — 2026-08-06
 

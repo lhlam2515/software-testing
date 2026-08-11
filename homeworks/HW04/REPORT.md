@@ -268,12 +268,13 @@ None of these are model-capability limits — all three are review gaps (accepti
 
 ## 10. Agent Skill
 
-> §7 — reusable Agent Skill for the data-driven, multi-browser automation workflow (script generation and maintenance). Source lives in [artifacts/skills/automation-workflow/](artifacts/skills/automation-workflow/).
+> §7 — reusable Agent Skill for the data-driven, multi-browser automation workflow (script generation and maintenance). Source lives in [artifacts/skills/playwright-spec-generator/](artifacts/skills/playwright-spec-generator/).
 
 | Field | Value |
 | ----- | ----- |
-| Skill name | `automation-workflow` |
-| What it automates | _TBD_ |
+| Skill name | `playwright-spec-generator` |
+| What it automates | 9-phase pipeline that turns an existing test-case design (`domain-testing.md`/`bva.md`, or designed on the spot via the `domain-testing` skill) into a running Playwright + TypeScript suite: data-driven case file → reusable fixtures/Page Objects → UI-only spec skeleton → layered network + DB assertions → independent subagent review → fixes → final multi-browser run with a pass/fail/data-driven/reusable/DRY checklist. |
+| Iteration | v0.1 was generalized directly from the FR-02 automation workflow run manually first in this homework (under the name `playwright-automation-pipeline`), then v0.2–v0.4 were each driven by a real gap found running the skill for real on FR-09. Renamed twice afterward as the name kept drifting from the scope: `automation-workflow` in v0.5, then `playwright-spec-generator` in v0.6 once "workflow" over-promised ownership of the whole test-automation lifecycle instead of just the code-generation step (see [artifacts/skills/playwright-spec-generator/CHANGELOG.md](artifacts/skills/playwright-spec-generator/CHANGELOG.md)) |
 | Demo video (skill applied to a full feature) | _TBD_ |
 
 ---

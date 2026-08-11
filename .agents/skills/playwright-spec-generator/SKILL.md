@@ -1,5 +1,5 @@
 ---
-name: playwright-automation-pipeline
+name: playwright-spec-generator
 description: >
   Writes Playwright + TypeScript test scripts (spec.ts) from test cases —
   the code-generation step of test automation, not manual execution or test
@@ -13,7 +13,7 @@ description: >
   designing test cases without writing any code (see domain-testing).
 ---
 
-# Playwright Automation Pipeline
+# Playwright Spec Generator
 
 Framework: Playwright + TypeScript. Detect the project's actual config in
 Phase 1 instead of assuming a fresh setup.
