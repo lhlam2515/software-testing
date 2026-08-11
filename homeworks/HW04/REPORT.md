@@ -291,11 +291,13 @@ None of these are model-capability limits — all three are review gaps (accepti
 
 ## 12. AI Critique (200–300 words, Mandatory)
 
-> Assignment §10. Must be written entirely by the student. Where was the AI wrong, biased,
-> or incomplete? Why did it fail to catch the issue? What principle did you learn about
-> collaborating with AI during this assignment?
+Across 7 audited artifacts, AI output was INCOMPLETE in 6 of 7 (86%) and never INVALID: the scripts ran and looked structurally reasonable, but nearly every one needed a correction from the same failure mode. This is not a case of broken generation. The AI kept trusting a plausible textual source over the SUT's actual runtime behavior.
 
-_TBD_
+Two variants of that failure showed up repeatedly. `domain-testing.md` called the Username field "`type=email`", so TC-03's original case and its fix rationale both assumed HTML5 email validation existed; nobody had opened `Login.jsx:30` to check the field is actually `type="text"`. TC-05 shipped with no `db` check because it pattern-matched TC-06's shape, without tracing that `assertApi` early-returns when `requestSent` is false for this specific case. Same root cause both times: reasoning from what the spec document says a field does, instead of what the source code actually does.
+
+The more useful finding is that the failure survived a review step built specifically to catch it. Artifact #7, an AI-run gap review over FR-02/FR-09/FR-16, found 4 real gaps correctly, but the rationale note it wrote for one of them was wrong for the identical reason: reasoning from the design doc's language instead of the live SUT. So the AI's own review pass is not a substitute for independent verification; it inherits the same blind spot it is supposed to catch.
+
+That changes what "reviewing AI output" needs to mean here. Reading the diff is not enough, because a plausible-sounding artifact and a correct one look the same on the page. What actually catches this is running the assertion against the live SUT and checking the field it claims to test really behaves that way, which is the discipline this audit ended up relying on for every fix in §6.
 
 ---
 
