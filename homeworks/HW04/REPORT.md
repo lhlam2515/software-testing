@@ -259,10 +259,10 @@ None of these are model-capability limits — all three are review gaps (accepti
 
 | Field | Value |
 | ----- | ----- |
-| Link (unlisted YouTube, ≥ 5 min) | _TBD_ |
-| Feature demonstrated end to end | _TBD_ |
-| Fix narrated during the review | _TBD_ |
-| Authorship evidence | `<Face-cam or terminal running whoami/hostname>` |
+| Link (unlisted YouTube, ≥ 5 min) | [Video Demo](https://youtu.be/371g6eJhN88) |
+| Feature demonstrated end to end | FR-02 — Login & Account Lockout (18 test cases, 3 assertion patterns, Chromium/Firefox/Edge run, HTML report walkthrough) |
+| Fix narrated during the review | Shared `actLogin` helper in `tests/_fixtures/fr02-helpers.ts` always submitted the form, so TC-UI-01 (password field must render as `type="password"`) redirected out of `/login` before the assertion could read the DOM, producing a misleading "element not found" failure instead of a real result. Fixed by adding a `submitVia: 'none'` case-data flag with an early return in `actLogin` so the form fills but does not submit, letting the assertion read the input's `type` attribute in place. This surfaced the real defect [BUG-02-005](bugs/BUG_REPORT.md) — the password field renders as `type="text"`, so input is unmasked. |
+| Authorship evidence | Face-cam, shown at video open |
 
 ---
 
@@ -275,7 +275,7 @@ None of these are model-capability limits — all three are review gaps (accepti
 | Skill name | `playwright-spec-generator` |
 | What it automates | 9-phase pipeline that turns an existing test-case design (`domain-testing.md`/`bva.md`, or designed on the spot via the `domain-testing` skill) into a running Playwright + TypeScript suite: data-driven case file → reusable fixtures/Page Objects → UI-only spec skeleton → layered network + DB assertions → independent subagent review → fixes → final multi-browser run with a pass/fail/data-driven/reusable/DRY checklist. |
 | Iteration | v0.1 was generalized directly from the FR-02 automation workflow run manually first in this homework (under the name `playwright-automation-pipeline`), then v0.2–v0.4 were each driven by a real gap found running the skill for real on FR-09. Renamed twice afterward as the name kept drifting from the scope: `automation-workflow` in v0.5, then `playwright-spec-generator` in v0.6 once "workflow" over-promised ownership of the whole test-automation lifecycle instead of just the code-generation step (see [artifacts/skills/playwright-spec-generator/CHANGELOG.md](artifacts/skills/playwright-spec-generator/CHANGELOG.md)) |
-| Demo video (skill applied to a full feature) | _TBD_ |
+| Demo video (skill applied to a full feature) | [Video Demo](https://youtu.be/kcqyrRKTTz0) — FR-01 Registration (not a graded feature; test cases sourced from HW02 `domain-testing.md`/`bva.md`, 19 TC × 3 browsers = 57 runs, 39 pass / 18 fail against 2 known SUT defects). |
 
 ---
 
@@ -284,7 +284,7 @@ None of these are model-capability limits — all three are review gaps (accepti
 | Field | Value |
 | ----- | ----- |
 | Public GitHub repository | [github.com/lhlam2515/software-testing](https://github.com/lhlam2515/software-testing) |
-| Commits touching test-script files | _TBD (≥ 8 required; 4-day span requirement removed per TA update, 2026-08-10)_ |
+| Commits touching test-script files | 9 (≥ 8 required; 4-day span requirement removed per TA update, 2026-08-10). Counts `.spec.ts` files plus `artifacts/tests/_fixtures/` — page objects and helpers that the spec files import directly and cannot run without, so they are test-script code, not documentation. |
 | Git commit log | [assets/git-commit-log.txt](assets/git-commit-log.txt) |
 
 ---

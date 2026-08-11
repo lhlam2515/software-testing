@@ -7,8 +7,9 @@
 - **Group**: 02
 - **Class / Cohort**: 23KTPM1
 - **Github Repository**: [github.com/lhlam2515/software-testing](https://github.com/lhlam2515/software-testing)
-- **SUT (EShop web)**: `<Base URL — local http://localhost:5173 or deployed>`
-- **Demo video**: `<Unlisted YouTube URL>`
+- **SUT (EShop web)**: `http://localhost:5173` (customer storefront — FR-02, FR-09) · `http://localhost:5174` (admin dashboard — FR-16) · backend `http://localhost:3000` (repo: [github.com/ttbhanh/eshop-sut](https://github.com/ttbhanh/eshop-sut))
+- **Demo video (Task 2)**: [Video Demo](https://youtu.be/371g6eJhN88) (unlisted, FR-02 — Login & Account Lockout)
+- **Demo video (Agent Skill)**: [Video Demo](https://youtu.be/kcqyrRKTTz0) (unlisted, `playwright-spec-generator` skill applied to FR-01 — Registration)
 
 ---
 
@@ -19,9 +20,9 @@
 | [REPORT.md](./REPORT.md) | Main report — feature selection, automation approach, results per feature, AI gap analysis, AI Critique (§12), Agent Skill |
 | [BUG_REPORT.md](./bugs/BUG_REPORT.md) | Consolidated bug report, cross-linked to GitHub Issues |
 | [prompt_log.md](./prompt_log.md) | Full AI prompt log with timestamps |
-| [[AI-02]_AI_Audit_Report.md](./%5BAI-02%5D_AI_Audit_Report.md) | Per-artifact AI audit (prompt, output, verdict, reasoning, student fix) |
-| [[AI-03]_AI_Disclosure_Form.md](./%5BAI-03%5D_AI_Disclosure_Form.md) | Mandatory AI usage disclosure |
-| [[AI-05]_AI_Privacy_Checklist.md](./%5BAI-05%5D_AI_Privacy_Checklist.md) | AI privacy and responsible-use checklist |
+| [AI_Audit_Report.md](./%5BAI-02%5D_AI_Audit_Report.md) | Per-artifact AI audit (prompt, output, verdict, reasoning, student fix) |
+| [AI_Disclosure_Form.md](./%5BAI-03%5D_AI_Disclosure_Form.md) | Mandatory AI usage disclosure |
+| [AI_Privacy_Checklist.md](./%5BAI-05%5D_AI_Privacy_Checklist.md) | AI privacy and responsible-use checklist |
 | [artifacts/tests/](./artifacts/tests/) | Playwright automation scripts, one folder per feature (FR-02, FR-09, FR-16) |
 | [artifacts/test-data/](./artifacts/test-data/) | External `.csv` / `.json` test data — no hardcoded arrays in scripts |
 | [artifacts/html-reports/](./artifacts/html-reports/) | Multi-browser HTML reports (Chromium / Firefox / Edge — WebKit substituted per [BUG_REPORT.md](./bugs/BUG_REPORT.md)) per feature, showing `Run by: {StudentID}` |
@@ -36,32 +37,34 @@ Same three web features selected in HW02 — one per Pool A/B/C.
 
 | Feature | Name | HW02 source | Automated test cases |
 | --- | --- | --- | ---: |
-| FR-02 | Login & Account Lockout | [HW02 domain-testing.md](../HW02/artifacts/tests/FR-02-login-lockout/domain-testing.md) · [bva.md](../HW02/artifacts/tests/FR-02-login-lockout/bva.md) | `<Count>` |
-| FR-09 | Discount Coupons | [HW02 domain-testing.md](../HW02/artifacts/tests/FR-09-coupon/domain-testing.md) · [bva.md](../HW02/artifacts/tests/FR-09-coupon/bva.md) | `<Count>` |
-| FR-16 | CSV Import | [HW02 domain-testing.md](../HW02/artifacts/tests/FR-16-csv-import/domain-testing.md) · [bva.md](../HW02/artifacts/tests/FR-16-csv-import/bva.md) | `<Count>` |
+| FR-02 | Login & Account Lockout | [HW02 domain-testing.md](.reference/FR-02-login-lockout/domain-testing.md) · [bva.md](.reference/FR-02-login-lockout/bva.md) | `18` |
+| FR-09 | Discount Coupons | [HW02 domain-testing.md](.reference/FR-09-coupon/domain-testing.md) · [bva.md](.reference/FR-09-coupon/bva.md) | `21` |
+| FR-16 | CSV Import | [HW02 domain-testing.md](.reference/FR-16-csv-import/domain-testing.md) · [bva.md](.reference/FR-16-csv-import/bva.md) | `24` |
 
 ## Test Summary
+
+> Executed / Passed / Failed are summed across all 3 browser runs per feature (single-run count × 3, since all 3 browsers produced identical results — see [REPORT.md §4.4](./REPORT.md)).
 
 | Metric | Result |
 | --- | ---: |
 | Features | `3` |
-| Test cases automated | `<Count>` |
-| Test cases executed | `<Count>` |
-| Passed | `<Count>` |
-| Failed | `<Count>` |
-| Browser runs | `<Count>` |
-| Bugs | `<Count>` |
+| Test cases automated | `63` |
+| Test cases executed | `189` |
+| Passed | `99` |
+| Failed | `90` |
+| Browser runs | `9` |
+| Bugs | `16` |
 
 ## Self-assessment
 
 | **No.** | **Criteria** | **Grade** | **Self-Assessed Grade** |
 | --- | --- | --- | --- |
-| **1** | Task 1 — Feature A (FR-02, ≥12 TCs, data-driven, 3 assertion patterns, 3 browsers) | 25 |  |
-| **1** | Task 1 — Feature B (FR-09, ≥12 TCs, data-driven, 3 assertion patterns, 3 browsers) | 25 |  |
-| **1** | Task 1 — Feature C (FR-16, ≥12 TCs, data-driven, 3 assertion patterns, 3 browsers) | 25 |  |
-| **2** | Task 2 — Demo video | 15 |  |
-| **3** | Agent Skills | 10 |  |
-|  | **Total** | **100** |  |
+| **1** | Task 1 — Feature A (FR-02, ≥12 TCs, data-driven, 3 assertion patterns, 3 browsers) | 25 | 25 |
+| **1** | Task 1 — Feature B (FR-09, ≥12 TCs, data-driven, 3 assertion patterns, 3 browsers) | 25 | 25 |
+| **1** | Task 1 — Feature C (FR-16, ≥12 TCs, data-driven, 3 assertion patterns, 3 browsers) | 25 | 25 |
+| **2** | Task 2 — Demo video | 15 | 15 |
+| **3** | Agent Skills | 10 | 10 |
+| | **Total** | **100** | 100 |
 
 ---
 
