@@ -1,3 +1,6 @@
-product_id
-TODO_PRODUCT_ID
-
+product_id,product_name,product_price
+1,iPhone 15 Pro Max,30000000
+2,Samsung Galaxy S24 Ultra,28000000
+3,MacBook Pro M3,45000000
+4,Tai nghe AirPods Pro 2,6000000
+5,Ban phim co Keychron Q1,4000000

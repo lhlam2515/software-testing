@@ -1,17 +1,44 @@
 $ErrorActionPreference = 'Stop'
 
-$jmeter = 'jmeter'
-$plan = Join-Path $PSScriptRoot 'plans\23127543_Stress_20260811.jmx'
-$jtl = Join-Path $PSScriptRoot 'results\23127543_Stress_20260811.jtl'
-$report = Join-Path $PSScriptRoot 'reports\stress'
+$baseDir = $PSScriptRoot
+$plan = Join-Path $baseDir 'plans\23127543_Stress_20260811.jmx'
+$jtl = Join-Path $baseDir 'results\23127543_Stress_20260811.jtl'
+$report = Join-Path $baseDir 'reports\stress'
 
-if (-not (Get-Command $jmeter -ErrorAction SilentlyContinue)) {
-  Write-Host 'TODO: JMeter not found on PATH. Install JMeter or update this script.'
-  exit 1
+function Resolve-JMeterCommand {
+  $cmd = Get-Command 'jmeter.bat' -ErrorAction SilentlyContinue
+  if ($cmd) { return $cmd.Source }
+
+  if ($env:JMETER_HOME) {
+    $candidate = Join-Path $env:JMETER_HOME 'bin\jmeter.bat'
+    if (Test-Path -LiteralPath $candidate) {
+      return $candidate
+    }
+  }
+
+  throw 'JMeter was not found. Install Apache JMeter and add jmeter.bat to PATH, or set JMETER_HOME to the JMeter installation directory.'
 }
 
-Write-Host 'TODO - REQUIRES REAL EXECUTION. This script will run the Stress plan only when you are ready.'
-Write-Host "Plan: $plan"
-Write-Host "JTL : $jtl"
-Write-Host "Report: $report"
+foreach ($dir in @((Split-Path -Parent $jtl), $report)) {
+  New-Item -ItemType Directory -Force -Path $dir | Out-Null
+}
 
+$jmeter = Resolve-JMeterCommand
+
+Write-Host "Running Stress plan: $plan"
+Write-Host "Results: $jtl"
+Write-Host "HTML report: $report"
+
+$args = @(
+  '-n'
+  '-t', $plan
+  '-l', $jtl
+  '-e'
+  '-o', $report
+)
+
+& $jmeter @args
+$exitCode = $LASTEXITCODE
+if ($exitCode -ne 0) {
+  throw "JMeter exited with code $exitCode"
+}
