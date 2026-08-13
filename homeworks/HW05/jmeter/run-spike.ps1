@@ -1,44 +1,5 @@
-$ErrorActionPreference = 'Stop'
-
-$baseDir = $PSScriptRoot
-$plan = Join-Path $baseDir 'plans\23127543_Spike_20260811.jmx'
-$jtl = Join-Path $baseDir 'results\23127543_Spike_20260811.jtl'
-$report = Join-Path $baseDir 'reports\spike'
-
-function Resolve-JMeterCommand {
-  $cmd = Get-Command 'jmeter.bat' -ErrorAction SilentlyContinue
-  if ($cmd) { return $cmd.Source }
-
-  if ($env:JMETER_HOME) {
-    $candidate = Join-Path $env:JMETER_HOME 'bin\jmeter.bat'
-    if (Test-Path -LiteralPath $candidate) {
-      return $candidate
-    }
-  }
-
-  throw 'JMeter was not found. Install Apache JMeter and add jmeter.bat to PATH, or set JMETER_HOME to the JMeter installation directory.'
-}
-
-foreach ($dir in @((Split-Path -Parent $jtl), $report)) {
-  New-Item -ItemType Directory -Force -Path $dir | Out-Null
-}
-
-$jmeter = Resolve-JMeterCommand
-
-Write-Host "Running Spike plan: $plan"
-Write-Host "Results: $jtl"
-Write-Host "HTML report: $report"
-
-$args = @(
-  '-n'
-  '-t', $plan
-  '-l', $jtl
-  '-e'
-  '-o', $report
+param(
+  [string]$JMeterHome = $env:JMETER_HOME
 )
 
-& $jmeter @args
-$exitCode = $LASTEXITCODE
-if ($exitCode -ne 0) {
-  throw "JMeter exited with code $exitCode"
-}
+& (Join-Path $PSScriptRoot "Run-JMeter.ps1") -Plan "23127543_Spike_20260813.jmx" -Label "spike" -Threads "50" -RampUp "8" -Duration "120" -Loops "1" -ThinkTimeMs "50" -JMeterHome $JMeterHome
