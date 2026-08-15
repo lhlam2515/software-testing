@@ -1,12 +1,13 @@
 # Endurance Evidence
 
-Place real endurance / soak-test evidence here.
+Available local evidence:
 
-Expected items:
+- sustained Stress JTL: [`../../jmeter/results/stress/stress-20260815-071958.jtl`](../../jmeter/results/stress/stress-20260815-071958.jtl)
+- HTML report: [`../../jmeter/results/stress/report-20260815-071958/index.html`](../../jmeter/results/stress/report-20260815-071958/index.html)
+
+Still required manually:
 
 - sustained-load screenshot
 - resource monitor evidence
-- raw `.jtl`
-- HTML report folder
 - notes about maximum stable RPS and memory ceiling
 

@@ -1,12 +1,14 @@
 # Stress Evidence
 
-Place real Stress-test evidence here.
+Available local evidence:
 
-Expected items:
+- raw JTL: [`../../jmeter/results/stress/stress-20260815-071958.jtl`](../../jmeter/results/stress/stress-20260815-071958.jtl)
+- HTML report: [`../../jmeter/results/stress/report-20260815-071958/index.html`](../../jmeter/results/stress/report-20260815-071958/index.html)
+
+Still required manually:
 
 - JMeter running screenshot
 - backend resource monitor visible in the same frame
 - final JMeter result screenshot
-- raw `.jtl`
-- HTML report folder
+- hardware/spec evidence
 
