@@ -44,42 +44,49 @@ TBD: state that k6 and the backend share the same host, and what that means for 
 
 ### 2.3 Data seeding and reset procedure
 
-TBD: how the database was seeded before each run, how it was reset between runs, and how the account lockout (locks after 2 consecutive failures, for 180 seconds) was cleared between Stress and Spike runs (section 6, Task 1).
+TBD: how the database was seeded before each run, how it was reset between runs, and how the account lockout (locks after 2 consecutive failures, for 180 seconds) was cleared between runs. Since login is cached per VU and only a small dedicated sub-scenario inside Spike deliberately fails login (section 3.2), lockout is expected primarily around Spike runs, but `reset_lockout.js` is still run before every scenario as a precaution (section 6, Task 1).
 
 ---
 
-## 3. Scope: Endpoint Selection
+## 3. Scope: End-to-End Workflow
 
-### 3.1 Selected endpoint groups
+Section 6, Task 1 requires all three test plans (Load / Stress / Spike) to exercise **the same end-to-end workflow**, covering all three endpoint groups in one journey. This replaces the one-endpoint-per-scenario pairing used in earlier drafts of this report — the requirement changed on 2026-08-13 (see the assignment's section 5 and 6, Task 1: *"a virtual user may log in, browse or search products, then add an item to the cart and complete checkout"*).
 
-| Group | Method + path | SRS | Why representative of the group |
-| ----- | ------------- | --- | ------------------------------- |
-| Read-heavy | `GET /api/products?search={keyword}` | FR-05 | Search over the product name is the only read path in the SUT whose cost grows with the data volume. Every other read resolves by primary key or returns a small fixed table, so search is the read that can actually saturate something. |
-| Auth-heavy | `POST /api/login` | FR-02 | Password verification plus JWT issuance, guarded by a counter-based lockout: each failure adds 2 to `login_attempts`, and the account locks for 180 seconds once the counter reaches 3 (so 2 consecutive failures trigger it, not 3). Section 5 names the lockout behaviour explicitly for this group. |
-| Transactional | `POST /api/cart` | FR-07 | An authenticated write that mutates per-user state. In the current implementation it does not upsert: every call `push()`es a new entry onto an in-memory array keyed by user id, so adding the same product twice produces two array entries, not a quantity bump, and the whole array is lost on backend restart. Section 5 names add-to-cart as a transactional example. |
+### 3.1 Selected workflow
 
-### 3.2 Scenario pairing and justification
+| Step | Group | Method + path | SRS | Why this step is representative of the group |
+| ---- | ----- | -------------- | --- | ---------------------------------------------- |
+| 1. Login | Auth-heavy | `POST /api/login` | FR-02 | Password verification plus JWT issuance, guarded by a counter-based lockout: each failure adds 2 to `login_attempts`, and the account locks for 180 seconds once the counter reaches 3 (so 2 consecutive failures trigger it, not 3). The SRS exposes no other auth-heavy endpoint. |
+| 2. Browse / search | Read-heavy | `GET /api/products?search={keyword}` | FR-05 | Search over the product name is the only read path in the SUT whose cost grows with data volume. Every other read resolves by primary key or returns a small fixed table. |
+| 3. Add to cart | Transactional | `POST /api/cart` | FR-07 | An authenticated write that mutates per-user state. It does not upsert: every call `push()`es a new entry onto an in-memory array keyed by user id, so adding the same product twice produces two array entries, and the whole array is lost on backend restart. |
+| 4. Checkout | Transactional | `POST /api/checkout` | FR-08 | Inserts one order row per request. It does **not** read from the cart populated in step 3 — `total_amount` / `shipping_address` come directly from the request body — so cart and order are functionally disconnected (logged as BUG-05-LAM-007 in `BUG_REPORT.md`). |
 
-| Scenario | Endpoint group | Why this pairing |
-| -------- | -------------- | ---------------- |
-| Load | Transactional, `POST /api/cart` | This request does not touch the database at all — it pushes onto an in-memory array on the backend process, so a sustained run makes the process's own resident memory the thing under test rather than the database. Load is the only scenario of the three whose question ("does the system hold the expected rate") does not require driving the system past its limit, which matches a steady run long enough to watch that memory growth. |
-| Stress | Read-heavy, `GET /api/products?search=` | Stress asks where the system breaks, which means driving it past the point of failure repeatedly. Only an endpoint that creates no state can be pushed that way without a reset between attempts. An unindexed `LIKE` scan also gives a failure mode that can be named, not just observed. |
-| Spike | Auth-heavy, `POST /api/login` | Spike asks whether the system recovers after a surge. The lockout locks an account for 180 seconds after 2 consecutive failures (each failure adds 2 to the attempt counter, which locks at 3), which is itself a recovery curve: error rate rises during the surge, stays elevated for the lockout window, then returns to baseline. The endpoint's own behaviour supplies the phenomenon the scenario is designed to measure. |
+### 3.2 Load profile design and justification
 
-Each pairing also matches the report view chosen for that scenario in section 4.4: the aggregate view fits the steady run, the per-stage percentile view fits the search for a breaking point, and the time-series view fits the recovery curve.
+All three scenarios run the identical four-step journey above; they differ only in load profile, not in which endpoints they exercise. Journey logic is factored into a shared `lib/journey.js` (login → browse → search → cart → checkout, each step tagged for per-step metrics), reused by all three named test plans, following the structure of the lecturer-provided `ref/Demo/k6/lib/journey.js`.
+
+| Scenario | Load profile | Why this profile answers a different question on the same workflow |
+| -------- | ------------- | ---------------------------------------------------------------------- |
+| Load | Ramp to expected peak VUs, hold, ramp down | Asks whether the system holds the expected rate across the whole journey — checkout's per-request order insert and cart's in-memory growth are the parts most likely to degrade under sustained rate. |
+| Stress | Ramp progressively past the expected peak until failure | Asks where the journey breaks first. The unindexed `LIKE` search is the most likely first failure point among the four steps, so the breaking point is expected to correlate with search latency, not login or cart. |
+| Spike | Sudden surge to a high VU count, then drop | Asks whether the journey recovers after a surge. The login step supplies a genuine recovery phenomenon here: a small, dedicated low-VU sub-scenario deliberately fails login to trigger the 180-second lockout, producing an error-rate spike followed by a decay back to baseline once the lockout window elapses — visible only on a time axis. |
+
+**Login is cached per VU, not repeated every iteration.** Calling `/api/login` on every iteration (the default pattern in `ref/Demo/k6/lib/journey.js`, which uses one fixed credential with no lockout to worry about) would let a 100-VU Load run alone exhaust the account pool and trigger lockout — a failure mode that did not exist under the old one-endpoint-per-scenario model, where only Spike touched `/api/login`. Each VU logs in once and reuses its token for subsequent iterations; only the Spike sub-scenario above intentionally uses invalid credentials (`auth_credentials.csv`, `valid_flag=false`), keeping the fail budget small and bounded (pool ≥ 200 accounts, fail rate ≤ 5% within that sub-scenario) rather than spread across all traffic.
+
+The load-profile choice also matches the report view chosen for that scenario in section 4.4: the aggregate view fits the steady run, the per-stage percentile view fits the search for a breaking point, and the time-series view fits the recovery curve.
 
 ### 3.3 Non-overlap declaration (section 5)
 
-Group 02 has two members. The split was agreed on 2026-08-06; the note sent to the other member is at `group/endpoint-split-note.md`.
+Group 02 has two members. Section 5's non-overlap rule now compares **workflows** ("no two members may test the same workflow"), a higher bar than the endpoint-level split agreed on 2026-08-06 (`group/endpoint-split-note.md`). Re-confirmation at the workflow level was sent to the other member on 2026-08-13 and is pending.
 
-| Member | Read-heavy | Auth-heavy | Transactional |
-| ------ | ---------- | ---------- | ------------- |
-| Lê Hoàng Lâm (23127216) | `GET /api/products?search=` | `POST /api/login` | `POST /api/cart` |
-| Other member | `GET /api/admin/orders` | `POST /api/register` | `POST /api/checkout` |
+| Member | Workflow | Auth-heavy | Read-heavy | Transactional |
+| ------ | -------- | ---------- | ---------- | -------------- |
+| Lê Hoàng Lâm (23127216) | Customer purchase journey: login → search products → add to cart → checkout | `POST /api/login` (customer account) | `GET /api/products?search=` | `POST /api/cart` + `POST /api/checkout` |
+| Other member (proposed) | Admin order-management journey: login → review orders → update order status | `POST /api/login` (admin account) | `GET /api/admin/orders` | `PUT /api/admin/orders/:id/status` |
 
-No endpoint appears twice. The full cart to checkout workflow was deliberately narrowed to `POST /api/cart` so that `POST /api/checkout` (FR-08, which the other member covered in HW02) stays available to them.
+Three of the four steps use different endpoints, and the narratives differ (customer purchase vs. admin operations); `POST /api/login` is shared only because it is the SRS's sole auth-heavy endpoint.
 
-Status: confirmed by the other member on 2026-08-08.
+Status: **pending confirmation** from the other member as of 2026-08-13.
 
 ---
 
@@ -107,13 +114,13 @@ TBD: the justification for each parameter, and which of them came from the AI ve
 
 ### 4.3 Data-driven inputs
 
-| Group | CSV file | Rows | Fields | How it is consumed |
-| ----- | -------- | ---- | ------ | ------------------ |
-| Read-heavy | TBD | | | TBD |
-| Auth-heavy | TBD | | | TBD |
-| Transactional | TBD | | | TBD |
+The requirement no longer mandates one CSV per endpoint group ("one or more CSV files, as appropriate for your workflow"); each file below feeds one step of the shared workflow.
 
-Each endpoint group has its own CSV. No file is shared between groups (section 6, Task 1).
+| Workflow step | CSV file | Rows | Fields | How it is consumed |
+| -------------- | -------- | ---- | ------ | ------------------ |
+| Login | `auth_credentials.csv` | TBD | email, password, valid_flag | `valid_flag=false` rows used only by the Spike lockout sub-scenario (section 3.2), never by the main traffic |
+| Search | `read_keywords.csv` | TBD | keyword, expected_hit_rate | Selected per iteration via `SharedArray` to vary search selectivity (high-hit / low-hit / miss) |
+| Cart + checkout | `cart_checkout_payloads.csv` | TBD | product_id, quantity, total_amount, shipping_address | product_id/quantity feed `POST /api/cart`, total_amount/shipping_address feed `POST /api/checkout` — two independent requests, since checkout does not read from the cart (section 3.1) |
 
 ### 4.4 Report views used
 

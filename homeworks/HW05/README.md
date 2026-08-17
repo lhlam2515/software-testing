@@ -24,7 +24,7 @@
 | [[AI-05]_AI_Privacy_Checklist.md](./%5BAI-05%5D_AI_Privacy_Checklist.md) | AI privacy and responsible-use checklist |
 | [group/endpoint-split-note.md](./group/endpoint-split-note.md) | Endpoint split agreed with the other Group 02 member (section 5 non-overlap) |
 | [artifacts/test-plans/](./artifacts/test-plans/) | The three test plans (Load / Stress / Spike) plus the endurance script |
-| [artifacts/test-data/](./artifacts/test-data/) | One CSV input file per endpoint group |
+| [artifacts/test-data/](./artifacts/test-data/) | CSV input data feeding the shared end-to-end workflow (credentials, search keywords, cart/checkout payloads) |
 | [artifacts/results/raw/](./artifacts/results/raw/) | Raw per-request logs (the `.jtl` equivalent) and end-of-test summaries |
 | [artifacts/results/html-reports/](./artifacts/results/html-reports/) | HTML report folder per scenario |
 | [artifacts/skills/](./artifacts/skills/) | Agent Skill source for the performance-testing and log-analysis workflow |
@@ -62,17 +62,20 @@ No view type repeats.
 
 ---
 
-## Scope: Endpoint Selection
+## Scope: End-to-End Workflow
 
-Three endpoint groups, one scenario each, no overlap with other group members (section 5).
+Section 6, Task 1 requires all three test plans (Load / Stress / Spike) to exercise **the same end-to-end workflow**, covering all three endpoint groups in one journey — not one endpoint per scenario as in earlier assignments. The workflow chosen here is a customer purchase journey:
 
-| Group | Endpoint | SRS | Scenario paired | Why this pairing | Test plan | CSV input |
-| ----- | -------- | --- | --------------- | ---------------- | --------- | --------- |
-| Read-heavy | `GET /api/products?search={keyword}` | FR-05 | **Stress** | Creates no state, so it can be pushed to the breaking point and re-run indefinitely. An unindexed `LIKE` scan is where SQLite gives out first, which makes the breaking point explainable rather than merely observed. | `23127216_Stress_YYYYMMDD.js` | `read_keywords.csv` |
-| Auth-heavy | `POST /api/login` | FR-02 | **Spike** | The lockout locks an account for 180 seconds after 2 consecutive failures (each failure adds 2 to `login_attempts`, which locks at 3), so it is visible only on a time axis: error rate jumps, stays up for the lockout window, then decays. That recovery shape is exactly what a spike scenario asks about and what an aggregate number cannot carry. | `23127216_Spike_YYYYMMDD.js` | `auth_credentials.csv` |
-| Transactional | `POST /api/cart` | FR-07 | **Load** | Does not touch the database — `push()`es onto an in-memory array per user, unbounded and lost on restart. A sustained run at steady rate makes backend RSS growth the primary observable, which suits Load's "does the system hold the expected rate" question better than a push to failure. | `23127216_Load_YYYYMMDD.js` | `cart_payloads.csv` |
+| Step | Group | Endpoint | SRS | Why this step is representative |
+| ---- | ----- | -------- | --- | -------------------------------- |
+| 1. Login | Auth-heavy | `POST /api/login` | FR-02 | Password verification plus JWT issuance, guarded by a counter-based lockout: each failure adds 2 to `login_attempts`, and the account locks for 180 seconds once the counter reaches 3 (so 2 consecutive failures trigger it). The only auth-heavy endpoint the SRS exposes. |
+| 2. Browse / search | Read-heavy | `GET /api/products?search={keyword}` | FR-05 | Search over the product name is the only read path whose cost grows with data volume — every other read resolves by primary key or returns a small fixed table. |
+| 3. Add to cart | Transactional | `POST /api/cart` | FR-07 | An authenticated write that mutates per-user state. It does not upsert: every call `push()`es a new entry onto an in-memory array keyed by user id, unbounded and lost on backend restart. |
+| 4. Checkout | Transactional | `POST /api/checkout` | FR-08 | Inserts one order row per request. Notably, it does **not** read from the cart populated in step 3 — it takes `total_amount` / `shipping_address` directly from the request body, so cart and order are functionally disconnected (see `BUG_REPORT.md`, BUG-05-LAM-007). |
 
-**Why not the full cart to checkout workflow.** `POST /api/checkout` inserts one order row per request, so a 10 to 15 minute soak leaves tens of thousands of orphan orders behind and every run needs the cart re-seeded for the whole account pool beforehand. `POST /api/cart` is the same transactional shape (authenticated write, per-user state) without the cleanup cost, and section 5 names add-to-cart as a transactional example in its own right. Checkout is left to the other group member, who covered FR-08 in HW02.
+All three scenarios (Load, Stress, Spike) run this same four-step journey; they differ only in load profile (VU ramp, duration, surge shape), not in which endpoints they hit. Journey logic lives in `artifacts/test-plans/lib/journey.js`, shared configuration in `artifacts/test-plans/config.js`, and each named test plan (`23127216_{Type}_{YYYYMMDD}.js`) only declares its `options`.
+
+**Login is cached per VU, not repeated every iteration.** If every iteration called `/api/login`, a 100-VU Load run alone could exhaust the account pool and trigger lockout well before Spike ever runs — a failure mode that did not exist under the previous one-endpoint-per-scenario model. Each VU logs in once and reuses its token; only a small, dedicated low-VU sub-scenario inside Spike deliberately uses invalid credentials (`auth_credentials.csv`, `valid_flag=false`) to exercise and observe the lockout behaviour in a controlled, bounded way.
 
 **Why FR-09, FR-16, and FR-20 from HW02 were not reused.**
 
@@ -85,14 +88,14 @@ Three endpoint groups, one scenario each, no overlap with other group members (s
 
 ### Non-overlap declaration
 
-Group 02 has two members. Split agreed on 2026-08-06, recorded in [group/endpoint-split-note.md](./group/endpoint-split-note.md).
+Group 02 has two members. Section 5's non-overlap rule now compares **workflows**, not individual endpoints ("no two members may test the same workflow"), which is a higher bar than the endpoint-level split agreed on 2026-08-06 in [group/endpoint-split-note.md](./group/endpoint-split-note.md). Re-confirmation at the workflow level is pending as of 2026-08-13.
 
-| Member | Read-heavy | Auth-heavy | Transactional |
-| ------ | ---------- | ---------- | ------------- |
-| Lê Hoàng Lâm (23127216) | `GET /api/products?search=` | `POST /api/login` | `POST /api/cart` |
-| Other member | `GET /api/admin/orders` | `POST /api/register` | `POST /api/checkout` |
+| Member | Workflow | Auth-heavy | Read-heavy | Transactional |
+| ------ | -------- | ---------- | ---------- | -------------- |
+| Lê Hoàng Lâm (23127216) | Customer purchase journey: login → search products → add to cart → checkout | `POST /api/login` (customer account) | `GET /api/products?search=` | `POST /api/cart` + `POST /api/checkout` |
+| Other member (proposed, pending confirmation) | Admin order-management journey: login → review orders → update order status | `POST /api/login` (admin account) | `GET /api/admin/orders` | `PUT /api/admin/orders/:id/status` |
 
-No endpoint appears twice. Status: confirmed by the other member on 2026-08-08.
+Three of the four steps use different endpoints, and the narratives differ (customer purchase vs. admin operations); `POST /api/login` is shared because it is the SRS's only auth-heavy endpoint. Status: **pending** — sent for re-confirmation, not yet acknowledged by the other member.
 
 ---
 
@@ -100,12 +103,12 @@ No endpoint appears twice. Status: confirmed by the other member on 2026-08-08.
 
 ### Scenarios Run
 
-| Scenario | Endpoint group | VUs (peak) | Duration | Requests | Error rate | p95 (ms) | RPS (avg) |
-| -------- | -------------- | ---------- | -------- | -------- | ---------- | -------- | --------- |
-| Load | TBD | | | | | | |
-| Stress | TBD | | | | | | |
-| Spike | TBD | | | | | | |
-| Endurance / soak | TBD | | | | | | |
+| Scenario | Workflow | VUs (peak) | Duration | Requests | Error rate | p95 (ms) | RPS (avg) |
+| -------- | -------- | ---------- | -------- | -------- | ---------- | -------- | --------- |
+| Load | Login → search → cart → checkout | | | | | | |
+| Stress | Login → search → cart → checkout | | | | | | |
+| Spike | Login → search → cart → checkout (+ lockout sub-scenario) | | | | | | |
+| Endurance / soak | Login → search → cart → checkout | | | | | | |
 
 ### Endurance Threshold (section 6, Task 1)
 
@@ -171,7 +174,7 @@ Evidence: `assets/screenshots/hardware/fastfetch.png` — hostname `FedoraOS` vi
 - [ ] Three test plans named `23127216_{ScenarioType}_{YYYYMMDD}`
 - [ ] Three raw per-request logs (the `.jtl` equivalent), attached in full
 - [ ] Three HTML report folders
-- [ ] One CSV input file per endpoint group (three files, not one shared file)
+- [ ] CSV input data for the shared workflow (credentials, search keywords, cart/checkout payloads)
 - [ ] Resource-monitor screenshots per run
 - [ ] Hardware report screenshot and spec table
 - [ ] Endurance / soak run with the threshold reported in numbers

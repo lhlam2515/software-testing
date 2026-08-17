@@ -75,7 +75,7 @@ Target three backend API **endpoint groups**, mapping each to the SUT's API:
 - **Auth-heavy** — for example, login, taking the account-lockout behaviour into account.
 - **Transactional** — for example, add-to-cart and checkout / order creation.
 
-For each of the three groups, choose the specific endpoint or workflow you will test. As in the previous assignments, ensure that your selection is **not duplicated** among the members of your group: no two members may test the same endpoint / workflow.
+As in the previous assignments, ensure that your selection is **not duplicated** among the members of your group: no two members may test the same workflow.
 
 ## 6. Requirements
 
@@ -85,12 +85,12 @@ For each of the following tasks, document your process in the main report and at
 
 Following the AI-first strategy, use an AI tool to design and generate the test plans, then review, fix, and take full responsibility for them.
 
-- **Design and generate with AI.** Drive an AI tool — step by step, not with a single generic prompt — to design and generate the three test plans: **Load**, **Stress**, and **Spike**, each targeting **one** endpoint group, so that the three groups (read-heavy, auth-heavy, transactional) are each covered by exactly one scenario. Have the AI help choose realistic parameters (think-time, ramp-up, thread / virtual-user counts), and briefly justify which group you paired with each scenario.
-- **Make the test plans data-driven.** Each endpoint group must have **its own CSV input file** (e.g., product IDs for read-heavy, credentials for auth-heavy, order payloads for transactional). A single shared CSV is not sufficient.
+- **Design and generate with AI.** Drive an AI tool — step by step, not with a single generic prompt — to design and generate three test plans: **Load**, **Stress**, and **Spike**. All three test plans must exercise the same end-to-end workflow, covering all three endpoint groups: **auth-heavy**, **read-heavy**, and **transactional**. For example, a virtual user may log in, browse or search products, then add an item to the cart and complete checkout. Have the AI help choose realistic parameters (think-time, ramp-up, thread / virtual-user counts) for each scenario, and briefly justify how the workflow covers each endpoint group.
+- **Make the workflow data-driven.** Use CSV input data in the end-to-end workflow to parameterize requests (e.g., credentials, product IDs, or order payloads). You may use one or more CSV files, as appropriate for your workflow.
 - **Use three different report views.** Across the three test plans, use three distinct listener / report types (e.g., View Results Tree, Summary Report, Aggregate Report); do not repeat a type. *(JMeter terminology; k6 users provide the equivalent distinct outputs.)*
 - **Name each test plan** `{StudentID}_{ScenarioType}_{YYYYMMDD}`.
 - **Review and fix (human review).** Critically review the AI-generated test plans and correct them. Report what the AI got wrong or missed — for example, unrealistic ramp-up or think-time, wrong thread counts, weak assertions, or missing account-lockout handling — and explain *why* it missed them (prompt quality, model limitations, or characteristics of the endpoint). You are fully responsible for the final test plans.
-- **Run as completely as possible, with evidence.** Execute the three scenarios and capture, for each run, a screenshot of the tool together with the backend process's resource usage (htop / Task Manager / Activity Monitor), plus a hardware report (a dxdiag / screenfetch screenshot and a spec table). When Stress/Spike runs trigger the 3-fail login lockout, reset it between runs and document the steps. Produce the raw `.jtl` logs and the HTML report folders.
+- **Run as completely as possible, with evidence.** Execute all three scenarios and capture, for each run, a screenshot of the tool together with the backend process's resource usage (htop / Task Manager / Activity Monitor), plus a hardware report (a dxdiag / screenfetch screenshot and a spec table). When Stress/Spike runs trigger the 3-fail login lockout, reset it between runs and document the steps. Produce the raw `.jtl` logs and the HTML report folders.
 - **Determine the endurance threshold.** Run a short endurance / soak test (around 10–15 minutes at sustained load) to empirically find your hardware's threshold, reported with concrete numbers (e.g., maximum stable RPS, memory ceiling).
 - **Record a demo video.** An unlisted YouTube video of **at least 6 minutes total** (you may split it into one clip per scenario), showing the tool and the resource monitor **in the same frame**, with your own Vietnamese narration.
 - **Report issues.** Log any genuine bugs or performance issues (error responses, crashes, functional regressions) on your GitHub Issues page with screenshots. Logging performance issues such as high latency or elevated error rate is encouraged but not penalised if absent.
