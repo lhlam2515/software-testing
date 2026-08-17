@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<title>23127216 — Load Test Report (2026-08-17T12:06:18.193Z)</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 2rem; color: #0A3A45; }
+  h1 { font-size: 1.25rem; }
+  table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+  th, td { border: 1px solid #d0d7d8; padding: 0.5rem 0.75rem; text-align: right; font-variant-numeric: tabular-nums; }
+  th:first-child, td:first-child { text-align: left; }
+  th { background: #12707F; color: white; }
+  tr:nth-child(even) { background: #f4f8f8; }
+  caption { text-align: left; font-size: 0.85rem; color: #5B6B70; margin-bottom: 0.5rem; }
+</style>
+</head>
+<body>
+  <h1>23127216 — Load Test Aggregate Report</h1>
+  <p>Scenario: Load (peak 80 VU, 60s ramp-up / 300s hold / 30s ramp-down, 390s total).
+     Run duration measured: 394.0s.</p>
+  <table>
+    <caption>One row per journey step. Error rate = 1 - checks{step:x} pass rate (business-contract checks,
+      not just HTTP status — see lib/journey.js). Throughput = step count / total run duration.</caption>
+    <thead>
+      <tr>
+        <th>Step</th><th>Count</th><th>Error rate</th>
+        <th>p50 (ms)</th><th>p90 (ms)</th><th>p95 (ms)</th><th>p99 (ms)</th>
+        <th>Throughput (req/s)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+    <td>login</td>
+    <td>80</td>
+    <td>0.00%</td>
+    <td>1.12</td>
+    <td>1.52</td>
+    <td>1.98</td>
+    <td>12.95</td>
+    <td>0.20</td>
+  </tr>
+<tr>
+    <td>search</td>
+    <td>4636</td>
+    <td>0.00%</td>
+    <td>0.91</td>
+    <td>3.47</td>
+    <td>4.30</td>
+    <td>6.16</td>
+    <td>11.77</td>
+  </tr>
+<tr>
+    <td>cart</td>
+    <td>4636</td>
+    <td>0.00%</td>
+    <td>0.71</td>
+    <td>0.96</td>
+    <td>1.08</td>
+    <td>1.42</td>
+    <td>11.77</td>
+  </tr>
+<tr>
+    <td>checkout</td>
+    <td>4636</td>
+    <td>0.00%</td>
+    <td>5.19</td>
+    <td>10.16</td>
+    <td>10.86</td>
+    <td>13.51</td>
+    <td>11.77</td>
+  </tr>
+    </tbody>
+  </table>
+</body>
+</html>
