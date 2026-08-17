@@ -39,4 +39,4 @@ Bugs / performance issues:
 
 ## Links
 
-- Demo video link: `MANUAL ACTION REQUIRED: Insert unlisted YouTube demo URL.`
+- Demo video link: `https://youtu.be/2iNwzWi6pEo`
