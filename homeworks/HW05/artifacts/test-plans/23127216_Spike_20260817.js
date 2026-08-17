@@ -34,9 +34,32 @@
 
 import http from 'k6/http';
 import { check, sleep } from 'k6';
-import { BASE_URL, jsonParams } from './config.js';
+import { BASE_URL, ACCOUNTS, jsonParams } from './config.js';
 import { authCredentials, readKeywords, cartCheckoutPayloads } from './lib/csvData.js';
 import { shopJourney, thresholds as journeyThresholds } from './lib/journey.js';
+
+// Edge case 2 — lockout budget, computed once at init, not guessed:
+//   - pool = ACCOUNTS.length real accounts (200).
+//   - server.js:54 adds +2 login_attempts per wrong-password attempt;
+//     server.js:56 locks once login_attempts >= 3 -> exactly 2 CONSECUTIVE
+//     fails on the SAME account are enough to lock it (0 -> 2 -> 4).
+//   - Budget ceiling: this probe must not push more than 5% of the pool
+//     into a locked state before the pool "cạn" (is exhausted) during a
+//     single Spike run -> floor(200 * 0.05) = 10 accounts max.
+// auth_credentials.csv currently ships 5 valid_flag=false rows (1 dedicated
+// account per lockoutProbe VU) = 5/200 = 2.5%, comfortably under the 10
+// budget. The check below is a fail-fast guard, not decoration: if
+// auth_credentials.csv is ever edited to add more invalid rows without
+// recomputing this budget, the run aborts at init instead of silently
+// locking out more of the pool than intended.
+const LOCKOUT_BUDGET_ACCOUNTS = Math.floor(ACCOUNTS.length * 0.05);
+const invalidAccountRows = authCredentials.filter((r) => r.valid_flag === 'false');
+if (invalidAccountRows.length > LOCKOUT_BUDGET_ACCOUNTS) {
+  throw new Error(
+    `lockout-probe budget exceeded: ${invalidAccountRows.length} valid_flag=false accounts > ` +
+      `${LOCKOUT_BUDGET_ACCOUNTS} (5% of the ${ACCOUNTS.length}-account pool) — trim auth_credentials.csv`,
+  );
+}
 
 export const options = {
   scenarios: {
@@ -95,18 +118,20 @@ export function spikeJourney() {
 // valid_flag=false row (5 consecutive VU ids mod 5 always covers all 5
 // residues exactly once, regardless of the absolute VU numbers k6 hands
 // this scenario, so this stays collision-free without needing to know
-// k6's VU-id allocation across scenarios). 3 iterations per VU walks the
-// documented lockout mechanics on that one account:
-//   iter 1: login_attempts 0 -> 2 (server.js:54, newAttempts=0+2, still <3)
-//           -> 401 "Invalid email or password" (wrong-password path)
-//   iter 2: login_attempts 2 -> 4 (newAttempts=2+2=4, >=3) -> server.js:56-57
-//           sets locked_until = now+180s on THIS SAME request, but the
-//           response is still 401 — the lockout check (server.js:40, "is
-//           locked_until in the future") runs BEFORE the password compare,
-//           so it only blocks attempts AFTER this one, not this one itself.
-//   iter 3: locked_until is now in the future -> rejected at server.js:40-44
-//           with 403 (not a 401) BEFORE the password is even checked — this
-//           is the request that actually proves the lockout tripped.
+// k6's VU-id allocation across scenarios). 3 iterations per VU (__ITER is
+// 0-indexed) walks the documented lockout mechanics on that one account:
+//   __ITER=0: login_attempts 0 -> 2 (server.js:54, newAttempts=0+2, <3)
+//             -> 401 "Invalid email or password" (wrong-password path)
+//   __ITER=1: login_attempts 2 -> 4 (newAttempts=2+2=4, >=3) -> server.js:56-57
+//             sets locked_until = now+180s on THIS SAME request, but the
+//             response is still 401 — the lockout check (server.js:40, "is
+//             locked_until in the future") runs BEFORE the password compare,
+//             so it only blocks attempts AFTER this one, not this one itself.
+//   __ITER=2: locked_until is now in the future -> rejected at server.js:40-44
+//             with 403 (not a 401, not a 429) BEFORE the password is even
+//             checked — this is the request that actually proves the
+//             lockout tripped, and the only one where the check below
+//             expects 403 rather than 401.
 // Known residual risk (documented, not hidden — see EXECUTION_PLAN.md
 // convention): at Spike's 200-VU peak, the main spikeJourney scenario maps
 // every account in the pool (VU % 200), including 195-199, so a real
@@ -115,8 +140,7 @@ export function spikeJourney() {
 // always resets the counter). At 5/200 accounts this is a low-probability
 // event, not a zero one.
 export function lockoutProbe() {
-  const invalidRows = authCredentials.filter((r) => r.valid_flag === 'false');
-  const row = invalidRows[(__VU - 1) % invalidRows.length];
+  const row = invalidAccountRows[(__VU - 1) % invalidAccountRows.length];
 
   const res = http.post(
     `${BASE_URL}/api/login`,
@@ -124,15 +148,24 @@ export function lockoutProbe() {
     jsonParams('lockout-probe'),
   );
 
-  // 401 = wrong password, still under the lockout threshold (iter 1-2).
-  // 403 = the lockout itself tripped (iter 3, expected once attempts>=3 —
-  // server.js:40-44). A 200 here would mean the CSV row's password
-  // accidentally matches the real one — the actual bug this check exists
-  // to catch.
+  // __ITER is 0-indexed per VU, so it lines up exactly with the 3-step
+  // mechanics documented above: iter 0-1 are the two wrong-password
+  // attempts (must be 401), iter 2 is the first attempt made AFTER
+  // login_attempts crossed >=3 on iter 1, so it MUST be the lockout
+  // response specifically. Checking "401 or 403" on every iteration would
+  // let a broken lockout (e.g. a bug that keeps returning 401 forever
+  // instead of ever locking) pass silently — asserting the EXACT expected
+  // status per iteration is what actually proves the lockout tripped.
+  // That expected status is 403 (server.js:40-44) — not 429, which is the
+  // more common rate-limit convention elsewhere but not what this backend
+  // implements.
+  const expectLocked = __ITER >= 2;
+  const expectedLabel = expectLocked ? '403 (locked)' : '401 (wrong password)';
   check(
     res,
     {
-      'lockout-probe: rejected (401 wrong password or 403 locked)': (r) => r.status === 401 || r.status === 403,
+      [`lockout-probe: iter ${__ITER} returns ${expectedLabel}`]: (r) =>
+        expectLocked ? r.status === 403 : r.status === 401,
     },
     { step: 'lockout-probe' },
   );

@@ -31,6 +31,13 @@ function think(min = THINK_MIN, max = THINK_MAX) {
 export const reloginTotal = new Counter('journey_relogin_total');
 export const loginFailureTotal = new Counter('journey_login_failure_total');
 export const searchNonJsonTotal = new Counter('journey_search_non_json_total');
+// Edge case 3 (soak/long-running token expiry): counts mid-iteration
+// self-heal re-logins, distinct from reloginTotal (which only fires when
+// token is ALREADY null at the top of an iteration). Non-zero here across
+// a soak run means something invalidated live tokens mid-flight (backend
+// restart, secret rotation) — worth flagging in REPORT even though the
+// journey recovered on its own.
+export const tokenExpiredMidRunTotal = new Counter('journey_token_expired_mid_run_total');
 
 // Per-step check-rate thresholds, keyed by the `step` tag every check()
 // below is tagged with (see jsonParams/authParams in config.js for the
@@ -203,6 +210,14 @@ export function shopJourney(overrides = {}) {
   think(); // pause to "read" the search results before adding to cart
 
   group('add to cart', function () {
+    // Edge case 4: deliberately NOT reading/validating existing cart state
+    // here — userCarts is in-memory, unbounded, per-user (BUG-05-LAM-003),
+    // so a real client's cart is never empty by the time a soak run has
+    // been going for a while. This step only ever POSTs an addition; it
+    // never assumes (and never needs to know) how many items are already
+    // in the cart. Resetting that in-memory state between runs is a
+    // session-level concern (teardown_testbed.sh), not this script's job.
+    //
     // overrides.productId (from cart_checkout_payloads.csv) takes priority
     // over the id a real search just returned — this is how BVA rows at the
     // product-id pool boundary (1, 2005) get exercised even when the random
@@ -232,7 +247,18 @@ export function shopJourney(overrides = {}) {
       },
       { step: 'cart' },
     );
-    if (res.status === 401) token = null; // stale/invalidated token
+    if (res.status === 401) {
+      // Edge case 3: the JWT itself has no `expiresIn` (server.js:51), so
+      // this should not happen in theory — but it's still the only signal
+      // available that a token went stale mid-run (backend restart between
+      // login and here, secret rotation, etc.). Re-login IMMEDIATELY,
+      // synchronously, instead of just nulling `token`: nulling it would
+      // leave checkout (right below, same iteration) still holding the
+      // dead token and failing too, wasting the whole rest of this
+      // iteration before the fix kicks in on the NEXT one.
+      tokenExpiredMidRunTotal.add(1);
+      token = login();
+    }
   });
 
   think(); // pause to "review the cart" before paying — same env-tunable bounds as
@@ -266,6 +292,12 @@ export function shopJourney(overrides = {}) {
       },
       { step: 'checkout' },
     );
-    if (res.status === 401) token = null; // stale/invalidated token
+    if (res.status === 401) {
+      // Edge case 3, same rationale as the cart step above: re-login now so
+      // the token is already fresh for this VU's NEXT iteration, instead of
+      // starting that iteration with a token already known to be dead.
+      tokenExpiredMidRunTotal.add(1);
+      token = login();
+    }
   });
 }
