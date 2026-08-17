@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="23127543 Endurance Test" enabled="true">
+      <stringProp name="TestPlan.comments">Endurance soak test copied from the stable Load plan and extended to 900 seconds.</stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="PROTOCOL" elementType="Argument"><stringProp name="Argument.name">PROTOCOL</stringProp><stringProp name="Argument.value">${__P(PROTOCOL,http)}</stringProp></elementProp>
+          <elementProp name="HOST" elementType="Argument"><stringProp name="Argument.name">HOST</stringProp><stringProp name="Argument.value">${__P(HOST,localhost)}</stringProp></elementProp>
+          <elementProp name="PORT" elementType="Argument"><stringProp name="Argument.name">PORT</stringProp><stringProp name="Argument.value">${__P(PORT,3000)}</stringProp></elementProp>
+          <elementProp name="ADMIN_EMAIL" elementType="Argument"><stringProp name="Argument.name">ADMIN_EMAIL</stringProp><stringProp name="Argument.value">${__P(ADMIN_EMAIL,admin@eshop.com)}</stringProp></elementProp>
+          <elementProp name="ADMIN_PASSWORD" elementType="Argument"><stringProp name="Argument.name">ADMIN_PASSWORD</stringProp><stringProp name="Argument.value">${__P(ADMIN_PASSWORD,Admin123!)}</stringProp></elementProp>
+          <elementProp name="TARGET_ORDER_STATUS" elementType="Argument"><stringProp name="Argument.name">TARGET_ORDER_STATUS</stringProp><stringProp name="Argument.value">${__P(TARGET_ORDER_STATUS,confirmed)}</stringProp></elementProp>
+          <elementProp name="ORDER_TOTAL_AMOUNT" elementType="Argument"><stringProp name="Argument.name">ORDER_TOTAL_AMOUNT</stringProp><stringProp name="Argument.value">${__P(ORDER_TOTAL_AMOUNT,250000)}</stringProp></elementProp>
+          <elementProp name="SHIPPING_ADDRESS" elementType="Argument"><stringProp name="Argument.name">SHIPPING_ADDRESS</stringProp><stringProp name="Argument.value">${__P(SHIPPING_ADDRESS,123 Test Street Ho Chi Minh City)}</stringProp></elementProp>
+          <elementProp name="THREADS" elementType="Argument"><stringProp name="Argument.name">THREADS</stringProp><stringProp name="Argument.value">${__P(THREADS,10)}</stringProp></elementProp>
+          <elementProp name="RAMP_UP" elementType="Argument"><stringProp name="Argument.name">RAMP_UP</stringProp><stringProp name="Argument.value">${__P(RAMP_UP,60)}</stringProp></elementProp>
+          <elementProp name="DURATION" elementType="Argument"><stringProp name="Argument.name">DURATION</stringProp><stringProp name="Argument.value">${__P(DURATION,900)}</stringProp></elementProp>
+          <elementProp name="LOOPS" elementType="Argument"><stringProp name="Argument.name">LOOPS</stringProp><stringProp name="Argument.value">${__P(LOOPS,1)}</stringProp></elementProp>
+          <elementProp name="THINK_TIME_MS" elementType="Argument"><stringProp name="Argument.name">THINK_TIME_MS</stringProp><stringProp name="Argument.value">${__P(THINK_TIME_MS,250)}</stringProp></elementProp>
+        </collectionProp>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"/>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Endurance Thread Group" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController">
+          <boolProp name="LoopController.continue_forever">true</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">${THREADS}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${RAMP_UP}</stringProp>
+        <longProp name="ThreadGroup.start_time">0</longProp>
+        <longProp name="ThreadGroup.end_time">0</longProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">${DURATION}</stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Defaults" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments"><collectionProp name="Arguments.arguments"/></elementProp>
+          <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
+          <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
+          <stringProp name="HTTPSampler.port">${PORT}</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+        </ConfigTestElement>
+        <hashTree/>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Common Headers" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="" elementType="Header"><stringProp name="Header.name">Content-Type</stringProp><stringProp name="Header.value">application/json</stringProp></elementProp>
+            <elementProp name="" elementType="Header"><stringProp name="Header.name">Accept</stringProp><stringProp name="Header.value">application/json</stringProp></elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree/>
+        <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="Cookie Manager" enabled="true">
+          <boolProp name="CookieManager.clearEachIteration">true</boolProp>
+        </CookieManager>
+        <hashTree/>
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Workflow CSV Data" enabled="true">
+          <stringProp name="filename">../jmeter/data/workflow-data.csv</stringProp>
+          <stringProp name="fileEncoding">UTF-8</stringProp>
+          <stringProp name="variableNames">email,password,total_amount,shipping_address</stringProp>
+          <stringProp name="delimiter">,</stringProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+          <boolProp name="quotedData">true</boolProp>
+          <boolProp name="recycle">true</boolProp>
+          <boolProp name="stopThread">false</boolProp>
+          <stringProp name="shareMode">shareMode.all</stringProp>
+        </CSVDataSet>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

@@ -1,0 +1,14 @@
+flowchart TD
+  A[Git Commit] --> B[Detect Changed Files]
+  B --> C{Performance-sensitive Change?}
+  C -- No --> D[Skip / defer performance test]
+  D --> E[Record decision]
+  C -- Yes --> F[Start controlled test environment]
+  F --> G[Run performance test]
+  G --> H[Collect JTL]
+  H --> I[Calculate p95]
+  I --> J[Compare with baseline]
+  J --> K{p95 regression?}
+  K -- No --> L[PASS]
+  K -- Yes --> M[FLAG REGRESSION]
+  M --> N[Developer review]
