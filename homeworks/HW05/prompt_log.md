@@ -306,6 +306,7 @@ export const options = {
 
 export default shopJourney;
 ```
+
 ```
 
 ---
@@ -594,3 +595,112 @@ Tự kiểm tra (yêu cầu bắt buộc trong prompt):
 ```
 
 ---
+
+## Entry 007 | 18:06 17/08/2026
+
+**Tool:** Claude Code (Sonnet 5)
+**Task:** M2 — xử lý edge case (lockout budget, token hết hạn, giỏ hàng không rỗng) cho 3 test plan (Task 1)
+**Step:** P-7 (edge case handling)
+
+### Prompt
+
+```text
+Tiếp tục vai trò kỹ sư performance k6 ở trên. Bổ sung xử lý các edge case sau vào
+CẢ 3 script đã sinh ở bước trước (Load, Stress, Spike) — nêu rõ mỗi thay đổi áp
+dụng vào file nào:
+
+1. Sub-scenario cố ý fail login để chứng minh lockout: cần một nhóm VU riêng, số
+   lượng nhỏ (~5 VU), CHỈ dùng các dòng valid_flag=false trong
+   auth_credentials.csv (email thật trong pool + password sai — nhắc lại lần nữa:
+   KHÔNG được dùng email không tồn tại, vì email lạ không làm login_attempts tăng
+   nên sẽ không bao giờ trigger được lockout). Sub-scenario này chạy song song
+   trong Spike — KHÔNG được rải việc fail login vào toàn bộ traffic chính (traffic
+   chính dùng token cache theo VU nên chỉ login 1 lần/VU, không tạo fail nào).
+   Response lockout thật là status 403 (KHÔNG phải 429) kèm message tiếng Việt
+   "Tài khoản đã bị khóa..." — assertion của sub-scenario này phải check đúng 403,
+   không được giả định 429 dù đó là pattern phổ biến hơn ở các API khác.
+2. Ngân sách: pool có 200 account, mỗi account cần đúng 2 lần fail liên tiếp để
+   bị khóa (login_attempts +2/lần, khóa khi >=3). Tính trước, có công thức rõ
+   ràng, để fail rate của sub-scenario này không vượt 5% tổng account (10 account)
+   trước khi pool cạn trong suốt thời lượng chạy Spike.
+3. Xử lý token hết hạn/expired giữa run dài (soak) — script phải tự phát hiện
+   token hết hạn (ví dụ response 401 ở một step lẽ ra không nên fail) và
+   login lại, không để cả VU đó fail toàn bộ phần còn lại của run.
+4. Không cần cleanup giỏ hàng giữa run trong script (đã có teardown_testbed.sh ở
+   cấp session) — chỉ cần script không giả định giỏ hàng rỗng khi bắt đầu.
+
+Định dạng câu trả lời: với mỗi thay đổi, ghi rõ file bị sửa và đoạn code thêm/sửa
+tương ứng (không cần in lại toàn bộ file nếu phần không đổi).
+```
+
+### AI Output
+
+```text
+Cả 3 file vẫn parse/init đúng sau khi sửa. Tóm tắt các thay đổi:
+
+## Edge case 1 & 2 — Sub-scenario lockout + ngân sách 5%
+
+**File: `23127216_Spike_20260817.js`** (Load/Stress **không đổi** — đúng ý đồ, vì `valid_flag=false` chỉ được dùng trong sub-scenario riêng của Spike, không rải vào traffic chính của bất kỳ file nào)
+
+Thêm ngay sau import, tính ngân sách và tự chặn (fail-fast) nếu CSV bị sửa vượt ngưỡng:
+
+```js
+import { BASE_URL, ACCOUNTS, jsonParams } from './config.js';
+...
+const LOCKOUT_BUDGET_ACCOUNTS = Math.floor(ACCOUNTS.length * 0.05); // = 10
+const invalidAccountRows = authCredentials.filter((r) => r.valid_flag === 'false');
+if (invalidAccountRows.length > LOCKOUT_BUDGET_ACCOUNTS) {
+  throw new Error(`lockout-probe budget exceeded: ...`);
+}
+```
+
+Công thức: pool 200 account × 5% = 10 account là trần; mỗi account chỉ cần đúng 2 lần fail liên tiếp để khóa (server.js:54,56: `+2`/lần, khóa khi `>=3`). CSV hiện có 5 dòng `valid_flag=false` → 2.5%, dưới trần, và có "cầu chì" tự chặn nếu sau này thêm dòng vượt ngưỡng.
+
+`lockoutProbe()` sửa assertion từ "401 hoặc 403" (mơ hồ) thành check đúng theo `__ITER`:
+
+```js
+const expectLocked = __ITER >= 2; // 0-indexed: iter 0-1 = wrong password, iter 2 = đã khóa
+check(res, {
+  [`lockout-probe: iter ${__ITER} returns ${expectLocked ? '403 (locked)' : '401 (wrong password)'}`]:
+    (r) => (expectLocked ? r.status === 403 : r.status === 401),
+}, { step: 'lockout-probe' });
+```
+
+Đã đối chiếu `server.js` thật (dòng 40-44, 54-63): response khóa là **403** kèm message "Tài khoản đã bị khóa..." — không phải 429.
+
+## Edge case 3 — Token hết hạn giữa run dài
+
+**File: `lib/journey.js`** (dùng chung → tự động áp dụng cho cả Load/Stress/Spike, không cần sửa riêng từng file)
+
+Thêm counter quan sát + đổi `token = null` (chỉ null hoá, chờ iteration sau) thành re-login **ngay lập tức trong cùng iteration**, ở cả bước `cart` và `checkout`:
+
+```js
+export const tokenExpiredMidRunTotal = new Counter('journey_token_expired_mid_run_total');
+...
+// trong group('add to cart', ...) và group('checkout', ...):
+if (res.status === 401) {
+  tokenExpiredMidRunTotal.add(1);
+  token = login(); // tự heal ngay, không đợi iteration kế tiếp
+}
+```
+
+Lý do đổi: nếu chỉ `token = null` ở bước cart, bước checkout ngay sau đó trong **cùng iteration** vẫn dùng token cũ (đã chết) và fail tiếp — lãng phí cả phần còn lại của iteration. Re-login ngay giúp checkout cùng iteration (và mọi iteration sau) phục hồi mà không cần đợi vòng lặp kế.
+
+## Edge case 4 — Không giả định giỏ hàng rỗng
+
+**File: `lib/journey.js`** (dùng chung) — không cần đổi logic (bước cart vốn chỉ `POST` thêm item, chưa từng đọc/giả định số lượng item hiện có), chỉ thêm comment làm rõ đây là quyết định có chủ đích:
+
+```js
+group('add to cart', function () {
+  // Edge case 4: deliberately NOT reading/validating existing cart state
+  // here — userCarts is in-memory, unbounded, per-user (BUG-05-LAM-003),
+  // so a real client's cart is never empty by the time a soak run has
+  // been going for a while. This step only ever POSTs an addition...
+  // Resetting that in-memory state between runs is a session-level
+  // concern (teardown_testbed.sh), not this script's job.
+  const cartProductId = overrides.productId || productId || 1;
+  ...
+```
+
+Đã `node -c` + `k6 inspect` lại cả 3 file sau khi sửa — parse/init sạch, không lỗi.
+```
