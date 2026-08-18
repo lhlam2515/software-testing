@@ -704,3 +704,143 @@ group('add to cart', function () {
 
 Đã `node -c` + `k6 inspect` lại cả 3 file sau khi sửa — parse/init sạch, không lỗi.
 ```
+
+---
+
+## Entry 008 | 18:22 18/08/2026
+
+**Tool:** Claude Code (Sonnet 5)
+**Task:** M4 — hoàn thiện `BUG_REPORT.md` (Bug Summary + Detailed Findings), quét anomaly toàn bộ raw log, phân loại misinterpretation lockout ở Spike (Task 1 §6, chuẩn bị Task 2)
+**Step:** P-8 (bug report: viết đầy đủ finding + anomaly scan + phân loại đúng thiết kế/bug thật)
+
+### Prompt
+
+```text
+Vai trò: Bạn là kỹ sư performance testing, nhiệm vụ là đọc dữ liệu k6 thô đã
+thu thập cho SUT EShop (bài HW05, workflow login → search → cart → checkout)
+và soạn đầy đủ nội dung cho BUG_REPORT.md theo đúng template hiện có trong
+file, không đổi cấu trúc heading.
+
+Bối cảnh:
+- 4 scenario đã chạy thật và có evidence đầy đủ: Load (80VU), Stress (5 stage,
+  0->350VU), Spike (surge 200VU + sub-scenario lockout cố ý dùng sai mật
+  khẩu), Soak (80VU, ~10.5 phút).
+- 2 finding đã được tham chiếu ở nơi khác nhưng CHƯA viết đầy đủ vào
+  BUG_REPORT.md:
+  - BUG-05-LAM-003: RSS backend tăng liên tục không có dấu hiệu plateau
+    trong suốt soak run (70,768KB -> 216,444KB, +145,676KB / 10.47 phút),
+    nghi do mảng `userCarts` trong bộ nhớ không bao giờ được trim.
+  - BUG-05-LAM-007: `POST /api/checkout` không đọc từ cart đã tạo ở bước
+    trước, mà lấy `total_amount`/`shipping_address` thẳng từ request body,
+    nên cart và order bị tách rời về mặt logic.
+- Đã xác nhận trước 1 dòng lỗi thật, chưa đưa vào BUG_REPORT.md: trong
+  raw_stress.csv có 1 request `POST /api/cart` trả status=0, error
+  "read: connection reset by peer", tại stage3 (220VU), timestamp
+  1786975623. Dùng làm mẫu định dạng bằng chứng, KHÔNG bỏ qua nếu quét ra
+  thêm dòng khác tương tự.
+
+Nguồn dữ liệu (đọc theo đúng thứ tự ưu tiên):
+1. homeworks/HW05/README.md - mục "Test Summary" (số liệu tổng đã verify,
+   dùng làm nguồn số chính, không tính lại từ đầu).
+2. homeworks/HW05/REPORT.md - mục 3.1 (bảng workflow 4 bước, FR tương ứng)
+   để biết endpoint group và spec hành vi mong đợi.
+3. homeworks/HW05/BUG_REPORT.md - file đích, đọc template hiện tại trước khi
+   viết.
+4. homeworks/HW05/artifacts/results/raw/monitor_{load,stress,spike,soak}.csv
+   - cột timestamp,rss_kb,cpu_pct, dùng để lấy CPU/RSS đúng thời điểm mỗi
+   finding.
+5. homeworks/HW05/artifacts/results/raw/stress_percentiles_by_stage.json,
+   soak_summary.json, spike_console_summary.txt - số liệu đã tổng hợp sẵn.
+6. homeworks/HW05/artifacts/results/raw/raw_{load,stress,spike,soak}.csv -
+   log thô từng request. CẢNH BÁO: các file này nặng vài trăm MB
+   (raw_stress.csv ~200MB, raw_soak.csv ~235MB). KHÔNG đọc trực tiếp toàn bộ
+   file vào ngữ cảnh - viết một script Python ngắn (theo đúng cách
+   artifacts/scripts/analyze_raw.py đã làm) để lọc: mọi dòng có
+   metric_name=http_req_duration và status khác 200, hoặc field error khác
+   rỗng, rồi chỉ in ra danh sách rút gọn (timestamp, step, status, error,
+   url) - không paste nguyên file.
+7. docs/eshop-sut/srs.md - FR-02 (login/lockout), FR-05 (search), FR-07
+   (cart), FR-08 (checkout) để biết hành vi đúng theo spec, dùng phân biệt
+   "đúng thiết kế" với "bug thật".
+
+Nhiệm vụ, thực hiện tuần tự:
+1. Với BUG-05-LAM-003 và BUG-05-LAM-007: viết đầy đủ 2 entry theo đúng
+   template BUG_REPORT.md (Load conditions, Steps to reproduce, Expected
+   result, Actual result, Evidence với path + dòng cụ thể, Notes). Số liệu
+   lấy từ soak_summary.json và REPORT.md mục 3.1, không tính lại.
+2. Chạy script lọc mô tả ở nguồn số 6 trên cả 4 file raw log. Với mỗi dòng
+   anomaly tìm được (kể cả dòng connection-reset đã biết trước), đối chiếu
+   backend CPU/RSS tại đúng timestamp đó bằng monitor CSV tương ứng, rồi
+   viết thành 1 entry riêng nếu nó không trùng với 2 bug đã có ở bước 1.
+3. Với hành vi login FAIL rate=2.43% ở Spike (checks{step:login} threshold
+   breach, 7886/8083 request login fail): phân loại rõ đây là "đúng thiết
+   kế" (lockout kích hoạt theo FR-02) hay "bug thật" (vd: VU cứ retry login
+   liên tục không có backoff sau khi bị lock, gây tải rác không cần thiết) -
+   giải thích căn cứ vào FR-02 và vào tỉ lệ journey_login_failure_total so
+   với journey_relogin_total nếu có trong log.
+4. Phân loại mỗi finding: functional bug (error response/crash/regression)
+   hay performance issue (latency/error rate/resource). Gán severity theo
+   mức ảnh hưởng tới business invariant của EShop (ví dụ: đơn hàng tạo sai
+   dữ liệu = Critical, memory leak không tự hồi phục = High, 1 request bị
+   reset dưới tải đỉnh = Low hoặc Medium - tự giải thích lý do chọn mức).
+5. Điền lại toàn bộ bảng "Bug Summary" và từng block "Detailed Findings"
+   trong BUG_REPORT.md, đúng cấu trúc heading hiện có, không thêm/bớt mục.
+   Cột "GitHub Issue" ghi "Pending - to be filed" cho mọi finding chưa có
+   link thật, không bịa link.
+
+Yêu cầu output:
+- Trả về đúng nội dung Markdown sẵn sàng dán thay thế phần "Bug Summary" và
+  "Detailed Findings" hiện tại của BUG_REPORT.md.
+- Cuối cùng, liệt kê riêng: tổng số functional bug, tổng số performance
+  issue, và với mỗi finding là path + dòng/field cụ thể đã dùng làm bằng
+  chứng (để tôi tự kiểm tra lại theo yêu cầu human review bắt buộc của bài).
+
+Ràng buộc:
+- Không bịa số liệu hoặc suy đoán thay dữ liệu thật; mọi con số phải trích
+  dẫn được path và dòng/field cụ thể.
+- Nếu một finding chưa đủ bằng chứng để khẳng định chắc chắn, ghi rõ "needs
+  human verification" thay vì khẳng định sai.
+- Không tự sửa code SUT, không tự tạo GitHub Issue thật.
+- Không dùng ký tự "§" hoặc em-dash "—" trong nội dung viết ra (dùng
+  "section", dấu phẩy, hai chấm) - đúng convention style đã chốt cho các
+  deliverable của bài này.
+- Toàn bộ nội dung ghi vào BUG_REPORT.md viết bằng tiếng Anh, dù prompt này
+  viết tiếng Việt.
+```
+
+### AI Output
+
+```text
+Đã hoàn tất soạn nội dung Bug Summary và Detailed Findings cho `homeworks/HW05/BUG_REPORT.md`, giữ nguyên cấu trúc heading gốc, và đã commit (`0aa60a8`). Chưa push lên remote vì đây là worktree coursework mà bạn tự quản lý commit/push xuyên suốt các session trước, để bạn tự review rồi push khi sẵn sàng.
+
+## Kết quả phân loại
+
+- **Functional bug: 1** — BUG-05-LAM-007 (Critical)
+- **Performance issue: 3** — BUG-05-LAM-003 (High), BUG-05-LAM-008 (Low), BUG-05-LAM-009 (Low)
+
+## Bằng chứng để bạn tự kiểm tra lại (human review bắt buộc)
+
+**BUG-05-LAM-007** (checkout không đọc cart, nhận thẳng `total_amount` từ body, không xóa cart sau checkout):
+- `apps/backend/server.js:290-295` (`POST /api/cart` push vào `userCarts`) và `server.js:297-309` (`POST /api/checkout` không hề đụng tới `userCarts`)
+- `artifacts/test-plans/lib/journey.js:268-277` (comment xác nhận checkout không đọc cart)
+- `artifacts/results/raw/raw_load.csv:76` (cart, ts=1786967987, status=200) và `:247` (checkout, ts=1786967990, status=200)
+- `docs/eshop-sut/srs.md` mục FR-08
+
+**BUG-05-LAM-003** (RSS backend tăng liên tục, không plateau):
+- `apps/backend/server.js:14` (`const userCarts = {}`, không giới hạn)
+- `artifacts/results/raw/monitor_soak.csv:2` (70,768KB) → `:627` (216,444KB)
+- `artifacts/results/raw/soak_summary.json` khối `monitor`
+- Đối chứng chéo mới: `artifacts/results/raw/monitor_spike.csv:56,73,90,112-117` cho thấy RSS ở Spike cũng nhảy từ ~84MB lên ~230MB và không tụt lại, dù VU đã giảm về 0
+
+**BUG-05-LAM-008** (1 request `POST /api/cart` bị connection reset ở stage3/220VU của Stress):
+- `artifacts/results/raw/raw_stress.csv:683720-683728` (dòng `http_req_duration` cụ thể ở `:683721`), timestamp=1786975623, error_code=1220
+- `artifacts/results/raw/monitor_stress.csv:284` (14:07:02.833Z, rss_kb=139660, cpu_pct=17.3)
+- Đã quét toàn bộ 4 file raw (load/stress/soak/spike) bằng script, load và soak không có anomaly nào ngoài đã biết trước
+
+**BUG-05-LAM-009** (login fail 2.43% ở Spike, phân loại):
+- Toàn bộ 7,886 request login fail đều trả về **403 (locked)**, 0 request trả 401 — xác nhận bằng cách quét trực tiếp `raw_spike.csv` (không có trong bất kỳ file tổng hợp có sẵn nào, tôi tự tính trong phiên này)
+- `apps/backend/server.js:32-44` cho thấy check `locked_until` chạy trước khi so mật khẩu → 403 chứng minh account đã bị khóa từ trước, không phải do traffic của chính Spike gây ra (vì VU:account là ánh xạ 1:1 ở đỉnh 200VU)
+- `artifacts/test-plans/23127216_Spike_20260817.js:31-32` (comment gốc cảnh báo `perf_user_195..199` còn khóa từ lần chạy trước nếu quên chạy `reset_lockout.js`)
+- `artifacts/test-plans/lib/journey.js:154-157` (retry mỗi iteration, không backoff)
+- Kết luận: cơ chế lockout **đúng thiết kế theo FR-02**; phần đáng ghi nhận là thiếu throttling/`Retry-After` phía server + có thể do quên chạy `reset_lockout.js` trước run này. Số tài khoản bị ảnh hưởng chính xác **cần xác minh thủ công** vì raw log không có field VU/account.
+```
