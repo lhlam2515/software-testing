@@ -119,7 +119,7 @@ RSS climbs from 70,768 KB to 216,444 KB (max observed 223,492 KB) over the 10.47
 - Resource monitor (Soak): `artifacts/results/raw/monitor_soak.csv:2` (`2026-08-18T08:48:39.681Z`, `rss_kb=70768`), `artifacts/results/raw/monitor_soak.csv:627` (`2026-08-18T08:59:09.125Z`, `rss_kb=216444`)
 - Aggregated numbers: `artifacts/results/raw/soak_summary.json`, `monitor` block (`rss_growth_kb=145676`, `rss_growth_kb_per_min=13918.09`, `rss_monotonic_nondecreasing=false`, `cpu_steady_avg_pct=17.51`)
 - Cross-scenario corroboration (Spike): `artifacts/results/raw/monitor_spike.csv:56` (`07:57:24.162Z`, `rss_kb=93896`), `:73` (`07:57:41.293Z`, `rss_kb=216268`), `:90` (`07:57:58.408Z`, `rss_kb=226756`), `:112-117` (`07:58:20-25Z`, `rss_kb` holding at ~223,000-225,000, no drop)
-- Resource monitor screenshot: no Soak screenshot exists yet in `assets/screenshots/resource-monitor/` (only Load/Stress/Spike PNGs are present) - **needs human action**: capture a Soak resource-monitor screenshot before submission, the CSV-based evidence above stands on its own but the section 14 checklist expects a screenshot per run.
+- Resource monitor screenshot: `assets/screenshots/resource-monitor/23127216_Soak_20260817.png` (k6 running `23127216_Soak_20260817.js`, `monitor.sh` sampling backend PID 6863 into `monitor_soak.csv`, btop showing the `node` process's RES memory alongside)
 - GitHub Issue: Pending - to be filed
 
 **Notes**
