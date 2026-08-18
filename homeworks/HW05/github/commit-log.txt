@@ -1,0 +1,9 @@
+7cb1c03 (HEAD -> Vu/feat/HW02, origin/Vu/feat/HW02) add report
+a97943d endurance test
+94002c7 add AI Critique, video link
+ec69431 add main report, read_me.md, endurance test
+1b80e73 complete plans
+4376c0b update plans for new workflow
+b3cfff5 rewrite plans
+01613ca first commit HW05
+
