@@ -153,8 +153,10 @@ Evidence: `assets/screenshots/hardware/fastfetch.png`, hostname `FedoraOS` visib
 
 | Video | Content | Link | Duration |
 | ----- | ------- | ---- | -------- |
-| Main demo | Three scenarios, tool and resource monitor in the same frame, Vietnamese narration | TBD | TBD (6 minutes minimum in total) |
-| Agent Skill demo | End-to-end run of the skill on one complete endpoint group | TBD | TBD |
+| Main demo | Three scenarios, tool and resource monitor in the same frame, Vietnamese narration | Not produced | Not applicable |
+| Agent Skill demo | End-to-end run of the skill on one complete endpoint group | Not produced | Not applicable |
+
+> **Demo video note.** Neither video was produced. This is a deliberate, final decision, not an oversight or a pending item: the student is knowingly accepting the point deduction associated with this specific requirement (section 14, unlisted YouTube demo video) rather than submitting one.
 
 ---
 
@@ -182,7 +184,7 @@ Evidence: `assets/screenshots/hardware/fastfetch.png`, hostname `FedoraOS` visib
 - [x] Resource-monitor screenshots per run
 - [x] Hardware report screenshot and spec table
 - [x] Endurance / soak run with the threshold reported in numbers
-- [ ] Unlisted YouTube demo video, at least 6 minutes, tool + monitor in the same frame, own narration
+- [ ] Unlisted YouTube demo video, at least 6 minutes, tool + monitor in the same frame, own narration (not produced, deliberate decision, point deduction accepted, see Demo Videos section above)
 - [ ] AI Critique (200 to 300 words) and AI Audit Report, Markdown + PDF
 - [ ] Git commit log (`assets/commit-log.txt`), one commit per procedure step
 - [ ] Bug report with GitHub Issue screenshots

@@ -246,12 +246,12 @@ This soak run is the empirical basis for the answer to "determine the endurance 
 
 | Metric | Count |
 | ------ | ----- |
-| Functional bugs identified during design/execution | 2 confirmed so far: BUG-05-LAM-003 (unbounded in-memory `userCarts`, confirmed by the soak memory-leak measurement above), BUG-05-LAM-007 (checkout does not read from the cart populated in the previous step, section 3.1) |
-| Performance issues | 1: Stress's checkout latency cliff at 220 VU (16.6x jump, section 4.6.2), caused by no `busy_timeout`/WAL on the single SQLite writer (section 2.1) |
-| Open item, not yet a confirmed bug | Spike's login-failure storm during the 15 to 200 VU surge (section 4.6.3/4.7): root cause (SQLite write contention vs. a genuine login-endpoint concurrency bug) not yet isolated from the raw data |
-| Reported on GitHub Issues | Pending: full write-up with screenshots tracked in [BUG_REPORT.md](./BUG_REPORT.md), not yet completed as of this draft |
+| Functional bugs | 1: BUG-05-LAM-007, checkout does not read from the cart populated in the previous step and accepts a client-supplied `total_amount` (section 3.1), Critical severity |
+| Performance issues | 3: BUG-05-LAM-003 (unbounded in-memory `userCarts`, confirmed by the soak memory-leak measurement in section 4.8, High severity), BUG-05-LAM-008 (isolated connection reset at the Stress 220 VU breaking point, section 4.6.2, Low severity), BUG-05-LAM-009 (Spike's login retry-storm on already-locked accounts during the 15 to 200 VU surge, section 4.6.3/4.7, Low severity) |
+| Severity distribution | 1 Critical, 1 High, 0 Medium, 2 Low |
+| Reported on GitHub Issues | 4 of 4, each with a screenshot in `assets/screenshots/issues/`: BUG-05-LAM-007 as [#37](https://github.com/lhlam2515/software-testing/issues/37), BUG-05-LAM-003 as [#38](https://github.com/lhlam2515/software-testing/issues/38), BUG-05-LAM-008 as [#39](https://github.com/lhlam2515/software-testing/issues/39), BUG-05-LAM-009 as [#40](https://github.com/lhlam2515/software-testing/issues/40) |
 
-Full findings detail, reproduction steps, and screenshots: [BUG_REPORT.md](./BUG_REPORT.md) (currently a placeholder pending a dedicated write-up pass; the 2 confirmed bugs and 1 open item above are the ones with hard evidence already on record in this report and in `README.md`).
+Full findings detail, reproduction steps, evidence citations, and screenshots for all four issues above: [BUG_REPORT.md](./BUG_REPORT.md).
 
 ---
 
