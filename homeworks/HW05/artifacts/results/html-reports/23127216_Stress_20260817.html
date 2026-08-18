@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<title>23127216 — Stress Test Report (per-stage percentiles, recomputed from raw log)</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 2rem; color: #0A3A45; }
+  h1 { font-size: 1.25rem; }
+  table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+  th, td { border: 1px solid #d0d7d8; padding: 0.4rem 0.65rem; text-align: right; font-variant-numeric: tabular-nums; }
+  th:first-child, td:first-child { text-align: left; }
+  th { background: #7F3B12; color: white; }
+  tr:nth-child(even) { background: #faf6f3; }
+  tr.stage-sep td { background: #EFE3D8; font-weight: 600; text-align: left; color: #5B3B1E; }
+  tr.breaking { background: #FDE3E3; font-weight: 600; }
+  caption { text-align: left; font-size: 0.85rem; color: #5B6B70; margin-bottom: 0.5rem; }
+  .note { background: #FDE3E3; border: 1px solid #E88; padding: 0.75rem 1rem; border-radius: 4px; margin: 1rem 0; }
+</style>
+</head>
+<body>
+  <h1>23127216 — Stress Test Report</h1>
+  <p>Scenario: Stress (5 stages, 0 &rarr; 40 &rarr; 120 &rarr; 220 &rarr; 350 &rarr; 0 VU, 430s total).
+     Report mechanism: raw per-request log (<code>--out csv=</code>) with percentiles recomputed
+     <b>per load stage</b> by <code>analyze_raw.py</code> — deliberately not read off k6's own
+     end-of-run summary, so the breaking point is pinned to a specific VU stage instead of being
+     averaged away across the whole run (see README.md "Report views used").</p>
+  <div class="note">Breaking point: <b>stage3_break_120-220VU</b> (target 220 VU) — checkout p95 = 7093.2ms, error rate = 0.00%.</div>
+  <table>
+    <caption>One row per (load stage &times; journey step). Error rate = k6 <code>http_req_failed</code>
+      over that stage/step's samples. Percentiles recomputed with linear-interpolation from raw
+      <code>http_req_duration</code> samples (see analyze_raw.py).</caption>
+    <thead>
+      <tr>
+        <th>Step</th><th>Count</th><th>Error rate</th>
+        <th>p50 (ms)</th><th>p90 (ms)</th><th>p95 (ms)</th><th>p99 (ms)</th><th>Max (ms)</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="stage-sep"><td colspan="9">stage1_baseline_0-40VU (target 40 VU)</td></tr>
+<tr>
+    <td>login</td>
+    <td>40</td>
+    <td>0.00%</td>
+    <td>1.2</td>
+    <td>3.4</td>
+    <td>5.3</td>
+    <td>17.9</td>
+    <td>20.5</td>
+    <td></td>
+  </tr>
+<tr>
+    <td>search</td>
+    <td>2514</td>
+    <td>0.00%</td>
+    <td>1.1</td>
+    <td>5.0</td>
+    <td>7.6</td>
+    <td>20.9</td>
+    <td>47.5</td>
+    <td></td>
+  </tr>
+<tr>
+    <td>cart</td>
+    <td>2497</td>
+    <td>0.00%</td>
+    <td>0.7</td>
+    <td>1.0</td>
+    <td>1.2</td>
+    <td>2.3</td>
+    <td>23.0</td>
+    <td></td>
+  </tr>
+<tr>
+    <td>checkout</td>
+    <td>2474</td>
+    <td>0.00%</td>
+    <td>5.1</td>
+    <td>11.8</td>
+    <td>14.6</td>
+    <td>30.7</td>
+    <td>67.3</td>
+    <td></td>
+  </tr>
+<tr class="stage-sep"><td colspan="9">stage2_approach_40-120VU (target 120 VU)</td></tr>
+<tr>
+    <td>login</td>
+    <td>80</td>
+    <td>0.00%</td>
+    <td>1.8</td>
+    <td>8.8</td>
+    <td>16.3</td>
+    <td>77.4</td>
+    <td>214.6</td>
+    <td></td>
+  </tr>
+<tr>
+    <td>search</td>
+    <td>9341</td>
+    <td>0.00%</td>
+    <td>11.1</td>
+    <td>295.1</td>
+    <td>358.5</td>
+    <td>531.7</td>
+    <td>737.7</td>
+    <td></td>
+  </tr>
+<tr>
+    <td>cart</td>
+    <td>9297</td>
+    <td>0.00%</td>
+    <td>0.8</td>
+    <td>102.1</td>
+    <td>147.0</td>
+    <td>227.9</td>
+    <td>443.8</td>
+    <td></td>
+  </tr>
+<tr>
+    <td>checkout</td>
+    <td>9261</td>
+    <td>0.00%</td>
+    <td>14.2</td>
+    <td>345.9</td>
+    <td>427.5</td>
+    <td>587.4</td>
+    <td>741.2</td>
+    <td></td>
+  </tr>
+<tr class="stage-sep"><td colspan="9">stage3_break_120-220VU (target 220 VU)</td></tr>
+<tr>
+    <td>login</td>
+    <td>100</td>
+    <td>0.00%</td>
+    <td>214.1</td>
+    <td>1229.3</td>
+    <td>1358.5</td>
+    <td>1509.3</td>
+    <td>1650.8</td>
+    <td></td>
+  </tr>
+<tr>
+    <td>search</td>
+    <td>8296</td>
+    <td>0.00%</td>
+    <td>128.0</td>
+    <td>1306.8</td>
+    <td>1603.7</td>
+    <td>5054.0</td>
+    <td>10631.3</td>
+    <td></td>
+  </tr>
+<tr>
+    <td>cart</td>
+    <td>8319</td>
+    <td>0.01%</td>
+    <td>7.9</td>
+    <td>256.3</td>
+    <td>401.2</td>
+    <td>856.2</td>
+    <td>9070.9</td>
+    <td></td>
+  </tr>
+<tr class="breaking">
+    <td>checkout</td>
+    <td>8224</td>
+    <td>0.00%</td>
+    <td>154.5</td>
+    <td>1922.7</td>
+    <td>7093.2</td>
+    <td>10298.0</td>
+    <td>10846.2</td>
+    <td>&larr; breaking point</td>
+  </tr>
+<tr class="stage-sep"><td colspan="9">stage4_confirm_220-350VU (target 350 VU)</td></tr>
+<tr>
+    <td>login</td>
+    <td>130</td>
+    <td>0.00%</td>
+    <td>2010.8</td>
+    <td>4346.2</td>
+    <td>4761.2</td>
+    <td>5131.7</td>
+    <td>5248.9</td>
+    <td></td>
+  </tr>
+<tr>
+    <td>search</td>
+    <td>11647</td>
+    <td>0.00%</td>
+    <td>519.2</td>
+    <td>1869.7</td>
+    <td>2198.9</td>
+    <td>2763.0</td>
+    <td>3522.5</td>
+    <td></td>
+  </tr>
+<tr>
+    <td>cart</td>
+    <td>11642</td>
+    <td>0.00%</td>
+    <td>121.2</td>
+    <td>625.6</td>
+    <td>883.5</td>
+    <td>1407.9</td>
+    <td>2424.2</td>
+    <td></td>
+  </tr>
+<tr>
+    <td>checkout</td>
+    <td>11697</td>
+    <td>0.00%</td>
+    <td>684.2</td>
+    <td>2334.5</td>
+    <td>2553.3</td>
+    <td>2976.1</td>
+    <td>3517.5</td>
+    <td></td>
+  </tr>
+<tr class="stage-sep"><td colspan="9">stage5_rampdown_350-0VU (target 0 VU)</td></tr>
+<tr>
+    <td>login</td>
+    <td>0</td>
+    <td>0.00%</td>
+    <td>-</td>
+    <td>-</td>
+    <td>-</td>
+    <td>-</td>
+    <td>-</td>
+    <td></td>
+  </tr>
+<tr>
+    <td>search</td>
+    <td>1482</td>
+    <td>0.00%</td>
+    <td>317.8</td>
+    <td>2047.5</td>
+    <td>2079.6</td>
+    <td>2924.7</td>
+    <td>2937.5</td>
+    <td></td>
+  </tr>
+<tr>
+    <td>cart</td>
+    <td>1520</td>
+    <td>0.00%</td>
+    <td>15.5</td>
+    <td>304.9</td>
+    <td>485.0</td>
+    <td>1851.9</td>
+    <td>2355.7</td>
+    <td></td>
+  </tr>
+<tr>
+    <td>checkout</td>
+    <td>1610</td>
+    <td>0.00%</td>
+    <td>440.2</td>
+    <td>2733.6</td>
+    <td>2916.4</td>
+    <td>3074.9</td>
+    <td>3214.0</td>
+    <td></td>
+  </tr>
+    </tbody>
+  </table>
+  <p style="font-size:0.85rem;color:#5B6B70;margin-top:1rem;">
+    Source: <code>artifacts/results/raw/raw_stress.csv</code> &rarr;
+    <code>artifacts/scripts/analyze_raw.py</code> &rarr;
+    <code>artifacts/results/raw/stress_percentiles_by_stage.json</code> &rarr; this report.
+    Raw request-level log attached separately per section 14.
+  </p>
+</body>
+</html>
