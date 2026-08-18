@@ -906,3 +906,248 @@ Chưa push - để bạn tự review rồi push khi sẵn sàng, đúng quy ư�
 trước.
 ```
 
+---
+
+## Entry 010 | 00:37 19/08/2026
+
+**Tool:** Claude Code (Sonnet 5)
+**Task:** M2 — Task 2: phân tích raw log 4 scenario, đề xuất threshold + optimization (chưa review, deliberately isolated from BUG_REPORT.md/REPORT.md §4-5)
+**Step:** P-10 (Task 2, log-analysis + đề xuất, trước bước review riêng)
+
+### Prompt
+
+```text
+Vai trò: Bạn là kỹ sư performance testing, nhiệm vụ là đọc raw log k6 đã thu
+thập cho SUT EShop (bài HW05, workflow login -> search -> cart -> checkout,
+4 scenario: Load/Stress/Spike/Soak) rồi (a) đề xuất performance threshold cho
+từng bước của workflow và (b) đề xuất phương án optimization để khắc phục các
+điểm chưa tốt bạn phát hiện được. Đây KHÔNG phải bước review: bạn không tự
+đối chiếu lại số liệu của mình với ai khác, không tự chấm điểm feasible/
+hallucinated cho optimization của chính mình, không được đọc REPORT.md mục 4
+hay 5, BUG_REPORT.md, hay bất kỳ kết luận nào đã có sẵn về việc hệ thống có
+vấn đề gì — nếu đọc trước các file đó, việc bạn "phát hiện" lại chính xác các
+finding đã biết sẽ không còn giá trị làm bài tập review sau này. Hai việc đó
+(review + phân loại) sẽ do một prompt khác thực hiện sau, đối chiếu ngược lại
+output của bạn với raw log thật.
+
+CẢNH BÁO NGỮ CẢNH: `artifacts/results/raw/raw_stress.csv` và
+`artifacts/results/raw/raw_soak.csv` nặng vài trăm MB
+(raw_stress.csv ~200MB, raw_soak.csv ~235MB). TUYỆT ĐỐI không đọc trực tiếp
+bất kỳ file .csv/.json log thô nào vào ngữ cảnh (không cat/head một phần lớn,
+không paste nguyên dòng). Toàn bộ việc trích số liệu phải đi qua script Python
+ngắn: chỉ được đọc STDOUT hoặc file JSON tổng hợp mà script in ra/ghi ra, chưa
+bao giờ đọc trực tiếp một dòng dữ liệu thô nào bằng mắt bạn.
+
+Nguồn dữ liệu và script cần tái sử dụng (đọc theo đúng thứ tự):
+1. artifacts/scripts/analyze_raw.py - đã tồn tại, tính p50/p90/p95/p99 và
+   error rate theo (stage, step) cho Stress từ raw_stress.csv. Nếu
+   artifacts/results/raw/stress_percentiles_by_stage.json đã tồn tại và mới
+   hơn raw_stress.csv, dùng thẳng JSON đó, không chạy lại script. Nếu chưa có
+   hoặc cũ hơn, chạy lại: `python3 artifacts/scripts/analyze_raw.py
+   artifacts/results/raw/raw_stress.csv --out
+   artifacts/results/raw/stress_percentiles_by_stage.json`.
+2. artifacts/scripts/analyze_soak.py - đã tồn tại, tính overall per-step stats
+   + checkout theo từng phút + RSS/CPU cho Soak. Dùng thẳng
+   artifacts/results/raw/soak_summary.json nếu đã có và mới hơn 2 file input
+   của nó (raw_soak.csv, monitor_soak.csv), nếu không thì chạy lại script
+   theo đúng cú pháp trong docstring của file.
+3. artifacts/results/raw/spike_console_summary.txt và
+   artifacts/results/raw/ts_spike.json - đã có sẵn cho Spike. Đọc
+   spike_console_summary.txt trực tiếp (file nhỏ, là console summary đã tổng
+   hợp, không phải raw log). Nếu cần thêm số liệu theo mốc thời gian, dùng lại
+   logic bucket-theo-thời-gian của artifacts/scripts/build_spike_report.py
+   (đọc file này để hiểu cách nó parse ts_spike.json) thay vì tự viết lại từ
+   đầu hay đọc thẳng ts_spike.json bằng mắt.
+4. Load KHÔNG có script tổng hợp per-step sẵn. Viết một script mới
+   artifacts/scripts/analyze_load.py, theo đúng convention của
+   analyze_raw.py/analyze_soak.py đã đọc ở trên (cùng hàm percentile
+   linear-interpolation, cùng cách parse `step=` ra khỏi cột `extra_tags`,
+   không có tham số ẩn, có docstring nói rõ vì sao cần và input/output),
+   tính count/error_rate/p50/p90/p95/p99/max/rps tổng cho từng step
+   (login/search/cart/checkout) từ artifacts/results/raw/raw_load.csv, và
+   ghi ra artifacts/results/raw/load_summary.json. Chạy script này, không chỉ
+   viết ra rồi bỏ đó.
+5. artifacts/results/raw/monitor_{load,stress,spike,soak}.csv - cột
+   timestamp,rss_kb,cpu_pct, dùng để đối chiếu CPU/RSS backend tại các mốc bạn
+   nêu trong phân tích (không phải đọc toàn bộ, chỉ lấy min/max/avg qua script
+   nếu cần, ví dụ tái sử dụng summarize_monitor() trong analyze_soak.py cho
+   scenario khác nếu hợp lý).
+6. apps/backend/ (đọc trực tiếp mã nguồn, không giới hạn file cụ thể nào) -
+   để tự xác định điểm nghẽn kiến trúc thật (cách kết nối database, cách xử lý
+   query cho search/cart/checkout, có index/connection pool/WAL hay không,
+   v.v.) làm căn cứ cho phần optimization, thay vì suy đoán chung chung theo
+   kiểu web-stack phổ biến không gắn với SUT này.
+7. docs/eshop-sut/srs.md (FR-05 search, FR-07 cart, FR-08 checkout) và
+   docs/eshop-sut/api_specification.md - để biết hành vi/endpoint đúng theo
+   spec khi cần phân biệt "chậm do thiết kế" với "chậm do implementation".
+
+Nhiệm vụ, thực hiện tuần tự:
+1. Với mỗi trong 4 scenario (Load/Stress/Spike/Soak), lấy số liệu qua đúng
+   script/file tổng hợp tương ứng ở trên (không đọc raw CSV/JSON dòng theo
+   dòng). Tóm tắt ngắn gọn theo từng bước journey (login/search/cart/
+   checkout): count, error rate, p50/p90/p95/p99, rps, và backend CPU/RSS
+   liên quan nếu có.
+2. Từ 4 bộ số liệu đó, đề xuất một bảng performance threshold cho từng bước
+   journey mà hệ thống nên bị gate vào (dùng cho continuous testing sau này ở
+   Task 3): p95 latency threshold, p99 latency threshold (nếu có căn cứ),
+   error-rate threshold, và ngưỡng RPS/VU tối đa còn an toàn. KHÔNG chỉ copy
+   lại một con số hardcode có sẵn trong analyze_raw.py (biến BREAKING_P95_MS)
+   - đó là ngưỡng dùng để xác định breaking point lúc thiết kế Stress, không
+   phải threshold bạn đang được yêu cầu tự đề xuất ở đây. Mỗi threshold phải
+   nêu rõ: dựa trên scenario/file/field nào, và logic suy luận (ví dụ: lấy
+   p95 baseline khỏe mạnh từ Load, nhân với hệ số an toàn, đối chiếu với mốc
+   bắt đầu suy giảm quan sát được ở Stress).
+3. Đọc mã nguồn `apps/backend/` liên quan đến 4 bước journey, tự xác định tối
+   thiểu 4-6 điểm có thể optimize được (không giới hạn đúng 3 ví dụ trong đề:
+   database index, connection pool, SQLite WAL - có thể đề xuất thêm nếu tìm
+   thấy căn cứ thật trong code hoặc trong số liệu, ví dụ liên quan tới cách
+   `search` trả kết quả, cách `cart`/`checkout` được xử lý, hay bất cứ pattern
+   nào bạn quan sát được gây tốn tài nguyên). Với mỗi đề xuất: nêu rõ cơ chế
+   cụ thể đang có trong code (trích path/dòng nếu đọc được), thay đổi đề xuất,
+   và effect kỳ vọng lên số liệu nào ở bước 1 (ví dụ: "sẽ giảm p95 checkout ở
+   VU cao vì...").
+4. KHÔNG tự gán nhãn feasible/hallucinated cho bất kỳ đề xuất nào ở bước 3.
+   KHÔNG tự nhận xét đề xuất của mình đúng/sai. Việc đó nằm ngoài phạm vi
+   prompt này.
+
+Yêu cầu output, trả về nguyên trong câu trả lời (KHÔNG tự ý ghi vào REPORT.md,
+BUG_REPORT.md, hay prompt_log.md - chỉ ghi/chạy các file script + JSON tổng
+hợp mô tả ở nguồn số 1-4 ở trên), theo đúng 3 phần:
+
+A. "Raw Log Analysis Summary" - tóm tắt số liệu từng scenario theo bước 1,
+   viết bằng tiếng Anh (nội dung này sẽ được dán vào REPORT.md mục 5.1 và
+   prompt_log.md, cả hai đều viết tiếng Anh).
+B. "Suggested Performance Thresholds" - bảng: Step | Suggested p95 threshold
+   (ms) | Suggested error-rate threshold | Suggested max sustainable RPS/VU |
+   Justification (scenario + file/field dùng làm căn cứ). Tiếng Anh.
+C. "Proposed Optimizations" - bảng: # | Proposed optimization | Target
+   component (path/mechanism cụ thể trong apps/backend) | Expected effect
+   (đo được ở threshold/metric nào). Tiếng Anh. KHÔNG có cột Verdict/
+   Reasoning - cột đó sẽ do prompt review sau thêm vào.
+
+Cuối câu trả lời, liệt kê riêng (không thuộc 3 phần trên, có thể viết tiếng
+Việt): danh sách chính xác mọi file bạn đã đọc/chạy (path cụ thể), phân biệt
+rõ file nào là "đọc thẳng file tổng hợp có sẵn" và file nào là "tự chạy script
+để tạo ra" - để tôi tự kiểm tra lại quy trình.
+
+Ràng buộc:
+- Không bịa số liệu; mọi số trong phần A/B phải truy được ra script/file/field
+  cụ thể đã dùng.
+- Không đọc REPORT.md, BUG_REPORT.md, hay bất kỳ file nào trong
+  homeworks/HW05/ ngoài prompt_log.md (chỉ nếu cần tra cứu tên file test plan,
+  không đọc entry nội dung) và các file raw log/script/docs đã liệt kê ở trên.
+- Không đọc trực tiếp toàn bộ một file .csv/.json log thô nào bằng mắt - nếu
+  bạn thấy mình sắp làm vậy vì script hiện có không đủ, dừng lại và viết thêm
+  script thay vì đọc thô.
+- Không tự ý sửa apps/backend/ (chỉ đọc để phân tích, không patch code thật).
+- Không dùng ký tự "§" hoặc em-dash "—" trong nội dung phần A/B/C (dùng
+  "section", dấu phẩy, hai chấm) - đúng convention style đã chốt cho các
+  deliverable của bài này.
+- Script mới (analyze_load.py) phải có docstring giải thích lý do và
+  usage, theo đúng phong cách 2 script đã có.
+```
+
+### AI Output
+
+```text
+## A. Raw Log Analysis Summary
+
+**Load** (23127216_Load_20260817.js, ramping-vus 0 to 80 over 60s, hold 80 VU for 300s, ramp-down 30s. Source: raw_load.csv via newly-written analyze_load.py, output load_summary.json)
+
+| step | count | error% | rps | p50 | p90 | p95 | p99 | max |
+|---|---|---|---|---|---|---|---|---|
+| login | 80 | 0.00% | 0.2 | 1.1ms | 1.5ms | 2.0ms | 12.9ms | 21.1ms |
+| search | 4636 | 0.00% | 11.8 | 0.9ms | 3.5ms | 4.3ms | 6.2ms | 10.0ms |
+| cart | 4636 | 0.00% | 11.8 | 0.7ms | 1.0ms | 1.1ms | 1.4ms | 5.5ms |
+| checkout | 4636 | 0.00% | 11.8 | 5.2ms | 10.2ms | 10.9ms | 13.5ms | 42.5ms |
+
+Backend (monitor_load.csv): RSS 71,368KB to 144,564KB (growth 73,196KB over 12.55min, ~5,832KB/min), CPU avg 0.61%, max 1.9%.
+
+**Stress** (23127216_Stress_20260817.js, 5-stage ramp 0 to 40 to 120 to 220 to 350 to 0 VU. Source: raw_stress.csv, analyze_raw.py rerun since the existing JSON predated the current raw_stress.csv, output stress_percentiles_by_stage.json)
+
+| stage (VU) | step | count | err% | p50 | p90 | p95 | p99 | max |
+|---|---|---|---|---|---|---|---|---|
+| stage1 (40) | login | 40 | 0.00% | 1ms | 3ms | 5ms | 18ms | 21ms |
+| stage1 (40) | search | 2514 | 0.00% | 1ms | 5ms | 8ms | 21ms | 48ms |
+| stage1 (40) | cart | 2497 | 0.00% | 1ms | 1ms | 1ms | 2ms | 23ms |
+| stage1 (40) | checkout | 2474 | 0.00% | 5ms | 12ms | 15ms | 31ms | 67ms |
+| stage2 (120) | login | 80 | 0.00% | 2ms | 9ms | 16ms | 77ms | 215ms |
+| stage2 (120) | search | 9341 | 0.00% | 11ms | 295ms | 359ms | 532ms | 738ms |
+| stage2 (120) | cart | 9297 | 0.00% | 1ms | 102ms | 147ms | 228ms | 444ms |
+| stage2 (120) | checkout | 9261 | 0.00% | 14ms | 346ms | 427ms | 587ms | 741ms |
+| stage3 (220) | login | 100 | 0.00% | 214ms | 1229ms | 1358ms | 1509ms | 1651ms |
+| stage3 (220) | search | 8296 | 0.00% | 128ms | 1307ms | 1604ms | 5054ms | 10631ms |
+| stage3 (220) | cart | 8319 | 0.01% | 8ms | 256ms | 401ms | 856ms | 9071ms |
+| stage3 (220) | checkout | 8224 | 0.00% | 154ms | 1923ms | 7093ms | 10298ms | 10846ms |
+| stage4 (350) | login | 130 | 0.00% | 2011ms | 4346ms | 4761ms | 5132ms | 5249ms |
+| stage4 (350) | search | 11647 | 0.00% | 519ms | 1870ms | 2199ms | 2763ms | 3523ms |
+| stage4 (350) | cart | 11642 | 0.00% | 121ms | 626ms | 883ms | 1408ms | 2424ms |
+| stage4 (350) | checkout | 11697 | 0.00% | 684ms | 2334ms | 2553ms | 2976ms | 3517ms |
+| stage5 rampdown (0) | search/cart/checkout | 1482/1520/1610 | 0.00% | tail of the ramp-down window, still elevated (checkout p95 2916ms) | | | | |
+
+Script's own breaking-point detection (BREAKING_P95_MS=1000ms on checkout): stage3_break_120-220VU, checkout p95=7093ms. Backend (monitor_stress.csv): RSS 71,220KB to 123,536KB (max 195,532KB, growth 52,316KB over 8.4min, ~6,228KB/min), CPU avg 15.15%, max 25.2%.
+
+**Spike** (23127216_Spike_20260817.js, 15 to 200 VU surge over 5s, hold 30s, drop to 15 VU, 60s recovery hold, plus a dedicated lockoutProbe sub-scenario. Source: spike_console_summary.txt read directly, plus per-step overall stats recomputed from raw_spike.csv with an ad-hoc script reusing build_spike_report.py's step-tag parsing convention, not committed to the repo)
+
+| step | count | error% | rps | p50 | p90 | p95 | p99 | max |
+|---|---|---|---|---|---|---|---|---|
+| login | 8083 | 97.56% | 67.9 | 0.7ms | 12.5ms | 18.8ms | 40.2ms | 7143.5ms |
+| search | 3809 | 0.00% | 32.0 | 8.8ms | 1165.2ms | 3350.2ms | 5015.0ms | 7093.9ms |
+| cart | 3809 | 0.00% | 32.0 | 1.4ms | 198.3ms | 454.0ms | 2361.4ms | 4337.8ms |
+| checkout | 3711 | 0.00% | 31.2 | 12.1ms | 3392.6ms | 4593.0ms | 6737.2ms | 8054.6ms |
+
+Per spike_console_summary.txt's own note, the 97.56% login error rate is attributed to the intentional lockoutProbe sub-scenario (journey_login_failure_total 7886) plus journey.js's re-login-on-401 healing retries, not a capacity failure; login latency itself stays low (p95 18.8ms) through the surge. Console aggregate http_req_duration: avg 226.78ms, p90 93.47ms, p95 1.83s; http_req_failed 40.67% (7901/19427), overwhelmingly from login-step failures. Backend (monitor_spike.csv): RSS 71,496KB to 231,824KB (growth 160,328KB over just 2.57min, ~62,465KB/min, the steepest of the four), CPU avg 8.72%, max 28.3%.
+
+**Soak** (23127216_Soak_20260817.js, constant-vus 80, 10m. Source: soak_summary.json, already fresh versus its two inputs, read directly, no rerun needed)
+
+| step | count | error% | rps | p50 | p90 | p95 | p99 | max |
+|---|---|---|---|---|---|---|---|---|
+| login | 80 | 0.00% | 0.1 | 81.2ms | 118.4ms | 124.9ms | 127.3ms | 127.8ms |
+| search | 39280 | 0.00% | 59.5 | 4.5ms | 76.1ms | 131.9ms | 852.8ms | 4524.8ms |
+| cart | 39280 | 0.00% | 59.5 | 0.6ms | 21.8ms | 41.8ms | 129.7ms | 2540.7ms |
+| checkout | 39280 | 0.00% | 59.5 | 8.6ms | 91.9ms | 176.5ms | 1644.6ms | 4550.6ms |
+
+Checkout by minute (degradation-over-time): p95 62.8ms(min0), 187.9ms(min1), 189.8ms(min2), 1916.4ms(min3, spike), 1732.0ms(min4, still elevated), then back to 116 to 176ms range (min5 to 9), 10.2ms(min10, ramp-down tail); p99 mirrors the same shape, spiking to 3907.9ms (min3) and 3807.6ms (min4). Backend (monitor_soak.csv): RSS 70,768KB to 216,444KB (max 223,492KB, growth 145,676KB over 10.47min, ~13,918KB/min, monotonic_nondecreasing=false but net trend strongly upward), CPU avg 16.85%, max 29.0% (steady-state avg 17.51%, max 18.7%).
+
+---
+
+## B. Suggested Performance Thresholds
+
+| Step | Suggested p95 (ms) | Suggested p99 (ms) | Error-rate threshold | Max sustainable RPS/VU | Justification |
+|---|---|---|---|---|---|
+| login | 50 | 150 | 0.5% | up to 120 VU (RPS naturally low, about 1 request per VU at session start) | Load p95=2.0ms and Stress stage2(120VU) p95=16ms are both healthy; Stress stage3(220VU) p95=1358ms is the knee. 50/150ms sit with margin above the healthy points and well under the knee. Error-rate baseline is 0.00% in Load/Soak/Stress stage1-2; Spike's 97.56% aggregate is attributed by spike_console_summary.txt's own note to the intentional lockoutProbe sub-scenario, so it is not used as the basis for this gate. |
+| search | 100 | 250 | 0.5% | about 35 rps/step (about 40 VU) | Load p95=4.3ms (about 11.8rps) and Stress stage1(40VU, about 31rps) p95=8ms are healthy; Stress stage2(120VU, about 85rps) p95=359ms is a roughly 45x jump, the knee. Thresholds sit above both healthy points and below the knee. |
+| cart | 60 | 150 | 0.5% | 80 VU sustained, about 35 rps burst ceiling | Soak proves 80VU sustained for 10min holds at p95=41.8ms/p99=129.7ms, used as the sustained-load ceiling; Stress stage2(120VU, about 85rps) p95=147ms already exceeds it. Thresholds sit just above Soak's proven steady-state and below stage2. |
+| checkout | 100 | 300 | 0.5% | about 35 rps/step; 80 VU is short-burst-safe only, not proven sustained | Load p95=10.9ms (80VU, about 11.8rps) and Stress stage1(40VU, about 31rps) p95=15ms are healthy short-run baselines, but Soak (same 80VU, sustained 10min) shows checkout p95 spiking to 1916ms/1732ms in minutes 3 to 4 and an overall p95=176.5ms, i.e. the same VU count that looks safe in Load is not safe once sustained. 100/300ms sit above the two short-run healthy points and catch both the Soak minute-3/4 spike and the Stress stage2 p95=427ms knee. |
+
+---
+
+## C. Proposed Optimizations
+
+| # | Proposed optimization | Target component (path/mechanism) | Expected effect |
+|---|---|---|---|
+| 1 | Clear cart on checkout success, merge duplicate items on add instead of always pushing a new entry | apps/backend/server.js: `userCarts` in-memory object (line 14); POST /api/cart (lines 290-295) always does `userCarts[userId].push(req.body)`, never checking for an existing product id, which contradicts srs.md FR-07 ("adding the same product should increase quantity, not create a new row"); POST /api/checkout (lines 297-309) never clears `userCarts[userId]` after inserting the order, which contradicts srs.md FR-08 ("cart must be cleared after a successful checkout") | Should flatten Soak's RSS growth (currently +145,676KB over 10.47min, about 13,918KB/min per monitor_soak.csv), since the array behind each userId stops growing without bound across iterations; should also reduce cart p95/p99 in long sessions since GET/POST /api/cart no longer serialize an ever-growing array on every call. |
+| 2 | Enable SQLite WAL mode and set a busy_timeout | apps/backend/database.js: the `sqlite3.Database` connection is opened with no PRAGMA statements at all, no `journal_mode=WAL`, no `busy_timeout` | Should reduce checkout p95 at high concurrency (Stress stage3/220VU currently 7093ms, the detected breaking point) and reduce the collateral read-latency spikes on search/cart at the same stage (search p95 1604ms, cart p95 401ms at 220VU), by letting readers proceed without waiting on the default rollback-journal's exclusive write lock; should also reduce request failures caused by SQLITE_BUSY during Spike's surge. |
+| 3 | Replace the unindexed, leading-wildcard LIKE search with SQLite FTS5 (and parameterize the query) | apps/backend/server.js: GET /api/products (lines 141-157), `SELECT * FROM products WHERE name LIKE '%${searchQuery}%'` built via string interpolation against 2000 seeded rows (per seed_perf.js), with zero indexes defined anywhere in database.js's schema | Should keep search p95 flat as VU grows: currently p95 goes from 8ms (Stress stage1, 40VU) to 359ms (stage2, 120VU) to 1604ms (stage3, 220VU), much of which should be lock-wait time from item 2 rather than scan cost against only 2000 rows; FTS5 removes the remaining O(n) scan component so the two fixes are independently verifiable against search p95/p99. |
+| 4 | Add an index on users.email | apps/backend/database.js: users table schema (lines 50-61) has no UNIQUE/INDEX on `email`, so the login handler's `SELECT * FROM users WHERE email = ?` (server.js line 35) is a full table scan on every request | Should reduce login p50/p95 at higher VU (Stress stage3/220VU login p50=214ms, p95=1358ms against only 200 seeded users), isolating the scan cost from the lock-wait cost addressed in item 2. |
+| 5 | Skip the login-attempt UPDATE when nothing would change | apps/backend/server.js: POST /api/login success path (lines 46-50) unconditionally runs `UPDATE users SET login_attempts = 0, locked_until = NULL WHERE id = ?` even when `login_attempts` is already 0 and `locked_until` is already NULL | Should reduce the number of write-lock acquisitions per login under high login RPS (Spike's login rps=67.92/s during the surge), compounding with item 2 to shrink the write-serialization queue also shared with checkout. |
+| 6 | Split reads onto dedicated read-only connections (one-writer/many-readers pattern) | apps/backend/database.js: a single `sqlite3.Database` instance is shared by every route, GET and write alike; no separate connection pool exists for read-only routes (GET /api/products, /api/categories, /api/orders/my-orders, GET /api/cart) | Once WAL (item 2) is enabled, dedicated reader connections should stop search/cart-read from queuing behind checkout/login writes at high VU; expected to show up specifically in Stress stage3/stage4 (220/350VU) search and cart p95, and in Soak's checkout p95 minute-3/4 spike (1916ms/1732ms), since that same write load currently blocks reads on the single shared connection. |
+
+---
+
+Danh sách file đã đọc/chạy (không đọc raw CSV/JSON dòng theo dòng ở bất kỳ đâu):
+
+**Đọc thẳng file tổng hợp/nguồn có sẵn** (không tự chạy script để tạo ra):
+- `artifacts/results/raw/soak_summary.json` (đã mới hơn/cùng thời điểm với raw_soak.csv và monitor_soak.csv, đọc trực tiếp, không rerun)
+- `artifacts/results/raw/spike_console_summary.txt` (console summary nhỏ, có sẵn)
+- `artifacts/scripts/analyze_raw.py`, `artifacts/scripts/analyze_soak.py`, `artifacts/scripts/build_spike_report.py` (đọc để nắm convention và tái sử dụng logic parse tag/percentile)
+- `artifacts/test-plans/23127216_Load_20260817.js`, `artifacts/test-plans/23127216_Soak_20260817.js` (chỉ đọc phần `options` để lấy cấu hình VU/stage, không đọc log)
+- `artifacts/scripts/seed_perf.js` (đọc để biết scale dữ liệu seed: 2000 products, 200 users, 3000 orders)
+- `docs/eshop-sut/srs.md` (đọc FR-05, FR-07, FR-08)
+- `apps/backend/database.js`, `apps/backend/server.js` (đọc toàn bộ mã nguồn backend)
+
+**Tự chạy script để tạo ra/cập nhật số liệu**:
+- `python3 artifacts/scripts/analyze_raw.py artifacts/results/raw/raw_stress.csv --out artifacts/results/raw/stress_percentiles_by_stage.json` (rerun bắt buộc vì JSON cũ hơn raw_stress.csv theo mtime)
+- Viết mới `artifacts/scripts/analyze_load.py` rồi chạy `python3 artifacts/scripts/analyze_load.py artifacts/results/raw/raw_load.csv --out artifacts/results/raw/load_summary.json` (file trước đó chưa tồn tại)
+- Viết script tạm (không commit vào repo, đặt tại `$CLAUDE_JOB_DIR/tmp/spike_and_monitor_summary.py`), tái sử dụng logic parse `step=` trong `extra_tags` và `summarize_monitor()`, chạy trên `artifacts/results/raw/` để lấy: (a) per-step overall stats cho Spike từ `raw_spike.csv`, (b) RSS/CPU summary cho `monitor_load.csv`, `monitor_stress.csv`, `monitor_spike.csv`. Output chỉ in JSON ra stdout, không ghi file nào vào repo.
+```
