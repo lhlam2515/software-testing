@@ -105,21 +105,25 @@ Three of the four steps use different endpoints, and the narratives differ (cust
 
 | Scenario | Workflow | VUs (peak) | Duration | Requests | Error rate | p95 (ms) | RPS (avg) |
 | -------- | -------- | ---------- | -------- | -------- | ---------- | -------- | --------- |
-| Load | Login → search → cart → checkout | | | | | | |
-| Stress | Login → search → cart → checkout | | | | | | |
-| Spike | Login → search → cart → checkout (+ lockout sub-scenario) | | | | | | |
-| Endurance / soak | Login → search → cart → checkout | | | | | | |
+| Load | Login → search → cart → checkout | 80 | 394s | 13,988 | 0.00% | 10.86 (checkout) | 35.5 |
+| Stress | Login → search → cart → checkout | 350 | 430s | 100,171 | ~0.00% (0.012% peak, cart@220VU) | 7,093 (checkout, 220VU breaking point) | 233 |
+| Spike | Login → search → cart → checkout (+ lockout sub-scenario) | 200 | 121s (14:56:28–14:58:29) | 19,427 | 40.67% (`http_req_failed`) — see note below | 1,830 (overall `http_req_duration`) | 161.3 |
+| Endurance / soak | Login → search → cart → checkout | 80 | ~10.5min (628 monitor samples @ 1/s) | 117,920 | 0.00% | 176.5 (checkout, overall) | 178.5 (search+cart+checkout combined) |
+
+> **Spike error rate note:** `checks{step:login}` breached its threshold (2.43% pass rate) during the run — `journey_login_failure_total` = 7,886 and `journey_relogin_total` = 7,883 (nearly 1:1), meaning a batch of VUs failed to log in once during the 15→200VU surge and then kept retrying `/api/login` every iteration for the rest of the run instead of recovering, since journey.js has no retry backoff. `search`/`cart`/`checkout` checks all pass at 100% — the failure is isolated to the login step under the surge, not a full-journey failure. Root cause (SQLite write contention vs. a genuine login-endpoint bug under concurrent first-logins) not yet isolated from raw_spike.csv — flagged as an open item, not yet written up as a confirmed bug.
 
 ### Endurance Threshold (section 6, Task 1)
 
+Computed from the real Soak run (`23127216_Soak_20260817.js`: 80 VU, `constant-vus`, 10m + 30s gracefulStop) via `artifacts/scripts/analyze_soak.py` over `raw_soak.csv` (1.57M samples) and `monitor_soak.csv` (628 samples, 1/s) — see `artifacts/results/raw/soak_summary.json` for the full per-minute breakdown. Breaking-point row is cross-referenced from the Stress run (`stress_percentiles_by_stage.json`).
+
 | Metric | Value |
 | ------ | ----- |
-| Maximum stable RPS | TBD |
-| Breaking point (VUs at which error rate exceeds threshold) | TBD |
-| p95 latency at the stable ceiling | TBD |
-| Backend memory ceiling (RSS) | TBD |
-| Backend CPU at ceiling | TBD |
-| Soak duration | TBD (10 to 15 minutes required) |
+| Maximum stable RPS | 178.5 req/s (search+cart+checkout combined, 80 VU, 0% error, sustained 10 min — login excluded, it only fires once per VU) |
+| Breaking point (VUs at which error rate exceeds threshold) | Not reached by error rate — `http_req_failed` stays ~0% even at 350 VU in Stress. Real breaking point is a **latency** cliff: checkout p95 jumps from 427ms at 120 VU to 7,093ms at 220 VU (16.6x). Backend has no timeout/circuit-breaker, so it queues instead of erroring — see BUG_REPORT.md |
+| p95 latency at the stable ceiling | 176.5ms (checkout, 80 VU, whole 10-min soak) — note: minutes 3-4 show a transient spike to ~1,900ms p95 that self-recovered by minute 5, not a sustained regression |
+| Backend memory ceiling (RSS) | Not a ceiling — still climbing at end of run: 70,768KB → 216,444KB (max 223,492KB), +145,676KB over 10.47 min (~13.9MB/min), consistent with the unbounded in-memory `userCarts` array (BUG-05-LAM-003) |
+| Backend CPU at ceiling | 17.5% avg / 18.7% max (steady-state, excluding the first ~30s startup burst which peaked at 29%) — well under the <30% CPU-interference budget |
+| Soak duration | 10 minutes (`constant-vus`) + 30s `gracefulStop`, ~10.47 min measured end-to-end |
 
 ### Issues Found
 
