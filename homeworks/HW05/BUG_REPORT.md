@@ -41,6 +41,7 @@ Each finding is cross-linked to a GitHub Issue with a screenshot in `assets/scre
 **Endpoint group:** Transactional
 **Endpoint:** `POST /api/checkout`
 **Severity:** Critical, order and payment data can be created with arbitrary, cart-unrelated totals, which is a business-invariant violation, not a cosmetic defect.
+**GitHub Issue:** [#37](https://github.com/lhlam2515/software-testing/issues/37)
 
 **Load conditions when observed**
 
@@ -73,7 +74,7 @@ Per `docs/eshop-sut/srs.md` FR-08 ("Thanh toan (Checkout)"): "Backend phai tu ti
 - Test design confirmation: `artifacts/test-plans/lib/journey.js:268-277`, `artifacts/test-data/cart_checkout_payloads.csv:2-5` (checkout payloads carry a static `total_amount` independent of `product_id`/`quantity`)
 - Raw log: `artifacts/results/raw/raw_load.csv:76` (cart, `ts=1786967987`, `status=200`), `artifacts/results/raw/raw_load.csv:247` (checkout, `ts=1786967990`, `status=200`)
 - Spec: `docs/eshop-sut/srs.md`, FR-08 section (backend-side total recomputation and post-checkout cart clearing requirements)
-- GitHub Issue: [#37](https://github.com/lhlam2515/software-testing/issues/37), screenshot at `assets/screenshots/issues/BUG-05-LAM-007-issue-37.png`
+- GitHub Issue Screenshot: `assets/screenshots/issues/BUG-05-LAM-007-issue-37.png`
 
 **Notes**
 
@@ -88,6 +89,7 @@ Reproducible at a single request, not load-induced. Two distinct SRS violations 
 **Endpoint group:** Transactional
 **Endpoint:** `POST /api/cart`
 **Severity:** High, memory never plateaus or self-recovers within the observed window; left running in production this is an eventual OOM / crash risk, but no crash or error response was observed within the 10.47-minute test window, so it falls short of Critical.
+**GitHub Issue:** [#38](https://github.com/lhlam2515/software-testing/issues/38)
 
 **Load conditions when observed**
 
@@ -120,7 +122,7 @@ RSS climbs from 70,768 KB to 216,444 KB (max observed 223,492 KB) over the 10.47
 - Aggregated numbers: `artifacts/results/raw/soak_summary.json`, `monitor` block (`rss_growth_kb=145676`, `rss_growth_kb_per_min=13918.09`, `rss_monotonic_nondecreasing=false`, `cpu_steady_avg_pct=17.51`)
 - Cross-scenario corroboration (Spike): `artifacts/results/raw/monitor_spike.csv:56` (`07:57:24.162Z`, `rss_kb=93896`), `:73` (`07:57:41.293Z`, `rss_kb=216268`), `:90` (`07:57:58.408Z`, `rss_kb=226756`), `:112-117` (`07:58:20-25Z`, `rss_kb` holding at ~223,000-225,000, no drop)
 - Resource monitor screenshot: `assets/screenshots/resource-monitor/23127216_Soak_20260817.png` (k6 running `23127216_Soak_20260817.js`, `monitor.sh` sampling backend PID 6863 into `monitor_soak.csv`, btop showing the `node` process's RES memory alongside)
-- GitHub Issue: [#38](https://github.com/lhlam2515/software-testing/issues/38), screenshot at `assets/screenshots/issues/BUG-05-LAM-003-issue-38.png`
+- GitHub Issue Screenshot: `assets/screenshots/issues/BUG-05-LAM-003-issue-38.png`
 
 **Notes**
 
@@ -135,6 +137,7 @@ RSS climbs from 70,768 KB to 216,444 KB (max observed 223,492 KB) over the 10.47
 **Endpoint group:** Transactional
 **Endpoint:** `POST /api/cart`
 **Severity:** Low, a single occurrence out of 100,171 total Stress requests (0.001% of the run, 1/8,319 = 0.012% within its own stage/step bucket), not reproduced elsewhere in Load, Soak, or the rest of Stress, and it coincides with the already-documented latency cliff at the same 220 VU stage (checkout p95 jumps to 7,093ms in the same stage per README.md), so it reads as a symptom of the same peak-load saturation rather than a distinct defect.
+**GitHub Issue:** [#39](https://github.com/lhlam2515/software-testing/issues/39)
 
 **Load conditions when observed**
 
@@ -165,7 +168,7 @@ One `POST /api/cart` request (out of 8,319 cart requests in that stage) returned
 - Raw log: `artifacts/results/raw/raw_stress.csv:683720-683728` (the full metric block for this one request; `http_req_duration` row at `:683721`), `timestamp=1786975623`, `error="read: connection reset by peer"`, `error_code=1220`, `scenario=stress`, `step=cart`
 - Aggregated cross-check: `artifacts/results/raw/stress_percentiles_by_stage.json`, `stage3_break_120-220VU` / `step="cart"` row, `error_rate=0.00012020675561966583` (= 1/8,319), `count=8319`
 - Resource monitor: `artifacts/results/raw/monitor_stress.csv:284` (`2026-08-17T14:07:02.833Z`, `rss_kb=139660`, `cpu_pct=17.3`); screenshot at `assets/screenshots/resource-monitor/23127216_Stress_20260817.png`
-- GitHub Issue: [#39](https://github.com/lhlam2515/software-testing/issues/39), screenshot at `assets/screenshots/issues/BUG-05-LAM-008-issue-39.png`
+- GitHub Issue Screenshot: `assets/screenshots/issues/BUG-05-LAM-008-issue-39.png`
 
 **Notes**
 
@@ -180,6 +183,7 @@ Not reproducible on demand from the evidence available, this is a single sample,
 **Endpoint group:** Auth-heavy
 **Endpoint:** `POST /api/login`
 **Severity:** Low. The lockout mechanism itself matched FR-02 exactly and no incorrect data or user-facing correctness issue resulted; the finding is a missing hardening signal (no rate limiting / `Retry-After`) combined with a test-harness gap, not a SUT correctness defect.
+**GitHub Issue:** [#40](https://github.com/lhlam2515/software-testing/issues/40)
 
 **Load conditions when observed**
 
@@ -215,7 +219,7 @@ Per FR-02, an account should only lock after its own login failures reach the th
 - Code: `apps/backend/server.js:32-44` (lockout check precedes password comparison), `artifacts/test-plans/lib/journey.js:154-157` (no-backoff retry on null token), `artifacts/test-plans/23127216_Spike_20260817.js:31-32` (explicit comment: accounts `perf_user_195..199` are left locked from the previous run unless `reset_lockout.js` is run first), `artifacts/test-plans/config.js:23` (`ACCOUNTS` sized to `PERF_USER_COUNT`, confirmed 200 in `artifacts/test-data/auth_credentials.csv`'s companion pool)
 - Resource monitor: `artifacts/results/raw/monitor_spike.csv:56,73,90` (RSS climbing through the same window); screenshot at `assets/screenshots/resource-monitor/23127216_Spike_20260817.png`
 - Spec: `docs/eshop-sut/srs.md` FR-02 section
-- GitHub Issue: [#40](https://github.com/lhlam2515/software-testing/issues/40), screenshot at `assets/screenshots/issues/BUG-05-LAM-009-issue-40.png`
+- GitHub Issue Screenshot: `assets/screenshots/issues/BUG-05-LAM-009-issue-40.png`
 
 **Notes**
 
