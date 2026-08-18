@@ -290,55 +290,40 @@ No optimization was classified hallucinated. All 6 are grounded in the real back
 
 ## 6. Task 3 — Continuous Performance Testing proposal (G9.6)
 
-### 6.1 The model
-
-TBD: a pipeline that watches the SUT's commits, decides whether a performance run is warranted, executes it, and flags p95 regressions.
-
-### 6.2 Flow chart
-
-```mermaid
-flowchart TD
-    A[TBD] --> B[TBD]
-```
-
-### 6.3 Decision rules
-
-| Decision point | Rule | Rationale |
-| -------------- | ---- | --------- |
-| When to run | TBD | TBD |
-| Which scenario to run | TBD | TBD |
-| What counts as a regression | TBD | TBD |
-| What to do on a regression | TBD | TBD |
-
-### 6.4 Trade-offs
-
-| Trade-off | Discussion |
-| --------- | ---------- |
-| Compute cost per run vs coverage | TBD |
-| False alarms vs missed regressions | TBD |
-| Shared-runner noise vs dedicated hardware | TBD |
-| Blocking the merge vs reporting asynchronously | TBD |
+**Not completed.** This is a deliberate, final decision for this submission, not an oversight or a pending item: the student is knowingly accepting the 10-point deduction associated with this requirement (assessment template item 5) rather than submitting a rushed or under-substantiated design under the remaining time budget. The threshold table produced in Task 2 (§5.1) would have been the intended input to this proposal's regression-gate rule, but the model, flow chart, decision rules, and trade-off analysis itself were not designed. Disclosed in `[AI-02]_AI_Audit_Report.md` §6.
 
 ---
 
 ## 7. Agent Skill
 
-TBD: what the skill does, how it maps onto the workflow in Tasks 1 and 2, and how it is reused on a new endpoint group. Source in `artifacts/skills/`, demo video link in [README.md](./README.md).
+**Not completed.** Same deliberate decision as §6: the 10-point deduction for this requirement (assessment template item 6) is accepted rather than submitting a stub or an unreused skill. No skill source exists under `artifacts/skills/` beyond the placeholder directory, and no demo video was recorded. Disclosed in `[AI-02]_AI_Audit_Report.md` §6.
 
 ---
 
 ## 8. AI Critique (200 to 300 words)
 
-TBD. Must be student-written, not AI-generated (section 10). Address: where the AI got something wrong, biased, or incomplete; why it failed to catch the issue; what principle about collaborating with AI came out of this assignment.
+The recurring failure across this assignment was not a wrong number, it was the AI defaulting to whatever answer sounds standard instead of what this SUT actually does. The clearest case: it assumed the lockout response would be `423 Locked`, the RFC-conventional status for a locked resource, when the real backend returns `401` on the first two failed attempts and `403` only on the third, a distinction visible only by reading `server.js` directly (section 4.5, row 1). The same pattern drove the VU parameters: left unconstrained, every scenario proposal defaulted to round textbook values (50/100/200) instead of anything derived from the actual 4-core host or a calibration run, and it stopped only once every prompt explicitly forbade it (row 3). Task 2 repeated the pattern at a higher level: the AI attributed the Spike login failures to the `lockoutProbe` sub-scenario, a plausible read given the vocabulary already in the test plan, when the raw log shows `lockoutProbe` never touches the login step and the real cause is the main traffic mass-locking during the surge (section 5.2). None were fabrications; they were pattern-matches to the most common shape of a similar problem, and nothing in the AI's own output flagged the mismatch without a specific artifact checked against it: a source line, a log column, a hardware probe.
+
+The principle this leaves me with: fluency is not evidence, and confidence says nothing about whether a claim was checked. Every error here was caught by refusing to accept a claim until it pointed at something verifiable, and every claim accepted on the AI's first pass without that check turned out wrong. Going forward, that means treating AI output as a hypothesis to run the check against, not an answer.
 
 ---
 
 ## 9. Conclusion
 
-TBD.
+Task 1 and Task 2 are complete with real, attributable evidence. All four scenarios (Load, Stress, Spike, Soak) ran against the same four-step end-to-end journey (login → search → cart → checkout) spanning the three required endpoint groups, driven by AI-generated k6 test plans that were reviewed and corrected against the SUT's real source and lockout behaviour (§4.5, `[AI-02]_AI_Audit_Report.md` Artifacts #1–3). The soak run isolated a concrete, numeric endurance threshold on this hardware: 178.5 req/s stable at 80 VU, 0% error, with a real memory leak measured at +145,676KB RSS over 10.47 minutes (§4.8) — not a projected figure, a measured one. The Stress run found the real breaking point is a latency cliff (checkout p95 16.6x between 120 and 220 VU), not an error-rate breach, because the backend has no timeout or circuit-breaker and queues instead of failing. Task 2's AI-assisted analysis (Entry 010, deliberately isolated from the rest of this report) held up on independent re-derivation for every metric except one root-cause claim about the Spike login failure rate, which traced to a genuine load-triggered mass lockout, not the AI's cited mechanism (§5.2) — the single confirmed misinterpretation this assignment's methodology was designed to surface. All 6 of the AI's proposed optimizations were verified feasible against the real backend code, none hallucinated (§5.3).
+
+Task 3 (continuous performance testing proposal) and the Agent Skill (section 7) were not attempted for this submission, and the demo video (section 6, Task 1) was not recorded — three deliberate scope decisions, not oversights, made to keep the submitted work verified and evidence-backed rather than padded with unreviewed or fabricated content under the remaining time budget. The associated point deductions (assessment template items 5, 6, and part of items 1–3) are accepted. Two items remain genuinely open, not scope-cut: the workflow-level non-overlap confirmation with the other Group 02 member (§3.3), pending since 2026-08-13, and the Spike login-failure storm's underlying concurrency mechanism (SQLite write contention vs. a genuine login-endpoint bug), flagged in `BUG_REPORT.md` as an open item rather than a confirmed bug.
+
+The methodology's central finding is not about the SUT but about the AI: every AI mistake caught in this assignment (the `423` lockout-status assumption, the loose "401 or 403" assertion, the Spike root-cause misattribution) came from letting the AI default to a plausible-sounding convention instead of a checked fact, and every one was caught only once a prompt forced a specific source — a hardware probe, a source-code line, a raw log's own status-code column — before the AI was allowed to answer. That pattern, not any single number in this report, is the reusable result.
 
 ---
 
 ## References
 
-TBD.
+- ISTQB Foundation Level Syllabus (latest edition) — testing objectives and terminology underlying the Load/Stress/Spike/Soak design (§4) and the boundary-value reasoning applied to the account-lockout assertion (§4.5, `[AI-02]_AI_Audit_Report.md` Artifact #3).
+- k6 documentation, Grafana Labs — executor semantics (`ramping-vus`), `SharedArray`, `handleSummary()`, and output modes (`--out csv=`, `--out json=`) underlying all three test plans (§4.4, `artifacts/test-plans/`).
+- Little, J. D. C. — Little's Law (queueing theory), applied informally to derive the Load scenario's VU/think-time/write-rate relationship (§4.2, prompt_log.md Entry 002).
+- Hardman, P. (2025). *A Post-AI Learning Taxonomy.* — source of the G9.1–G9.6 Bloom-AI levels this assignment targets (`REQUIREMENTS.md` §3).
+- Kharbach, M. (2026). *AI Use Policy Templates for Higher Education.* CC BY-NC-SA 4.0. — source template for `[AI-02]_AI_Audit_Report.md`, `[AI-03]_AI_Disclosure_Form.md`, and `[AI-05]_AI_Privacy_Checklist.md`.
+- `docs/eshop-sut/srs.md`, `docs/eshop-sut/api_specification.md` — SUT behaviour contract cited throughout §3–5 (FR-02, FR-05, FR-07, FR-08).
+- `apps/backend/server.js`, `apps/backend/database.js` — SUT source consulted directly for the lockout logic (§4.5), the optimization feasibility verdicts (§5.3), and the bug findings in `BUG_REPORT.md`.
