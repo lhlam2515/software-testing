@@ -844,3 +844,65 @@ Ràng buộc:
 - `artifacts/test-plans/lib/journey.js:154-157` (retry mỗi iteration, không backoff)
 - Kết luận: cơ chế lockout **đúng thiết kế theo FR-02**; phần đáng ghi nhận là thiếu throttling/`Retry-After` phía server + có thể do quên chạy `reset_lockout.js` trước run này. Số tài khoản bị ảnh hưởng chính xác **cần xác minh thủ công** vì raw log không có field VU/account.
 ```
+
+---
+
+## Entry 009 | 19:55 18/08/2026
+
+**Tool:** Claude Code (Sonnet 5)
+**Task:** M2 — file GitHub Issues thật cho 4 finding trong BUG_REPORT.md, kèm bằng chứng screenshot (Task 1)
+**Step:** P-9 (GitHub Issues + screenshot evidence)
+
+### Prompt
+
+```text
+Tôi muốn bạn hãy giúp tôi tạo Github Issues cho các BUG được tìm thấy bên trong
+BUG_REPORT kèm ảnh chụp màn hình full-page của các trang Github Issues đã được
+đăng tải. Đối với nội dung Issues có "needs human verification" cần phải bổ
+sung một notes hay checklist để kiểm tra nguyên nhân thực sự của nó là gì bên
+trong body của Issues. Ảnh chụp Github Issues nằm bên trong assets/../issues.
+```
+
+### AI Output
+
+```text
+Đã đọc BUG_REPORT.md, xác nhận `gh` CLI đã auth vào đúng repo
+lhlam2515/software-testing (khớp git remote origin), và kiểm tra không trùng
+với issue #30 có sẵn (bug tương tự nhưng từ HW02, functional/UI testing, số
+liệu khác) trước khi filed issue mới cho HW05.
+
+Đã file 4 issue thật trên lhlam2515/software-testing, mỗi issue mang toàn bộ
+nội dung Detailed Findings tương ứng (load conditions, steps to reproduce,
+expected/actual, evidence, notes):
+- #37 - BUG-05-LAM-007 (Critical, functional bug)
+- #38 - BUG-05-LAM-003 (High, performance/memory leak)
+- #39 - BUG-05-LAM-008 (Low, performance/connection reset)
+- #40 - BUG-05-LAM-009 (Low, performance/retry-storm)
+
+Với #38, #39, #40 (3 issue có ghi "needs human verification" trong Notes gốc
+của BUG_REPORT.md), đã thêm mục riêng "Needs human verification" cuối body,
+mỗi mục là 1 checklist cụ thể để xác minh nguyên nhân thật:
+- #38: 5 bước xác minh bằng heap snapshot (node --inspect) xem userCarts có
+  đúng là đối tượng gây leak không, và re-run Soak sau khi fix #37 để xem RSS
+  growth có giảm không.
+- #39: 5 bước xác minh backlog/somaxconn/ephemeral port, re-run stage3 cô lập
+  với ss -s để phân biệt lỗi hạ tầng vs lỗi ứng dụng.
+- #40: 5 bước xác minh bằng cách log __VU/account vào journey.js, đối chiếu
+  cửa sổ thất bại với ramp schedule, và chạy lại có reset_lockout.js để xác
+  nhận giả thuyết "quên reset lockout" trước khi đóng issue.
+
+Dùng skill playwright-cli mở từng URL issue thật (repo public, không cần
+login) và chụp full-page screenshot, lưu vào
+homeworks/HW05/assets/screenshots/issues/BUG-05-LAM-{007,003,008,009}-issue-{37,38,39,40}.png.
+
+Cập nhật BUG_REPORT.md: thay "Pending - to be filed" bằng link issue thật
+trong Bug Summary table và trong Evidence của cả 4 Detailed Findings block,
+thêm đường dẫn screenshot tương ứng.
+
+Thêm `.playwright-cli/` vào .gitignore (thư mục artifact tạm do skill sinh
+ra, không nên version). Tách commit thành 2 phần theo đúng logic riêng biệt:
+`f25bccb` (chore: gitignore) và `ce310bf` (docs: link issues + screenshot).
+Chưa push - để bạn tự review rồi push khi sẵn sàng, đúng quy ước các session
+trước.
+```
+
