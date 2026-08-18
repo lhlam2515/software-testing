@@ -1,0 +1,338 @@
+openapi: 3.0.3
+info:
+  title: HW06 API Testing - FR-04, FR-08, FR-18
+  version: 1.0.0
+  description: >
+    OpenAPI specification for the three required functional requirements only:
+    FR-04 (Personal profile management), FR-08 (Checkout), and FR-18 (Order
+    management for admin).
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: FR-04
+    description: Personal profile management
+  - name: FR-08
+    description: Checkout
+  - name: FR-18
+    description: Order management (admin)
+security:
+  - bearerAuth: []
+paths:
+  /api/users/me:
+    get:
+      tags: [FR-04]
+      operationId: getCurrentUserProfile
+      summary: Get current user profile
+      description: Returns the authenticated user's full profile row from the database.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Unauthorized - no bearer token provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags: [FR-04]
+      operationId: updateCurrentUserProfile
+      summary: Update current user profile
+      description: >
+        Updates the authenticated user's name, shipping address, and phone.
+        The backend also accepts an optional role field, although this is a
+        security discrepancy because profile edits should not change role.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileUpdateRequest'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          description: Unauthorized - no bearer token provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/checkout:
+    post:
+      tags: [FR-08]
+      operationId: checkout
+      summary: Create an order at checkout
+      description: Inserts a new order for the authenticated user with pending status.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckoutRequest'
+      responses:
+        '200':
+          description: Checkout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutResponse'
+        '401':
+          description: Unauthorized - no bearer token provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/admin/orders:
+    get:
+      tags: [FR-18]
+      operationId: listAdminOrders
+      summary: List all orders for admin
+      description: Returns all orders joined with the user name.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Order list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminOrder'
+        '401':
+          description: Unauthorized - no bearer token provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/admin/orders/{id}/status:
+    put:
+      tags: [FR-18]
+      operationId: updateAdminOrderStatus
+      summary: Update order status
+      description: >
+        Updates order status when the current status allows the requested
+        transition. The backend accepts only the transitions implemented in
+        server.js and returns an error for invalid transitions.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Order identifier
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrderStatusRequest'
+      responses:
+        '200':
+          description: Order status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          description: Invalid state transition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - no bearer token provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+      additionalProperties: true
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
+      additionalProperties: true
+    UserProfile:
+      type: object
+      description: >
+        Database user row returned by GET /api/users/me. The backend returns the
+        complete row, so the schema allows the observed fields plus additional
+        properties to avoid inventing missing columns.
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+        login_attempts:
+          type: integer
+        locked_until:
+          type: string
+          format: date-time
+          nullable: true
+        shipping_address:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        reset_token:
+          type: string
+          nullable: true
+      additionalProperties: true
+    UserProfileUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+        shipping_address:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        role:
+          type: string
+          nullable: true
+      additionalProperties: false
+    CheckoutRequest:
+      type: object
+      required:
+        - total_amount
+        - shipping_address
+      properties:
+        total_amount:
+          type: number
+        shipping_address:
+          type: string
+      additionalProperties: false
+    CheckoutResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Checkout successful
+        orderId:
+          type: integer
+      required: [message, orderId]
+      additionalProperties: true
+    AdminOrder:
+      type: object
+      description: Order row returned by GET /api/admin/orders.
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        total_amount:
+          type: number
+        status:
+          type: string
+        shipping_address:
+          type: string
+          nullable: true
+        user_name:
+          type: string
+          nullable: true
+      additionalProperties: true
+    UpdateOrderStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum:
+            - confirmed
+            - shipping
+            - delivered
+            - canceled
+      additionalProperties: false
