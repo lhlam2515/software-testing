@@ -117,23 +117,61 @@ Corrected in Entry 007 (prompt_log.md): the lockout status assertion was tighten
 
 ---
 
-### Artifact #4: TBD (Raw log analysis and threshold suggestions)
+### Artifact #4: Raw log analysis and threshold suggestions (`prompt_log.md` Entry 010)
 
 > **Requirement mapping:** Task 2
 
-Task 2 (AI analysis + misinterpretation hunt) has not been executed yet as of 18/08/2026, see REPORT.md section 5. This artifact will be audited once Task 2's prompt_log entry exists.
+#### (1) Prompt + Tool
 
-*Same 5 sub-items as Artifact #1. The misinterpretation hunt in `REPORT.md` section 5.2 is the Student Fix for this artifact, and each corrected value must cite the raw log it came from.*
+**Tool:** Claude Code (Sonnet 5)
+**Time:** 00:37 19/08/2026 (Entry 010, step P-10), deliberately isolated from `REPORT.md` sections 4-5 and `BUG_REPORT.md` so the AI could not simply reproduce findings already on record.
+
+The AI was asked to read the raw k6 logs for all 4 executed scenarios (Load/Stress/Spike/Soak) only through the existing analysis scripts and JSON summaries, never a raw CSV/JSON row by eye. It had to summarize per-step count, error rate, p50/p90/p95/p99, RPS, and backend RSS/CPU for each scenario, then propose a performance-threshold table per journey step. Classifying its own later optimizations as feasible or hallucinated was explicitly withheld. See prompt_log.md, Entry 010.
+
+#### (2) AI Output
+
+The AI produced a per-scenario raw-log summary (Load baseline; Stress across 5 stages with a detected breaking point at 220VU; Spike; Soak with per-minute checkout degradation), a threshold table for login/search/cart/checkout (p95/p99/error rate/max RPS-VU, each row justified against a specific scenario/stage/field), and a note attributing Spike's 97.56% login error rate to the `lockoutProbe` sub-scenario plus re-login healing retries, calling it "not a capacity failure." See prompt_log.md, Entry 010.
+
+#### (3) Verdict
+
+`INCOMPLETE`
+
+#### (4) Reasoning
+
+Independent verification against the raw logs (`REPORT.md` section 5.2) re-derived every raw count/error-rate/percentile/RSS-CPU figure across all 4 scenarios, plus the threshold-table math, from the same scripts and JSON summaries. All of it checked out. The one thing that did not: the Spike login-failure root cause. A status-code and time-bucketed re-derivation from `raw_spike.csv` shows all 7,886 failures are HTTP 403 inside the main spike scenario's own `login()` calls; `lockoutProbe` is a separate `step=lockout-probe` tag with only 15 total requests. Onset lands exactly at the 200VU surge (t=30s), with no recovery inside the test window, a genuine load-triggered mass account lockout, not a lockoutProbe artifact. This matches the ISTQB principle that a root-cause claim must trace to the specific data path that produced it (here, the `scenario`/`status` columns), not to a plausible-sounding mechanism logged nearby.
+
+#### (5) Student Fix
+
+Corrected in `REPORT.md` section 5.2, row 1: the claim is replaced with the verified root cause, a mass 403 lockout of the main account pool, timed exactly to the VU surge, not lockoutProbe, traced to `raw_spike.csv`'s `scenario`/`status` columns and `23127216_Spike_20260817.js`'s separate step tagging for lockoutProbe.
 
 ---
 
-### Artifact #5: TBD (Optimization proposals)
+### Artifact #5: Optimization proposals (`prompt_log.md` Entry 010)
 
 > **Requirement mapping:** Task 2, feasible-or-hallucinated classification
 
-Task 2 (AI analysis + misinterpretation hunt) has not been executed yet as of 18/08/2026, see REPORT.md section 5. This artifact will be audited once Task 2's prompt_log entry exists.
+#### (1) Prompt + Tool
 
-*Same 5 sub-items as Artifact #1.*
+**Tool:** Claude Code (Sonnet 5)
+**Time:** 00:37 19/08/2026 (Entry 010, step P-10, same prompt as Artifact #4). The feasible/hallucinated classification was completed separately, through direct verification against the real `apps/backend` source (see (4) Reasoning below).
+
+The AI was asked to read `apps/backend/` directly, not assume a generic web-stack pattern, and propose at least 4-6 concrete optimizations each tied to a specific code location, without self-labelling them feasible or hallucinated. See prompt_log.md, Entry 010.
+
+#### (2) AI Output
+
+Six optimizations, each citing a specific `apps/backend/database.js` or `server.js` path/line: (1) merge-on-add and clear-on-checkout for the in-memory `userCarts` object, (2) SQLite WAL mode plus busy_timeout, (3) FTS5 to replace the unindexed, string-interpolated `LIKE` search, (4) an index on `users.email`, (5) skipping the unconditional login-success UPDATE when nothing would change, (6) splitting reads onto dedicated read-only connections. See prompt_log.md, Entry 010.
+
+#### (3) Verdict
+
+`VALID`
+
+#### (4) Reasoning
+
+Independent verification (`REPORT.md` section 5.3) read `apps/backend/database.js` and `server.js` directly and confirmed every cited mechanism: a single `sqlite3.Database` instance with zero PRAGMA statements, no index anywhere in the schema, the exact `SELECT * FROM users WHERE email = ?` at server.js line 35, and the exact unconditional UPDATE at lines 47-50. It also confirmed the installed `sqlite3` 6.0.1 package's bundled native binary has FTS5 compiled in (verified by string inspection of `node_sqlite3.node`), so proposal 3 is not a hallucinated dependency. This matches the assignment's own worked examples (database index, connection pool, SQLite WAL) and the principle that a performance-fix recommendation must trace to the real bottleneck mechanism, not to a generic best practice.
+
+#### (5) Student Fix
+
+No correction needed. All 6 optimizations were accepted as feasible and classified in `REPORT.md` section 5.3, after direct verification against the real `apps/backend` source. None required a rewrite of the proposed mechanism, only the addition of the verdict and reasoning column.
 
 ---
 
@@ -170,18 +208,18 @@ No correction needed. The Bug Summary and Detailed Findings content was accepted
 
 | Metric                                     | Count | Percentage |
 | ------------------------------------------ | ----- | ---------- |
-| Total AI-generated artifacts audited       | 4 of 4 audited artifacts (2 still pending Task 2 execution) | 100% |
-| **VALID** (correct, accepted as-is)        | 2     | 50%        |
+| Total AI-generated artifacts audited       | 6 of 6 audited artifacts | 100% |
+| **VALID** (correct, accepted as-is)        | 3     | 50%        |
 | **INVALID** (wrong; rejected)              | 0     | 0%         |
-| **INCOMPLETE** (acceptable after edits)    | 2     | 50%        |
+| **INCOMPLETE** (acceptable after edits)    | 3     | 50%        |
 
-VALID: Artifact #2 (Stress), Artifact #6 (Bug report and GitHub Issues). INCOMPLETE: Artifact #1 (Load), Artifact #3 (Spike). Artifact #4 (Raw log analysis) and Artifact #5 (Optimization proposals) are excluded from this count, Task 2 has not been executed yet.
+VALID: Artifact #2 (Stress), Artifact #5 (Optimization proposals), Artifact #6 (Bug report and GitHub Issues). INCOMPLETE: Artifact #1 (Load), Artifact #3 (Spike), Artifact #4 (Raw log analysis).
 
 ---
 
 ## 5. Conclusion (When should AI be used or not)
 
-Across the four artifacts audited, a clear pattern emerges. Left to invent implicit defaults, such as VU counts and ramp shapes, without a real system to check against, the AI fell back on textbook round numbers; those became trustworthy only once prompts demanded hardware-grounded, probe-validated figures. Pointed instead at a specific, checkable fact, an exact HTTP status code, an account-lockout threshold rule, it got that fact wrong once and right only after the source code was actually read, not assumed from general convention. The strongest results came from the Stress calibration and the bug report: give the AI a measurement to make before it designs, and a rule to hedge honestly when evidence is incomplete, and the output holds up unedited. The practical rule: never let it pick a load parameter or an assertion target from convention alone; force it to cite a specific source line or measured number first.
+Across the six artifacts audited, the same failure mode repeats. Left to invent implicit defaults, such as VU counts and ramp shapes, with no real system to check against, the AI fell back on textbook round numbers. Those numbers only became trustworthy once prompts demanded hardware-grounded, probe-validated figures. Pointed instead at a specific, checkable fact, an exact HTTP status code, an account-lockout threshold rule, or (Artifact #4) the root cause behind an error-rate spike, the AI got that fact wrong once, and right only after the source code or the raw log's own status-code column was actually read, not assumed from a plausible-sounding mechanism logged nearby. The strongest results came from the Stress calibration, the optimization proposals, and the bug report: give the AI a measurement to make before it designs, a real source file to ground a fix in, and a rule to hedge honestly when evidence is incomplete, and the output holds up unedited. The practical rule: never let it pick a load parameter, an assertion target, or a root-cause explanation from convention alone. Force it to cite a specific source line or measured number first.
 
 ---
 
@@ -190,14 +228,14 @@ Across the four artifacts audited, a clear pattern emerges. Left to invent impli
 - **Test plans (Task 1):** the Load, Stress, and Spike test plans were initially generated by Claude Code (Sonnet 5) (prompt_log.md Entries 001-007); I reviewed and corrected the Spike `lockoutProbe` assertion (an RFC-style `423` assumption versus the SUT's actual `401`/`403` sequence, tightened to an exact per-iteration check) and required every VU/ramp/think-time parameter proposal to be validated against a real hardware probe before accepting it. Full audit in section 3, Artifact #1-3.
 - **CSV input data (Task 1):** the three CSV files (`auth_credentials.csv`, `read_keywords.csv`, `cart_checkout_payloads.csv`) were initially generated by Claude Code (Sonnet 5) (prompt_log.md Entry 006); I verified each file against the seeded database (account pool, keyword weights, product id range) rather than accepting the generated values as-is.
 - **Test execution and evidence capture (Task 1):** TBD
-- **Raw log analysis (Task 2):** TBD
+- **Raw log analysis and optimization proposals (Task 2):** the raw-log summary, threshold table, and 6 optimization proposals were initially generated by Claude Code (Sonnet 5) (prompt_log.md Entry 010, deliberately isolated from this report's sections 4-5). I independently verified the analysis against the raw logs and the real `apps/backend` source, found and corrected one root-cause misattribution in the Spike login-failure analysis (REPORT.md section 5.2), and confirmed all 6 optimizations as feasible (REPORT.md section 5.3). Full audit in section 3, Artifact #4-5.
 - **Continuous performance testing proposal (Task 3):** TBD
 - **Agent Skill (section 7):** TBD
 - **Bug report and GitHub Issues (`BUG_REPORT.md`):** the Bug Summary and Detailed Findings content, and the 4 filed GitHub Issues (#37-#40), were initially generated by Claude Code (Sonnet 5) (prompt_log.md Entries 008-009); I accepted them as-is after verifying each evidence citation against its source file/line. Full audit in section 3, Artifact #6.
 - **AI Critique (`REPORT.md` section 8):** written entirely by me, no AI drafting, per the assignment's anti-AI-cheat constraint on this artifact.
 - **Deviation from course AI policy:** TBD
 
-Task 2 (raw log analysis, optimization proposals), Task 3 (continuous performance testing proposal), Agent Skill, and AI Critique have not been completed yet and are not disclosed here; they will be added once executed.
+Task 3 (continuous performance testing proposal), Agent Skill, and AI Critique have not been completed yet and are not disclosed here; they will be added once executed.
 
 ---
 
