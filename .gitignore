@@ -71,6 +71,7 @@ coverage/
 test-results/
 playwright-report/
 playwright/.cache/
+.playwright-cli/
 k6-results/
 stryker-tmp/
 reports/
