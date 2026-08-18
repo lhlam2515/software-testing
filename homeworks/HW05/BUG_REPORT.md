@@ -23,10 +23,10 @@ Each finding is cross-linked to a GitHub Issue with a screenshot in `assets/scre
 
 | Bug ID | Type | Scenario found in | Endpoint group | Severity | Status | GitHub Issue |
 | ------ | ---- | ----------------- | -------------- | -------- | ------ | ------------ |
-| BUG-05-LAM-007 | Functional bug | Load (confirmed by code + log cross-check; load-independent) | Transactional | Critical | Open | Pending - to be filed |
-| BUG-05-LAM-003 | Performance issue (resource exhaustion) | Endurance / Soak (confirmed), corroborated in Spike | Transactional | High | Open | Pending - to be filed |
-| BUG-05-LAM-008 | Performance issue (connection failure under peak load) | Stress | Transactional | Low | Open | Pending - to be filed |
-| BUG-05-LAM-009 | Performance issue (missing throttling, retry-storm amplification) | Spike | Auth-heavy | Low | Open | Pending - to be filed |
+| BUG-05-LAM-007 | Functional bug | Load (confirmed by code + log cross-check; load-independent) | Transactional | Critical | Open | [#37](https://github.com/lhlam2515/software-testing/issues/37) |
+| BUG-05-LAM-003 | Performance issue (resource exhaustion) | Endurance / Soak (confirmed), corroborated in Spike | Transactional | High | Open | [#38](https://github.com/lhlam2515/software-testing/issues/38) |
+| BUG-05-LAM-008 | Performance issue (connection failure under peak load) | Stress | Transactional | Low | Open | [#39](https://github.com/lhlam2515/software-testing/issues/39) |
+| BUG-05-LAM-009 | Performance issue (missing throttling, retry-storm amplification) | Spike | Auth-heavy | Low | Open | [#40](https://github.com/lhlam2515/software-testing/issues/40) |
 
 **Severity distribution:** 1 Critical (BUG-05-LAM-007), 1 High (BUG-05-LAM-003), 0 Medium, 2 Low (BUG-05-LAM-008, BUG-05-LAM-009)
 
@@ -73,7 +73,7 @@ Per `docs/eshop-sut/srs.md` FR-08 ("Thanh toan (Checkout)"): "Backend phai tu ti
 - Test design confirmation: `artifacts/test-plans/lib/journey.js:268-277`, `artifacts/test-data/cart_checkout_payloads.csv:2-5` (checkout payloads carry a static `total_amount` independent of `product_id`/`quantity`)
 - Raw log: `artifacts/results/raw/raw_load.csv:76` (cart, `ts=1786967987`, `status=200`), `artifacts/results/raw/raw_load.csv:247` (checkout, `ts=1786967990`, `status=200`)
 - Spec: `docs/eshop-sut/srs.md`, FR-08 section (backend-side total recomputation and post-checkout cart clearing requirements)
-- GitHub Issue: Pending - to be filed
+- GitHub Issue: [#37](https://github.com/lhlam2515/software-testing/issues/37), screenshot at `assets/screenshots/issues/BUG-05-LAM-007-issue-37.png`
 
 **Notes**
 
@@ -120,7 +120,7 @@ RSS climbs from 70,768 KB to 216,444 KB (max observed 223,492 KB) over the 10.47
 - Aggregated numbers: `artifacts/results/raw/soak_summary.json`, `monitor` block (`rss_growth_kb=145676`, `rss_growth_kb_per_min=13918.09`, `rss_monotonic_nondecreasing=false`, `cpu_steady_avg_pct=17.51`)
 - Cross-scenario corroboration (Spike): `artifacts/results/raw/monitor_spike.csv:56` (`07:57:24.162Z`, `rss_kb=93896`), `:73` (`07:57:41.293Z`, `rss_kb=216268`), `:90` (`07:57:58.408Z`, `rss_kb=226756`), `:112-117` (`07:58:20-25Z`, `rss_kb` holding at ~223,000-225,000, no drop)
 - Resource monitor screenshot: `assets/screenshots/resource-monitor/23127216_Soak_20260817.png` (k6 running `23127216_Soak_20260817.js`, `monitor.sh` sampling backend PID 6863 into `monitor_soak.csv`, btop showing the `node` process's RES memory alongside)
-- GitHub Issue: Pending - to be filed
+- GitHub Issue: [#38](https://github.com/lhlam2515/software-testing/issues/38), screenshot at `assets/screenshots/issues/BUG-05-LAM-003-issue-38.png`
 
 **Notes**
 
@@ -165,7 +165,7 @@ One `POST /api/cart` request (out of 8,319 cart requests in that stage) returned
 - Raw log: `artifacts/results/raw/raw_stress.csv:683720-683728` (the full metric block for this one request; `http_req_duration` row at `:683721`), `timestamp=1786975623`, `error="read: connection reset by peer"`, `error_code=1220`, `scenario=stress`, `step=cart`
 - Aggregated cross-check: `artifacts/results/raw/stress_percentiles_by_stage.json`, `stage3_break_120-220VU` / `step="cart"` row, `error_rate=0.00012020675561966583` (= 1/8,319), `count=8319`
 - Resource monitor: `artifacts/results/raw/monitor_stress.csv:284` (`2026-08-17T14:07:02.833Z`, `rss_kb=139660`, `cpu_pct=17.3`); screenshot at `assets/screenshots/resource-monitor/23127216_Stress_20260817.png`
-- GitHub Issue: Pending - to be filed
+- GitHub Issue: [#39](https://github.com/lhlam2515/software-testing/issues/39), screenshot at `assets/screenshots/issues/BUG-05-LAM-008-issue-39.png`
 
 **Notes**
 
@@ -215,7 +215,7 @@ Per FR-02, an account should only lock after its own login failures reach the th
 - Code: `apps/backend/server.js:32-44` (lockout check precedes password comparison), `artifacts/test-plans/lib/journey.js:154-157` (no-backoff retry on null token), `artifacts/test-plans/23127216_Spike_20260817.js:31-32` (explicit comment: accounts `perf_user_195..199` are left locked from the previous run unless `reset_lockout.js` is run first), `artifacts/test-plans/config.js:23` (`ACCOUNTS` sized to `PERF_USER_COUNT`, confirmed 200 in `artifacts/test-data/auth_credentials.csv`'s companion pool)
 - Resource monitor: `artifacts/results/raw/monitor_spike.csv:56,73,90` (RSS climbing through the same window); screenshot at `assets/screenshots/resource-monitor/23127216_Spike_20260817.png`
 - Spec: `docs/eshop-sut/srs.md` FR-02 section
-- GitHub Issue: Pending - to be filed
+- GitHub Issue: [#40](https://github.com/lhlam2515/software-testing/issues/40), screenshot at `assets/screenshots/issues/BUG-05-LAM-009-issue-40.png`
 
 **Notes**
 
