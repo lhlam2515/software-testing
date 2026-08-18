@@ -66,6 +66,18 @@ def stage_for(elapsed_s):
     return None
 
 
+def extract_step(row):
+    """k6's CSV output has no top-level `step` column — the tag set with
+    `tags: { step: ... }` in config.js lands in `extra_tags` as a raw
+    "step=<value>" string instead (verified against a real run's header:
+    metric_name,timestamp,...,extra_tags,metadata — no `step` column at
+    all). Parse it out of there."""
+    for pair in (row.get("extra_tags") or "").split(";"):
+        if pair.startswith("step="):
+            return pair[len("step="):]
+    return "other"
+
+
 def load_samples(csv_path):
     """Bucket raw http_req_duration / http_req_failed rows by (stage, step)."""
     with open(csv_path, newline="") as f:
@@ -86,7 +98,7 @@ def load_samples(csv_path):
     fail_buckets = {}  # (stage, step) -> [n_fail, n_total]
 
     for r in rows:
-        step = r.get("step") or "other"
+        step = extract_step(r)
         if step not in STEPS:
             continue
         elapsed = float(r["timestamp"]) - t0
