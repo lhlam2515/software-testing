@@ -12,6 +12,9 @@ out/
 # ===== DATABASE =====
 *.sqlite
 *.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite.baseline
 *.db
 *.sqlite-shm
 *.sqlite-wal
@@ -70,6 +73,7 @@ coverage/
 test-results/
 playwright-report/
 playwright/.cache/
+.playwright-cli/
 k6-results/
 stryker-tmp/
 reports/
@@ -81,6 +85,18 @@ reports/
 .parcel-cache/
 .turbo/
 .cache/
+
+# ===== HOMEWORK REFERENCE MATERIAL (lecturer-provided, not deliverables) =====
+homeworks/HW05/ref/
+
+# ===== HOMEWORK INTERNAL PLANNING (not a graded deliverable) =====
+homeworks/HW05/EXECUTION_PLAN.md
+homeworks/HW05/group/endpoint-split-note.md
+homeworks/HW05/*.prompt.md
+
+# ===== PYTHON CACHE =====
+__pycache__/
+*.pyc
 
 # ===== CLAUDE CONFIG =====
 audit_config.json

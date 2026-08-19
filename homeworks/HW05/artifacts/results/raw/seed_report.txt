@@ -1,0 +1,6 @@
+seed_perf.js run at 2026-08-17T11:28:52.010Z
+products: 2005 (target inserted this run: 2000)
+users: 202 (target inserted this run: 200)
+orders: 3000 (target inserted this run: 3000)
+perf user password (all): PerfTest1234!
+perf user email pattern: perf_user_{0..199}@eshop.test

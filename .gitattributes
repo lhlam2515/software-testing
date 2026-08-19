@@ -1,0 +1,14 @@
+# HW05 k6 raw result logs — per-request CSV logs and time-series JSON dumps
+# routinely exceed GitHub's 100MB hard per-file push limit (raw_stress.csv
+# ~193MB, ts_stress.json ~404MB, raw_soak.csv ~235MB). Route them through
+# Git LFS instead of trimming/gitignoring the raw data, so the full
+# per-request evidence stays in the repo for grading (section 14 requires
+# the raw log attached in full).
+#
+# Deliberately narrow patterns (raw_*.csv / ts_*.json only) — small summary
+# artifacts in the same directory (soak_summary.json,
+# stress_percentiles_by_stage.json, monitor_*.csv, spike_console_summary.txt)
+# stay as regular git blobs so they remain diffable/readable directly on
+# GitHub without an LFS-aware client.
+homeworks/HW05/artifacts/results/raw/raw_*.csv filter=lfs diff=lfs merge=lfs -text
+homeworks/HW05/artifacts/results/raw/ts_*.json filter=lfs diff=lfs merge=lfs -text
