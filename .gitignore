@@ -88,5 +88,5 @@ context/transcripts/
 context/MEMORY.md
 .claude/hooks/pending/
 
-# ===== INTERNAL WORKING DOCS (not part of submissions) =====
-homeworks/HW04/PROGRESS_CHECKLIST.md
+# ===== GIT WORKTREES (parallel homework tracks) =====
+.worktrees/
