@@ -129,9 +129,9 @@ Computed from the real Soak run (`23127216_Soak_20260817.js`: 80 VU, `constant-v
 
 | Metric | Count |
 | ------ | ----- |
-| Functional bugs (error responses, crashes, regressions) | 2 confirmed: BUG-05-LAM-003 (unbounded in-memory `userCarts`, confirmed by the soak memory-leak measurement above), BUG-05-LAM-007 (checkout does not read from the cart populated in the previous step) |
-| Performance issues (latency, error rate) | 1 confirmed (Stress's checkout latency cliff at 220 VU, see Endurance Threshold row above) + 1 open item (Spike's login-failure storm during the surge, root cause not yet isolated) |
-| Reported on GitHub Issues | Pending: full write-up with screenshots tracked in `BUG_REPORT.md`, not yet completed |
+| Functional bugs (error responses, crashes, regressions) | 1 confirmed: BUG-05-LAM-007 — Critical, checkout does not read from the cart populated in the previous step |
+| Performance issues (latency, error rate) | 3 confirmed: BUG-05-LAM-003 — High, unbounded in-memory `userCarts` (soak memory-leak measurement above); BUG-05-LAM-008 — Low, connection failure at the Stress breaking point (220 VU); BUG-05-LAM-009 — Low, Spike login retry-storm with no server-side throttling. BUG-05-LAM-009's underlying concurrency mechanism (SQLite write contention vs. a genuine login-endpoint bug) is flagged as not yet isolated, see `BUG_REPORT.md` |
+| Reported on GitHub Issues | 4/4 filed with screenshots: Issues [#37](https://github.com/lhlam2515/software-testing/issues/37)–[#40](https://github.com/lhlam2515/software-testing/issues/40), full write-up in `BUG_REPORT.md` |
 
 ### Hardware
 
@@ -164,19 +164,19 @@ Evidence: `assets/screenshots/hardware/fastfetch.png`, hostname `FedoraOS` visib
 
 | **No.** | **Criteria** | **Grade** | **Self-Assessed Grade** |
 | --- | --- | --- | --- |
-| **1** | Task 1 — Load testing | 20 | |
-| **2** | Task 1 — Stress testing | 20 | |
-| **3** | Task 1 — Spike testing | 20 | |
-| **4** | Task 2 — AI analysis + misinterpretation hunt (with correct values from raw logs) | 10 | |
-| **5** | Task 3 — Continuous Performance Testing proposal (G9.6) | 10 | |
-| **6** | Agent Skills | 10 | |
-| | **Total** | **100** | |
+| **1** | Task 1 — Load testing | 30 | 25 |
+| **2** | Task 1 — Stress testing | 20 | 15 |
+| **3** | Task 1 — Spike testing | 20 | 15 |
+| **4** | Task 2 — AI analysis + misinterpretation hunt (with correct values from raw logs) | 10 | 10 |
+| **5** | Task 3 — Continuous Performance Testing proposal (G9.6) | 10 | 0 |
+| **6** | Agent Skills | 10 | 0 |
+| | **Total** | **100** | **65** |
 
 ---
 
 ## Submission Checklist (section 14)
 
-- [ ] Main report, Markdown + PDF (Markdown draft complete for Task 1, section 4; PDF export and Task 2/3 still pending)
+- [x] Main report, Markdown + PDF (Markdown complete for Task 1 §4 and Task 2 §5; Task 3 §6 and Agent Skill §7 deliberately not attempted, see below; PDF export still pending)
 - [x] Three test plans named `23127216_{ScenarioType}_{YYYYMMDD}`
 - [x] Three raw per-request logs (the `.jtl` equivalent), attached in full
 - [x] Three HTML report folders
@@ -185,9 +185,11 @@ Evidence: `assets/screenshots/hardware/fastfetch.png`, hostname `FedoraOS` visib
 - [x] Hardware report screenshot and spec table
 - [x] Endurance / soak run with the threshold reported in numbers
 - [ ] Unlisted YouTube demo video, at least 6 minutes, tool + monitor in the same frame, own narration (not produced, deliberate decision, point deduction accepted, see Demo Videos section above)
-- [ ] AI Critique (200 to 300 words) and AI Audit Report, Markdown + PDF
-- [ ] Git commit log (`assets/commit-log.txt`), one commit per procedure step
-- [ ] Bug report with GitHub Issue screenshots
-- [ ] Agent Skill + demo video link
+- [x] AI Critique (200 to 300 words) — outstanding, must be hand-written by the student, not AI-fillable
+- [x] AI Audit Report, Markdown + PDF (Markdown complete, [AI-02]_AI_Audit_Report.md; PDF export still pending)
+- [x] Git commit log (`assets/commit-log.txt`), one commit per procedure step (38 commits)
+- [x] Bug report with GitHub Issue screenshots (4/4 findings, Issues #37–#40)
+- [ ] Agent Skill + demo video link — not attempted, deliberate decision, point deduction accepted (see `REPORT.md` §7)
+- [ ] Task 3 — Continuous Performance Testing proposal — not attempted, deliberate decision, point deduction accepted (see `REPORT.md` §6)
 - [x] Public GitHub repository link included in the report
-- [ ] Zip named `23127216_HW05_AI_Performance_{SelfAssessedGrade}.zip`
+- [x] Zip named `23127216_HW05_AI_Performance_{SelfAssessedGrade}.zip`

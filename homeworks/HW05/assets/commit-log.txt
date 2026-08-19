@@ -1,0 +1,841 @@
+Git Commit Log — HW05 (Performance Testing on EShop)
+Student: Lê Hoàng Lâm (23127216) | Branch: feature/HW05
+Range: from divergence with branch 'lhlam' (dbe446174f8fef0f01d1a6ac942ae3c95e40134e) to HEAD
+Generated: 2026-08-19 02:17 +0700
+Format: git log --graph --stat (full mode)
+Total commits: 43
+
+* commit 25256658d4a77b3677db9c97e0c7593c8eb358c4
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-19 02:16
+| 
+|     docs(HW05): write AI Critique and finalize REPORT closing sections
+|     
+|     - add AI Critique (section 8): AI's pattern of defaulting to plausible
+|       convention over the checked SUT behaviour (423 lockout-status guess,
+|       ungrounded round VU numbers, Spike login root-cause misattribution),
+|       and the verify-before-trust principle drawn from it
+|     - record Task 3 and Agent Skill as deliberate not-completed scope
+|       decisions (sections 6-7), not oversights
+|     - write closing Conclusion synthesizing Task 1/2 evidence and open items
+|       (section 9)
+|     - fill in the References list
+| 
+|  homeworks/HW05/REPORT.md | 49 ++++++++++++++++------------------------------
+|  1 file changed, 17 insertions(+), 32 deletions(-)
+| 
+* commit c0165a5595bb6a1d0c6dd9c7499cd4c99e792045
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-19 01:46
+| 
+|     docs(HW05): write Task 2 AI analysis and audit findings in REPORT and Audit Report
+|     
+|     - fill REPORT.md section 5 with the AI's per-scenario analysis, the Spike
+|       login-failure misinterpretation and its correction, and feasible/hallucinated
+|       verdicts for all 6 proposed optimizations
+|     - add Artifact #4-5 to AI Audit Report, auditing the raw-log analysis and
+|       optimization proposals through direct verification against the raw logs
+|       and the real apps/backend source
+|     - update Summary of AI Accuracy table, Conclusion, and Mandatory Disclosure
+|       to include Task 2
+|     - drop unsupported "prompt_log.md Entry 011" citations: no such entry was
+|       ever logged, so claims were reframed as direct verification instead of
+|       citing a nonexistent AI review pass
+| 
+|  homeworks/HW05/REPORT.md                  | 25 ++++++-----
+|  homeworks/HW05/[AI-02]_AI_Audit_Report.md | 64 +++++++++++++++++++++++------
+|  2 files changed, 66 insertions(+), 23 deletions(-)
+| 
+* commit 5fead666253b38c2e0004314fb3beea50a069e41
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-19 01:46
+| 
+|     feat(HW05): add analyze_load.py and log Task 2 raw-log analysis session
+|     
+|     - write analyze_load.py to compute per-step count/error-rate/percentiles/rps
+|       for the Load scenario, following analyze_raw.py/analyze_soak.py conventions
+|     - run script against raw_load.csv, producing load_summary.json
+|     - log Entry 010 in prompt_log.md: the isolated Task 2 prompt that reads all
+|       4 scenario logs via existing scripts/JSON summaries and proposes a
+|       threshold table plus 6 optimizations
+| 
+|  .../HW05/artifacts/results/raw/load_summary.json  |  49 ++++
+|  homeworks/HW05/artifacts/scripts/analyze_load.py  | 151 ++++++++++++
+|  homeworks/HW05/prompt_log.md                      | 245 ++++++++++++++++++++
+|  3 files changed, 445 insertions(+)
+| 
+* commit 00d088f010c74c6b53cb5d873200941aae8e599a
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-18 23:41
+| 
+|     docs(HW05): audit Load/Stress/Spike test plans and bug report in AI Audit Report
+|     
+|     - fill Artifact #1-3 (Load, Stress, Spike test plans) with verdict, ISTQB/perf-testing
+|       reasoning, and student-fix citations sourced from prompt_log.md Entries 001-007
+|     - add Artifact #6 (bug report + GitHub Issues, Entry 008-009), not one of the
+|       template's 5 fixed items but audited given its evidence weight
+|     - add TBD notes on Artifact #4/#5 (raw log analysis, optimization proposals):
+|       Task 2 not executed yet
+|     - fill section 4 accuracy summary (2 VALID, 2 INCOMPLETE, 0 INVALID of 4 audited),
+|       section 5 conclusion, and section 6 mandatory disclosure for the audited artifacts
+| 
+|  homeworks/HW05/[AI-02]_AI_Audit_Report.md | 122 ++++++++++++++++++++++------
+|  1 file changed, 99 insertions(+), 23 deletions(-)
+| 
+* commit c26e02a963bb0f6eed7117d01e1ae94e09f18f84
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-18 23:04
+| 
+|     docs(HW05): sync REPORT and README with completed BUG_REPORT and video decision
+|     
+|     - REPORT.md section 4.9: replace stale bug counts and pending language
+|       with the real, filed BUG_REPORT.md content (1 functional bug, 3
+|       performance issues, severity distribution, GitHub Issues #37-40)
+|     - README.md: replace TBD demo-video cells with an explicit note that no
+|       video was produced, a deliberate decision accepting the point
+|       deduction, not an oversight; annotate the matching checklist line
+| 
+|  homeworks/HW05/README.md |  8 +++++---
+|  homeworks/HW05/REPORT.md | 10 +++++-----
+|  2 files changed, 10 insertions(+), 8 deletions(-)
+| 
+* commit 153ff4e147c9361bd211ccf9e1e0d0512aeeaf58
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-18 20:03
+| 
+|     docs(HW05): move GitHub Issue link into each bug's metadata block
+|     
+|     - add a GitHub Issue line alongside Type/Scenario/Severity, matching
+|       the metadata-block placement used in HW02 and HW04's BUG_REPORT.md
+|     - rename the Evidence bullet to "GitHub Issue Screenshot", mirroring
+|       the same label used for per-bug issue screenshots in prior reports
+| 
+|  homeworks/HW05/BUG_REPORT.md | 12 ++++++++----
+|  1 file changed, 8 insertions(+), 4 deletions(-)
+| 
+* commit 0be30f52b15a652f737ec072bd2f8fad8c68b791
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-18 20:00
+| 
+|     docs(HW05): log Entry 009 in prompt_log.md for the GitHub Issues prompt
+|     
+|     - records the verbatim prompt and AI output for filing issues #37-#40
+|       and capturing their screenshots, per the course AI disclosure policy
+| 
+|  homeworks/HW05/prompt_log.md | 62 ++++++++++++++++++++++++++++++++++++++++++
+|  1 file changed, 62 insertions(+)
+| 
+* commit ce310bfdcf802021d6494271dc8bafe4b759b5f4
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-18 19:59
+| 
+|     docs(HW05): file GitHub Issues for BUG_REPORT findings, link screenshots
+|     
+|     - filed issues #37-#40 for BUG-05-LAM-007/003/008/009 on
+|       lhlam2515/software-testing, mirroring each finding's full detail
+|       (load conditions, steps, expected/actual, evidence, notes)
+|     - added a "Needs human verification" checklist to the body of the
+|       three performance issues (#38, #39, #40) whose root cause was
+|       flagged as unconfirmed in BUG_REPORT.md notes, so the exact
+|       verification steps live with the issue, not just the report
+|     - replaced "Pending - to be filed" with the live issue links in the
+|       Bug Summary table and each finding's Evidence section
+|     - captured full-page screenshots of the 4 published issues into
+|       assets/screenshots/issues/ and referenced them from BUG_REPORT.md
+| 
+|  homeworks/HW05/BUG_REPORT.md                         |  16 ++++++++--------
+|  .../screenshots/issues/BUG-05-LAM-003-issue-38.png   | Bin 0 -> 527196 bytes
+|  .../screenshots/issues/BUG-05-LAM-007-issue-37.png   | Bin 0 -> 435924 bytes
+|  .../screenshots/issues/BUG-05-LAM-008-issue-39.png   | Bin 0 -> 464294 bytes
+|  .../screenshots/issues/BUG-05-LAM-009-issue-40.png   | Bin 0 -> 621322 bytes
+|  5 files changed, 8 insertions(+), 8 deletions(-)
+| 
+* commit f25bccb1a3bfe6d4e9cbe90370bd39dfa0b181ad
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-18 19:59
+| 
+|     chore: ignore playwright-cli local artifact directory
+|     
+|     - .playwright-cli/ holds timestamped snapshot/console log files
+|       generated by the playwright-cli skill, not meant to be versioned
+| 
+|  .gitignore | 1 +
+|  1 file changed, 1 insertion(+)
+| 
+* commit 2aea07cb438483343c5f26b16242092395878184
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-18 18:33
+| 
+|     docs(HW05): log Entry 008 in prompt_log.md for the BUG_REPORT.md prompt
+|     
+|     - Paste the verbatim prompt from bug_report_analysis.prompt.md (M4, P-8)
+|       and a narrative of the actual output: anomaly scan results per raw log
+|       file, the Spike lockout misinterpretation classification, and the
+|       final functional/performance bug counts.
+|     - References commit 0aa60a8 where the real BUG_REPORT.md content landed.
+| 
+|  homeworks/HW05/prompt_log.md | 140 +++++++++++++++++++++++++++++++++++++++++
+|  1 file changed, 140 insertions(+)
+| 
+* commit b7509726af46a3cd01ddd448fb7eec65d147afd2
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-18 18:26
+| 
+|     test(HW05): add Soak resource-monitor screenshot, link it in BUG_REPORT.md
+|     
+|     - Move the user-captured screenshot into
+|       assets/screenshots/resource-monitor/23127216_Soak_20260817.png,
+|       matching the Load/Stress/Spike naming convention.
+|     - Update BUG-05-LAM-003's Evidence section to reference it, replacing
+|       the earlier "needs human action: no Soak screenshot yet" note.
+| 
+|  homeworks/HW05/BUG_REPORT.md                        |   2 +-
+|  .../resource-monitor/23127216_Soak_20260817.png     | Bin 0 -> 1117319 bytes
+|  2 files changed, 1 insertion(+), 1 deletion(-)
+| 
+* commit 0aa60a865b7382779fa476c617b439c6439e24af
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-18 18:22
+| 
+|     docs(HW05): fill Bug Summary and Detailed Findings in BUG_REPORT.md
+|     
+|     - Write up BUG-05-LAM-003 (unbounded userCarts memory leak, High) and
+|       BUG-05-LAM-007 (checkout ignores cart/accepts client total_amount,
+|       Critical) with evidence pulled from soak_summary.json, monitor CSVs,
+|       and server.js line references.
+|     - Add BUG-05-LAM-008: isolated connection-reset on POST /api/cart at
+|       Stress's 220VU breaking point (Low), found by scanning raw_stress.csv
+|       for anomalies and cross-referencing monitor_stress.csv.
+|     - Add BUG-05-LAM-009: Spike login retry-storm classification. All 7,886
+|       login failures returned 403 (locked), none 401, proving pre-existing
+|       lockout state rather than a new concurrency bug; flags journey.js's
+|       no-backoff retry and the login endpoint's missing throttling signal as
+|       the amplification cause. Lockout mechanism itself confirmed correct
+|       per FR-02/server.js.
+|     - Confirm via full anomaly scan that raw_load.csv and raw_soak.csv have
+|       zero non-200/error rows, consistent with their reported 0% error rate.
+| 
+|  homeworks/HW05/BUG_REPORT.md | 193 ++++++++++++++++++++++++++++++++++++-----
+|  1 file changed, 172 insertions(+), 21 deletions(-)
+| 
+* commit 17bdedb1258a31c051cf0767c900b4092c556aa9
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-18 17:51
+| 
+|     docs(HW05): fill Task 1 report sections with verified real data
+|     
+|     - REPORT.md 2.1-2.3: hardware table, load-generator-on-same-host caveat,
+|       seeding/reset procedure, all transcribed from already-captured evidence
+|       (fastfetch, prompt_log, database.js source read)
+|     - REPORT.md 4.1-4.3: AI design process table (7 prompt_log entries mapped
+|       to artifacts), per-scenario VU/think-time/threshold parameters, CSV
+|       row counts and consumption
+|     - REPORT.md 4.5: human review table with 4 concrete AI corrections
+|       (lockout status code 423 to 403, assertion precision, ungrounded VU
+|       defaults, token-expiry mid-iteration handling), each with why-missed
+|     - REPORT.md 4.6-4.9: full execution results per scenario (Load/Stress/
+|       Spike), lockout accounting cross-checked against raw CSV status codes,
+|       endurance threshold table, issues-found summary
+|     - README.md: note Stress/Spike HTML reports are post-hoc rendered (not
+|       handleSummary), fill Issues Found counts, check off completed
+|       Submission Checklist items (test plans, raw logs, HTML reports, CSV
+|       data, resource-monitor/hardware evidence, endurance threshold, repo
+|       link)
+|     - all numbers cross-referenced against stress_percentiles_by_stage.json,
+|       soak_summary.json, monitor_*.csv, spike_console_summary.txt and raw
+|       CSV status-code counts, no new k6 runs
+|     - voice-guard pass: replaced 60 em-dash instances across both files with
+|       period/colon/comma/parentheses per grammatical context, matching the
+|       project's no-em-dash convention for REPORT/prompt_log artifacts;
+|       numeric content verified unchanged (identical token multiset pre/post)
+| 
+|  homeworks/HW05/README.md |  56 +++++++--------
+|  homeworks/HW05/REPORT.md | 175 ++++++++++++++++++++++++++++++---------------
+|  2 files changed, 144 insertions(+), 87 deletions(-)
+| 
+* commit 73918b3080b3abf949cd6b6378e40ef3a2e43870
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-18 17:25
+| 
+|     test(HW05): capture Stress/Spike HTML report evidence
+|     
+|     - Stress: breaking point pinned to stage3_break_120-220VU, checkout p95
+|       = 7093.2ms, cross-checked against README's cited breaking-point numbers
+|     - Spike: login-step failure recomputed independently from raw ts_spike.json
+|       as 7,886/8,083 (97.56%), matching journey_login_failure_total already
+|       on record — cross-validates the data survived the git-lfs migration
+|     - completes the three-HTML-report-folder requirement (section 14); only
+|       Load had a report folder before this
+| 
+|  .../html-reports/23127216_Spike_20260817.html     | 275 ++++++++++++++++++++
+|  .../html-reports/23127216_Stress_20260817.html    | 273 +++++++++++++++++++
+|  2 files changed, 548 insertions(+)
+| 
+* commit 0be8a2c858b4b90616eaa5ab50e27d8276dd0527
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-18 17:25
+| 
+|     feat(HW05): add Stress/Spike HTML report generation scripts
+|     
+|     - build_stress_report.py renders per-stage percentile table from
+|       stress_percentiles_by_stage.json, highlighting the detected breaking
+|       point; no k6 rerun, reads analyze_raw.py's existing output
+|     - build_spike_report.py parses the raw ts_spike.json (--out json=) point
+|       stream directly, buckets samples into time windows, and renders a
+|       self-contained inline-SVG time-series chart (VU count + login error
+|       rate + p95 latency vs. elapsed time) with no external chart library
+|     - both close the gap in README.md's documented per-scenario report
+|       mechanism (Load=handleSummary/HTML, Stress=raw-log recompute,
+|       Spike=time-series), which previously only had Load's HTML wired up
+| 
+|  .../HW05/artifacts/scripts/build_spike_report.py  | 277 ++++++++++++++++++++
+|  .../HW05/artifacts/scripts/build_stress_report.py | 138 ++++++++++
+|  2 files changed, 415 insertions(+)
+| 
+* commit f40687895b92fdae1423b4dcee451a6e1290cf79
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-18 16:44
+| 
+|     test(HW05): capture Endurance/soak evidence — confirmed memory leak, no error-rate breach
+|     
+|     - constant-vus scenario (23127216_Soak_20260817.js): 80 VU, 10m sustained,
+|       deliberately not a ramp — Stress already found the latency breaking point
+|       (220VU); soak isolates "does it degrade over time" from "is it saturated"
+|     - raw request log (raw_soak.csv, 1.57M samples, routed through Git LFS —
+|       235MB exceeds GitHub's 100MB push limit) and RSS/CPU sampler
+|       (monitor_soak.csv, 628 samples)
+|     - analyze_soak.py: per-minute degradation check + monitor summary, output
+|       saved to soak_summary.json
+|     - confirmed: backend RSS climbs 70,768KB -> 216,444KB over 10.47min
+|       (+145,676KB, ~13.9MB/min), never plateaus — matches the unbounded
+|       in-memory userCarts leak (BUG-05-LAM-003), not a stable ceiling
+|     - 0% error rate throughout at 80 VU; checkout p95 has a transient spike to
+|       ~1,900ms at minute 3-4 that self-recovers by minute 5
+|     - tmux_perf_session.sh: add "soak" case (no --out json=, per the file-size
+|       lesson from Spike's 80MB ts_spike.json)
+|     - README.md: fill in Test Summary + Endurance Threshold tables with real
+|       numbers for all four scenarios (Load/Stress/Spike/Soak), replacing TBD
+|     - .gitattributes: route artifacts/results/raw/{raw_*.csv,ts_*.json} through
+|       Git LFS (raw_soak.csv 235MB, ts_stress.json 404MB, raw_stress.csv 203MB
+|       all exceed GitHub's 100MB hard push limit)
+| 
+|  .gitattributes                                    |  12 +
+|  homeworks/HW05/README.md                          |  24 +-
+|  .../HW05/artifacts/results/raw/monitor_soak.csv   | 629 ++++++++++++++++++++
+|  homeworks/HW05/artifacts/results/raw/raw_soak.csv |   3 +
+|  .../HW05/artifacts/results/raw/soak_summary.json  | 152 +++++
+|  homeworks/HW05/artifacts/scripts/analyze_soak.py  | 252 ++++++++
+|  .../HW05/artifacts/scripts/tmux_perf_session.sh   | 127 ++++
+|  .../test-plans/23127216_Soak_20260817.js          |  81 +++
+|  8 files changed, 1270 insertions(+), 10 deletions(-)
+| 
+* commit a3d4c86acf27a9a6ce0253849693c030a116baa1
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-18 15:17
+| 
+|     fix(HW05): correct step-tag extraction in analyze_raw.py
+|     
+|     k6's CSV output has no top-level `step` column — the `tags: { step: ... }`
+|     set in config.js lands in `extra_tags` as a raw "step=<value>" string
+|     instead. r.get("step") was always None, silently bucketing every row into
+|     "other" and dropping it (STEPS filter never matched). Parse `extra_tags`
+|     directly instead.
+| 
+|  homeworks/HW05/artifacts/scripts/analyze_raw.py | 14 +++++++++++++-
+|  1 file changed, 13 insertions(+), 1 deletion(-)
+| 
+* commit 48861b103f29606dea8ed5baed00c6e43dbf02b7
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-18 15:11
+| 
+|     docs(HW05): add M8 audit TODO note for Spike lockout status-code assumption
+|     
+|     - pending item for [AI-02] audit report: AI initially assumed 423 Locked,
+|       real backend returns 403 (see prompt_log.md Entry 006 for the correction)
+| 
+|  homeworks/HW05/NOTES.md | 8 ++++++++
+|  1 file changed, 8 insertions(+)
+| 
+* commit 6fed00156b8513a8387885e8d82a5bb18ea262f0
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-18 15:11
+| 
+|     test(HW05): capture Spike scenario evidence — login threshold breach at 200 VU surge
+|     
+|     - raw request log (raw_spike.csv, 19,427 requests) and time-series (ts_spike.json)
+|     - resource-monitor CSV sampling backend RSS/CPU during the run (155 samples,
+|       tightly scoped to the run window)
+|     - k6 + htop screenshot at peak (200/200 VUs, 1m00s/2m00s elapsed)
+|     - console summary saved separately (spike_console_summary.txt) since the
+|       threshold breach detail isn't recoverable from the raw CSV/JSON alone
+|     - checks{step:login} threshold crossed: 2.43% success (197/8083) during the
+|       15->200VU surge, while search/cart/checkout stay at 100% — journey.js's
+|       re-login-on-401 healing is what keeps iterations completing at all
+|     - lockout-probe sub-scenario confirms designed 401/401/403 sequence
+|       (NOTES.md AI-02 audit item)
+| 
+|  .../HW05/artifacts/results/raw/monitor_spike.csv  | 155 ++++++++++++++++++++
+|  .../HW05/artifacts/results/raw/raw_spike.csv      |   3 +
+|  .../results/raw/spike_console_summary.txt         |  52 +++++++
+|  .../HW05/artifacts/results/raw/ts_spike.json      |   3 +
+|  .../resource-monitor/23127216_Spike_20260817.png  | Bin 0 -> 1277063 bytes
+|  5 files changed, 213 insertions(+)
+| 
+* commit f98f49365f3318754ad769349ddaddf20f0f63bf
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-17 22:39
+| 
+|     test(HW05): capture Stress scenario evidence — breaking point at 220 VU
+|     
+|     - raw request log (raw_stress.csv, ~200k requests) and time-series (ts_stress.json)
+|     - per-stage percentile summary (stress_percentiles_by_stage.json), recomputed
+|       from raw CSV rather than read off k6's own summary
+|     - breaking point confirmed empirically: stage 3 (~220 VU) — checkout p95
+|       jumps from 427ms (120 VU) to 7093ms, crossing the 1000ms threshold,
+|       matching the pre-registered SQLite single-writer-serialization hypothesis
+|     - resource-monitor CSV trimmed to the real run window (505 of 1836 rows;
+|       dropped ~23min of idle post-run sampling), peak RSS 195,532 KB
+|     - k6 + htop screenshot at stage 3 (220/350 VUs, 4m31s/7m10s elapsed)
+|     - 200,380 checks at 99.99% success; one transient connection-reset on a
+|       single cart POST, not a repeating pattern
+| 
+|  .../HW05/artifacts/results/raw/monitor_stress.csv | 505 ++++++++++++++++++++
+|  .../HW05/artifacts/results/raw/raw_stress.csv     |   3 +
+|  .../results/raw/stress_percentiles_by_stage.json  | 256 ++++++++++
+|  .../HW05/artifacts/results/raw/ts_stress.json     |   3 +
+|  .../resource-monitor/23127216_Stress_20260817.png | Bin 0 -> 1229295 bytes
+|  5 files changed, 767 insertions(+)
+| 
+* commit 8514093e621cb8c57666a5a57c1edcc02fec93e1
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-17 20:33
+| 
+|     test(HW05): capture Load scenario evidence — 80 VU, 0% error, p95<15ms
+|     
+|     - raw request log (raw_load.csv, 187k rows) and time-series (ts_load.json)
+|     - aggregate HTML report per journey step (login/search/cart/checkout)
+|     - resource-monitor CSV sampling backend RSS/CPU during the run
+|     - k6 + htop screenshot, same frame, matching required evidence format
+|     - seed_report.txt timestamp refreshed (re-ran setup_testbed.sh seed step,
+|       same row counts as before: 2005 products / 202 users / 3000 orders)
+| 
+|  .../html-reports/23127216_Load_20260817.html      |  75 ++
+|  .../HW05/artifacts/results/raw/monitor_load.csv   | 754 ++++++++++++++++++++
+|  homeworks/HW05/artifacts/results/raw/raw_load.csv |   3 +
+|  .../HW05/artifacts/results/raw/seed_report.txt    |   2 +-
+|  homeworks/HW05/artifacts/results/raw/ts_load.json |   3 +
+|  .../resource-monitor/23127216_Load_20260817.png   | Bin 0 -> 1149921 bytes
+|  6 files changed, 836 insertions(+), 1 deletion(-)
+| 
+* commit 0cbcc0f7a1027ed7b830a37a138327c567889077
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-17 18:17
+| 
+|     docs(HW05): log AI prompt for edge-case handling pass (Entry 007, P-7)
+| 
+|  homeworks/HW05/prompt_log.md | 110 +++++++++++++++++++++++++++++++++++++++++
+|  1 file changed, 110 insertions(+)
+| 
+* commit be17c00751c058425009ca3e8811756981300407
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-17 18:15
+| 
+|     fix(HW05): harden k6 test plans against lockout, token-expiry, and cart-state edge cases
+|     
+|     - add 5%-of-pool lockout budget guard (fail-fast) and precise per-iteration
+|       status assertion (401 vs 403, not a loose either/or) to the Spike lockout
+|       sub-scenario
+|     - make cart/checkout steps in the shared journey self-heal on a stale token
+|       (re-login inline instead of just nulling it) so a mid-soak 401 doesn't
+|       waste the rest of the current iteration
+|     - document why the cart step never assumes empty cart state
+| 
+|  .../test-plans/23127216_Spike_20260817.js         | 75 +++++++++++++++------
+|  .../HW05/artifacts/test-plans/lib/journey.js      | 36 +++++++++-
+|  2 files changed, 88 insertions(+), 23 deletions(-)
+| 
+* commit 62e68aae1393cce671eddb0bb33a28d049076774
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-17 18:04
+| 
+|     docs(HW05): log AI-assisted design prompts for k6 suite (M2, P-1..P-6)
+|     
+|     - Entry 001: shared shopJourney() (login -> search -> cart -> checkout)
+|     - Entry 002-004: per-scenario load parameters for Load, Stress, Spike
+|     - Entry 005: thresholds and per-step assertions for shopJourney()
+|     - Entry 006: 3 test plans + 3 CSV data files via SharedArray
+| 
+|  homeworks/HW05/prompt_log.md | 574 ++++++++++++++++++++++++++++++++++++++++-
+|  1 file changed, 566 insertions(+), 8 deletions(-)
+| 
+* commit 243616eb1fea554d628282f53998793ea9ecc9dc
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-17 18:04
+| 
+|     feat(HW05): add raw k6 results analysis script
+|     
+|     - analyze_raw.py: recomputes p50/p90/p95/p99 per (stage, step) directly from
+|       k6's raw --out csv= log for the Stress scenario, to pin the breaking point
+|       to a specific VU stage
+|     - own numpy-free percentile function, stage boundaries mirror the `stages`
+|       array in 23127216_Stress_20260817.js
+| 
+|  homeworks/HW05/artifacts/scripts/analyze_raw.py | 194 ++++++++++++++++++++++
+|  1 file changed, 194 insertions(+)
+| 
+* commit 03db05d3e545e11278916d969cfd1efe68dc5072
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-17 18:04
+| 
+|     feat(HW05): add k6 Load, Stress, and Spike test plans
+|     
+|     - 23127216_Load_20260817.js: sustained realistic-traffic scenario
+|     - 23127216_Stress_20260817.js: staged VU ramp to locate the breaking point,
+|       stage boundaries kept in sync with artifacts/scripts/analyze_raw.py
+|     - 23127216_Spike_20260817.js: sharp burst scenario, zero think-time pacing
+|     - all three import options only, reusing config.js and lib/journey.js/csvData.js
+| 
+|  .../test-plans/23127216_Load_20260817.js          | 171 ++++++++++++++++++++
+|  .../test-plans/23127216_Spike_20260817.js         | 141 ++++++++++++++++
+|  .../test-plans/23127216_Stress_20260817.js        |  74 +++++++++
+|  3 files changed, 386 insertions(+)
+| 
+* commit 58fd27d45150e06fccd6e3e68bd724e03a52fc3d
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-17 18:04
+| 
+|     feat(HW05): add shared k6 config, journey, and CSV data-driven fixtures
+|     
+|     - config.js: BASE_URL, 200 seeded ACCOUNTS, SEARCH_KEYWORDS, jsonParams/authParams
+|     - lib/journey.js: shopJourney() shared across Load/Stress/Spike (login -> search
+|       -> cart -> checkout), one login per VU with cached JWT reuse, per-step
+|       thresholds/checks, tunable think() pacing
+|     - lib/csvData.js: SharedArray-backed CSV loader with a minimal RFC4180-ish
+|       parser, avoids per-VU re-parsing at high VU counts
+|     - test-data/*.csv: auth credentials, cart/checkout payloads, search keywords
+|       feeding the SharedArray pools
+| 
+|  .../HW05/artifacts/test-data/auth_credentials.csv |  21 ++
+|  .../test-data/cart_checkout_payloads.csv          |  21 ++
+|  .../HW05/artifacts/test-data/read_keywords.csv    |  21 ++
+|  homeworks/HW05/artifacts/test-plans/config.js     |  57 ++++
+|  .../HW05/artifacts/test-plans/lib/csvData.js      |  91 +++++++
+|  .../HW05/artifacts/test-plans/lib/journey.js      | 271 ++++++++++++++++++++
+|  6 files changed, 482 insertions(+)
+| 
+* commit 0f209144753521882af3ce6cb8f8fc56594f5113
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-17 18:04
+| 
+|     chore(HW05): extend .gitignore for scratch prompts and python cache
+|     
+|     - ignore homeworks/HW05/*.prompt.md scratch files
+|     - ignore __pycache__/ and *.pyc, previously untracked and unignored
+| 
+|  .gitignore | 5 +++++
+|  1 file changed, 5 insertions(+)
+| 
+* commit 58277852a67eb307d7671e4ebca9a2ff1dbfae8f
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-17 15:07
+| 
+|     chore(HW05): stop tracking group/endpoint-split-note.md, split model is obsolete
+|     
+|     Section 5/6 moved from endpoint-level split to workflow-level split
+|     (2026-08-13). Purged the file's git history (it only ever existed in
+|     the now-superseded endpoint-selection commits) and ignore it going
+|     forward; kept locally for the re-confirmation addendum with the other
+|     group member.
+| 
+|  .gitignore | 1 +
+|  1 file changed, 1 insertion(+)
+| 
+* commit 0b9acf55c3c5d8d444ed79041ef21c5fba7de812
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-17 15:06
+| 
+|     docs(HW05): switch scope docs to end-to-end workflow model
+|     
+|     - rewrite section 5/6 scope in README/REPORT/REQUIREMENTS: three
+|       scenarios now share one end-to-end purchase workflow (login -> search
+|       -> cart -> checkout) instead of one endpoint per scenario, per the
+|       2026-08-13 assignment update
+|     - add checkout (FR-08) as step 4, note it does not read from the cart
+|       populated in step 3 (BUG-05-LAM-007)
+|     - document per-VU login caching to avoid exhausting the account pool
+|       and triggering lockout across all traffic
+|     - update non-overlap declaration to workflow-level comparison, mark as
+|       pending re-confirmation with the other group member
+|     - update data-driven inputs and checklist wording to match the new
+|       CSV/workflow requirement text
+| 
+|  homeworks/HW05/README.md       | 47 ++++++++++++++++--------------
+|  homeworks/HW05/REPORT.md       | 63 ++++++++++++++++++++++------------------
+|  homeworks/HW05/REQUIREMENTS.md |  8 ++---
+|  3 files changed, 64 insertions(+), 54 deletions(-)
+| 
+* commit 9c6f32a66a5bd7d793155fe0e7d121a4d1125b49
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-09 22:17
+| 
+|     chore(HW05): stop tracking EXECUTION_PLAN.md, it is internal planning
+|     
+|     - add homeworks/HW05/EXECUTION_PLAN.md to .gitignore
+|     - git rm --cached; file stays on disk, no longer tracked going forward
+| 
+|  .gitignore                       |   3 +
+|  homeworks/HW05/EXECUTION_PLAN.md | 438 -------------------------------------
+|  2 files changed, 3 insertions(+), 438 deletions(-)
+| 
+* commit 93283dc1503369482614a30eeb58bdd4b1444d8a
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-08 16:24
+| 
+|     docs(HW05): add fastfetch hardware screenshot
+|     
+|     - fastfetch.png: manually-captured, scoped to the terminal window only
+|       (previous automated flameshot attempt grabbed unrelated windows and
+|       was discarded, not committed)
+|     - hostname FedoraOS visible in the prompt, matching the README hardware
+|       table declaration (section 11 hostname consistency evidence)
+|     - README.md: point the hardware evidence line at the actual file and
+|       drop the "pending" note
+| 
+|  homeworks/HW05/README.md                             |   2 +-
+|  .../HW05/assets/screenshots/hardware/fastfetch.png   | Bin 0 -> 962938 bytes
+|  2 files changed, 1 insertion(+), 1 deletion(-)
+| 
+* commit 9bb8f592382664861a01b34a9a8346e4f0e41d9b
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-08 16:19
+| 
+|     docs(HW05): fill hardware report table from fastfetch
+|     
+|     - Hostname, CPU, RAM, storage, OS/kernel now list real values from
+|       fastfetch output instead of TBD
+|     - hostname note explains the section 11 baseline situation (no prior
+|       HW01-04 hardware report existed to match against)
+|     - fastfetch screenshot still pending: automated full-screen capture
+|       (flameshot) grabbed unrelated windows (other coursework, personal
+|       browser tabs) that were on screen, so it was discarded rather than
+|       committed; needs a manually-selected region instead
+| 
+|  homeworks/HW05/README.md | 12 ++++++------
+|  1 file changed, 6 insertions(+), 6 deletions(-)
+| 
+* commit 12395034ef57e91c9cfe78df9f27d6cbc5bea7ea
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-08 15:59
+| 
+|     feat(HW05): add test bed setup/teardown scripts for perf data
+|     
+|     - setup_testbed.sh: reset DB to a clean baseline (RESET_DB=1), snapshot
+|       it to database.sqlite.baseline, then load perf data via seed_perf.js
+|     - teardown_testbed.sh: restore the database from that snapshot after
+|       the session's k6 runs so the app is handed back in its original
+|       state, not left holding thousands of perf rows
+|     - both refuse to run while a backend process holds a lock on the db file
+|     - .gitignore: exclude *.sqlite.baseline, *.sqlite-wal, *.sqlite-shm
+|     - EXECUTION_PLAN.md: document the setup/teardown procedure as step 0/9
+|       of the per-run cycle, distinct from reset_lockout.js (which resets
+|       between runs within a session, not the session-level test bed)
+|     - REPORT.md 4.7: describe the test bed procedure alongside lockout reset
+|     - seed_report.txt: regenerated after verifying the full setup/teardown
+|       cycle end to end (baseline 5/2/0 -> seeded 2005/202/3000 -> restored
+|       5/2/0)
+| 
+|  .gitignore                                        |  3 ++
+|  homeworks/HW05/EXECUTION_PLAN.md                  |  8 ++++-
+|  homeworks/HW05/REPORT.md                          |  6 ++--
+|  .../HW05/artifacts/results/raw/seed_report.txt    |  2 +-
+|  homeworks/HW05/artifacts/scripts/setup_testbed.sh | 39 +++++++++++++++++++++
+|  .../HW05/artifacts/scripts/teardown_testbed.sh    | 39 +++++++++++++++++++++
+|  6 files changed, 93 insertions(+), 4 deletions(-)
+| 
+* commit e8cfe8ee7cdfae16f9694420f14e0e695622fc96
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-08 15:33
+| 
+|     docs(HW05): correct cart persistence and login lockout claims
+|     
+|     - README.md / REPORT.md previously claimed POST /api/cart "upserts
+|       the quantity on an existing cart row" and "does not inflate the
+|       schema". Verified against server.js:290 and a live smoke test
+|       (baseline_smoke.txt): it push()es onto an in-memory array keyed by
+|       user id, does not touch the database, grows unbounded, and is lost
+|       on backend restart. Updated both files and the Load-pairing
+|       rationale, which now names backend RSS growth as the primary
+|       observable instead of a nonexistent schema-inflation concern.
+|     - both files previously described login lockout as "3-fail / 30
+|       seconds". Verified against server.js:54-58: each failure adds 2 to
+|       login_attempts, the account locks once the counter reaches 3 (i.e.
+|       after 2 consecutive failures), for 180 seconds. Updated the
+|       endpoint table, scenario pairing rationale, and two report
+|       scaffolding TBD notes that repeated the same wrong numbers.
+|     - README.md: fill in Node.js and k6 versions in the Hardware table
+|       now that k6 is installed and verified (k6 v1.0.0).
+| 
+|  homeworks/HW05/README.md |  8 ++++----
+|  homeworks/HW05/REPORT.md | 12 ++++++------
+|  2 files changed, 10 insertions(+), 10 deletions(-)
+| 
+* commit 4496cbe5b542f1c38d55c31320bedd895a89f7ff
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-08 15:33
+| 
+|     test(HW05): verify k6 pipeline with a smoke run against product search
+|     
+|     - baseline_smoke.txt: curl-equivalent checks against the 3 selected
+|       endpoints (search, login valid/invalid, cart) confirming response
+|       shape and status codes; also captures live proof that POST /api/cart
+|       pushes a new array entry per call rather than upserting quantity.
+|     - smoke_search.csv / smoke_search.html: 5 VU / 2 min k6 run against
+|       GET /api/products?search=, out=csv raw log plus a
+|       k6-reporter handleSummary() HTML, 600/600 requests passing both
+|       checks. Confirms the k6 -> raw CSV -> HTML report toolchain works
+|       end to end; parameters are not tuned yet (that is M2), this only
+|       proves the pipeline.
+| 
+|  .../results/html-reports/smoke_search.html        |  855 ++
+|  .../HW05/artifacts/results/raw/baseline_smoke.txt |    5 +
+|  .../HW05/artifacts/results/raw/smoke_search.csv   | 9241 +++++++++++++++++++
+|  3 files changed, 10101 insertions(+)
+| 
+* commit bd655e64ac33007777df8756a7708c219f9310df
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-08 15:32
+| 
+|     chore(HW05): add perf seed, lockout-reset, and resource-monitor scripts
+|     
+|     - seed_perf.js: seeds 2,000 products (weighted keyword distribution
+|       for realistic search selectivity), 200 users, and 3,000 orders
+|       directly via a raw sqlite3 connection, bypassing database.js so it
+|       does not trigger a reseed. Writes actual row counts to
+|       artifacts/results/raw/seed_report.txt.
+|     - reset_lockout.js: clears login_attempts/locked_until for all users
+|       between k6 runs.
+|     - monitor.sh: samples backend RSS/CPU once per second into a CSV,
+|       quantitative evidence alongside the required htop screenshot.
+|     - seed_report.txt: real counts from tonight's seed run (2005
+|       products, 202 users, 3000 orders).
+| 
+|  .../HW05/artifacts/results/raw/seed_report.txt    |   6 +
+|  homeworks/HW05/artifacts/scripts/monitor.sh       |  34 +++++
+|  homeworks/HW05/artifacts/scripts/reset_lockout.js |  36 +++++
+|  homeworks/HW05/artifacts/scripts/seed_perf.js     | 153 ++++++++++++++++++++
+|  4 files changed, 229 insertions(+)
+| 
+* commit 1cdf8d1cf79eb3350a36f795c1b7e90f0537b112
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-08 15:32
+| 
+|     fix(HW05): make backend DB seeding idempotent, allow PORT override
+|     
+|     - database.js: only run the destructive drop+reseed when RESET_DB=1
+|       or when the products table is empty/missing; otherwise skip it and
+|       keep existing rows. Previously every `require('./database')` (i.e.
+|       every backend restart) wiped the whole schema and reseeded the
+|       5-product/2-user defaults, which would destroy perf-test seed data
+|       on the first restart between k6 runs.
+|     - server.js: read PORT from process.env with a 3000 default instead
+|       of hard-coding it, so the backend can run on an alternate port when
+|       3000 is already taken by an unrelated local process.
+|     - add homeworks/HW05/EXECUTION_PLAN.md, the execution plan this and
+|       the following HW05 commits are following.
+| 
+|  apps/backend/database.js         |  19 +-
+|  apps/backend/server.js           |   2 +-
+|  homeworks/HW05/EXECUTION_PLAN.md | 432 +++++++++++++++++++++++++++++++++++++
+|  3 files changed, 450 insertions(+), 3 deletions(-)
+| 
+* commit f3f50c4a87da8b302ee1b27a3d3ab650d3ac413a
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-08 00:38
+| 
+|     docs(HW05): confirm endpoint split with the other group member
+|     
+|     - mark endpoint-split-note.md as confirmed (2026-08-08), close all 3 checklist items
+|     - fill in the other member's endpoints in the non-overlap table (README.md, REPORT.md 3.3)
+|     - drop TBD/proposed placeholders now that the split is final
+| 
+|  homeworks/HW05/README.md | 4 ++--
+|  homeworks/HW05/REPORT.md | 4 ++--
+|  2 files changed, 4 insertions(+), 4 deletions(-)
+| 
+* commit c774c36d5d17363fa063d76fc94eca46bebc5afe
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-06 22:45
+| 
+|     docs(HW05): lock in endpoint selection for the three groups
+|     
+|     - read-heavy: GET /api/products?search= (FR-05), paired with Stress
+|     - auth-heavy: POST /api/login (FR-02), paired with Spike
+|     - transactional: POST /api/cart (FR-07), paired with Load
+|     - narrow transactional from the cart-to-checkout workflow down to add-to-cart, leaving POST /api/checkout to the other member
+|     - record why FR-09, FR-16, and FR-20 from HW02 were not reused
+|     - add group/endpoint-split-note.md with the proposed split and the remaining endpoint map
+| 
+|  homeworks/HW05/README.md | 31 +++++++++++++++++++++++++------
+|  homeworks/HW05/REPORT.md | 29 ++++++++++++++++++++---------
+|  2 files changed, 45 insertions(+), 15 deletions(-)
+| 
+* commit f50e83c3e454ffc4256b725386d57ea740aa2b50
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-06 22:13
+| 
+|     docs(HW05): lock in the three distinct report views
+|     
+|     - Load: aggregate HTML summary via handleSummary()
+|     - Stress: raw per-request CSV with percentiles recomputed per load stage
+|     - Spike: time-series JSON stream charted against elapsed time
+|     - justify each pairing by the question its scenario asks
+|     - note that raw logs and HTML reports are still produced for all three runs per section 14
+| 
+|  homeworks/HW05/README.md | 16 ++++++++++------
+|  homeworks/HW05/REPORT.md | 16 +++++++++++-----
+|  2 files changed, 21 insertions(+), 11 deletions(-)
+| 
+* commit 0ee6ad05f901064a2ce2ca795b1b7e70197d3685
+| Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+| Date:   2026-08-06 22:08
+| 
+|     docs(HW05): add assignment requirements and submission scaffold
+|     
+|     - add REQUIREMENTS.md (HW05-AI performance testing on EShop)
+|     - scaffold README.md, REPORT.md, BUG_REPORT.md, prompt_log.md following the HW02/HW03 layout
+|     - add AI-02 audit report, AI-03 disclosure form, AI-05 privacy checklist from course templates
+|     - create artifacts tree for test plans, per-group CSV inputs, raw logs, HTML reports, agent skill
+|     - create assets tree for hardware, resource-monitor, and GitHub issue screenshots
+|     - document the k6 to JMeter deliverable mapping (script, raw CSV log, HTML summary)
+| 
+|  homeworks/HW05/BUG_REPORT.md                      |  71 ++++++
+|  homeworks/HW05/README.md                          | 161 ++++++++++++
+|  homeworks/HW05/REPORT.md                          | 256 ++++++++++++++++++++
+|  homeworks/HW05/REQUIREMENTS.md                    | 205 ++++++++++++++++
+|  homeworks/HW05/[AI-02]_AI_Audit_Report.md         | 147 +++++++++++
+|  homeworks/HW05/[AI-03]_AI_Disclosure_Form.md      |  99 ++++++++
+|  homeworks/HW05/[AI-05]_AI_Privacy_Checklist.md    |  44 ++++
+|  .../HW05/artifacts/results/html-reports/.gitkeep  |   0
+|  homeworks/HW05/artifacts/results/raw/.gitkeep     |   0
+|  homeworks/HW05/artifacts/skills/.gitkeep          |   0
+|  homeworks/HW05/artifacts/test-data/.gitkeep       |   0
+|  homeworks/HW05/artifacts/test-plans/.gitkeep      |   0
+|  .../HW05/assets/screenshots/hardware/.gitkeep     |   0
+|  homeworks/HW05/assets/screenshots/issues/.gitkeep |   0
+|  .../assets/screenshots/resource-monitor/.gitkeep  |   0
+|  homeworks/HW05/assets/signature.png               | Bin 0 -> 53409 bytes
+|  homeworks/HW05/prompt_log.md                      |  38 +++
+|  17 files changed, 1021 insertions(+)
+| 
+* commit dd87dd1b44df8411f1e6723fc17e95fe173260d1
+  Author: SoJDev | Hoàng Lâm <lhlam2515@gmail.com>
+  Date:   2026-08-06 22:08
+  
+      chore(HW05): exclude lecturer-provided reference material from git
+      
+      - ignore homeworks/HW05/ref/ (k6 demo scripts, Group05 example, slides)
+      - keeps a 15 MB HAR capture and 18 MB of handouts out of repo history
+  
+   .gitattributes | 2 ++
+   .gitignore     | 3 +++
+   2 files changed, 5 insertions(+)
