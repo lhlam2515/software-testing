@@ -1,0 +1,354 @@
+[
+  {
+    "id": "TC-01",
+    "hw02Ref": "domain-testing.md#tc-01",
+    "title": "Apply valid percent coupon (happy path)",
+    "layer": "hybrid",
+    "type": "positive",
+    "arrange": { "loginAs": "test@eshop.com", "resetUsageFor": ["SAVE10"] },
+    "act": { "code": "SAVE10", "totalAmount": 500000, "authMode": "valid" },
+    "assert": {
+      "api": { "status": 200, "discount_amount": 50000, "final_amount": 450000 }
+    },
+    "knownDefect": "BUG-09-001"
+  },
+  {
+    "id": "TC-02",
+    "hw02Ref": "domain-testing.md#tc-02",
+    "title": "Apply valid fixed coupon (happy path)",
+    "layer": "hybrid",
+    "type": "positive",
+    "arrange": { "loginAs": "test@eshop.com", "resetUsageFor": ["BIGBUY"] },
+    "act": { "code": "BIGBUY", "totalAmount": 600000, "authMode": "valid" },
+    "assert": {
+      "api": { "status": 200, "discount_amount": 50000, "final_amount": 550000 }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-03",
+    "hw02Ref": "domain-testing.md#tc-03",
+    "title": "Coupon code does not exist in the system",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": { "loginAs": "test@eshop.com" },
+    "act": { "code": "NOTEXIST99", "totalAmount": 500000, "authMode": "valid" },
+    "assert": {
+      "api": { "status": 404, "hasError": true, "hasDiscount": false }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-04",
+    "hw02Ref": "domain-testing.md#tc-04",
+    "title": "Coupon exists but is deactivated (is_active=0)",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": {
+      "loginAs": "test@eshop.com",
+      "createCoupon": {
+        "code": "DEAD01",
+        "type": "percent",
+        "discount_value": 5,
+        "min_order_amount": 100000,
+        "expired_at": "2099-12-31",
+        "max_uses_per_user": 1
+      },
+      "deactivateCoupon": "DEAD01"
+    },
+    "act": { "code": "DEAD01", "totalAmount": 500000, "authMode": "valid" },
+    "assert": {
+      "api": { "status": 404, "hasError": true, "hasDiscount": false }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-05",
+    "hw02Ref": "domain-testing.md#tc-05",
+    "title": "Coupon entered with wrong case is rejected (case-sensitivity gap)",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": { "loginAs": "test@eshop.com", "resetUsageFor": ["SAVE10"] },
+    "act": { "code": "save10", "totalAmount": 500000, "authMode": "valid" },
+    "assert": {
+      "api": { "status": 404, "hasError": true, "hasDiscount": false }
+    },
+    "knownDefect": "BUG-09-006"
+  },
+  {
+    "id": "TC-06",
+    "hw02Ref": "domain-testing.md#tc-06",
+    "title": "Coupon has expired (expired_at in the past)",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": { "loginAs": "test@eshop.com" },
+    "act": { "code": "EXPIRED", "totalAmount": 200000, "authMode": "valid" },
+    "assert": {
+      "api": { "status": 400, "hasError": true, "hasDiscount": false }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-07",
+    "hw02Ref": "domain-testing.md#tc-07",
+    "title": "Order total below minimum threshold",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": { "loginAs": "test@eshop.com", "resetUsageFor": ["SAVE10"] },
+    "act": { "code": "SAVE10", "totalAmount": 200000, "authMode": "valid" },
+    "assert": {
+      "api": { "status": 400, "hasError": true, "hasDiscount": false }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-08",
+    "hw02Ref": "domain-testing.md#tc-08",
+    "title": "No Authorization header must be rejected",
+    "layer": "api",
+    "type": "negative",
+    "arrange": { "resetUsageFor": ["SAVE10"] },
+    "act": { "code": "SAVE10", "totalAmount": 500000, "userId": 2, "authMode": "none" },
+    "assert": {
+      "api": { "status": 401, "hasError": true, "hasDiscount": false }
+    },
+    "knownDefect": "BUG-09-002"
+  },
+  {
+    "id": "TC-09",
+    "hw02Ref": "domain-testing.md#tc-09",
+    "title": "Invalid JWT token must be rejected",
+    "layer": "api",
+    "type": "negative",
+    "arrange": { "resetUsageFor": ["SAVE10"] },
+    "act": {
+      "code": "SAVE10",
+      "totalAmount": 500000,
+      "userId": 2,
+      "authMode": "invalid",
+      "invalidToken": "invalidtokenstring123abc"
+    },
+    "assert": {
+      "api": { "status": 403, "hasError": true, "hasDiscount": false }
+    },
+    "knownDefect": "BUG-09-003"
+  },
+  {
+    "id": "TC-10",
+    "hw02Ref": "domain-testing.md#tc-10",
+    "title": "User has already reached the per-user usage limit",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": {
+      "loginAs": "test@eshop.com",
+      "resetUsageFor": ["SAVE10"],
+      "consumeUsesViaCheckout": { "code": "SAVE10", "totalAmount": 500000, "times": 1 }
+    },
+    "act": { "code": "SAVE10", "totalAmount": 500000, "authMode": "valid" },
+    "assert": {
+      "api": { "status": 400, "hasError": true, "hasDiscount": false }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-11",
+    "hw02Ref": "domain-testing.md#tc-11",
+    "title": "Gap: fixed discount_value greater than total_amount must not yield a negative final_amount",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": {
+      "loginAs": "test@eshop.com",
+      "createCoupon": {
+        "code": "GAPTEST1",
+        "type": "fixed",
+        "discount_value": 100000,
+        "min_order_amount": 50000,
+        "expired_at": "2099-12-31",
+        "max_uses_per_user": 99
+      }
+    },
+    "act": { "code": "GAPTEST1", "totalAmount": 60000, "authMode": "valid" },
+    "assert": {
+      "api": { "finalAmountNotNegative": true }
+    },
+    "knownDefect": "BUG-09-004"
+  },
+  {
+    "id": "TC-12",
+    "hw02Ref": "domain-testing.md#tc-12",
+    "title": "Gap: total_amount=0 with min_order_amount=0 is a valid degenerate case (>=)",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": {
+      "loginAs": "test@eshop.com",
+      "createCoupon": {
+        "code": "ZERO01",
+        "type": "percent",
+        "discount_value": 10,
+        "min_order_amount": 0,
+        "expired_at": "2099-12-31",
+        "max_uses_per_user": 5
+      }
+    },
+    "act": { "code": "ZERO01", "totalAmount": 0, "authMode": "valid" },
+    "assert": {
+      "api": { "status": 200, "discount_amount": 0, "final_amount": 0 }
+    },
+    "knownDefect": "BUG-09-005"
+  },
+  {
+    "id": "TC-13",
+    "hw02Ref": "domain-testing.md#tc-13",
+    "title": "Gap: client-manipulated total_amount must not let the persisted order diverge from the real cart subtotal",
+    "note": "Real cart subtotal is 0 here: add-to-cart cannot be automated (ui-survey.md P1-2, cart state is unreachable via direct /checkout navigation), so this TC always starts from a genuinely empty cart rather than a seeded non-zero one. That still proves BUG-09-007 — checkout must persist total_amount=0 for an empty cart, not the client-manipulated value.",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": {
+      "loginAs": "test@eshop.com",
+      "resetUsageFor": ["SAVE10"],
+      "cartRealSubtotal": 0
+    },
+    "act": { "code": "SAVE10", "totalAmount": 500000, "authMode": "valid", "confirmCheckout": true },
+    "assert": {
+      "api": { "status": 200, "hasDiscount": true },
+      "db": { "orderTotalMatchesRealSubtotal": true }
+    },
+    "knownDefect": "BUG-09-007"
+  },
+  {
+    "id": "TC-BVA-01",
+    "hw02Ref": "bva.md#tc-bva-01",
+    "title": "total_amount one unit below min_order_amount is rejected (OFF point)",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "loginAs": "test@eshop.com", "resetUsageFor": ["SAVE10"] },
+    "act": { "code": "SAVE10", "totalAmount": 299999, "authMode": "valid" },
+    "assert": {
+      "api": { "status": 400, "hasError": true, "hasDiscount": false }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-BVA-02",
+    "hw02Ref": "bva.md#tc-bva-02",
+    "title": "total_amount exactly at min_order_amount must be accepted (ON point, >=)",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "loginAs": "test@eshop.com", "resetUsageFor": ["SAVE10"] },
+    "act": { "code": "SAVE10", "totalAmount": 300000, "authMode": "valid" },
+    "assert": {
+      "api": { "status": 200, "discount_amount": 30000, "final_amount": 270000 }
+    },
+    "knownDefect": "BUG-09-005"
+  },
+  {
+    "id": "TC-BVA-03",
+    "hw02Ref": "bva.md#tc-bva-03",
+    "title": "total_amount one unit above min_order_amount is accepted (UB+1)",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "loginAs": "test@eshop.com", "resetUsageFor": ["SAVE10"] },
+    "act": { "code": "SAVE10", "totalAmount": 300001, "authMode": "valid" },
+    "assert": {
+      "api": { "status": 200, "discount_amount": 30000, "final_amount": 270001 }
+    },
+    "knownDefect": "BUG-09-001"
+  },
+  {
+    "id": "TC-BVA-04",
+    "hw02Ref": "bva.md#tc-bva-04",
+    "title": "uses_by_user = max-1 (last valid use, VIP100 max=2) is accepted",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": {
+      "loginAs": "test@eshop.com",
+      "resetUsageFor": ["VIP100"],
+      "consumeUsesViaCheckout": { "code": "VIP100", "totalAmount": 400000, "times": 1 }
+    },
+    "act": { "code": "VIP100", "totalAmount": 400000, "authMode": "valid" },
+    "assert": {
+      "api": { "status": 200, "discount_amount": 100000, "final_amount": 300000 }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-BVA-05",
+    "hw02Ref": "bva.md#tc-bva-05",
+    "title": "uses_by_user = max (SAVE10, max=1) is rejected (ON point)",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": {
+      "loginAs": "test@eshop.com",
+      "resetUsageFor": ["SAVE10"],
+      "consumeUsesViaCheckout": { "code": "SAVE10", "totalAmount": 500000, "times": 1 }
+    },
+    "act": { "code": "SAVE10", "totalAmount": 500000, "authMode": "valid" },
+    "assert": {
+      "api": { "status": 400, "hasError": true, "hasDiscount": false }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-BVA-06",
+    "hw02Ref": "bva.md#tc-bva-06",
+    "title": "uses_by_user = max (VIP100, max=2) is rejected — rules out hardcoded max=1",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": {
+      "loginAs": "test@eshop.com",
+      "resetUsageFor": ["VIP100"],
+      "consumeUsesViaCheckout": { "code": "VIP100", "totalAmount": 400000, "times": 2 }
+    },
+    "act": { "code": "VIP100", "totalAmount": 400000, "authMode": "valid" },
+    "assert": {
+      "api": { "status": 400, "hasError": true, "hasDiscount": false }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-BVA-07",
+    "hw02Ref": "bva.md#tc-bva-07",
+    "title": "expired_at = today (ON point, strict <) is rejected as expired",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": {
+      "loginAs": "test@eshop.com",
+      "createCoupon": {
+        "code": "TODAYEXP",
+        "type": "percent",
+        "discount_value": 10,
+        "min_order_amount": 100000,
+        "expiredAtOffsetDays": 0,
+        "max_uses_per_user": 99
+      }
+    },
+    "act": { "code": "TODAYEXP", "totalAmount": 500000, "authMode": "valid" },
+    "assert": {
+      "api": { "status": 400, "hasError": true, "hasDiscount": false }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-BVA-08",
+    "hw02Ref": "bva.md#tc-bva-08",
+    "title": "expired_at = tomorrow (UB+1) is still valid",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": {
+      "loginAs": "test@eshop.com",
+      "createCoupon": {
+        "code": "TOMORROWEXP",
+        "type": "percent",
+        "discount_value": 10,
+        "min_order_amount": 100000,
+        "expiredAtOffsetDays": 1,
+        "max_uses_per_user": 99
+      }
+    },
+    "act": { "code": "TOMORROWEXP", "totalAmount": 500000, "authMode": "valid" },
+    "assert": {
+      "api": { "status": 200, "discount_amount": 50000, "final_amount": 450000 }
+    },
+    "knownDefect": "BUG-09-001"
+  }
+]

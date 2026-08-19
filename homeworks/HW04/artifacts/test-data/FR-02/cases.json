@@ -1,0 +1,264 @@
+[
+  {
+    "id": "TC-01",
+    "hw02Ref": "domain-testing.md#tc-01",
+    "title": "Happy path — successful login resets counter",
+    "layer": "hybrid",
+    "type": "positive",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 1, "setLockedUntil": null },
+    "act": { "email": "test@eshop.com", "password": "Test1234!" },
+    "assert": {
+      "ui": { "noErrorVisible": true, "navigatesAwayFromLogin": true },
+      "api": { "status": 200, "hasToken": true },
+      "db": { "login_attempts": 0, "locked_until": null }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-02",
+    "hw02Ref": "domain-testing.md#tc-02",
+    "title": "Empty email blocked by HTML5 validation",
+    "layer": "ui",
+    "type": "negative",
+    "arrange": {},
+    "act": { "email": "", "password": "Test1234!" },
+    "assert": {
+      "ui": { "staysOnLoginPage": true, "html5ValidationOnUsername": true },
+      "api": { "requestSent": false }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-03",
+    "hw02Ref": "domain-testing.md#tc-03",
+    "title": "Invalid email format (no @ sign) blocked by HTML5 type=email validation",
+    "layer": "ui",
+    "type": "negative",
+    "arrange": {},
+    "act": { "email": "invalid_no_at_sign", "password": "Test1234!" },
+    "assert": {
+      "ui": { "staysOnLoginPage": true, "html5ValidationOnUsername": true },
+      "api": { "requestSent": false }
+    },
+    "knownDefect": "BUG-02-001"
+  },
+  {
+    "id": "TC-03b",
+    "hw02Ref": "domain-testing.md#tc-03",
+    "title": "Invalid email format (missing domain, e.g. \"test@\") blocked by HTML5 validation",
+    "layer": "ui",
+    "type": "negative",
+    "arrange": {},
+    "act": { "email": "test@", "password": "Test1234!" },
+    "assert": {
+      "ui": { "staysOnLoginPage": true, "html5ValidationOnUsername": true },
+      "api": { "requestSent": false }
+    },
+    "note": "Bổ sung theo domain-testing.md#tc-03 verification point 4 (\"Also test with: test@, @domain.com, test @domain.com\") — biến thể gốc TC-03 chỉ dùng invalid_no_at_sign, chưa phủ 3 dạng lỗi email cụ thể mà thiết kế HW02 yêu cầu.",
+    "knownDefect": "BUG-02-001"
+  },
+  {
+    "id": "TC-03c",
+    "hw02Ref": "domain-testing.md#tc-03",
+    "title": "Invalid email format (missing local-part, e.g. \"@domain.com\") blocked by HTML5 validation",
+    "layer": "ui",
+    "type": "negative",
+    "arrange": {},
+    "act": { "email": "@domain.com", "password": "Test1234!" },
+    "assert": {
+      "ui": { "staysOnLoginPage": true, "html5ValidationOnUsername": true },
+      "api": { "requestSent": false }
+    },
+    "note": "Bổ sung theo domain-testing.md#tc-03 verification point 4 — cùng lý do với TC-03b.",
+    "knownDefect": "BUG-02-001"
+  },
+  {
+    "id": "TC-03d",
+    "hw02Ref": "domain-testing.md#tc-03",
+    "title": "Invalid email format (embedded space, e.g. \"test @domain.com\") blocked by HTML5 validation",
+    "layer": "ui",
+    "type": "negative",
+    "arrange": {},
+    "act": { "email": "test @domain.com", "password": "Test1234!" },
+    "assert": {
+      "ui": { "staysOnLoginPage": true, "html5ValidationOnUsername": true },
+      "api": { "requestSent": false }
+    },
+    "note": "Bổ sung theo domain-testing.md#tc-03 verification point 4 — cùng lý do với TC-03b. Biến thể này giữ lại để phủ đúng 3 dạng lỗi domain-testing.md yêu cầu; không tạo browser-diff vì field Username là type=\"text\" (Login.jsx:30), không có type=\"email\" để browser xử lý khác nhau — root cause chung cho cả TC-03/03b/03c/03d là BUG-02-001 (checkValidity() luôn trả true vì không có HTML5 email-format validation nào chạy).",
+    "knownDefect": "BUG-02-001"
+  },
+  {
+    "id": "TC-04",
+    "hw02Ref": "domain-testing.md#tc-04",
+    "title": "Unregistered email returns generic error, no enumeration",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": {},
+    "act": { "email": "notfound@example.com", "password": "Test1234!" },
+    "assert": {
+      "ui": { "genericErrorVisible": true, "errorRevealsReason": false },
+      "api": { "status": 401, "hasToken": false }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-05",
+    "hw02Ref": "domain-testing.md#tc-05",
+    "title": "Empty password rejected without granting a token",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 0, "setLockedUntil": null },
+    "act": { "email": "test@eshop.com", "password": "" },
+    "assert": {
+      "ui": { "staysOnLoginPage": true },
+      "api": { "requestSent": false },
+      "db": { "login_attempts": 0 }
+    },
+    "note": "Gap fix (2026-08-10): domain-testing.md#tc-05 yêu cầu ghi nhận nhánh nào thực sự xảy ra (Branch A: HTML5 chặn / Branch B: server trả lỗi) và login_attempts có tăng ở Branch B hay không — bản gốc thiếu hoàn toàn assert.db, và assert.ui.staysOnLoginPage đúng ở cả 2 nhánh nên không phân biệt được. Đã chạy thử để xác định nhánh thực tế: trường password có thuộc tính `required` (xem TC-UI-01), khiến trình duyệt chặn submit trước khi request tới server — Branch A. Assert api.requestSent:false + db.login_attempts:0 theo đúng nhánh quan sát được (chạy thật, không phải suy đoán); nếu SUT sau này đổi hành vi (bỏ required, chuyển sang Branch B), case sẽ FAIL đúng chỗ và lộ ra sự thay đổi nhánh. (`api.hasToken` đã bỏ khỏi assert — dead field vì assertApi() return sớm ngay sau requestSent:false, không bao giờ chạy tới nhánh hasToken.)",
+    "knownDefect": null
+  },
+  {
+    "id": "TC-06",
+    "hw02Ref": "domain-testing.md#tc-06",
+    "title": "Wrong password increments counter by exactly 1",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 0, "setLockedUntil": null },
+    "act": { "email": "test@eshop.com", "password": "WrongPass1!" },
+    "assert": {
+      "ui": { "genericErrorVisible": true, "errorRevealsReason": false },
+      "api": { "status": 401, "hasToken": false },
+      "db": { "login_attempts": 1 }
+    },
+    "knownDefect": "BUG-02-003"
+  },
+  {
+    "id": "TC-07",
+    "hw02Ref": "domain-testing.md#tc-07",
+    "title": "Locked account rejects even correct credentials",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 3, "setLockedUntilOffsetSeconds": 25 },
+    "act": { "email": "test@eshop.com", "password": "Test1234!" },
+    "assert": {
+      "ui": { "genericErrorVisible": true, "errorRevealsReason": false },
+      "api": { "hasToken": false, "status": 401 }
+    },
+    "note": "P6 bug-triage fix (2026-08-09): trước bản sửa này, assert.api chỉ có hasToken:false (đúng cho cả 401 lẫn 403 nên không bắt được gì) và note cũ đề nghị thêm status=403 — nhưng 403 CHÍNH LÀ hành vi lỗi quan sát được, gán nó làm expected sẽ vi phạm nguyên tắc bất di bất dịch ở §3.1 (assert theo spec, không theo implementation) và làm case luôn xanh dù bug còn đó. srs.md dòng 42 (\"Hệ thống trả về thông báo lỗi phù hợp; không để lộ chi tiết nguyên nhân\") xác nhận status code KHÔNG được phân biệt lockout vs sai mật khẩu — do đó status theo spec phải bằng 401 (giống nhánh sai mật khẩu thường, server.js:63), không phải 403 (server.js:40-44). Assert status=401 khiến case FAIL đúng chỗ, lộ ra bug mới (account-lockout state enumeration qua HTTP status + message) — xem BUG_REPORT.md.",
+    "knownDefect": "PENDING-NEW-lockout-message-enumeration"
+  },
+  {
+    "id": "TC-BVA-01",
+    "hw02Ref": "bva.md#tc-bva-01",
+    "title": "3rd failure (2->3) triggers lock immediately (ON point)",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 2, "setLockedUntil": null },
+    "act": { "email": "test@eshop.com", "password": "WrongPass1!" },
+    "assert": {
+      "api": { "hasToken": false },
+      "db": { "login_attempts": 3, "locked_untilNotNull": true }
+    },
+    "note": "login_attempts thực tế sẽ là 4, không phải 3 — server.js:54 tăng +2/lần thay vì +1 (BUG-02-003, đã cross-ref TC-06). HW02 BUG_REPORT.md dòng 105 đã liệt kê TC-BVA-01 là 1 trong 2 TC phát hiện bug này.",
+    "knownDefect": "BUG-02-003"
+  },
+  {
+    "id": "TC-BVA-02",
+    "hw02Ref": "bva.md#tc-bva-02",
+    "title": "Success at UB of valid class (login_attempts=2) fully resets counter",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 2, "setLockedUntil": null },
+    "act": { "email": "test@eshop.com", "password": "Test1234!" },
+    "assert": {
+      "api": { "status": 200, "hasToken": true },
+      "db": { "login_attempts": 0, "locked_until": null }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-BVA-03",
+    "hw02Ref": "bva.md#tc-bva-03",
+    "title": "1 second remaining in lock window — still rejected (UB-1)",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 3, "setLockedUntilOffsetSeconds": 1 },
+    "act": { "email": "test@eshop.com", "password": "Test1234!" },
+    "assert": {
+      "ui": { "genericErrorVisible": true },
+      "api": { "hasToken": false }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-BVA-04",
+    "hw02Ref": "bva.md#tc-bva-04",
+    "title": "Exact expiry boundary (locked_until = NOW) unlocks account (OFF point)",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 3, "setLockedUntilOffsetSeconds": 0 },
+    "act": { "email": "test@eshop.com", "password": "Test1234!" },
+    "assert": {
+      "ui": { "noErrorVisible": true },
+      "api": { "status": 200, "hasToken": true },
+      "db": { "login_attempts": 0, "locked_until": null }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-BVA-05",
+    "hw02Ref": "bva.md#tc-bva-05",
+    "title": "1 second past expiry (UB+1) — clearly unlocked, baseline confirmation",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 3, "setLockedUntilOffsetSeconds": -1 },
+    "act": { "email": "test@eshop.com", "password": "Test1234!" },
+    "assert": {
+      "ui": { "noErrorVisible": true },
+      "api": { "status": 200, "hasToken": true },
+      "db": { "login_attempts": 0, "locked_until": null }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-UI-01",
+    "hw02Ref": "TEST_PLAN.md#1.1-tc-ui-01",
+    "title": "Password field must mask input (type=password)",
+    "layer": "ui",
+    "type": "negative",
+    "arrange": {},
+    "act": { "email": "test@eshop.com", "password": "Test1234!", "submitVia": "none" },
+    "assert": {
+      "ui": { "passwordInputType": "password" }
+    },
+    "knownDefect": "PENDING-NEW-password-field-not-masked"
+  },
+  {
+    "id": "TC-UI-02",
+    "hw02Ref": "TEST_PLAN.md#1.1-tc-ui-02",
+    "title": "Submitting via Enter key behaves the same as clicking Sign In",
+    "layer": "ui",
+    "type": "positive",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 0, "setLockedUntil": null },
+    "act": { "email": "test@eshop.com", "password": "Test1234!", "submitVia": "enter" },
+    "assert": {
+      "ui": { "noErrorVisible": true, "navigatesAwayFromLogin": true },
+      "api": { "status": 200, "hasToken": true }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-UI-03",
+    "hw02Ref": "TEST_PLAN.md#1.1-tc-ui-03",
+    "title": "After lock, UI reflects lockout state, not only the API",
+    "layer": "ui",
+    "type": "negative",
+    "arrange": { "email": "test@eshop.com", "setAttempts": 3, "setLockedUntilOffsetSeconds": 25 },
+    "act": { "email": "test@eshop.com", "password": "Test1234!" },
+    "assert": {
+      "ui": { "genericErrorVisible": true, "errorRevealsReason": false }
+    },
+    "note": "Cùng root cause với TC-07 — xác nhận PASS ở tầng UI (chạy thật A4), rò rỉ chỉ lộ ở tầng API (403 + message riêng). Xem note đầy đủ ở TC-07.",
+    "knownDefect": "PENDING-NEW-lockout-message-enumeration"
+  }
+]

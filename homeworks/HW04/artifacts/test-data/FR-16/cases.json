@@ -1,0 +1,433 @@
+[
+  {
+    "id": "TC-01",
+    "hw02Ref": "domain-testing.md#tc-01",
+    "title": "Import one product with all valid fields",
+    "layer": "hybrid",
+    "type": "positive",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "csvRows": [
+        { "name": "Basic Men's T-Shirt", "price": 150000, "description": "100% cotton material", "imageUrl": "", "category_id": 1 }
+      ]
+    },
+    "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "1/1", "errorsCount": 0 },
+      "api": { "status": 200, "inserted": 1, "errorsCount": 0 },
+      "db": { "productExists": "Basic Men's T-Shirt", "productCountDelta": 1, "persistedRowsMatchInput": true }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-02",
+    "hw02Ref": "domain-testing.md#tc-02",
+    "title": "Import a batch of 3 valid products",
+    "layer": "hybrid",
+    "type": "positive",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "csvRows": [
+        { "name": "Product Alpha", "price": 100000, "category_id": 1 },
+        { "name": "Product Beta", "price": 200000, "description": "Beta description", "category_id": 1 },
+        { "name": "Product Gamma", "price": 350000, "category_id": 1 }
+      ]
+    },
+    "assert": {
+      "ui": { "previewCount": 3, "resultTextIncludes": "3/3", "errorsCount": 0 },
+      "api": { "status": 200, "inserted": 3, "errorsCount": 0 },
+      "db": { "productCountDelta": 3, "persistedRowsMatchInput": true }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-03",
+    "hw02Ref": "domain-testing.md#tc-03",
+    "title": "Request without Authorization header is rejected",
+    "layer": "api",
+    "type": "negative",
+    "arrange": {},
+    "act": {
+      "authMode": "none",
+      "rawBody": { "products": [{ "name": "Test", "price": 10000, "description": "", "imageUrl": "", "category_id": 1 }] }
+    },
+    "assert": {
+      "api": { "status": 401, "hasError": true },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["Test"] }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-04",
+    "hw02Ref": "domain-testing.md#tc-04",
+    "title": "Valid JWT but not an admin must be rejected",
+    "layer": "api",
+    "type": "negative",
+    "arrange": { "loginAs": "test@eshop.com" },
+    "act": {
+      "authMode": "validNonAdmin",
+      "csvRows": [{ "name": "Test", "price": 10000, "category_id": 1 }]
+    },
+    "assert": {
+      "api": { "status": 403, "hasError": true },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["Test"] }
+    },
+    "knownDefect": "BUG-16-001"
+  },
+  {
+    "id": "TC-05",
+    "hw02Ref": "domain-testing.md#tc-05",
+    "title": "JSON body without the products key is rejected",
+    "layer": "api",
+    "type": "negative",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": { "rawBody": {} },
+    "assert": {
+      "api": { "status": 400, "hasError": true },
+      "db": { "productCountDelta": 0 }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-06",
+    "hw02Ref": "domain-testing.md#tc-06",
+    "title": "name empty string causes the row to fail",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "csvRows": [{ "name": "", "price": 50000, "description": "desc", "category_id": 1 }]
+    },
+    "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1, "errorMentions": "name" },
+      "db": { "productCountDelta": 0 }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-07",
+    "hw02Ref": "domain-testing.md#tc-07",
+    "title": "name field absent causes the row to fail",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "csvRows": [{ "price": 50000, "description": "desc", "category_id": 1 }],
+      "csvColumns": ["price", "description", "imageUrl", "category_id"]
+    },
+    "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1, "errorMentions": "name" },
+      "db": { "productCountDelta": 0 }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-08",
+    "hw02Ref": "domain-testing.md#tc-08",
+    "title": "price = 0 (not positive) must reject the row",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "csvRows": [{ "name": "Test zero price", "price": 0, "category_id": 1 }]
+    },
+    "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1, "errorMentions": "price" },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["Test zero price"] }
+    },
+    "knownDefect": "BUG-16-002"
+  },
+  {
+    "id": "TC-09",
+    "hw02Ref": "domain-testing.md#tc-09",
+    "title": "Negative price must reject the row",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "csvRows": [{ "name": "Test negative price", "price": -1, "category_id": 1 }]
+    },
+    "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1, "errorMentions": "price" },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["Test negative price"] }
+    },
+    "knownDefect": "BUG-16-002"
+  },
+  {
+    "id": "TC-10",
+    "hw02Ref": "domain-testing.md#tc-10",
+    "title": "Non-numeric price string must reject the row",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "csvRows": [{ "name": "Test bad price", "price": "abc", "category_id": 1 }]
+    },
+    "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1, "errorMentions": "price" },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["Test bad price"] }
+    },
+    "knownDefect": "BUG-16-002"
+  },
+  {
+    "id": "TC-11",
+    "hw02Ref": "domain-testing.md#tc-11",
+    "title": "price field absent must reject the row",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "csvRows": [{ "name": "Test no price", "category_id": 1 }],
+      "csvColumns": ["name", "description", "imageUrl", "category_id"]
+    },
+    "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1, "errorMentions": "price" },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["Test no price"] }
+    },
+    "knownDefect": "BUG-16-002"
+  },
+  {
+    "id": "TC-12",
+    "hw02Ref": "domain-testing.md#tc-12",
+    "title": "Atomic rollback: 1 invalid row among 3 must roll back the entire batch",
+    "layer": "hybrid",
+    "type": "negative",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "csvRows": [
+        { "name": "Valid Product 1", "price": 100000, "category_id": 1 },
+        { "name": "Invalid Row", "price": 0, "category_id": 1 },
+        { "name": "Valid Product 2", "price": 200000, "category_id": 1 }
+      ]
+    },
+    "assert": {
+      "ui": { "previewCount": 3, "resultTextIncludes": "0/3", "errorsCount": 1, "errorRows": [3], "errorRowsMention": "price" },
+      "api": { "inserted": 0, "errorsCount": 1, "errorRows": [3], "errorRowsMention": "price" },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["Valid Product 1", "Valid Product 2"] }
+    },
+    "knownDefect": "BUG-16-002",
+    "note": "P2 finding (2026-08-05, deferred per TEST_PLAN.md §11): the import endpoint has no transaction — each row is inserted independently via stmt.run(), so this batch is expected to actually commit all 3 rows (price=0 is never validated, so nothing blocks any row). Kept the spec-correct expected value here per the explicit decision to defer the atomicity fix to P4; the resulting FAIL is expected to expose both BUG-16-002 (no price validation) and the not-yet-filed non-atomic-rollback defect together."
+  },
+  {
+    "id": "TC-13",
+    "hw02Ref": "domain-testing.md#tc-13",
+    "title": "Gap Probe: products = [] (empty array)",
+    "layer": "api",
+    "type": "edge",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": { "rawBody": { "products": [] } },
+    "assert": {
+      "api": { "status": 400, "hasError": true },
+      "db": { "productCountDelta": 0 }
+    },
+    "note": "Gap probe (spec không định nghĩa hành vi cho products:[]) — domain-testing.md liệt kê 3 nhánh hợp lệ: HTTP 400 (SUT tự xử lý input rỗng) · HTTP 200 với imported=0 (chấp nhận batch rỗng) · HTTP 500 (BUG — crash). Chọn nhánh HTTP 400 làm expected vì đây là hành vi REST chuẩn cho input rỗng về mặt nghiệp vụ, và khớp với kết quả thực tế đã quan sát khi thiết kế HW02 (Status: PASS). Nếu SUT đổi sang 1 trong 2 nhánh còn lại, case sẽ đỏ — đó là tín hiệu hợp lệ để re-triage, không phải lỗi test.",
+    "knownDefect": null
+  },
+  {
+    "id": "TC-14",
+    "hw02Ref": "domain-testing.md#tc-14",
+    "title": "Gap Probe: name longer than 255 characters (FR-15 cross-ref limit)",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "csvRows": [{ "nameFillChar": "x", "nameLength": 256, "price": 50000, "category_id": 1 }]
+    },
+    "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1 },
+      "db": { "productCountDelta": 0 }
+    },
+    "note": "Gap probe (spec không định nghĩa giới hạn 255 ký tự cho name khi import qua FR-16, dù FR-15 có giới hạn này) — domain-testing.md liệt kê 3 nhánh: HTTP 4xx + 0 products (giới hạn được enforce) · HTTP 200 + name bị cắt (BUG — truncate âm thầm) · HTTP 200 + name đủ 256 ký tự (giới hạn không được enforce, gap với FR-15). Chọn nhánh 'giới hạn được enforce' làm expected value theo §3.1 (assert theo spec cross-ref FR-15, không theo implementation) — hành vi thực tế quan sát được là nhánh 3 (chấp nhận full 256 ký tự), nên case này FAIL có chủ đích để lộ BUG-16-004.",
+    "knownDefect": "BUG-16-004"
+  },
+  {
+    "id": "TC-15",
+    "hw02Ref": "domain-testing.md#tc-15",
+    "title": "Gap Probe: category_id does not exist in DB (dangling FK)",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "loginAs": "admin@eshop.com", "assertCategoryMissing": 99999 },
+    "act": {
+      "csvRows": [{ "name": "Test invalid category", "price": 50000, "category_id": 99999 }]
+    },
+    "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1 },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["Test invalid category"] }
+    },
+    "note": "Gap probe (spec không định nghĩa việc validate category_id có tồn tại trong DB) — domain-testing.md liệt kê 3 nhánh: HTTP 4xx + 0 products (FK được validate) · HTTP 200 + product với category_id=99999 (CRITICAL BUG — dangling FK, dữ liệu hỏng) · HTTP 500 (BUG — exception không được handle). Chọn nhánh 'FK được validate' làm expected value vì đây là hành vi đúng đắn tối thiểu một hệ thống quản lý dữ liệu quan hệ phải có; hành vi thực tế quan sát được là nhánh 2 (dangling FK thực sự được tạo), nên case này FAIL có chủ đích để lộ BUG-16-003 (critical).",
+    "knownDefect": "BUG-16-003"
+  },
+  {
+    "id": "TC-16",
+    "hw02Ref": "domain-testing.md#tc-16",
+    "title": "Gap Probe: price as numeric string \"10000\" (CSV-parsing artifact)",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "csvRows": [{ "name": "Test price as string", "price": "10000", "category_id": 1 }]
+    },
+    "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "1/1", "errorsCount": 0 },
+      "api": { "status": 200, "inserted": 1 },
+      "db": { "productExists": "Test price as string", "productCountDelta": 1, "persistedRowsMatchInput": true }
+    },
+    "note": "Gap probe (spec không định nghĩa việc coerce price dạng chuỗi số như \"10000\") — domain-testing.md liệt kê 3 nhánh: HTTP 200 + price=10000 (coerce chuỗi sang số, chấp nhận lỏng lẻo) · HTTP 4xx (strict type-check, từ chối) · HTTP 200 + price=0/NaN (BUG — coerce sai). Chọn nhánh 'coerce hợp lệ' làm expected value vì đây là hành vi thực tế đã quan sát được (Status: PASS with deviation trong HW02) và không phải bug — CSV parsing luôn sinh ra string nên coerce là hành vi mong đợi hợp lý dù spec không nói rõ.",
+    "knownDefect": null
+  },
+  {
+    "id": "TC-17",
+    "hw02Ref": "domain-testing.md#tc-17",
+    "title": "Import report response schema exposes message, inserted, errors",
+    "layer": "api",
+    "type": "positive",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "csvRows": [{ "name": "Schema Probe Product", "price": 75000, "category_id": 1 }]
+    },
+    "assert": {
+      "api": {
+        "status": 200,
+        "hasFields": ["message", "inserted", "errors"],
+        "fieldTypes": { "message": "string", "inserted": "number", "errors": "array" },
+        "inserted": 1
+      },
+      "db": { "productCountDelta": 1, "persistedRowsMatchInput": true }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-18",
+    "hw02Ref": "domain-testing.md#tc-18",
+    "title": "Gap Probe: all-rows-invalid batch must list a distinct reason per row",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "csvRows": [
+        { "name": "Invalid Row 1", "price": 0, "category_id": 1 },
+        { "name": "Invalid Row 2", "price": -1, "category_id": 1 },
+        { "name": "Invalid Row 3", "price": "abc", "category_id": 1 }
+      ]
+    },
+    "assert": {
+      "ui": { "previewCount": 3, "resultTextIncludes": "0/3", "errorsCount": 3, "errorRows": [2, 3, 4], "errorRowsMention": "price" },
+      "api": { "inserted": 0, "errorsCount": 3, "errorRows": [2, 3, 4], "errorRowsMention": "price" },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["Invalid Row 1", "Invalid Row 2", "Invalid Row 3"] }
+    },
+    "knownDefect": "BUG-16-002",
+    "note": "Same non-atomicity caveat as TC-12 — deferred per TEST_PLAN.md §11."
+  },
+  {
+    "id": "TC-19",
+    "hw02Ref": "domain-testing.md#tc-19",
+    "title": "Gap Probe: Admin UI must enforce the .csv file extension",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "fileName": "products.txt",
+      "fileContentIsValidCsv": true,
+      "validCsvComparison": true,
+      "csvRows": [{ "name": "FR16 text extension probe", "price": 50000, "category_id": 1 }]
+    },
+    "assert": {
+      "ui": { "acceptCsvOnly": true, "fileRejectedBeforeUpload": true, "validResultTextIncludes": "1/1" },
+      "api": { "status": 200, "requestContentType": "application/json", "requestProductsCount": 1 },
+      "db": { "productCountDelta": 1, "persistedRowsMatchInput": true }
+    },
+    "knownDefect": "BUG-16-005"
+  },
+  {
+    "id": "TC-BVA-01",
+    "hw02Ref": "bva.md#tc-bva-01",
+    "title": "price = 0 at the ON point must be rejected",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "csvRows": [{ "name": "BVA price zero", "price": 0, "category_id": 1 }]
+    },
+    "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1 },
+      "db": { "productCountDelta": 0, "productsNotCreated": ["BVA price zero"] }
+    },
+    "knownDefect": "BUG-16-002"
+  },
+  {
+    "id": "TC-BVA-02",
+    "hw02Ref": "bva.md#tc-bva-02",
+    "title": "price = 1 (minimum valid, LB+1) must be accepted",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "csvRows": [{ "name": "BVA price one", "price": 1, "category_id": 1 }]
+    },
+    "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "1/1", "errorsCount": 0 },
+      "api": { "status": 200, "inserted": 1 },
+      "db": { "productExists": "BVA price one", "productCountDelta": 1, "persistedRowsMatchInput": true }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-BVA-03",
+    "hw02Ref": "bva.md#tc-bva-03",
+    "title": "name = 254 chars (UB-1) must be accepted",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "csvRows": [{ "nameFillChar": "A", "nameLength": 254, "price": 50000, "category_id": 1 }]
+    },
+    "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "1/1", "errorsCount": 0 },
+      "api": { "status": 200, "inserted": 1 },
+      "db": { "productCountDelta": 1, "productNameLength": 254, "persistedRowsMatchInput": true }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-BVA-04",
+    "hw02Ref": "bva.md#tc-bva-04",
+    "title": "name = 255 chars (UB, ON point) must be accepted",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "csvRows": [{ "nameFillChar": "B", "nameLength": 255, "price": 50000, "category_id": 1 }]
+    },
+    "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "1/1", "errorsCount": 0 },
+      "api": { "status": 200, "inserted": 1 },
+      "db": { "productCountDelta": 1, "productNameLength": 255, "persistedRowsMatchInput": true }
+    },
+    "knownDefect": null
+  },
+  {
+    "id": "TC-BVA-05",
+    "hw02Ref": "bva.md#tc-bva-05",
+    "title": "name = 256 chars (UB+1) must be rejected if the 255-char limit is enforced",
+    "layer": "hybrid",
+    "type": "edge",
+    "arrange": { "loginAs": "admin@eshop.com" },
+    "act": {
+      "csvRows": [{ "nameFillChar": "C", "nameLength": 256, "price": 50000, "category_id": 1 }]
+    },
+    "assert": {
+      "ui": { "previewCount": 1, "resultTextIncludes": "0/1", "errorsCount": 1 },
+      "api": { "inserted": 0, "errorsCount": 1 },
+      "db": { "productCountDelta": 0 }
+    },
+    "knownDefect": "BUG-16-004"
+  }
+]
