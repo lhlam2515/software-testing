@@ -93,6 +93,8 @@ homeworks/HW05/ref/
 homeworks/HW05/EXECUTION_PLAN.md
 homeworks/HW05/group/endpoint-split-note.md
 homeworks/HW05/*.prompt.md
+homeworks/HW06/EXECUTION_PLAN.md
+homeworks/HW06/*.prompt.md
 
 # ===== PYTHON CACHE =====
 __pycache__/

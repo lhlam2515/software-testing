@@ -25,9 +25,9 @@
 
 | Pool | API | Endpoint |
 | ---- | --- | -------- |
-| Pool A | _TBD_ | _TBD_ |
-| Pool B | _TBD_ | _TBD_ |
-| Pool C | _TBD_ | _TBD_ |
+| Pool A | FR-02 Login & Account Lockout | `POST /api/login` |
+| Pool B | FR-08 Checkout | `POST /api/checkout` |
+| Pool C | FR-15 Product Management (Admin CRUD) | `POST /api/products`, `PUT /api/products/:id`, `DELETE /api/products/:id` |
 
 ## Test Summary
 
