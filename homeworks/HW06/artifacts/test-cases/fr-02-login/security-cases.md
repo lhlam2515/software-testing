@@ -1,0 +1,23 @@
+# FR-02 `POST /api/login` — Security Cases
+
+Scope: cases generated only for SEC ids marked `Yes` in `specs/security-requirement.md`
+(SEC-01, SEC-02, SEC-05). All payloads are non-destructive (read-only/auth-bypass probes;
+no stacked destructive statements).
+
+The enumeration-resistance requirement from srs.md FR-02 line 42 ("hệ thống ... không để
+lộ chi tiết nguyên nhân") is not one of the numbered SEC-01..07 requirements, so per this
+skill's rule it is not represented here as a SEC-C row. It is instead covered as an
+error-response-shape consistency check in `schema-cases.md` (SC rows comparing the error
+bodies for wrong-password vs. unknown-email vs. locked-account), which is the correct home
+for a cross-response consistency assertion.
+
+| Row ID | SEC-ID | Asset / invariant | Principal | Vector | Payload / condition | Expected control and observable oracle | Trace |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| SEC-C-01 | SEC-01 | User credential confidentiality (password/hash) | Any client receiving a successful-login response | Response body inspection | Login with valid registered credentials (`test@eshop.com` / `Test1234!`); inspect every top-level and nested field of the response | The `user` object (and the response as a whole) must not contain a `password`, `passwordHash`, or equivalent key/value. A prior manual spot-check flagged a candidate leak here (`homeworks/HW06/assets/w3-risk-triage-note.md`) — this is the formal re-test. | api_specification.md 1.2; srs.md SEC-01 (line 278); `homeworks/HW06/assets/w3-risk-triage-note.md` |
+| SEC-C-02 | SEC-01 | User credential confidentiality (password/hash) | Any client receiving a failed-login response | Response body inspection | Login with a valid registered email and a wrong password; inspect the full error response body | Error response must not contain a `password`/`passwordHash` field or otherwise echo the submitted or stored password | srs.md SEC-01 (line 278) |
+| SEC-C-03 | SEC-02 | JWT issuance integrity | Any client receiving a successful-login response | Response body inspection | Login with valid registered credentials; parse the `token` field | `token` must be a syntactically valid JWT: exactly three `.`-separated base64url segments with a decodable header containing an `alg` claim. Exact expiry/claim content is UNSPECIFIED (see specs/requirements.md) and is not asserted here. | api_specification.md 1.2; srs.md SEC-02 (line 279) |
+| SEC-C-04 | SEC-02 | JWT issuance integrity (fail-closed) | Attacker submitting invalid credentials | Response body inspection | Login with a wrong password for a registered email | Response must not contain a `token` field (or any field usable as an auth credential) — no token may be issued on failed authentication | srs.md SEC-02 (line 279); FR-02 fail-closed expectation |
+| SEC-C-05 | SEC-02 | JWT issuance integrity (fail-closed under lockout) | Attacker submitting CORRECT credentials while the account is locked | Response body inspection | Trigger lockout (3 consecutive failures via EC-09/TR-03), then immediately submit the correct email/password inside the 30s window | No `token` may be issued even though the credentials are correct — lockout must fail closed, not merely return a generic message while still authenticating the user underneath | srs.md FR-02 line 42; srs.md SEC-02 (line 279) |
+| SEC-C-06 | SEC-05 | Backing datastore integrity / auth-bypass resistance | Unauthenticated attacker | `email` field | `email = "' OR '1'='1' -- "`, `password = "x"` | Parameterized query must treat the payload as a literal string; login must fail (no `token` issued); no raw SQL error message or stack trace may appear in the response | srs.md SEC-05 (line 282) |
+| SEC-C-07 | SEC-05 | Backing datastore integrity / auth-bypass resistance | Unauthenticated attacker | `password` field | `email` = valid registered email (`test@eshop.com`), `password = "' OR '1'='1"` | Parameterized query must treat the payload as a literal string; login must fail (no `token` issued); no raw SQL error message or stack trace in the response | srs.md SEC-05 (line 282) |
+| SEC-C-08 | SEC-05 | Backing datastore integrity / auth-bypass resistance | Unauthenticated attacker | `email` field, comment-based bypass | `email = "admin@eshop.com'-- "` (targets the real admin account per srs.md section 1), `password = "anything"` | Parameterized query must treat the entire string as a literal email value (no row match, no comment-stripping of the password check); login must fail without a token; no raw SQL error in the response | srs.md SEC-05 (line 282); srs.md section 1 (admin account) |
