@@ -1,0 +1,65 @@
+# AI-generated from docs/eshop-sut/api_specification.md; human audit required.
+openapi: 3.0.3
+info:
+  title: EShop Checkout (fragment)
+  version: "1.0"
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/checkout:
+    post:
+      summary: Đặt hàng (Checkout)
+      description: >
+        api_specification.md section 4.3. Section 4 header (line 141) states all
+        Cart & Orders endpoints require `Authorization: Bearer <token>`. srs.md FR-08
+        additionally states only a logged-in user may check out, total_amount is
+        recomputed server-side (client value ignored), and the cart is cleared after
+        a successful checkout.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                total_amount:
+                  type: number
+                  description: >
+                    UNSPECIFIED whether this field is required by the schema.
+                    srs.md FR-08 (line 107) states the backend must recompute the
+                    total and must not accept a client-supplied total_amount, so any
+                    value submitted here is documented as ignored for the purpose of
+                    the resulting order total. Whether an out-of-range/wrong-type
+                    value here causes a 4xx before recomputation is not documented.
+                shipping_address:
+                  type: string
+                  description: >
+                    UNSPECIFIED whether required, and UNSPECIFIED maximum length.
+                    No length constraint or required/optional marker is documented in
+                    either source for this field on this endpoint.
+              example:
+                total_amount: 200000
+                shipping_address: "123 Le Loi, TP.HCM"
+      responses:
+        "200":
+          description: >
+            UNSPECIFIED response body shape. No success example is documented for
+            this endpoint (unlike 1.1/1.2, which do document example bodies). Only
+            inferable facts: FR-08 implies an order is created and the cart is
+            cleared; FR-10 (order state machine) implies a newly created order's
+            status is "pending" (first node in the documented diagram, srs.md lines
+            141-156), but no source states the checkout response returns a status
+            field, order id, or item list.
+        "4xx":
+          description: >
+            UNSPECIFIED status code and body shape for: missing/invalid auth,
+            invalid shipping_address, empty cart. No error envelope is documented
+            anywhere in api_specification.md for any endpoint.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
