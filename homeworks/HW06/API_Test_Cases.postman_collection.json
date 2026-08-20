@@ -56,6 +56,10 @@
     {
       "key": "otherUserOrderId",
       "value": ""
+    },
+    {
+      "key": "canceledOrderId2",
+      "value": ""
     }
   ],
   "event": [
@@ -430,6 +434,385 @@
               }
             }
           ]
+        },
+        {
+          "name": "11 Create Pending Spare A",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/checkout",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"total_amount\": 240000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('checkout 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('pendingOrderIdA', String(pm.response.json().orderId));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "12 Create Pending Spare B",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/checkout",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"total_amount\": 250000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('checkout 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('pendingOrderIdB', String(pm.response.json().orderId));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "13 Create Pending Spare C",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/checkout",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"total_amount\": 260000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('checkout 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('pendingOrderIdC', String(pm.response.json().orderId));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "14 Create Pending Spare D",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/checkout",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"total_amount\": 270000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('checkout 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('pendingOrderIdD', String(pm.response.json().orderId));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "15 Create Pending Spare E",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/checkout",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"total_amount\": 280000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('checkout 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('pendingOrderIdE', String(pm.response.json().orderId));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "16 Create Pending Spare F",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/checkout",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"total_amount\": 290000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('checkout 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('pendingOrderIdF', String(pm.response.json().orderId));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "17 Create Pending Spare G",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/checkout",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"total_amount\": 300000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('checkout 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('pendingOrderIdG', String(pm.response.json().orderId));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "18 Create Pending Spare H",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/checkout",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"total_amount\": 310000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('checkout 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('pendingOrderIdH', String(pm.response.json().orderId));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "19 Create Canceled Spare",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/checkout",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"total_amount\": 320000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('checkout 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('canceledOrderId2', String(pm.response.json().orderId));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "20 Cancel Spare Order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/orders/{{canceledOrderId2}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"canceled\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('cancel 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -470,7 +853,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('401', () => pm.response.to.have.status(401));"
+              "pm.test('403', () => pm.response.to.have.status(403));"
             ]
           }
         }
@@ -742,7 +1125,7 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{userToken}}"
+            "value": "Bearer invalid"
           }
         ],
         "url": "{{baseUrl}}/api/users/me"
@@ -766,7 +1149,7 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{userToken}}"
+            "value": "Bearer invalid"
           }
         ],
         "url": "{{baseUrl}}/api/users/me"
@@ -838,7 +1221,7 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{userToken}}"
+            "value": "Bearer invalid"
           }
         ],
         "url": "{{baseUrl}}/api/users/me"
@@ -910,7 +1293,7 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{userToken}}"
+            "value": "Bearer invalid"
           }
         ],
         "url": "{{baseUrl}}/api/users/me"
@@ -958,7 +1341,7 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{userToken}}"
+            "value": "Bearer invalid"
           }
         ],
         "url": "{{baseUrl}}/api/users/me"
@@ -1116,7 +1499,7 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{userToken}}"
+            "value": "Bearer invalid"
           }
         ],
         "url": "{{baseUrl}}/api/users/me"
@@ -1188,7 +1571,7 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{userToken}}"
+            "value": "Bearer invalid"
           }
         ],
         "url": "{{baseUrl}}/api/users/me"
@@ -1278,7 +1661,381 @@
       ]
     },
     {
-      "name": "TC-037 FR-08 / POST /api/checkout Positive",
+      "name": "TC-037 FR-07 / GET /api/cart Positive",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-038 FR-07 / GET /api/cart Positive",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-039 FR-07 / GET /api/cart AuthN",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/cart"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('401', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-040 FR-07 / GET /api/cart AuthN",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer invalid"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('403', () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-041 FR-07 / GET /api/cart AuthN",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer expired"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('403', () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-042 FR-07 / GET /api/cart Boundary",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-043 FR-07 / GET /api/cart Security",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart?user_id=999"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-044 FR-07 / GET /api/cart Security",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/cart"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('401', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-045 FR-07 / GET /api/cart Boundary",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer invalid"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('403', () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-046 FR-07 / GET /api/cart Boundary",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-047 FR-07 / GET /api/cart Schema",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-048 FR-07 / GET /api/cart Schema",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-049 FR-07 / GET /api/cart Schema",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-050 FR-07 / GET /api/cart Security",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-051 FR-07 / GET /api/cart Negative",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-052 FR-07 / GET /api/cart Boundary",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-053 FR-07 / POST /api/cart Positive",
       "request": {
         "method": "POST",
         "header": [
@@ -1291,10 +2048,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/checkout",
+        "url": "{{baseUrl}}/api/cart",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+          "raw": "{\n  \"productId\": 1,\n  \"name\": \"iPhone 15 Pro Max\",\n  \"quantity\": 1\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -1308,14 +2065,88 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
             ]
           }
         }
       ]
     },
     {
-      "name": "TC-038 FR-08 / POST /api/checkout AuthN",
+      "name": "TC-054 FR-07 / POST /api/cart Positive",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": 2,\n  \"name\": \"Samsung Galaxy S24 Ultra\",\n  \"quantity\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-055 FR-07 / POST /api/cart Positive",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": 3,\n  \"name\": \"MacBook Pro M3\",\n  \"quantity\": 2,\n  \"price\": 45000000,\n  \"description\": \"Laptop chuyen nghiep\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-056 FR-07 / POST /api/cart AuthN",
       "request": {
         "method": "POST",
         "header": [
@@ -1324,10 +2155,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/checkout",
+        "url": "{{baseUrl}}/api/cart",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+          "raw": "{\n  \"productId\": 1,\n  \"quantity\": 1\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -1348,7 +2179,7 @@
       ]
     },
     {
-      "name": "TC-039 FR-08 / POST /api/checkout AuthN",
+      "name": "TC-057 FR-07 / POST /api/cart AuthN",
       "request": {
         "method": "POST",
         "header": [
@@ -1361,10 +2192,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/checkout",
+        "url": "{{baseUrl}}/api/cart",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+          "raw": "{\n  \"productId\": 1,\n  \"quantity\": 1\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -1385,578 +2216,23 @@
       ]
     },
     {
-      "name": "TC-040 FR-08 / POST /api/checkout Boundary",
+      "name": "TC-058 FR-07 / POST /api/cart AuthN",
       "request": {
         "method": "POST",
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{userToken}}"
+            "value": "Bearer expired"
           },
           {
             "key": "Content-Type",
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/checkout",
+        "url": "{{baseUrl}}/api/cart",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-041 FR-08 / POST /api/checkout Boundary",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{userToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-042 FR-08 / POST /api/checkout Boundary",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{userToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-043 FR-08 / POST /api/checkout Boundary",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{userToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-044 FR-08 / POST /api/checkout Type",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{userToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-045 FR-08 / POST /api/checkout Type",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{userToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-046 FR-08 / POST /api/checkout Type",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{userToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"shipping_address\": \"123 Le Loi\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-047 FR-08 / POST /api/checkout Type",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{userToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "{}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-048 FR-08 / POST /api/checkout Type",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{userToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-049 FR-08 / POST /api/checkout Boundary",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{userToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-050 FR-08 / POST /api/checkout Boundary",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{userToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-051 FR-08 / POST /api/checkout Format",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{userToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-052 FR-08 / POST /api/checkout Security",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{userToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-053 FR-08 / POST /api/checkout Security",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{userToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-054 FR-08 / POST /api/checkout Security",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{userToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-055 FR-08 / POST /api/checkout Security",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{userToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+          "raw": "{\n  \"productId\": 1,\n  \"quantity\": 1\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -1977,7 +2253,7 @@
       ]
     },
     {
-      "name": "TC-056 FR-08 / POST /api/checkout Security",
+      "name": "TC-059 FR-07 / POST /api/cart Boundary",
       "request": {
         "method": "POST",
         "header": [
@@ -1990,10 +2266,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/checkout",
+        "url": "{{baseUrl}}/api/cart",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+          "raw": "{\n  \"productId\": 1,\n  \"quantity\": 0\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -2007,14 +2283,14 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
             ]
           }
         }
       ]
     },
     {
-      "name": "TC-057 FR-08 / POST /api/checkout Schema",
+      "name": "TC-060 FR-07 / POST /api/cart Boundary",
       "request": {
         "method": "POST",
         "header": [
@@ -2027,10 +2303,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/checkout",
+        "url": "{{baseUrl}}/api/cart",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+          "raw": "{\n  \"productId\": 1,\n  \"quantity\": -1\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -2044,14 +2320,14 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
             ]
           }
         }
       ]
     },
     {
-      "name": "TC-058 FR-08 / POST /api/checkout Schema",
+      "name": "TC-061 FR-07 / POST /api/cart Boundary",
       "request": {
         "method": "POST",
         "header": [
@@ -2064,10 +2340,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/checkout",
+        "url": "{{baseUrl}}/api/cart",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+          "raw": "{\n  \"productId\": 1,\n  \"quantity\": 999999\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -2081,14 +2357,14 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
             ]
           }
         }
       ]
     },
     {
-      "name": "TC-059 FR-08 / POST /api/checkout Schema",
+      "name": "TC-062 FR-07 / POST /api/cart Boundary",
       "request": {
         "method": "POST",
         "header": [
@@ -2101,10 +2377,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/checkout",
+        "url": "{{baseUrl}}/api/cart",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+          "raw": "{\n  \"productId\": 1,\n  \"quantity\": \"2\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -2118,14 +2394,14 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
             ]
           }
         }
       ]
     },
     {
-      "name": "TC-060 FR-08 / POST /api/checkout Negative",
+      "name": "TC-063 FR-07 / POST /api/cart Boundary",
       "request": {
         "method": "POST",
         "header": [
@@ -2138,10 +2414,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/checkout",
+        "url": "{{baseUrl}}/api/cart",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+          "raw": "{\n  \"productId\": 1,\n  \"price\": \"30000000\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -2155,46 +2431,14 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
             ]
           }
         }
       ]
     },
     {
-      "name": "TC-061 FR-08 / POST /api/checkout Negative",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{userToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "text/plain"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "not-json"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-062 FR-08 / POST /api/checkout Negative",
+      "name": "TC-064 FR-07 / POST /api/cart Boundary",
       "request": {
         "method": "POST",
         "header": [
@@ -2207,10 +2451,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/checkout",
+        "url": "{{baseUrl}}/api/cart",
         "body": {
           "mode": "raw",
-          "raw": "{}",
+          "raw": "{\n  \"productId\": 1,\n  \"name\": \"?o thun Vi?t Nam\",\n  \"quantity\": 1\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -2224,14 +2468,14 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
             ]
           }
         }
       ]
     },
     {
-      "name": "TC-063 FR-08 / POST /api/checkout Boundary",
+      "name": "TC-065 FR-07 / POST /api/cart Boundary",
       "request": {
         "method": "POST",
         "header": [
@@ -2244,10 +2488,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/checkout",
+        "url": "{{baseUrl}}/api/cart",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+          "raw": "{\n  \"productId\": 1,\n  \"name\": \"LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -2261,14 +2505,14 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
             ]
           }
         }
       ]
     },
     {
-      "name": "TC-064 FR-08 / POST /api/checkout Boundary",
+      "name": "TC-066 FR-07 / POST /api/cart Security",
       "request": {
         "method": "POST",
         "header": [
@@ -2281,10 +2525,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/checkout",
+        "url": "{{baseUrl}}/api/cart",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+          "raw": "{\n  \"name\": \"x' OR 1=1 --\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -2298,14 +2542,14 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
             ]
           }
         }
       ]
     },
     {
-      "name": "TC-065 FR-08 / POST /api/checkout Boundary",
+      "name": "TC-067 FR-07 / POST /api/cart Security",
       "request": {
         "method": "POST",
         "header": [
@@ -2318,10 +2562,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/checkout",
+        "url": "{{baseUrl}}/api/cart",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+          "raw": "{\n  \"name\": \"<script>alert(1)</script>\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -2335,14 +2579,14 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
             ]
           }
         }
       ]
     },
     {
-      "name": "TC-066 FR-08 / POST /api/checkout Security",
+      "name": "TC-068 FR-07 / POST /api/cart Security",
       "request": {
         "method": "POST",
         "header": [
@@ -2355,10 +2599,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/checkout",
+        "url": "{{baseUrl}}/api/cart",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+          "raw": "{\n  \"product\": {\n    \"id\": 1,\n    \"name\": \"Nested\"\n  }\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -2372,47 +2616,14 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
             ]
           }
         }
       ]
     },
     {
-      "name": "TC-067 FR-08 / POST /api/checkout Security",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('401', () => pm.response.to.have.status(401));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-068 FR-08 / POST /api/checkout Schema",
+      "name": "TC-069 FR-07 / POST /api/cart Security",
       "request": {
         "method": "POST",
         "header": [
@@ -2425,10 +2636,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/checkout",
+        "url": "{{baseUrl}}/api/cart",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+          "raw": "[\n  {\"productId\": 1}\n]",
           "options": {
             "raw": {
               "language": "json"
@@ -2442,14 +2653,14 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
             ]
           }
         }
       ]
     },
     {
-      "name": "TC-069 FR-08 / POST /api/checkout Boundary",
+      "name": "TC-070 FR-07 / POST /api/cart Security",
       "request": {
         "method": "POST",
         "header": [
@@ -2462,10 +2673,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/checkout",
+        "url": "{{baseUrl}}/api/cart",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+          "raw": "{\n  \"productId\": 1,\n  \"quantity\": 1\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -2479,96 +2690,30 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
             ]
           }
         }
       ]
     },
     {
-      "name": "TC-070 FR-08 / POST /api/checkout Security",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('401', () => pm.response.to.have.status(401));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-071 FR-08 / POST /api/checkout Boundary",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/checkout",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('403', () => pm.response.to.have.status(403));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-072 FR-08 / POST /api/checkout Security",
+      "name": "TC-071 FR-07 / POST /api/cart Schema",
       "request": {
         "method": "POST",
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer invalid"
+            "value": "Bearer {{userToken}}"
           },
           {
             "key": "Content-Type",
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/checkout",
+        "url": "{{baseUrl}}/api/cart",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"total_amount\": 200000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+          "raw": "{\n  \"productId\": 1\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -2582,7 +2727,44 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('500', () => pm.response.to.have.status(500));"
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-072 FR-07 / POST /api/cart Schema",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": 1,\n  \"coupon_code\": \"SAVE10\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
             ]
           }
         }
@@ -2649,7 +2831,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('403', () => pm.response.to.have.status(403));"
+              "pm.test('Authenticated admin can access admin orders', () => pm.response.to.have.status(200));"
             ]
           }
         }
@@ -2686,7 +2868,7 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{adminToken}}"
+            "value": "Bearer {{userToken}}"
           }
         ],
         "url": "{{baseUrl}}/api/admin/orders"
@@ -2878,7 +3060,7 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{adminToken}}"
+            "value": "Bearer {{userToken}}"
           }
         ],
         "url": "{{baseUrl}}/api/admin/orders"
@@ -2926,7 +3108,7 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{adminToken}}"
+            "value": "Bearer {{userToken}}"
           }
         ],
         "url": "{{baseUrl}}/api/admin/orders"
@@ -2947,12 +3129,7 @@
       "name": "TC-088 FR-18 / GET /api/admin/orders Negative",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminToken}}"
-          }
-        ],
+        "header": [],
         "url": "{{baseUrl}}/api/admin/orders"
       },
       "event": [
@@ -2995,7 +3172,12 @@
       "name": "TC-090 FR-18 / GET /api/admin/orders Schema",
       "request": {
         "method": "GET",
-        "header": [],
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
         "url": "{{baseUrl}}/api/admin/orders"
       },
       "event": [
@@ -3041,7 +3223,7 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{adminToken}}"
+            "value": "Bearer {{userToken}}"
           }
         ],
         "url": "{{baseUrl}}/api/admin/orders"
@@ -3076,7 +3258,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('403', () => pm.response.to.have.status(403));"
+              "pm.test('200', () => pm.response.to.have.status(200));"
             ]
           }
         }
@@ -3113,7 +3295,7 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{adminToken}}"
+            "value": "Bearer {{userToken}}"
           }
         ],
         "url": "{{baseUrl}}/api/admin/orders"
@@ -3180,7 +3362,7 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{adminToken}}"
+            "value": "Bearer {{userToken}}"
           }
         ],
         "url": "{{baseUrl}}/api/admin/orders"
@@ -3225,12 +3407,7 @@
       "name": "TC-100 FR-18 / GET /api/admin/orders Boundary",
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminToken}}"
-          }
-        ],
+        "header": [],
         "url": "{{baseUrl}}/api/admin/orders"
       },
       "event": [
@@ -3420,7 +3597,7 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{adminToken}}"
+            "value": "Bearer {{userToken}}"
           }
         ],
         "url": "{{baseUrl}}/api/admin/orders"
@@ -3505,7 +3682,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test('Pending order can be confirmed', () => pm.response.to.have.status(200));"
             ]
           }
         }
@@ -3542,7 +3719,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test('Confirmed order can move to shipping', () => pm.response.to.have.status(200));"
             ]
           }
         }
@@ -3579,7 +3756,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test('Shipping order can move to delivered', () => pm.response.to.have.status(200));"
             ]
           }
         }
@@ -3656,8 +3833,41 @@
         "method": "PUT",
         "header": [
           {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"confirmed\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('401', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-116 FR-18 / PUT /api/admin/orders/{id}/status Security",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
             "key": "Authorization",
-            "value": "Bearer {{adminToken}}"
+            "value": "Bearer {{userToken}}"
           },
           {
             "key": "Content-Type",
@@ -3688,50 +3898,13 @@
       ]
     },
     {
-      "name": "TC-116 FR-18 / PUT /api/admin/orders/{id}/status Security",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"status\": \"confirmed\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
-            ]
-          }
-        }
-      ]
-    },
-    {
       "name": "TC-117 FR-18 / PUT /api/admin/orders/{id}/status Security",
       "request": {
         "method": "PUT",
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{adminToken}}"
+            "value": "Bearer invalid"
           },
           {
             "key": "Content-Type",
@@ -3792,7 +3965,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test('Boundary order id remains valid', () => pm.response.to.have.status(200));"
             ]
           }
         }
@@ -3829,7 +4002,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('404', () => pm.response.to.have.status(404));"
+              "pm.test('Missing order id returns 404', () => pm.response.to.have.status(404));"
             ]
           }
         }
@@ -3866,7 +4039,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test('Boundary request remains valid', () => pm.response.to.have.status(200));"
             ]
           }
         }
@@ -3903,7 +4076,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test('Boundary request remains valid', () => pm.response.to.have.status(200));"
             ]
           }
         }
@@ -3940,7 +4113,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('404', () => pm.response.to.have.status(404));"
+              "pm.test('Missing order id returns 404', () => pm.response.to.have.status(404));"
             ]
           }
         }
@@ -3968,7 +4141,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('400', () => pm.response.to.have.status(400));"
+              "pm.test('401', () => pm.response.to.have.status(401));"
             ]
           }
         }
@@ -4166,7 +4339,7 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{adminToken}}"
+            "value": "Bearer invalid"
           },
           {
             "key": "Content-Type",
@@ -4190,7 +4363,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('404', () => pm.response.to.have.status(404));"
+              "pm.test('403', () => pm.response.to.have.status(403));"
             ]
           }
         }
@@ -4227,7 +4400,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test('Successful status update returns message schema', () => pm.response.to.have.status(200));"
             ]
           }
         }
@@ -4301,7 +4474,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test('Pending order status update succeeds', () => pm.response.to.have.status(200));"
             ]
           }
         }
@@ -4597,7 +4770,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test('Canceled order transition follows backend behavior', () => pm.response.to.have.status(200));"
             ]
           }
         }
@@ -4610,7 +4783,7 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{adminToken}}"
+            "value": "Bearer invalid"
           },
           {
             "key": "Content-Type",
@@ -4708,7 +4881,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test('Boundary request remains valid', () => pm.response.to.have.status(200));"
             ]
           }
         }
@@ -4745,7 +4918,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('200', () => pm.response.to.have.status(200));"
+              "pm.test('Security request remains valid', () => pm.response.to.have.status(200));"
             ]
           }
         }

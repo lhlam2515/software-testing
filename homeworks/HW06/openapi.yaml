@@ -1,18 +1,18 @@
 openapi: 3.0.3
 info:
-  title: HW06 API Testing - FR-04, FR-08, FR-18
+  title: HW06 API Testing - FR-04, FR-07, FR-18
   version: 1.0.0
   description: >
     OpenAPI specification for the three required functional requirements only:
-    FR-04 (Personal profile management), FR-08 (Checkout), and FR-18 (Order
-    management for admin).
+    FR-04 (Personal profile management), FR-07 (Shopping Cart), and FR-18
+    (Order management for admin).
 servers:
   - url: http://localhost:3000
 tags:
   - name: FR-04
     description: Personal profile management
-  - name: FR-08
-    description: Checkout
+  - name: FR-07
+    description: Shopping Cart
   - name: FR-18
     description: Order management (admin)
 security:
@@ -87,27 +87,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /api/checkout:
-    post:
-      tags: [FR-08]
-      operationId: checkout
-      summary: Create an order at checkout
-      description: Inserts a new order for the authenticated user with pending status.
+  /api/cart:
+    get:
+      tags: [FR-07]
+      operationId: getShoppingCart
+      summary: Get shopping cart
+      description: Returns the authenticated user's in-memory cart array.
       security:
         - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CheckoutRequest'
       responses:
         '200':
-          description: Checkout successful
+          description: Cart contents
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CheckoutResponse'
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
         '401':
           description: Unauthorized - no bearer token provided
           content:
@@ -120,8 +117,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Database error
+    post:
+      tags: [FR-07]
+      operationId: addToShoppingCart
+      summary: Add item to shopping cart
+      description: Appends the raw request body to the authenticated user's cart.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Item added to cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          description: Unauthorized - no bearer token provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - invalid or expired token
           content:
             application/json:
               schema:
@@ -284,27 +308,6 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-    CheckoutRequest:
-      type: object
-      required:
-        - total_amount
-        - shipping_address
-      properties:
-        total_amount:
-          type: number
-        shipping_address:
-          type: string
-      additionalProperties: false
-    CheckoutResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          example: Checkout successful
-        orderId:
-          type: integer
-      required: [message, orderId]
-      additionalProperties: true
     AdminOrder:
       type: object
       description: Order row returned by GET /api/admin/orders.

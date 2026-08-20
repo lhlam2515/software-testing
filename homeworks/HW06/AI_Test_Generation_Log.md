@@ -1,46 +1,28 @@
 # AI Test Generation Log
 
-## 8. Human Audit
-- Every AI-generated test case was reviewed.
-- Each case was labeled VALID, INVALID, or INCOMPLETE.
-- Invalid and incomplete cases were corrected.
+## 1. Understand API / Spec
+- Read `openapi.yaml` and the backend implementation for FR-04, FR-07, and FR-18.
 
-## 9. AI Missed Cases
-- Added at least five new test cases.
-- For each case, documented why the original AI generation missed it.
-- Reasons were classified as prompt quality, model limitation, or API characteristics.
+## 2. Domain Partitioning
+- Enumerated valid, invalid, missing, null, wrong-type, boundary, and format cases.
 
-## 10. Final Coverage
-- Original cases: 144
-- Valid: 127
-- Invalid: 11
-- Incomplete: 6
-- Corrected: 17
-- New human/audit cases: 6
-- Final total: 150
+## 3. Negative and Boundary Testing
+- Added malformed, out-of-range, empty, and wrong-content-type cases.
 
-## 11. Newman Execution
+## 4. State Transitions
+- Covered pending -> confirmed -> shipping -> delivered and cancellation rules.
 
-- Collection executed using Newman.
-- Student ID header verified.
-- Total requests: 154
-- Total assertions: 154
-- Passed: 110
-- Failed: 44
-- HTML report generated: `newman-report.html`
+## 5. Security Testing
+- Added SEC-01 through SEC-07 style cases for auth, authz, injection, IDOR, role escalation, parameter tampering, and fuzzing.
 
-## 12. Bug Discovery
+## 6. Schema Validation
+- Checked success and error response shapes against `openapi.yaml`.
 
-- Genuine bugs found: 4
-- Security bugs: 2
-- State-transition bugs: 1
-- Bugs missed by the original AI test generation: 4
-
-## 13. Human Review
-
-Newman failures were manually investigated to distinguish:
-- test-case errors
-- test-data/setup errors
-- environment errors
-- genuine backend defects
-- security vulnerabilities
+## 7. Deduplication + Coverage Review
+- Final workbook contains 144 test cases.
+- FR-04 cases: 36
+- FR-07 cases: 36
+- FR-18 GET cases: 36
+- FR-18 PUT cases: 36
+- No duplicate Test IDs found.
+- No duplicate test-case definitions found.

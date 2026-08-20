@@ -131,6 +131,45 @@ fr08 = [
     mk("Security", "POST", "Malformed JSON fuzz", "Malformed JSON", "500", "Parse/validation failure.", "SEC-05; SEC-07"),
 ]
 
+fr07 = [
+    mk("Positive", "GET", "Valid JWT with empty cart", "Authorization: Bearer <valid token>", "200", "Empty array for the authenticated user's cart.", "SEC-01 auth; SEC-07 schema"),
+    mk("Positive", "GET", "Valid JWT with one cart item", "Authorization: Bearer <valid token>", "200", "Array contains previously added cart item objects.", "SEC-01 auth; state persistence"),
+    mk("AuthN", "GET", "No token", "No Authorization header", "401", "ErrorResponse {error}", "SEC-01 missing auth"),
+    mk("AuthN", "GET", "Invalid token", "Authorization: Bearer invalid.jwt", "403", "ErrorResponse {error}", "SEC-01 invalid token"),
+    mk("AuthN", "GET", "Expired token", "Authorization: Bearer <expired token>", "403", "ErrorResponse {error}", "SEC-01 invalid token"),
+    mk("Boundary", "GET", "Reused valid token", "Same bearer token used again", "200", "Cart remains available for the same user.", "SEC-01 token reuse"),
+    mk("Security", "GET", "Other user's token", "Bearer token for another account", "200", "Returns that token owner's cart, not the current user's.", "SEC-03 subject isolation"),
+    mk("Security", "GET", "Cookie only", "Cookie session without Authorization header", "401", "ErrorResponse {error}", "SEC-01 bearer-only auth"),
+    mk("Boundary", "GET", "Authorization header with extra spaces", "Authorization: Bearer  <token>", "403", "ErrorResponse {error}", "SEC-01 parsing"),
+    mk("Boundary", "GET", "Lowercase authorization header", "authorization: Bearer <token>", "200", "Cart returned if Node header normalization accepts it.", "SEC-07 transport"),
+    mk("Schema", "GET", "Response is array", "Valid JWT", "200", "JSON array response.", "SEC-07 schema"),
+    mk("Schema", "GET", "Empty cart array schema", "Valid JWT", "200", "[] is valid cart payload.", "SEC-07 schema"),
+    mk("Schema", "GET", "Non-empty cart array schema", "Valid JWT", "200", "Array items are preserved as stored.", "SEC-07 schema"),
+    mk("Boundary", "GET", "Rapid repeated GETs", "Valid JWT repeatedly", "200", "Same cart array returned consistently.", "SEC-07 resilience"),
+    mk("Positive", "POST", "Add simple product object", "Valid JWT; {productId:1,name:'iPhone 15 Pro Max',quantity:1}", "200", "MessageResponse {message:'Added to cart'}.", "FR-07 cart write"),
+    mk("Positive", "POST", "Add second item for same user", "Valid JWT; another product object", "200", "MessageResponse {message:'Added to cart'}.", "FR-07 cart write"),
+    mk("Positive", "POST", "Add multiple fields", "Valid JWT; product object with price and description", "200", "Entire request body is appended to the cart.", "FR-07 raw body storage"),
+    mk("AuthN", "POST", "No token", "No Authorization header", "401", "ErrorResponse {error}", "SEC-01 missing auth"),
+    mk("AuthN", "POST", "Invalid token", "Authorization: Bearer invalid.jwt", "403", "ErrorResponse {error}", "SEC-01 invalid token"),
+    mk("AuthN", "POST", "Expired token", "Authorization: Bearer <expired token>", "403", "ErrorResponse {error}", "SEC-01 invalid token"),
+    mk("Boundary", "POST", "Empty JSON object", "Valid JWT; {}", "200", "Empty object is appended because there is no schema validation.", "FR-07 raw body storage"),
+    mk("Boundary", "POST", "Null body fields", "Valid JWT; {productId:null,quantity:null}", "200", "Null values are stored as sent.", "FR-07 raw body storage"),
+    mk("Boundary", "POST", "Zero quantity", "Valid JWT; {productId:1,quantity:0}", "200", "Zero quantity is stored as sent.", "FR-07 raw body storage"),
+    mk("Boundary", "POST", "Negative quantity", "Valid JWT; {productId:1,quantity:-1}", "200", "Negative quantity is stored as sent.", "FR-07 raw body storage"),
+    mk("Boundary", "POST", "Large quantity", "Valid JWT; very large quantity", "200", "Large numeric values are accepted.", "FR-07 raw body storage"),
+    mk("Boundary", "POST", "String quantity", "Valid JWT; {quantity:'2'}", "200", "String values are stored literally.", "FR-07 type tolerance"),
+    mk("Boundary", "POST", "String price", "Valid JWT; {price:'30000000'}", "200", "String values are stored literally.", "FR-07 type tolerance"),
+    mk("Boundary", "POST", "Unicode product name", "Valid JWT; Vietnamese text", "200", "Unicode is preserved in stored cart items.", "FR-07 format"),
+    mk("Boundary", "POST", "Very long product name", "Valid JWT; long text field", "200", "Long string is accepted and preserved.", "FR-07 format"),
+    mk("Security", "POST", "SQL injection payload in string field", "Valid JWT; name=\"x' OR 1=1 --\"", "200", "Raw string is appended without SQL execution.", "SEC-05 injection resistance"),
+    mk("Security", "POST", "HTML/script payload", "Valid JWT; <script>alert(1)</script>", "200", "Payload is stored as raw JSON text.", "SEC-05 stored XSS defense"),
+    mk("Security", "POST", "Object body with nested item", "Valid JWT; nested object", "200", "Nested JSON structure is preserved.", "SEC-06 request tampering"),
+    mk("Security", "POST", "Array body", "Valid JWT; []", "200", "Array is appended as sent.", "FR-07 raw body storage"),
+    mk("Schema", "POST", "Success response schema", "Valid JWT; minimal body", "200", "MessageResponse with message string.", "SEC-07 schema"),
+    mk("Schema", "POST", "Response message exact value", "Valid JWT; minimal body", "200", "message = Added to cart.", "FR-07 write confirmation"),
+    mk("Negative", "POST", "Unexpected extra field", "Valid JWT; extra coupon_code field", "200", "Extra fields are preserved as part of the raw body.", "SEC-06"),
+]
+
 fr18_get = [
     mk("Positive", "GET", "Valid JWT", "Authorization: Bearer <valid token>", "200", "Array of AdminOrder objects.", "SEC-01; SEC-07"),
     mk("AuthN", "GET", "No token", "No Authorization header", "401", "ErrorResponse {error}", "SEC-01"),
@@ -211,7 +250,7 @@ fr18_put = [
 
 cases_by_api = [
     ("FR-04 / GET /api/users/me", "/api/users/me", fr04),
-    ("FR-08 / POST /api/checkout", "/api/checkout", fr08),
+    ("FR-07 / Shopping Cart", "/api/cart", fr07),
     ("FR-18 / GET /api/admin/orders", "/api/admin/orders", fr18_get),
     ("FR-18 / PUT /api/admin/orders/{id}/status", "/api/admin/orders/{id}/status", fr18_put),
 ]
@@ -310,7 +349,7 @@ def build_workbook():
         ["Metric", "Value"],
         ["Total test cases", str(len(all_cases))],
         ["FR-04 cases", str(Counter(row[1] for row in all_cases)["FR-04 / GET /api/users/me"])],
-        ["FR-08 cases", str(Counter(row[1] for row in all_cases)["FR-08 / POST /api/checkout"])],
+        ["FR-07 cases", str(Counter(row[1] for row in all_cases)["FR-07 / Shopping Cart"])],
         ["FR-18 GET cases", str(Counter(row[1] for row in all_cases)["FR-18 / GET /api/admin/orders"])],
         ["FR-18 PUT cases", str(Counter(row[1] for row in all_cases)["FR-18 / PUT /api/admin/orders/{id}/status"])],
         ["Coverage", "Domain partitions, negative, boundary, security, state transitions, schema validation, deduplication"],
@@ -360,7 +399,7 @@ def write_log(counts, duplicate_ids, duplicate_rows):
     OUT_LOG.write_text(
         "# AI Test Generation Log\n\n"
         "## 1. Understand API / Spec\n"
-        "- Read `openapi.yaml` and the backend implementation for FR-04, FR-08, and FR-18.\n\n"
+        "- Read `openapi.yaml` and the backend implementation for FR-04, FR-07, and FR-18.\n\n"
         "## 2. Domain Partitioning\n"
         "- Enumerated valid, invalid, missing, null, wrong-type, boundary, and format cases.\n\n"
         "## 3. Negative and Boundary Testing\n"
@@ -374,9 +413,9 @@ def write_log(counts, duplicate_ids, duplicate_rows):
         "## 7. Deduplication + Coverage Review\n"
         f"- Final workbook contains {len(all_cases)} test cases.\n"
         f"- FR-04 cases: {counts['FR-04 / GET /api/users/me']}\n"
-        f"- FR-08 cases: {counts['FR-08 / POST /api/checkout']}\n"
+        f"- FR-07 cases: {counts['FR-07 / Shopping Cart']}\n"
         f"- FR-18 GET cases: {counts['FR-18 / GET /api/admin/orders']}\n"
-        f"- FR-18 PUT cases: {counts['FR-18 / PUT /api/admin/orders/{{id}}/status']}\n"
+        f"- FR-18 PUT cases: {counts['FR-18 / PUT /api/admin/orders/{id}/status']}\n"
         f"- {duplicate_id_line}\n"
         f"- {duplicate_row_line}\n",
         encoding="utf-8",
