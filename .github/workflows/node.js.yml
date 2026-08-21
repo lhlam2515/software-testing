@@ -24,21 +24,21 @@ jobs:
       - name: Start backend
         working-directory: homeworks/HW06/apps/backend
         run: |
-          npm start > server.log 2>&1 &
-
+          npm start > "$GITHUB_WORKSPACE/server.log" 2>&1 &
+      
       - name: Wait for backend
         run: |
           for i in {1..30}; do
-            if curl -f http://localhost:3000/health; then
-              echo "Backend is ready"
+            if (echo > /dev/tcp/127.0.0.1/3000) >/dev/null 2>&1; then
+              echo "Backend is ready on port 3000"
               exit 0
             fi
             echo "Waiting for backend..."
             sleep 2
           done
-
-          echo "Backend failed to start"
-          cat homeworks/HW06/apps/server.log
+      
+          echo "Backend did not start"
+          cat "$GITHUB_WORKSPACE/server.log" || true
           exit 1
 
       - name: Install Newman
