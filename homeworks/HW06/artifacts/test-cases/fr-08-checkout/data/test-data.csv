@@ -1,36 +1,43 @@
-tc_id,technique,auth_token,cart_setup,shipping_address,shipping_address_raw,total_amount,total_amount_raw,extra_field,content_type,body_raw_override,expected_status,expected_status_note,expected_side_effect_note,tc_ref,trace
-TC-01,EP,valid_userA,userA:2_items_typical,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED accepted exact code not documented,order created; cart cleared,,"EC-01,EC-07,EC-12"
-TC-02,EP,valid_userA,userA:nonempty,,,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED,record actual behavior,,EC-02
-TC-03,EP,valid_userA,userA:nonempty,,OMIT_KEY,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED,record actual behavior,,EC-03
-TC-04,EP,valid_userA,userA:nonempty,,RAW_TYPE_NULL,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED,record actual behavior,,EC-04
-TC-05,EP,valid_userA,userA:nonempty,LONG_STRING_5000_CHARS,,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED,record actual behavior; no documented max length,,EC-05
-TC-06,EP,valid_userA,userA:nonempty,12345,RAW_TYPE_NUMBER,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED,record actual behavior,,EC-06
-TC-07,EP,valid_userA,userA:nonempty_known_total_500000,"123 Le Loi, TP.HCM",,1,,,application/json,,,UNSPECIFIED accepted per FR-08 recompute rule,resulting order total must equal real cart total not 1 (checked in TC-30),,"EC-08"
-TC-08,EP,valid_userA,userA:nonempty,"123 Le Loi, TP.HCM",,,OMIT_KEY,,application/json,,,UNSPECIFIED,record actual behavior,,EC-09
-TC-09,EP,valid_userA,userA:nonempty,"123 Le Loi, TP.HCM",,-1,,,application/json,,,UNSPECIFIED,"record actual behavior; also repeat this row with total_amount=0",,EC-10
-TC-10,EP,valid_userA,userA:nonempty,"123 Le Loi, TP.HCM",,abc,RAW_TYPE_STRING,,application/json,,,UNSPECIFIED,record actual behavior,,EC-11
-TC-11,EP,MISSING,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED rejected exact code not documented,no order created; cart unchanged,,"EC-13,SEC-C-01"
-TC-12,EP,MALFORMED,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED rejected exact code not documented,no order created; cart unchanged,,"EC-14,SEC-C-02"
-TC-13,EP,valid_userA,userA:nonempty,,,,OMIT_KEY,,application/json,,,UNSPECIFIED combination case,must not leak more detail than single-field violation,,"EC-02,EC-09"
-TC-14,BVA,valid_userA,userA:0_items,"123 Le Loi, TP.HCM",,0,,,application/json,,,UNSPECIFIED empty-cart handling not documented,checked further in TC-31,,BVA-01
-TC-15,BVA,valid_userA,userA:1_item_qty1,"123 Le Loi, TP.HCM",,ITEM_PRICE,,,application/json,,,UNSPECIFIED accepted per FR-08,order created from single line; cart cleared,,BVA-02
-TC-16,Lifecycle,valid_userA,userA:nonempty_fresh,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED accepted,"order created; follow-up GET /api/cart must return empty cart",,S-01
-TC-17,Lifecycle,valid_userA,userA:post_TC16_emptied,"123 Le Loi, TP.HCM",,0,,,application/json,,,UNSPECIFIED repeat-call behavior not documented,record actual behavior,,S-02
-TC-18,Lifecycle,valid_userC,userC:never_populated,"123 Le Loi, TP.HCM",,0,,,application/json,,,UNSPECIFIED same class as TC-17,compare against TC-17,,S-03
-TC-19,Lifecycle,valid_userA,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,DOUBLE_SUBMIT,application/json,,,UNSPECIFIED idempotency not documented,"count resulting orders; check final cart state",,S-04
-TC-20,Lifecycle,valid_userA,"userA:nonempty + userB:nonempty_separate","123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED accepted,userB cart/orders must be unchanged after userA's call,,S-05
-TC-21,Security,MISSING,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED rejected,fail-closed; no order created; cart unchanged; no leaked internal error detail,,SEC-C-01
-TC-22,Security,MALFORMED,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED rejected,fail-closed; no order created; cart unchanged,,SEC-C-02
-TC-23,Security,FORGED_BAD_SIG,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED rejected,fail-closed; no order created; cart unchanged,,SEC-C-03
-TC-24,Security,EXPIRED,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED rejected,fail-closed; no order created; cart unchanged,,SEC-C-04
-TC-25,Security,valid_userA,"userA:nonempty + userB:nonempty_separate","123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,INJECT_USER_ID_B,application/json,,,UNSPECIFIED accepted for A only,injected field ignored; userB cart/orders unchanged; resulting order reflects only userA's cart,,SEC-C-05
-TC-26,Security,valid_userA,userA:nonempty_known_total_500000,"123 Le Loi, TP.HCM",,1,,,application/json,,,UNSPECIFIED accepted per FR-08 recompute rule,recorded/charged total must equal real cart total not 1,,SEC-C-06
-TC-27,Security,valid_userA,userA:nonempty,"' OR '1'='1",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED,"no raw SQL error; no data leak/alteration",,SEC-C-07
-TC-28,Security,valid_userA,userA:nonempty,"123 Le Loi'; --",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED,"no raw SQL error; no data leak/alteration",,SEC-C-08
-TC-29,Schema,,,,,,,,,,,,inspect TC-01/TC-16 response: status/Content-Type/body parseability/status-like field,"TC-01,TC-16","SC-01,SC-02,SC-03,SC-05"
-TC-30,Schema,,,,,,,,,,,,inspect TC-07/TC-26 resulting order total,"TC-07,TC-26",SC-04
-TC-31,Schema,,,,,,,,,,,,inspect TC-14 response + confirm no order created / cart unaffected,TC-14,"SC-06,SC-07,SC-08"
-TC-32,Schema,,,,,,,,,,,,inspect TC-11/TC-21 response + confirm no order created,"TC-11,TC-21",SC-09
-TC-33,Schema,valid_userA,userA:nonempty,,,,,,application/json,"{""shipping_address"":""x"",""total_amount"":}",,UNSPECIFIED,structured error not raw stack trace/HTML page,,SC-10
-TC-34,Schema,valid_userA,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,OMIT_HEADER,,,UNSPECIFIED,record actual status/body,,SC-11
-TC-35,Schema,,,,,,,,,,,,compare TC-02 vs TC-14 error body key sets,"TC-02,TC-14",SC-12
+tc_id,technique,auth_token,cart_setup,shipping_address,shipping_address_raw,total_amount,total_amount_raw,extra_field,content_type,body_raw_override,expected_status,expected_status_note,expected_side_effect_note,tc_ref,trace,endpoint_override
+TC-01,EP,valid_userA,userA:2_items_typical,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED accepted exact code not documented,order created; cart cleared,,"EC-01,EC-07,EC-12",
+TC-02,EP,valid_userA,userA:nonempty,,,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED,record actual behavior,,EC-02,
+TC-03,EP,valid_userA,userA:nonempty,,OMIT_KEY,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED,record actual behavior,,EC-03,
+TC-04,EP,valid_userA,userA:nonempty,,RAW_TYPE_NULL,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED,record actual behavior,,EC-04,
+TC-05,EP,valid_userA,userA:nonempty,LONG_STRING_5000_CHARS,,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED,record actual behavior; no documented max length,,EC-05,
+TC-06,EP,valid_userA,userA:nonempty,12345,RAW_TYPE_NUMBER,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED,record actual behavior,,EC-06,
+TC-07,EP,valid_userA,userA:nonempty_known_total_500000,"123 Le Loi, TP.HCM",,1,,,application/json,,,UNSPECIFIED accepted per FR-08 recompute rule,resulting order total must equal real cart total not 1 (checked in TC-30),,EC-08,
+TC-08,EP,valid_userA,userA:nonempty,"123 Le Loi, TP.HCM",,,OMIT_KEY,,application/json,,,UNSPECIFIED,record actual behavior,,EC-09,
+TC-09,EP,valid_userA,userA:nonempty,"123 Le Loi, TP.HCM",,-1,,,application/json,,,UNSPECIFIED,record actual behavior; also repeat this row with total_amount=0,,EC-10,
+TC-10,EP,valid_userA,userA:nonempty,"123 Le Loi, TP.HCM",,abc,RAW_TYPE_STRING,,application/json,,,UNSPECIFIED,record actual behavior,,EC-11,
+TC-11,EP,MISSING,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED rejected exact code not documented,no order created; cart unchanged,,"EC-13,SEC-C-01",
+TC-12,EP,MALFORMED,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED rejected exact code not documented,no order created; cart unchanged,,"EC-14,SEC-C-02",
+TC-13,EP,valid_userA,userA:nonempty,,,,OMIT_KEY,,application/json,,,UNSPECIFIED combination case,must not leak more detail than single-field violation,,"EC-02,EC-09",
+TC-14,BVA,valid_userA,userA:0_items,"123 Le Loi, TP.HCM",,0,,,application/json,,,UNSPECIFIED empty-cart handling not documented,checked further in TC-31,,BVA-01,
+TC-15,BVA,valid_userA,userA:1_item_qty1,"123 Le Loi, TP.HCM",,ITEM_PRICE,,,application/json,,,UNSPECIFIED accepted per FR-08,order created from single line; cart cleared,,BVA-02,
+TC-16,Lifecycle,valid_userA,userA:nonempty_fresh,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED accepted,order created; follow-up GET /api/cart must return empty cart,,S-01,
+TC-17,Lifecycle,valid_userA,userA:post_TC16_emptied,"123 Le Loi, TP.HCM",,0,,,application/json,,,UNSPECIFIED repeat-call behavior not documented,record actual behavior,,S-02,
+TC-18,Lifecycle,valid_userC,userC:never_populated,"123 Le Loi, TP.HCM",,0,,,application/json,,,UNSPECIFIED same class as TC-17,compare against TC-17,,S-03,
+TC-19,Lifecycle,valid_userA,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,DOUBLE_SUBMIT,application/json,,,UNSPECIFIED idempotency not documented,count resulting orders; check final cart state,,S-04,
+TC-20,Lifecycle,valid_userA,userA:nonempty + userB:nonempty_separate,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED accepted,userB cart/orders must be unchanged after userA's call,,S-05,
+TC-21,Security,MISSING,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED rejected,fail-closed; no order created; cart unchanged; no leaked internal error detail,,SEC-C-01,
+TC-22,Security,MALFORMED,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED rejected,fail-closed; no order created; cart unchanged,,SEC-C-02,
+TC-23,Security,FORGED_BAD_SIG,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED rejected,fail-closed; no order created; cart unchanged,,SEC-C-03,
+TC-24,Security,EXPIRED,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED rejected,fail-closed; no order created; cart unchanged,,SEC-C-04,
+TC-25,Security,valid_userA,userA:nonempty + userB:nonempty_separate,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,INJECT_USER_ID_B,application/json,,,UNSPECIFIED accepted for A only,injected field ignored; userB cart/orders unchanged; resulting order reflects only userA's cart,,SEC-C-05,
+TC-26,Security,valid_userA,userA:nonempty_known_total_500000,"123 Le Loi, TP.HCM",,1,,,application/json,,,UNSPECIFIED accepted per FR-08 recompute rule,recorded/charged total must equal real cart total not 1,,SEC-C-06,
+TC-27,Security,valid_userA,userA:nonempty,' OR '1'='1,,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED,no raw SQL error; no data leak/alteration,,SEC-C-07,
+TC-28,Security,valid_userA,userA:nonempty,123 Le Loi'; --,,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED,no raw SQL error; no data leak/alteration,,SEC-C-08,
+TC-29,Schema,,,,,,,,,,,,inspect TC-01/TC-16 response: status/Content-Type/body parseability/status-like field,"TC-01,TC-16","SC-01,SC-02,SC-03,SC-05",
+TC-30,Schema,,,,,,,,,,,,inspect TC-07/TC-26 resulting order total,"TC-07,TC-26",SC-04,
+TC-31,Schema,,,,,,,,,,,,inspect TC-14 response + confirm no order created / cart unaffected,TC-14,"SC-06,SC-07,SC-08",
+TC-32,Schema,,,,,,,,,,,,inspect TC-11/TC-21 response + confirm no order created,"TC-11,TC-21",SC-09,
+TC-33,Schema,valid_userA,userA:nonempty,,,,,,application/json,"{""shipping_address"":""x"",""total_amount"":}",,UNSPECIFIED,structured error not raw stack trace/HTML page,,SC-10,
+TC-34,Schema,valid_userA,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,OMIT_HEADER,,,UNSPECIFIED,record actual status/body,,SC-11,
+TC-35,Schema,,,,,,,,,,,,compare TC-02 vs TC-14 error body key sets,"TC-02,TC-14",SC-12,
+TC-36a,Security (EP),NO_SCHEME,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED rejected exact code not documented; same class as TC-12/TC-22,no order created; cart unchanged,,EC-14,
+TC-36b,Security (EP),WRONG_SCHEME_BASIC,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,application/json,,,UNSPECIFIED rejected exact code not documented; same class as TC-12/TC-22,no order created; cart unchanged,,EC-14,
+TC-37,Schema,,,,,,,,,,,,compare order count (GET /api/orders/my-orders) and cart state (GET /api/cart) before/after each of TC-02..TC-10 and TC-13; none may have created an order or altered the cart,"TC-02,TC-03,TC-04,TC-05,TC-06,TC-07,TC-08,TC-09,TC-10,TC-13",SC-08,
+TC-38,Schema/Lifecycle,valid_userA,,,,,,,,,,,"confirm GET /api/orders/my-orders order count increased by exactly one after TC-01/TC-16 checkout; record item/total/status fields actually returned, do not assume shape","TC-01,TC-16",FR-08 lines 104-108; FR-11 line 164,GET /api/orders/my-orders
+TC-39,Security,valid_userB,,,,,,,,,,,confirm userB's GET /api/orders/my-orders response does not contain the order just created by userA's checkout (order id absent if observable),TC-16,FR-11 line 164; FR-07 lines 93-100,GET /api/orders/my-orders
+TC-40,Schema,,,,,,,,,,,,"if TC-09's -1 or 0 sub-case created an order, its recorded/charged total must equal the real cart total, never the submitted -1 or 0",TC-09,SC-04,
+TC-41,Schema,valid_userA,userA:nonempty,"123 Le Loi, TP.HCM",,REAL_CART_TOTAL,,,text/plain,,,"UNSPECIFIED — incorrect (not missing) Content-Type value; record actual status/body, do not assume rejection or acceptance",inspected for raw stack trace/HTML per SC-10 convention,,SC-11,

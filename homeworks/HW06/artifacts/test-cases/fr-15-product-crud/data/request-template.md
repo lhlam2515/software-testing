@@ -11,11 +11,14 @@ Method: {{method}}
 URL: {{baseUrl}}{{path}}
 ```
 
-`path` may contain a literal placeholder like `{{P1_ID}}`, `{{A_ID}}`, `{{B_ID}}`, or
-`{{C_ID}}` — these resolve at run time to ids captured from earlier rows' responses
-(TC-01 → `P1_ID`; TC-20 → `P2_ID`; TC-21's two pre-seeded products → `A_ID`/`B_ID`; TC-24's
-pre-seeded product → `C_ID`), never to literal values baked into the CSV. `999999` and
-`abc` are literal path values (non-existent / malformed id classes).
+`path` may contain a literal placeholder like `{{P1_ID}}`, `{{A_ID}}`, `{{B_ID}}`,
+`{{C_ID}}`, `{{CX_ID}}`, or `{{PRODUCT_CX_ID}}` — these resolve at run time to ids captured
+from earlier rows' responses (TC-01 → `P1_ID`; TC-20 → `P2_ID`; TC-21's two pre-seeded
+products → `A_ID`/`B_ID`; TC-24's pre-seeded product → `C_ID`; TC-46's own sequence steps →
+`CX_ID`/`PRODUCT_CX_ID`, captured within the same row, not from an earlier row), never to
+literal values baked into the CSV. `999999`, `abc`, `0`, `-1`, and the URL-encoded
+`1%20OR%201%3D1` are literal path values (non-existent / malformed / boundary / injection
+id classes).
 
 Headers:
 
@@ -52,6 +55,7 @@ row:
 | `auth_token` = `MISSING` | Do not send an `Authorization` header at all. |
 | `auth_token` = `MALFORMED` | `Authorization: Bearer not-a-real-jwt-string`. |
 | `auth_token` = `EXPIRED` | A token constructed (or obtained) such that its `exp` claim has already passed at request time, with an otherwise-valid admin claim; token expiry mechanics are flagged unspecified in `../specs/requirements.md` — this row records observed behavior, it does not assert a specific expiry duration. |
+| `auth_token` = `TAMPERED_SIG_ADMIN_CLAIM` | Log in as any registered non-admin (customer) account to obtain a genuine, correctly-signed JWT, then locally alter the decoded payload's `role` claim to `admin` (or re-sign the token with an incorrect secret) without producing a valid signature; use `Authorization: Bearer <tampered token>`. Distinct from `MALFORMED` (not a real JWT shape at all) and `EXPIRED` (valid signature, expired `exp`) — this token is well-formed and decodable but fails signature verification (TC-44). |
 | `name`, `name_raw` | `name` substitutes directly as a JSON string. When `name_raw` = `OMIT_KEY`, remove the key entirely (TC-02). `EMPTY_STRING` sends `""` (TC-03). `LEN_254`/`LEN_255`/`LEN_256` (TC-04/05/06) mean generate an alphanumeric string of that exact character length at request time, not a literal CSV value. |
 | `price`, `price_raw` | `price` substitutes directly as a JSON number. When `price_raw` = `OMIT_KEY`, remove the key entirely (TC-07). `RAW_TYPE_STRING` sends the `price` column's value as a quoted JSON string, not a number (TC-08). |
 | `category_id`, `category_id_raw` | `VALID_CATEGORY` resolves at request time to a real `category_id` fetched via `GET /api/categories` immediately before the row fires. `999999` (TC-13, TC-19) is a literal non-existent id. When `category_id_raw` = `OMIT_KEY`, remove the key entirely (TC-12). `RAW_TYPE_STRING` sends the `category_id` column's value as a quoted JSON string, not an integer (TC-14). |
@@ -59,7 +63,8 @@ row:
 | `imageUrl`, `imageUrl_raw` | `imageUrl` substitutes directly as a JSON string. When `imageUrl_raw` = `OMIT_KEY`, remove the key entirely (TC-16). |
 | `extra_field` = `INJECT_ROLE_ADMIN` | Add an extra, undocumented `"role": "admin"` key to the JSON body alongside the normal fields (TC-35). |
 | `extra_field` = `INJECT_IS_ADMIN_TRUE` | Add an extra, undocumented `"isAdmin": true` key to the JSON body (TC-36). |
-| `method` = `SEQUENCE` | This row is a multi-step scenario (create-then-read, update-then-read-other, delete-then-read-then-delete-again). The `path` column lists the steps informally; the runner executes them in order using the same `auth_token`, capturing each step's response before firing the next. |
+| `body_raw_override` | When present on a `SEQUENCE` row, holds the raw JSON body for that row's first (setup) request, which is not a `/api/products` request and so cannot be built from the `name`/`price`/`category_id`/etc. columns. Currently used only by TC-46: `{"name": "Danh mục CX test"}` for the `POST /api/categories` setup step that creates category `CX`. The row's `name`/`price`/`description`/`imageUrl`/`category_id` columns still build the body for that same row's `POST /api/products` step (with `category_id` = the just-captured `{{CX_ID}}`), exactly as for any other row. |
+| `method` = `SEQUENCE` | This row is a multi-step scenario (create-then-read, update-then-read-other, delete-then-read-then-delete-again, cross-resource setup-then-delete-then-read). The `path` column lists the steps informally; the runner executes them in order using the same `auth_token`, capturing each step's response before firing the next. |
 | `method` = `ANALYSIS` | This row does not fire a new HTTP request. It is a post-run analysis step over the response(s) already captured for the `tc_ref` id(s) (TC-37..TC-43). |
 | `expected_status` | Blank on every row in this suite — no status code is documented anywhere in `api_specification.md` section 3.3 for any of the three operations (`../schema-cases.md`). `expected_status_note` carries the UNSPECIFIED caveat instead; the runner records the observed code rather than asserting one. |
 | `expected_side_effect_note` | The one class of assertion this suite *can* make without a documented status code: whether a product was created/mutated/deleted, and whether an unrelated product's fields stayed unchanged (isolation). Every generic assertion below reads this column, not `expected_status`. |
@@ -67,10 +72,12 @@ row:
 | `trace` | Not sent on the wire — carries the coverage id(s) back to `../master-test-cases.md` for audit traceability. |
 
 Sequenced/stateful rows (TC-18, TC-19, TC-20, TC-21, TC-22, TC-24, TC-26, TC-27, TC-29,
-TC-31, TC-32, TC-34, TC-36) require the runner to have already captured the referenced
-product id (`P1_ID`, `A_ID`, `B_ID`, `C_ID`) from an earlier row's response before firing.
-Rows referencing `tc_ref` (TC-37..TC-43) must run after every `tc_id` they reference has
-already produced a captured response.
+TC-31, TC-32, TC-34, TC-36, TC-48a, TC-48b) require the runner to have already captured the
+referenced product id (`P1_ID`, `A_ID`, `B_ID`, `C_ID`) from an earlier row's response before
+firing. TC-46 is self-contained: its own `SEQUENCE` steps create category `CX` and the
+product referencing it, capture `CX_ID`/`PRODUCT_CX_ID` from those steps' responses, then use
+them in the same row's later steps. Rows referencing `tc_ref` (TC-37..TC-43) must run after
+every `tc_id` they reference has already produced a captured response.
 
 ## 3. Generic assertions (read from the current data row)
 
@@ -112,7 +119,10 @@ pm.test("mass-assignment rows never grant privilege or persist an undocumented f
 });
 
 pm.test("SQL injection rows never surface a raw DB error or destroy data", () => {
-  if (data.trace && (data.trace.includes("SEC-C-09") || data.trace.includes("SEC-C-10"))) {
+  if (data.trace && (data.trace.includes("SEC-C-09") || data.trace.includes("SEC-C-10") || data.trace.includes("SEC-05"))) {
+    // SEC-C-09/SEC-C-10 cover the body-field injection rows (TC-33, TC-34);
+    // SEC-05 also matches TC-45's path-parameter injection row, which has no
+    // security-cases.md catalog id of its own.
     const raw = pm.response.text();
     pm.expect(raw).to.not.match(/SQLITE_ERROR|syntax error|SQL error/i);
     // Runner must additionally confirm GET /api/products still lists every
