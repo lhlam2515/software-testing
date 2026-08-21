@@ -109,6 +109,13 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+const requireAdmin = (req, res, next) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+  next();
+};
+
 app.get("/api/users/me", authenticateToken, (req, res) => {
   db.get("SELECT * FROM users WHERE id = ?", [req.user.id], (err, user) => {
     res.json(user);
@@ -196,7 +203,7 @@ app.delete("/api/products/:id", (req, res) => {
 });
 
 // Import products from CSV (parsed on frontend, sent as JSON array)
-app.post("/api/admin/import-products", authenticateToken, (req, res) => {
+app.post("/api/admin/import-products", authenticateToken, requireAdmin, (req, res) => {
   const { products: rows } = req.body;
 
   if (!rows || !Array.isArray(rows) || rows.length === 0) {
@@ -246,7 +253,7 @@ app.get("/api/categories", (req, res) => {
   });
 });
 
-app.post("/api/categories", authenticateToken, (req, res) => {
+app.post("/api/categories", authenticateToken, requireAdmin, (req, res) => {
   const { name } = req.body;
   db.run("INSERT INTO categories (name) VALUES (?)", [name], function (err) {
     if (err) return res.status(500).json({ error: err.message });
@@ -254,7 +261,7 @@ app.post("/api/categories", authenticateToken, (req, res) => {
   });
 });
 
-app.put("/api/categories/:id", authenticateToken, (req, res) => {
+app.put("/api/categories/:id", authenticateToken, requireAdmin, (req, res) => {
   const { name } = req.body;
   db.run(
     "UPDATE categories SET name = ? WHERE id = ?",
@@ -266,7 +273,7 @@ app.put("/api/categories/:id", authenticateToken, (req, res) => {
   );
 });
 
-app.delete("/api/categories/:id", authenticateToken, (req, res) => {
+app.delete("/api/categories/:id", authenticateToken, requireAdmin, (req, res) => {
   db.run(
     "DELETE FROM categories WHERE id = ?",
     [req.params.id],
@@ -454,7 +461,7 @@ app.post("/api/coupon-usage", authenticateToken, (req, res) => {
 });
 
 // ADMIN: CRUD Coupons
-app.post("/api/admin/coupons", authenticateToken, (req, res) => {
+app.post("/api/admin/coupons", authenticateToken, requireAdmin, (req, res) => {
   const {
     code,
     type,
@@ -480,7 +487,7 @@ app.post("/api/admin/coupons", authenticateToken, (req, res) => {
   );
 });
 
-app.delete("/api/admin/coupons/:id", authenticateToken, (req, res) => {
+app.delete("/api/admin/coupons/:id", authenticateToken, requireAdmin, (req, res) => {
   db.run("DELETE FROM coupons WHERE id = ?", [req.params.id], function (err) {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ message: "Coupon deleted" });
@@ -491,7 +498,7 @@ app.delete("/api/admin/coupons/:id", authenticateToken, (req, res) => {
 // ADMIN APIS
 // ==========================================
 
-app.get("/api/admin/users", authenticateToken, (req, res) => {
+app.get("/api/admin/users", authenticateToken, requireAdmin, (req, res) => {
   db.all(
     "SELECT id, name, email, role, login_attempts, locked_until, shipping_address FROM users",
     [],
@@ -501,13 +508,13 @@ app.get("/api/admin/users", authenticateToken, (req, res) => {
   );
 });
 
-app.delete("/api/admin/users/:id", authenticateToken, (req, res) => {
+app.delete("/api/admin/users/:id", authenticateToken, requireAdmin, (req, res) => {
   db.run("DELETE FROM users WHERE id = ?", [req.params.id], function (err) {
     res.json({ message: "User deleted" });
   });
 });
 
-app.get("/api/admin/orders", authenticateToken, (req, res) => {
+app.get("/api/admin/orders", authenticateToken, requireAdmin, (req, res) => {
   db.all(
     `
         SELECT orders.*, users.name as user_name 
@@ -522,7 +529,7 @@ app.get("/api/admin/orders", authenticateToken, (req, res) => {
   );
 });
 
-app.put("/api/admin/orders/:id/status", authenticateToken, (req, res) => {
+app.put("/api/admin/orders/:id/status", authenticateToken, requireAdmin, (req, res) => {
   const { status } = req.body; // pending, confirmed, shipping, delivered, canceled
 
   db.get(

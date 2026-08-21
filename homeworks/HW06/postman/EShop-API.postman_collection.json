@@ -60,6 +60,22 @@
     {
       "key": "canceledOrderId2",
       "value": ""
+    },
+    {
+      "key": "confirmedOrderId2",
+      "value": ""
+    },
+    {
+      "key": "shippingOrderId2",
+      "value": ""
+    },
+    {
+      "key": "confirmedOrderId3",
+      "value": ""
+    },
+    {
+      "key": "canceledOrderId3",
+      "value": ""
     }
   ],
   "event": [
@@ -778,7 +794,194 @@
           ]
         },
         {
-          "name": "20 Cancel Spare Order",
+          "name": "20 Create Confirmed Spare",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/checkout",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"total_amount\": 330000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('checkout 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('confirmedOrderId2', String(pm.response.json().orderId));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "21 Promote Confirmed Spare",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/orders/{{confirmedOrderId2}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"confirmed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('promote 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "22 Create Shipping Spare",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/checkout",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"total_amount\": 340000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('checkout 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('shippingOrderId2', String(pm.response.json().orderId));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "23 Promote Shipping Spare To Confirmed",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/orders/{{shippingOrderId2}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"confirmed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('promote 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "24 Promote Shipping Spare To Shipping",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/orders/{{shippingOrderId2}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"shipping\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('promote 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "25 Cancel Spare Order",
           "request": {
             "method": "PUT",
             "header": [
@@ -813,11 +1016,124 @@
               }
             }
           ]
-        }
-      ]
-    },
-    {
-      "name": "TC-001 FR-04 / GET /api/users/me Positive",
+            }
+          ]
+        },
+        {
+          "name": "26 Cancel Extra Spare Order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderIdH}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"canceled\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('cancel 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('canceledOrderId3', String(pm.environment.get('pendingOrderIdH')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "27 Create Confirmed Spare 2",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/checkout",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"total_amount\": 350000,\n  \"shipping_address\": \"123 Le Loi\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('checkout 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('confirmedOrderId3', String(pm.response.json().orderId));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "28 Promote Confirmed Spare 2",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/orders/{{confirmedOrderId3}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"confirmed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('promote 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-001 FR-04 / GET /api/users/me Positive",
       "request": {
         "method": "GET",
         "header": [
@@ -853,7 +1169,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('403', () => pm.response.to.have.status(403));"
+              "pm.test('401', () => pm.response.to.have.status(401));"
             ]
           }
         }
@@ -877,7 +1193,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('401', () => pm.response.to.have.status(401));"
+              "pm.test('403', () => pm.response.to.have.status(403));"
             ]
           }
         }
@@ -3628,10 +3944,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{confirmedOrderId}}/status",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"status\": \"confirmed\"\n}",
+          "raw": "{\n  \"status\": \"shipping\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -3665,47 +3981,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{confirmedOrderId2}}/status",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"status\": \"confirmed\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Pending order can be confirmed', () => pm.response.to.have.status(200));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "TC-111 FR-18 / PUT /api/admin/orders/{id}/status State",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"status\": \"confirmed\"\n}",
+          "raw": "{\n  \"status\": \"shipping\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -3726,7 +4005,7 @@
       ]
     },
     {
-      "name": "TC-112 FR-18 / PUT /api/admin/orders/{id}/status State",
+      "name": "TC-111 FR-18 / PUT /api/admin/orders/{id}/status State",
       "request": {
         "method": "PUT",
         "header": [
@@ -3739,10 +4018,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{shippingOrderId}}/status",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"status\": \"confirmed\"\n}",
+          "raw": "{\n  \"status\": \"delivered\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -3763,7 +4042,7 @@
       ]
     },
     {
-      "name": "TC-113 FR-18 / PUT /api/admin/orders/{id}/status State",
+      "name": "TC-112 FR-18 / PUT /api/admin/orders/{id}/status State",
       "request": {
         "method": "PUT",
         "header": [
@@ -3793,6 +4072,43 @@
           "script": {
             "type": "text/javascript",
             "exec": [
+              "pm.test('Canceled order can move to delivered', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TC-113 FR-18 / PUT /api/admin/orders/{id}/status State",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/admin/orders/{{canceledOrderId2}}/status",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"delivered\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
               "pm.test('200', () => pm.response.to.have.status(200));"
             ]
           }
@@ -3804,10 +4120,10 @@
       "request": {
         "method": "PUT",
         "header": [],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderIdD}}/status",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"status\": \"confirmed\"\n}",
+          "raw": "{\n  \"status\": \"archived\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -3837,10 +4153,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderIdE}}/status",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"status\": \"confirmed\"\n}",
+          "raw": "{\n  \"status\": \"archived\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -3874,10 +4190,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderIdF}}/status",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"status\": \"confirmed\"\n}",
+          "raw": "{\n  \"status\": \"archived\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -3911,10 +4227,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderIdG}}/status",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"status\": \"confirmed\"\n}",
+          "raw": "{\n  \"status\": \"archived\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -3948,7 +4264,7 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderIdA}}/status",
         "body": {
           "mode": "raw",
           "raw": "{\n  \"status\": \"confirmed\"\n}",
@@ -3985,7 +4301,7 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/999999/status",
         "body": {
           "mode": "raw",
           "raw": "{\n  \"status\": \"confirmed\"\n}",
@@ -4022,7 +4338,7 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderIdB}}/status",
         "body": {
           "mode": "raw",
           "raw": "{\n  \"status\": \"confirmed\"\n}",
@@ -4059,7 +4375,7 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderIdC}}/status",
         "body": {
           "mode": "raw",
           "raw": "{\n  \"status\": \"confirmed\"\n}",
@@ -4096,7 +4412,7 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/999998/status",
         "body": {
           "mode": "raw",
           "raw": "{\n  \"status\": \"confirmed\"\n}",
@@ -4124,7 +4440,7 @@
       "request": {
         "method": "PUT",
         "header": [],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderIdD}}/status",
         "body": {
           "mode": "raw",
           "raw": "{\n  \"status\": \"confirmed\"\n}",
@@ -4161,10 +4477,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderIdE}}/status",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"status\": \"confirmed\"\n}",
+          "raw": "{\n  \"status\": 123\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -4198,10 +4514,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{confirmedOrderId3}}/status",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"status\": \"confirmed\"\n}",
+          "raw": "{\n  \"status\": true\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -4235,10 +4551,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{confirmedOrderId3}}/status",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"status\": \"confirmed\"\n}",
+          "raw": "{\n  \"status\": \"archived\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -4272,10 +4588,10 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{confirmedOrderId3}}/status",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"status\": \"confirmed\"\n}",
+          "raw": "{\n  \"status\": \"archived\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -4309,7 +4625,7 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{confirmedOrderId3}}/status",
         "body": {
           "mode": "raw",
           "raw": "{\n  \"status\": \"confirmed\"\n}",
@@ -4349,7 +4665,7 @@
         "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"status\": \"confirmed\"\n}",
+          "raw": "{\n  \"status\": \"archived\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -4383,7 +4699,7 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderIdD}}/status",
         "body": {
           "mode": "raw",
           "raw": "{\n  \"status\": \"confirmed\"\n}",
@@ -4423,7 +4739,7 @@
         "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"status\": \"confirmed\"\n}",
+          "raw": "{\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -4457,7 +4773,7 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderIdE}}/status",
         "body": {
           "mode": "raw",
           "raw": "{\n  \"status\": \"confirmed\"\n}",
@@ -4531,7 +4847,7 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{confirmedOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{confirmedOrderId3}}/status",
         "body": {
           "mode": "raw",
           "raw": "{\n  \"status\": \"shipping\"\n}",
@@ -4568,7 +4884,7 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{shippingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{shippingOrderId2}}/status",
         "body": {
           "mode": "raw",
           "raw": "{\n  \"status\": \"delivered\"\n}",
@@ -4753,7 +5069,7 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{canceledOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{canceledOrderId3}}/status",
         "body": {
           "mode": "raw",
           "raw": "{\n  \"status\": \"delivered\"\n}",
@@ -4790,7 +5106,7 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderIdF}}/status",
         "body": {
           "mode": "raw",
           "raw": "{\n  \"status\": \"confirmed\"\n}",
@@ -4827,7 +5143,7 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{shippingOrderId}}/status",
         "body": {
           "mode": "raw",
           "raw": "{\n  \"status\": \"confirmed\"\n}",
@@ -4864,7 +5180,7 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderIdF}}/status",
         "body": {
           "mode": "raw",
           "raw": "{\n  \"status\": \"confirmed\"\n}",
@@ -4901,7 +5217,7 @@
             "value": "application/json"
           }
         ],
-        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderId}}/status",
+        "url": "{{baseUrl}}/api/admin/orders/{{pendingOrderIdG}}/status",
         "body": {
           "mode": "raw",
           "raw": "{\n  \"status\": \"confirmed\"\n}",
