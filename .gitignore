@@ -78,6 +78,12 @@ k6-results/
 stryker-tmp/
 reports/
 
+# Postman/Newman execution evidence is a graded deliverable (see
+# homeworks/HW06/artifacts/postman/README.md) — un-ignore it specifically
+# without loosening the generic reports/ rule above.
+!homeworks/HW06/artifacts/postman/*/reports/
+!homeworks/HW06/artifacts/postman/*/reports/**
+
 # ===== CACHE =====
 .npm/
 .eslintcache
