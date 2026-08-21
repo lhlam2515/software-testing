@@ -1,0 +1,72 @@
+* commit 0c18a69b1f03ade39d899265355e95f14d4b2332 (HEAD -> Vu/feat/HW02, origin/Vu/feat/HW02)
+| Author: VVVu1511 <161138657+VVVu1511@users.noreply.github.com>
+| Date:   Fri Aug 21 15:17:12 2026 +0700
+| 
+|     test: demonstrate failing API test in CI
+|   
+*   commit 668a94a85627dd4bec0b75a4a8a9af44985a2edf
+|\  Merge: 37b7500 92a8a07
+| | Author: VVVu1511 <161138657+VVVu1511@users.noreply.github.com>
+| | Date:   Fri Aug 21 14:54:31 2026 +0700
+| | 
+| |     Merge branch 'Vu/feat/HW02' of https://github.com/lhlam2515/software-testing into Vu/feat/HW02
+| | 
+| * commit 92a8a076d32b4911de2b35e86aa985482736f4c5
+| | Author: vvvu <Vanvu151105@gmail.com>
+| | Date:   Fri Aug 21 12:09:18 2026 +0700
+| | 
+| |     Update backend log file path in GitHub Actions
+| | 
+| * commit bd4b0c9266b8003bdce9e18c0db3fc2537ff8fa3
+| | Author: vvvu <Vanvu151105@gmail.com>
+| | Date:   Fri Aug 21 12:02:27 2026 +0700
+| | 
+| |     Modify CI workflow to include Postman API tests
+| |     
+| |     Updated the workflow to run Postman API tests after starting the backend service.
+| | 
+* | commit 37b75001011d03cebe7b02ea8aafaa40fa6d83de
+|/  Author: VVVu1511 <161138657+VVVu1511@users.noreply.github.com>
+|   Date:   Fri Aug 21 14:33:25 2026 +0700
+|   
+|       all tests pass
+| 
+* commit cf8cd5b2b8b735bf6ebc1ac85a2ef58a9517fa3a
+| Author: VVVu1511 <161138657+VVVu1511@users.noreply.github.com>
+| Date:   Fri Aug 21 11:59:03 2026 +0700
+| 
+|     feat: add HW06 backend
+| 
+* commit 2e85592d91333eb01091d3c65ce1641594dc6caa
+| Author: VVVu1511 <161138657+VVVu1511@users.noreply.github.com>
+| Date:   Fri Aug 21 11:19:08 2026 +0700
+| 
+|     ci: add Postman API tests
+| 
+* commit 6c57e013ea82261ec5265d1026a3b55a038d6781
+| Author: VVVu1511 <161138657+VVVu1511@users.noreply.github.com>
+| Date:   Thu Aug 20 17:22:24 2026 +0700
+| 
+|     add FR-07 test cases
+| 
+* commit 7ae7835bf57d61c787d4816a9780e765f31a54ea
+| Author: VVVu1511 <161138657+VVVu1511@users.noreply.github.com>
+| Date:   Wed Aug 19 10:14:43 2026 +0700
+| 
+|     finish test
+| 
+* commit 4f51bb5266459ddfaa162fc96f136dda91ac886e
+| Author: VVVu1511 <161138657+VVVu1511@users.noreply.github.com>
+| Date:   Tue Aug 18 16:17:32 2026 +0700
+| 
+|     add test cases
+| 
+* commit 461cf4dd169c72d48014a0e54744f6f6e874b8ac
+| Author: VVVu1511 <161138657+VVVu1511@users.noreply.github.com>
+| Date:   Tue Aug 18 14:53:45 2026 +0700
+| 
+|     HW06 first commit
+| 
+* commit 7cb1c0311bf63962ffb22c96cab12bf9309495ae
+| Author: VVVu1511 <161138657+VVVu1511@users.noreply.github.com>
+| Date:   Tue Aug 18 14:42:27 2026 +0700
