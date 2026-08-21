@@ -115,7 +115,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('login user 200', () => pm.response.to.have.status(200));",
+                  "pm.test('login user 200', () => pm.response.to.have.status(201));",
                   "pm.environment.set('userToken', pm.response.json().token);"
                 ]
               }
