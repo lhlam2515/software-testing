@@ -1,0 +1,6 @@
+email,password,expectedStatus
+admin@eshop.com,Admin123!,200
+test@eshop.com,Test1234!,200
+notfound@example.com,Test1234!,404
+test@eshop.com,,400
+test@eshop.com,WrongPass1!,401

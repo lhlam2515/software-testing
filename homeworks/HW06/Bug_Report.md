@@ -23,7 +23,7 @@ GET `/api/admin/orders`
 ```http
 GET /api/admin/orders HTTP/1.1
 Authorization: Bearer <userToken>
-X-Student-Id: YOUR_STUDENT_ID
+X-Student-Id: 23127543
 ```
 
 ### Expected Result
@@ -77,7 +77,7 @@ PUT `/api/admin/orders/{id}/status`
 PUT /api/admin/orders/5/status HTTP/1.1
 Authorization: Bearer <userToken>
 Content-Type: application/json
-X-Student-Id: YOUR_STUDENT_ID
+X-Student-Id: 23127543
 
 {"status":"confirmed"}
 ```
@@ -132,7 +132,7 @@ POST `/api/checkout`
 POST /api/checkout HTTP/1.1
 Authorization: Bearer <userToken>
 Content-Type: text/plain
-X-Student-Id: YOUR_STUDENT_ID
+X-Student-Id: 23127543
 
 not-json
 ```
@@ -188,7 +188,7 @@ PUT `/api/admin/orders/{id}/status`
 PUT /api/admin/orders/1/status HTTP/1.1
 Authorization: Bearer <adminToken>
 Content-Type: application/json
-X-Student-Id: YOUR_STUDENT_ID
+X-Student-Id: 23127543
 
 {"status":"delivered"}
 ```
