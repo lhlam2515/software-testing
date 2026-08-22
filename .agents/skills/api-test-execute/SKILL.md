@@ -1,6 +1,6 @@
 ---
 name: api-test-execute
-description: Run, inspect, and report one already-built local Postman/Newman FR package. Use when the user asks to execute a collection, trace Newman failures to test cases, identify likely SUT bugs, or produce execution evidence. Do not use to design test cases or build collections.
+description: Run, inspect, and report one already-built local Postman/Newman FR package. Use when the user asks to execute a collection, trace Newman failures to test cases, identify likely SUT bugs, record them in BUG_REPORT.md, or produce execution evidence. Do not use to design test cases or build collections.
 ---
 
 # API Test Execute
@@ -66,6 +66,36 @@ separately asks.
 The raw Newman reports may contain response bodies, credentials, or personal data. Review
 them before publishing. Keep observed, inferred, and unverified claims distinct.
 
+## Report bugs
+
+Run this step only for failures classified as SUT bug candidates, and only when the caller
+wants them recorded (execution alone does not imply a report is wanted). Read
+[`references/bug-report-contract.md`](references/bug-report-contract.md) for triage rules,
+severity/`foundBy` taxonomy, and the GitHub Issue workflow before writing anything.
+
+1. Group failing assertions by root cause and build one bug object per distinct defect, not
+   per failing assertion.
+2. Write the bug objects to a JSON array file, then append them to the project's
+   `BUG_REPORT.md`:
+
+```bash
+node <skill-dir>/scripts/append-bug-report.mjs \
+  --report <path-to-BUG_REPORT.md> \
+  --input <bugs.json>
+```
+
+The script appends one row to the Bug Summary table and one `### BUG-ID - <title>` section
+under Detailed Findings per bug, in the format used since HW02/HW04/HW05. It matches the
+summary table's columns by header text, validates `severity` and `foundBy`, skips ids already
+present, and drops the `_TBD_` placeholder row once real rows exist. It never opens a GitHub
+Issue or takes a screenshot.
+
+3. Opening the GitHub Issue and attaching a screenshot per bug (required by REQUIREMENTS.md
+   section 6 item 5) needs the user's explicit go-ahead — treat `gh issue create` as a
+   visible action on shared state, not something to run on your own judgment. Once created,
+   update that bug's `GitHub Issue` cell in the summary table and its `**GitHub Issue:**` /
+   `#### Screenshot` lines in its Detailed Findings section directly.
+
 ## Completion contract
 
 The package should contain:
@@ -74,6 +104,9 @@ The package should contain:
 - `reports/newman-report.html` when the HTML reporter is available;
 - `reports/test-execution.md` generated from the observed JSON report;
 - `reports/run-cycle.json` with phase status, exit codes, and cleanup state.
+
+When bug reporting ran, also report: bug ids appended to `BUG_REPORT.md`, ids skipped as
+duplicates, and which rows still need a GitHub Issue Link and Screenshot.
 
 Report the FR, exact command, exit code, concise counts, failed or blocked `tc_id`s, bug
 candidates, artifact paths, and cleanup still required. Never claim a pass from collection
