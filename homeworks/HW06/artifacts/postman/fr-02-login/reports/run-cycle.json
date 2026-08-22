@@ -1,6 +1,6 @@
 {
   "fr": "FR-02",
-  "startedAt": "2026-08-21T13:33:27.415Z",
+  "startedAt": "2026-08-22T08:27:13.270Z",
   "package": "/home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login",
   "phases": {
     "preflight": {
@@ -23,7 +23,7 @@
   },
   "cleanupRequired": null,
   "newmanVersion": "6.2.2",
-  "command": "/home/sojdev/.npm/_npx/75b90f33e80c3d7c/node_modules/.bin/newman run /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/collection.postman_collection.json --environment /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/environment.postman_environment.json --iteration-data /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/test-data.csv --env-var studentId=23127216 --reporters \"cli,json,html\" --reporter-json-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/reports/newman-report.json --reporter-html-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/reports/newman-report.html --env-var \"credEmail=[REDACTED]\" --env-var \"credPassword=[REDACTED]\" --env-var \"adminEmail=[REDACTED]\" --env-var \"adminPassword=[REDACTED]\" --timeout-request 35000 --timeout-script 35000",
+  "command": "newman run /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/collection.postman_collection.json --environment /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/environment.postman_environment.json --iteration-data /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/test-data.csv --env-var studentId=23127216 --reporters \"cli,json,html\" --reporter-json-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/reports/newman-report.json --reporter-html-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/reports/newman-report.html --env-var \"userEmail=[REDACTED]\" --env-var \"userPassword=[REDACTED]\" --env-var \"adminEmail=[REDACTED]\" --env-var \"adminPassword=[REDACTED]\"",
   "exitCode": 1,
-  "finishedAt": "2026-08-21T13:36:00.839Z"
+  "finishedAt": "2026-08-22T08:29:46.642Z"
 }
