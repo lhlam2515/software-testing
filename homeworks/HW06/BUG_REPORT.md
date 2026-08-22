@@ -22,17 +22,17 @@ inspection during triage (`Beyond AI`), per section 6 items 3 and 5.
 
 | Bug ID | API | Severity | Found By | Status | GitHub Issue |
 | ------ | --- | -------- | -------- | ------ | ------------- |
-| BUG-FR02-01 | `POST /api/login` | Medium | Beyond AI | Open | Pending |
-| BUG-FR02-02 | `POST /api/login` | Medium | AI | Open | Pending |
-| BUG-FR02-03 | `POST /api/login` | Critical | AI | Open | Pending |
-| BUG-FR02-04 | `POST /api/login` | High | AI | Open | Pending |
-| BUG-FR08-01 | `POST /api/checkout` | High | Beyond AI | Open | Pending |
-| BUG-FR08-02 | `POST /api/checkout` | High | AI | Open | Pending |
-| BUG-FR08-03 | `POST /api/checkout` | High | AI | Open | Pending |
-| BUG-FR08-04 | `POST /api/checkout` | High | AI | Open | Pending |
-| BUG-FR15-01 | `POST /api/products` | Critical | AI | Open | Pending |
-| BUG-FR15-02 | `PUT /api/products/:id` | Critical | AI | Open | Pending |
-| BUG-FR15-03 | `DELETE /api/products/:id` | Critical | AI | Open | Pending |
+| BUG-FR02-01 | `POST /api/login` | Medium | Beyond AI | Open | [#44](https://github.com/lhlam2515/software-testing/issues/44) |
+| BUG-FR02-02 | `POST /api/login` | Medium | AI | Open | [#45](https://github.com/lhlam2515/software-testing/issues/45) |
+| BUG-FR02-03 | `POST /api/login` | Critical | AI | Open | [#46](https://github.com/lhlam2515/software-testing/issues/46) |
+| BUG-FR02-04 | `POST /api/login` | High | AI | Open | [#47](https://github.com/lhlam2515/software-testing/issues/47) |
+| BUG-FR08-01 | `POST /api/checkout` | High | Beyond AI | Open | [#48](https://github.com/lhlam2515/software-testing/issues/48) |
+| BUG-FR08-02 | `POST /api/checkout` | High | AI | Open | [#49](https://github.com/lhlam2515/software-testing/issues/49) |
+| BUG-FR08-03 | `POST /api/checkout` | High | AI | Open | [#50](https://github.com/lhlam2515/software-testing/issues/50) |
+| BUG-FR08-04 | `POST /api/checkout` | High | AI | Open | [#51](https://github.com/lhlam2515/software-testing/issues/51) |
+| BUG-FR15-01 | `POST /api/products` | Critical | AI | Open | [#52](https://github.com/lhlam2515/software-testing/issues/52) |
+| BUG-FR15-02 | `PUT /api/products/:id` | Critical | AI | Open | [#53](https://github.com/lhlam2515/software-testing/issues/53) |
+| BUG-FR15-03 | `DELETE /api/products/:id` | Critical | AI | Open | [#54](https://github.com/lhlam2515/software-testing/issues/54) |
 
 **Severity distribution:** Critical: 4, High: 5, Medium: 2, Low: 0
 
@@ -45,7 +45,7 @@ inspection during triage (`Beyond AI`), per section 6 items 3 and 5.
 **API:** `POST /api/login`
 **Found By:** Beyond AI
 **Severity:** Medium
-**GitHub Issue:** Pending
+**GitHub Issue:** [#44](https://github.com/lhlam2515/software-testing/issues/44)
 
 #### Description
 
@@ -73,7 +73,7 @@ TC-16 sequence, `reports/newman-report.json` iteration 15.
 
 #### Screenshot
 
-Pending
+![GitHub Issue #44](assets/issues/BUG-FR02-01-issue-44.png)
 
 ---
 
@@ -82,7 +82,7 @@ Pending
 **API:** `POST /api/login`
 **Found By:** AI
 **Severity:** Medium
-**GitHub Issue:** Pending
+**GitHub Issue:** [#45](https://github.com/lhlam2515/software-testing/issues/45)
 
 #### Description
 
@@ -112,7 +112,7 @@ the account still locked well past their documented 30s wait.
 
 #### Screenshot
 
-Pending
+![GitHub Issue #45](assets/issues/BUG-FR02-02-issue-45.png)
 
 ---
 
@@ -121,7 +121,7 @@ Pending
 **API:** `POST /api/login`
 **Found By:** AI
 **Severity:** Critical
-**GitHub Issue:** Pending
+**GitHub Issue:** [#46](https://github.com/lhlam2515/software-testing/issues/46)
 
 #### Description
 
@@ -148,7 +148,7 @@ TC-39.
 
 #### Screenshot
 
-Pending
+![GitHub Issue #46](assets/issues/BUG-FR02-03-issue-46.png)
 
 ---
 
@@ -157,7 +157,7 @@ Pending
 **API:** `POST /api/login`
 **Found By:** AI
 **Severity:** High
-**GitHub Issue:** Pending
+**GitHub Issue:** [#47](https://github.com/lhlam2515/software-testing/issues/47)
 
 #### Description
 
@@ -190,7 +190,7 @@ throws `TypeError` when `req.body` is undefined).
 
 #### Screenshot
 
-Pending
+![GitHub Issue #47](assets/issues/BUG-FR02-04-issue-47.png)
 
 ---
 
@@ -199,7 +199,7 @@ Pending
 **API:** `POST /api/checkout`
 **Found By:** Beyond AI
 **Severity:** High
-**GitHub Issue:** Pending
+**GitHub Issue:** [#48](https://github.com/lhlam2515/software-testing/issues/48)
 
 #### Description
 
@@ -229,7 +229,7 @@ request changed the count (34 -> 33 orders before the run, i.e. an order was cre
 
 #### Screenshot
 
-Pending
+![GitHub Issue #48](assets/issues/BUG-FR08-01-issue-48.png)
 
 ---
 
@@ -238,7 +238,7 @@ Pending
 **API:** `POST /api/checkout`
 **Found By:** AI
 **Severity:** High
-**GitHub Issue:** Pending
+**GitHub Issue:** [#49](https://github.com/lhlam2515/software-testing/issues/49)
 
 #### Description
 
@@ -268,7 +268,7 @@ before/after TC-14 and found it rose from 45 to 46.
 
 #### Screenshot
 
-Pending
+![GitHub Issue #49](assets/issues/BUG-FR08-02-issue-49.png)
 
 ---
 
@@ -277,7 +277,7 @@ Pending
 **API:** `POST /api/checkout`
 **Found By:** AI
 **Severity:** High
-**GitHub Issue:** Pending
+**GitHub Issue:** [#50](https://github.com/lhlam2515/software-testing/issues/50)
 
 #### Description
 
@@ -305,7 +305,7 @@ again (duplicate-order risk).
 
 #### Screenshot
 
-Pending
+![GitHub Issue #50](assets/issues/BUG-FR08-03-issue-50.png)
 
 ---
 
@@ -314,7 +314,7 @@ Pending
 **API:** `POST /api/checkout`
 **Found By:** AI
 **Severity:** High
-**GitHub Issue:** Pending
+**GitHub Issue:** [#51](https://github.com/lhlam2515/software-testing/issues/51)
 
 #### Description
 
@@ -349,7 +349,7 @@ the `const { total_amount, shipping_address } = req.body` destructuring in `serv
 
 #### Screenshot
 
-Pending
+![GitHub Issue #51](assets/issues/BUG-FR08-04-issue-51.png)
 
 ---
 
@@ -358,7 +358,7 @@ Pending
 **API:** `POST /api/products`
 **Found By:** AI
 **Severity:** Critical
-**GitHub Issue:** Pending
+**GitHub Issue:** [#52](https://github.com/lhlam2515/software-testing/issues/52)
 
 #### Description
 
@@ -395,7 +395,7 @@ reason: no middleware checks it.
 
 #### Screenshot
 
-Pending
+![GitHub Issue #52](assets/issues/BUG-FR15-01-issue-52.png)
 
 ---
 
@@ -404,7 +404,7 @@ Pending
 **API:** `PUT /api/products/:id`
 **Found By:** AI
 **Severity:** Critical
-**GitHub Issue:** Pending
+**GitHub Issue:** [#53](https://github.com/lhlam2515/software-testing/issues/53)
 
 #### Description
 
@@ -433,7 +433,7 @@ Pending
 
 #### Screenshot
 
-Pending
+![GitHub Issue #53](assets/issues/BUG-FR15-02-issue-53.png)
 
 ---
 
@@ -442,7 +442,7 @@ Pending
 **API:** `DELETE /api/products/:id`
 **Found By:** AI
 **Severity:** Critical
-**GitHub Issue:** Pending
+**GitHub Issue:** [#54](https://github.com/lhlam2515/software-testing/issues/54)
 
 #### Description
 
@@ -471,10 +471,9 @@ BUG-FR15-01.
 
 #### Screenshot
 
-Pending
+![GitHub Issue #54](assets/issues/BUG-FR15-03-issue-54.png)
 
 ---
 
-> Each row above still needs a GitHub Issue opened with a screenshot attached before
-> submission, per REQUIREMENTS.md section 6 item 5. Once opened, update the row's `GitHub
-> Issue` cell in the Bug Summary table and the corresponding `#### Screenshot` section.
+All 11 rows above have a GitHub Issue opened (issues #44-#54) with a full-page screenshot of
+the issue page attached, per REQUIREMENTS.md section 6 item 5.
