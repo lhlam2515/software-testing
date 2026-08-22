@@ -42,14 +42,14 @@
 | TC-28 | SEC-C-08 | PASS | 9 pass / 0 fail |  |
 | TC-29 | SC-01,SC-02,SC-03,SC-05 | PASS | 1 pass / 0 fail |  |
 | TC-30 | SC-04 | PASS | 1 pass / 0 fail |  |
-| TC-31 | SC-06,SC-07,SC-08 | FAIL | 0 pass / 1 fail | expected 20 to deeply equal 19 |
+| TC-31 | SC-06,SC-07,SC-08 | FAIL | 0 pass / 1 fail | expected 46 to deeply equal 45 |
 | TC-32 | SC-09 | PASS | 1 pass / 0 fail |  |
 | TC-33 | SC-10 | FAIL | 3 pass / 3 fail | expected '<!DOCTYPE html>\n<html lang="en">\n<h…' not to match /<html/i; expected '<!DOCTYPE html>\n<html lang="en">\n<h…' not to match /<html/i; expected '<!DOCTYPE html>\n<html lang="en">\n<h…' not to match /<html/i |
 | TC-34 | SC-11 | FAIL | 3 pass / 3 fail | expected '<!DOCTYPE html>\n<html lang="en">\n<h…' not to match /<html/i; expected '<!DOCTYPE html>\n<html lang="en">\n<h…' not to match /<html/i; expected '<!DOCTYPE html>\n<html lang="en">\n<h…' not to match /<html/i |
 | TC-35 | SC-12 | PASS | 1 pass / 0 fail |  |
 | TC-36a | EC-14 | PASS | 21 pass / 0 fail |  |
 | TC-36b | EC-14 | PASS | 21 pass / 0 fail |  |
-| TC-37 | SC-08 | FAIL | 0 pass / 1 fail | order count changed for TC-02: expected 8 to deeply equal 7 |
+| TC-37 | SC-08 | FAIL | 0 pass / 1 fail | order count changed for TC-02: expected 34 to deeply equal 33 |
 | TC-38 | FR-08 lines 104-108; FR-11 line 164 | PASS | 1 pass / 0 fail |  |
 | TC-39 | FR-11 line 164; FR-07 lines 93-100 | PASS | 1 pass / 0 fail |  |
 | TC-40 | SC-04 | PASS | 1 pass / 0 fail |  |
@@ -58,10 +58,10 @@
 ## Failure triage
 
 - **UNRESOLVED** : Checkout / Data-Driven Request: expected 4 to deeply equal +0
-- **UNRESOLVED** : Checkout / Data-Driven Request: expected 20 to deeply equal 19
+- **UNRESOLVED** : Checkout / Data-Driven Request: expected 46 to deeply equal 45
 - **UNRESOLVED** : Checkout / Data-Driven Request: expected '<!DOCTYPE html>\n<html lang="en">\n<h…' not to match /<html/i
 - **UNRESOLVED** : Checkout / Data-Driven Request: expected '<!DOCTYPE html>\n<html lang="en">\n<h…' not to match /<html/i
-- **UNRESOLVED** : Checkout / Data-Driven Request: order count changed for TC-02: expected 8 to deeply equal 7
+- **UNRESOLVED** : Checkout / Data-Driven Request: order count changed for TC-02: expected 34 to deeply equal 33
 - **UNRESOLVED** : Checkout / Data-Driven Request: expected '<!DOCTYPE html>\n<html lang="en">\n<h…' not to match /<html/i
 
 > Classification and bug conclusions require agent review of the test contract and relevant SUT handler.
