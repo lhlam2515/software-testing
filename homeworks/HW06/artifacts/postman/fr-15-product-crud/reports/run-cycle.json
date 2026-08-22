@@ -1,6 +1,6 @@
 {
   "fr": "FR-15",
-  "startedAt": "2026-08-21T23:25:30.256Z",
+  "startedAt": "2026-08-22T08:57:40.075Z",
   "package": "/home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud",
   "phases": {
     "preflight": {
@@ -21,9 +21,9 @@
       "status": "NOT REQUESTED"
     }
   },
-  "cleanupRequired": "26 leftover product rows remain in the live SUT beyond the original 5 seed products (ids 15,16,19-42 as of this run's end): Fixture Product A (id 15) survived but had its name overwritten by an unrelated PUT bug; Fixture Product B (id 16) intact; P1 (id 18) was deleted by TC-27's no-auth DELETE and never recreated; ids 19-42 are probe products created by BUG-1/BUG-2 rows whose teardown assumed rejection. Not deleted by this run per scope (bug candidates reported back only, no extra requests beyond the one Newman pass). Manual or scripted cleanup of these ids is still required before any subsequent FR-15 rerun.",
+  "cleanupRequired": null,
   "newmanVersion": "6.2.2",
-  "command": "/home/sojdev/.npm/_npx/75b90f33e80c3d7c/node_modules/.bin/newman run /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/collection.postman_collection.json --environment /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/environment.postman_environment.json --iteration-data /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/test-data.csv --env-var studentId=23127216 --reporters \"cli,json,html\" --reporter-json-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/reports/newman-report.json --reporter-html-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/reports/newman-report.html --env-var \"adminEmail=[REDACTED]\" --env-var \"adminPassword=[REDACTED]\" --env-var \"customerEmail=[REDACTED]\" --env-var \"customerPassword=[REDACTED]\" --timeout-request 15000 --timeout-script 15000",
+  "command": "newman run /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/collection.postman_collection.json --environment /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/environment.postman_environment.json --iteration-data /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/test-data.csv --env-var studentId=23127216 --reporters \"cli,json,html\" --reporter-json-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/reports/newman-report.json --reporter-html-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/reports/newman-report.html --env-var \"adminEmail=[REDACTED]\" --env-var \"adminPassword=[REDACTED]\" --env-var \"customerEmail=[REDACTED]\" --env-var \"customerPassword=[REDACTED]\" --env-var \"baseUrl=[REDACTED]\"",
   "exitCode": 1,
-  "finishedAt": "2026-08-21T23:25:34.137Z"
+  "finishedAt": "2026-08-22T08:57:43.698Z"
 }
