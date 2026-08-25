@@ -44,7 +44,10 @@ Requirements:
   field in `Student fix`;
 - use `None` for `Student fix` only when the label is `VALID`.
 
-Audit the original row as written. Do not silently judge a corrected version of it.
+Audit the original row as written. Do not silently judge a corrected version of it. A source
+that is silent on a behavior does not make the case `INVALID`: apply the spec-silence rule in
+`references/audit-heuristics.md`, and keep the original TC IDs intact so downstream execution
+artifacts stay traceable.
 
 ### 3. Confirm the audit
 
@@ -87,10 +90,15 @@ pre-audit suite, disclose that mismatch in the handoff instead of regenerating i
 - [ ] Label counts add up to the number of original cases.
 - [ ] Every row has verified source evidence and concise reasoning.
 - [ ] Every `INVALID` or `INCOMPLETE` row has an exact, source-backed student fix.
-- [ ] Every `VALID` row passes every mandatory per-case check.
+- [ ] Every `VALID` row passes every mandatory per-case check, with reasoning that names the
+      deciding check rather than asserting a match.
+- [ ] Silent-source rows follow the spec-silence rule and are not counted as contract coverage.
+- [ ] Corrections preserve the original TC IDs and test intent.
+- [ ] The auditor self-checks in `references/audit-heuristics.md` were run before the review pass.
 - [ ] At least five non-duplicate additions have specific miss categories and reasons.
 - [ ] Corrections and additions appear in the final suite with no lost or silent changes.
-- [ ] Final TC IDs are unique, ordered, and continuous.
+- [ ] Final TC IDs are unique and ordered; an explicitly rejected case leaves a documented gap
+      in the sequence rather than triggering a renumber.
 - [ ] The original generated suite remains unchanged.
 - [ ] No execution result or runtime claim appears in the audit artifacts.
 

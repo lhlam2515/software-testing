@@ -34,6 +34,47 @@ When a row has multiple defects, use the first applicable label and list every m
 in `Student fix`. Do not use `INVALID` for style preferences. A source-supported duplicate may
 remain `VALID`, but flag the redundancy in reasoning and do not count it as unique coverage.
 
+## Spec silence
+
+A source that does not define a behavior is neither approval nor prohibition. Silence is a gap
+in the specification, not a defect in the test case. Apply this as a fourth rule, after the
+three above:
+
+1. **Silent source:** when no authoritative source defines the outcome, the case stays
+   admissible. Label it `VALID` when it names the undefined outcome explicitly, states what to
+   record, and asserts no invented status code, body shape, or boundary inclusivity. Label it
+   `INCOMPLETE` when it silently assumes one of the undefined outcomes as if it were
+   documented. Never label it `INVALID` for silence alone.
+
+Keep the two kinds of case distinct, and keep them distinct in coverage claims:
+
+- **Contract test:** a source defines the expected outcome, pass/fail is decidable, and the
+  case counts toward requirement coverage.
+- **Characterization test:** no source defines the outcome, the case records actual behavior to
+  expose the gap, and it counts toward input coverage only.
+
+A characterization test is legitimate work. It converts an unwritten assumption into a recorded
+observation, which is what a design-time specification review is for. Do not delete it, and do
+not let it stand as proof that a requirement is satisfied.
+
+Boundary inclusivity is silence unless the source states it. "Locked for 30 seconds" does not
+decide whether the request at exactly T=30s is rejected. Asserting either outcome invents the
+contract.
+
+## Trace admissibility
+
+A trace claims that the cited location supports this exact condition and this exact expected
+result. Check direction and scope, not keyword overlap.
+
+- **Wrong scope:** a storage requirement does not govern response fields. A requirement about
+  consuming a credential does not govern issuing one. Reusing a requirement ID across domains is
+  a false trace even when the underlying security idea is sound.
+- **Overreach:** when a row asserts more than the cited source states, correct the trace or split
+  the extra assertion into its own characterization row. Do not reject the whole row.
+- **Generated artifacts:** partition catalogs, state models, security case lists, and generated
+  schema files are audit subjects. Citing one of them alone is not source evidence. Cite the
+  authoritative location, and use the generated ID only as a cross-reference.
+
 ## Correction checklist
 
 For every `INVALID` or `INCOMPLETE` row:
@@ -43,7 +84,13 @@ For every `INVALID` or `INCOMPLETE` row:
 - cite the source supporting the replacement;
 - preserve the original test intent when possible;
 - if the intent itself is unsupported, replace or reject the case explicitly;
-- recheck precondition, expected result, oracle, and trace together after the correction.
+- recheck precondition, expected result, oracle, and trace together after the correction;
+- keep the original TC ID: a correction never renumbers, resequences, or drops IDs that
+  execution data, request templates, or filed defects already reference;
+- correct fields, not scenarios: rewriting `Input / action` into a different sequence produces a
+  new case, so add it in the gap pass instead of overwriting the audited row;
+- when one assertion is unsupported but the rest of the row holds, strip that assertion rather
+  than rejecting the row.
 
 ## Gap checklist
 
@@ -70,3 +117,24 @@ not a reworded duplicate.
 
 For `Why the AI missed it`, name the concrete instruction, missing connection, or endpoint
 behavior. Avoid generic claims such as "AI is imperfect."
+
+## Auditor self-checks
+
+Run these against the audit itself before presenting the label table:
+
+- **Symmetric standard:** hold your own corrections to the evidence bar you applied to the
+  original. If silence disqualifies an original expected result, it also disqualifies a
+  replacement expected result you inferred from that same silence.
+- **Reasoning is evidence:** "Matches" is not a reasoning entry. Name the check that decided the
+  label. A `VALID` row asserts that every per-case check passed, so it must say which one was
+  load-bearing.
+- **Label distribution is a signal, not a target:** a near-zero `INVALID` count usually means
+  traces were accepted without opening them. A near-total `INVALID` count usually means a
+  standard outside this document was applied, most often a contract-only reading that rejects
+  characterization. Investigate either extreme before presenting the table.
+- **Downstream cost:** state whether the corrections invalidate existing execution data, request
+  templates, generated collections, or filed defects. Breaking a downstream artifact without
+  disclosing it is a defect in the audit.
+- **Gate discipline:** provisional labels belong in the review pass, not on disk. Write nothing
+  under `audit/` before the user accepts the table, and never record a confirmation the session
+  did not receive.
