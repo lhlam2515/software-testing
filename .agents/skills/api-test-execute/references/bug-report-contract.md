@@ -64,6 +64,23 @@ Never hand-edit the summary table or a detail section for entries the script can
 hand edits are for the `GitHub Issue` cell/line and the `#### Screenshot` line after the issue
 exists (see below), or for prose outside the table/sections.
 
+## Re-run synchronization
+
+Applies when the package was executed before and the suite changed since (see
+[`rerun-contract.md`](rerun-contract.md)). The existing `BUG_REPORT.md` is the record of
+record; the re-run updates it, it does not replace it.
+
+| Situation | Action |
+|---|---|
+| New root cause with no existing entry | Append a new bug through the script, using the next unused id in that FR's `BUG-FR<NN>-NN` sequence. Never reuse a retired id. |
+| Existing open bug still reproduced, evidence moved (different `tc_id`, iteration, request body, or response) | Hand-edit that entry's Steps to Reproduce / Root Cause / Expected / Actual to the newly observed values. Keep the id, the `GitHub Issue` cell, and the `#### Screenshot` line. |
+| Existing open bug whose only evidence `tc_id` was deleted or rewritten by the audit | Re-point it at a current case that still reproduces the defect. If no current case does, keep the entry, note in its body that the current suite no longer covers it, and say so in the run report. A bug is not resolved because a test case disappeared. |
+| Existing open bug no longer reproduced | Do not close it on one run. Re-run that specific `tc_id` once to confirm, then report it as a fix candidate and ask the user before changing `status` away from `Open`. |
+| Failure the audit reclassified as a test-artifact or environment defect | Flag it for the user's decision. Do not silently drop the bug row. |
+
+Ids already present are skipped by the script by design, so content updates to existing
+entries are always hand edits. New entries always go through the script.
+
 ## GitHub Issue and screenshot
 
 REQUIREMENTS.md section 6 item 5 requires each genuine bug to also exist as a GitHub Issue

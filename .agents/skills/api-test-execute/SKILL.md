@@ -1,6 +1,6 @@
 ---
 name: api-test-execute
-description: Run, inspect, and report one already-built local Postman/Newman FR package. Use when the user asks to execute a collection, trace Newman failures to test cases, identify likely SUT bugs, record them in BUG_REPORT.md, or produce execution evidence. Do not use to design test cases or build collections.
+description: Run, inspect, and report one already-built local Postman/Newman FR package. Use when the user asks to execute a collection, trace Newman failures to test cases, identify likely SUT bugs, record them in BUG_REPORT.md, re-run a suite after its test cases were updated and sync the existing bug report with the new results, or produce execution evidence. Do not use to design test cases or build collections.
 ---
 
 # API Test Execute
@@ -21,6 +21,10 @@ Require one package containing:
 
 Read [`references/run-contract.md`](references/run-contract.md) before running optional
 setup or teardown hooks. Missing prerequisites produce `BLOCKED`, not invented results.
+
+When `reports/` already holds a previous run, check whether this is a re-run before
+executing: read [`references/rerun-contract.md`](references/rerun-contract.md) and follow it
+if any suite artifact changed since that report.
 
 ## Run
 
@@ -96,6 +100,21 @@ Issue or takes a screenshot.
    update that bug's `GitHub Issue` cell in the summary table and its `**GitHub Issue:**` /
    `#### Screenshot` lines in its Detailed Findings section directly.
 
+## Re-run after a suite update
+
+A package executed before, whose test cases, `test-data.csv`, collection, or environment
+changed since, is a re-run, not a fresh run. Confirm it from artifact mtimes and the `tc_id`
+diff rather than assuming, then follow
+[`references/rerun-contract.md`](references/rerun-contract.md): archive the existing
+`reports/` to `reports/archive/<UTC-timestamp>/`, re-run the whole suite, report a `Re-run
+delta` against the archived report, and synchronize `BUG_REPORT.md` per the "Re-run
+synchronization" rules in
+[`references/bug-report-contract.md`](references/bug-report-contract.md).
+
+Never close, delete, or rewrite an existing bug entry because the suite changed. New root
+causes are appended through the script; moved evidence is a hand edit on the existing entry;
+a bug that stops reproducing is a fix candidate for the user to decide, not a silent close.
+
 ## Completion contract
 
 The package should contain:
@@ -107,6 +126,13 @@ The package should contain:
 
 When bug reporting ran, also report: bug ids appended to `BUG_REPORT.md`, ids skipped as
 duplicates, and which rows still need a GitHub Issue Link and Screenshot.
+
+On a re-run, the package should additionally contain `reports/archive/<UTC-timestamp>/` with
+the previous evidence, a `Re-run delta` section in `reports/test-execution.md`, and the
+archive path plus delta recorded in `run-cycle.json`. Report the `tc_id` delta, the newly
+failing / newly passing / still failing counts, and every `BUG_REPORT.md` sync action taken:
+bugs added, bugs whose evidence was re-pointed, bugs no longer reproduced and awaiting the
+user's close decision, and bugs left uncovered by the current suite.
 
 Report the FR, exact command, exit code, concise counts, failed or blocked `tc_id`s, bug
 candidates, artifact paths, and cleanup still required. Never claim a pass from collection
