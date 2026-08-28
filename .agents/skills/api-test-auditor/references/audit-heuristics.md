@@ -138,3 +138,36 @@ Run these against the audit itself before presenting the label table:
 - **Gate discipline:** provisional labels belong in the review pass, not on disk. Write nothing
   under `audit/` before the user accepts the table, and never record a confirmation the session
   did not receive.
+
+## Re-audit challenge rules
+
+Applies to Pass 2 only, when the artifact under review is a prior audit.
+
+Three defect classes to hunt, in this order:
+
+1. **False negative** — a `VALID` row that fails a mandatory per-case check the prior pass never
+   named, or whose `Trace` the prior pass accepted without opening the cited location.
+2. **False positive** — an `INVALID` / `INCOMPLETE` row where the prior pass invented a
+   requirement no source states, misapplied the spec-silence rule, or penalized a row for a
+   defect that actually lives in a different row.
+3. **Bad fix** — a `Student fix` that cannot be verified against a source, silently changes the
+   test intent, upgrades an `UNSPECIFIED` to a concrete value, or contradicts the fix given to
+   another row.
+
+Verdict assignment:
+
+| Situation | Verdict |
+| --- | --- |
+| Label and fix both survive re-derivation | `upheld` |
+| Label changes | `overturned` |
+| Label survives, fix text is replaced | `fix-corrected` |
+| A Pass 1 addition is removed from the suite | `dropped` |
+
+Constraints:
+
+- A prior audit's reasoning is never admissible evidence. Re-open the oracle.
+- Spec silence still governs: a prior pass that resolved an `UNSPECIFIED` is a false positive
+  even when its resolution is plausible.
+- Preserve original TC IDs across passes. A dropped addition leaves a documented gap in the
+  sequence; do not renumber.
+- Report disagreement counts even when they are zero, and state which rows were re-derived.

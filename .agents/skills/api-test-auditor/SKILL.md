@@ -21,7 +21,15 @@ Resolve the test-suite directory and verify that it contains:
 If the original suite or authoritative sources are missing, stop and ask for them. Do not
 generate a replacement suite or treat generated artifacts as authoritative evidence.
 
-## Workflow
+## Mode select
+
+Inspect the target `audit/` directory before starting.
+
+- No `audit-log.md` present: run **Pass 1**, workflow steps 1-5 below.
+- `audit-log.md` already present: run **[Pass 2](#pass-2-re-audit)** instead. A prior audit is a
+  reviewable artifact, not a settled result. Do not repeat Pass 1 and do not overwrite its files.
+
+## Workflow (Pass 1)
 
 ### 1. Establish the evidence base
 
@@ -75,7 +83,7 @@ proposed additions through the same confirmation gate before finalizing them.
 Write to `<test-suite>/audit/`:
 
 - `audit-log.md`: the five-column audit table and `Valid: <n> | Invalid: <n> | Incomplete:
-  <n> | Total: <n>`;
+<n> | Total: <n>`;
 - `extended-test-cases.md`: confirmed additions in the nine-column schema;
 - `audited-master-test-cases.md`: corrected original cases followed by confirmed additions,
   using only the original seven test-case columns so the final suite has one consistent
@@ -83,6 +91,62 @@ Write to `<test-suite>/audit/`:
 
 Preserve the original `master-test-cases.md`. If existing execution data still represents the
 pre-audit suite, disclose that mismatch in the handoff instead of regenerating it silently.
+
+## Pass 2: re-audit
+
+Re-audit an existing audit and produce a more accurate suite. The goal is to attack the prior
+pass, not to re-confirm it. Read
+[`references/audit-heuristics.md`](references/audit-heuristics.md) `Re-audit challenge rules`
+before labeling anything.
+
+### 1. Fix the authority order
+
+Authoritative oracles > the original `master-test-cases.md` > `audit/audit-log.md`,
+`audit/extended-test-cases.md`, `audit/audited-master-test-cases.md`. All three audit files are
+under review and are never evidence for themselves or for each other.
+
+### 2. Re-derive every label
+
+Derive each label from the oracles first, then compare it against the prior label. Never carry a
+label forward because it reads reasonably. An upheld row still needs its own re-derived evidence
+and must name the deciding check; agreeing by silence is not a finding.
+
+Attack in both directions, per the challenge rules: false negatives among `VALID` rows, false
+positives among `INVALID` / `INCOMPLETE` rows, and defective `Student fix` text on any row.
+
+### 3. Re-audit the Pass 1 additions
+
+Label every added case with the same three labels. An addition with no oracle backing, one that
+duplicates an original case, or one resting on the prior auditor's reasoning instead of a source
+is `INVALID` and must be rewritten or dropped.
+
+### 4. Check cross-row consistency
+
+Check what a per-case pass cannot see: identical conditions labeled differently, preconditions
+that conflict under the documented run order, fixes that contradict each other, and coverage
+claims the revised labels now falsify.
+
+### 5. Confirm, in two gates
+
+Present the disagreement table first: every row whose label, evidence, or fix changed, plus the
+label-delta counts and the verdict counts. Then present the revised additions. Do not write files
+before both are accepted.
+
+### 6. Write Pass 2 outputs
+
+Write alongside the Pass 1 files, never over them:
+
+- `audit/audit-log-v2.md`: one row per original TC and per Pass 1 addition, using
+  `TC ID | Prev label | New label | Verdict | Source evidence | Reasoning | Student fix`, where
+  `Verdict` is `upheld`, `overturned`, `fix-corrected`, or `dropped`. End with the new label
+  counts and the verdict counts.
+- `audit/extended-test-cases-v2.md`: surviving Pass 1 additions plus any gap found in this pass,
+  in the nine-column schema.
+- `audit/audited-master-test-cases-v2.md`: the corrected suite in the seven original test-case
+  columns.
+
+Preserve `master-test-cases.md` and every Pass 1 artifact unchanged. A further pass continues the
+same versioning (`-v3`) rather than editing `-v2` in place.
 
 ## Completion checklist
 
@@ -101,6 +165,15 @@ pre-audit suite, disclose that mismatch in the handoff instead of regenerating i
       in the sequence rather than triggering a renumber.
 - [ ] The original generated suite remains unchanged.
 - [ ] No execution result or runtime claim appears in the audit artifacts.
+
+Pass 2 adds:
+
+- [ ] Every original TC and every Pass 1 addition appears exactly once in `audit-log-v2.md`.
+- [ ] Every row carries a verdict, and upheld rows cite re-derived evidence rather than the
+      prior pass's reasoning.
+- [ ] Both label counts and verdict counts are stated and add up.
+- [ ] Overturned rows name the specific defect in the prior label, evidence, or fix.
+- [ ] Pass 1 artifacts and `master-test-cases.md` are unchanged.
 
 ## Boundaries
 
