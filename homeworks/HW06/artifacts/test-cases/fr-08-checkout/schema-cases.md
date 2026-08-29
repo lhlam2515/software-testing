@@ -27,7 +27,7 @@ Two facts are still assertable without inventing anything:
 | SC-06 | Empty-cart / validation-error checkout attempt | Status code | UNSPECIFIED — no source documents a 4xx code for invalid `shipping_address`, empty cart, or malformed `total_amount` | Do not assert; record actual code | api_specification.md 4.3 (no example given); `specs/requirements.md` |
 | SC-07 | Empty-cart / validation-error checkout attempt | Error envelope shape | UNSPECIFIED — no error envelope (field names such as `error`/`message`/`code`) is documented anywhere in api_specification.md for any endpoint, not only this one | api_specification.md (document-wide gap) |
 | SC-08 | Empty-cart / validation-error checkout attempt | Side-effect invariant (composite with lifecycle) | Whatever the exact status/body, a rejected checkout must not have created an order or cleared a cart — this is assertable regardless of the unresolved status code/body shape, because it follows from FR-08 only describing clearing as a side effect of a *successful* checkout (line 108) | srs.md FR-08 line 108; overlaps `state-model.md` S-02/S-03 |
-| SC-09 | Auth-rejected checkout attempt (SEC-02) | Status code and body | UNSPECIFIED shape; same side-effect invariant as SC-08 applies (no order created, no cart cleared) | api_specification.md line 141; overlaps `security-cases.md` SEC-C-01..SEC-C-04 |
+| SC-09 | Auth-rejected checkout attempt (SEC-02) | Status code and body | UNSPECIFIED shape; same side-effect invariant as SC-08 applies (no order created, no cart cleared) | api_specification.md line 131; overlaps `security-cases.md` SEC-C-01..SEC-C-04 |
 | SC-10 | Any checkout attempt | Request robustness — syntactically broken JSON body (e.g. trailing comma / unclosed brace) | UNSPECIFIED exact status/shape, but a JSON API must not surface a raw stack trace or an unparseable/HTML error page; general document-wide JSON-API convention, not a per-endpoint documented rule | api_specification.md (document-wide convention: every endpoint's request/response shown is JSON) |
 | SC-11 | Any checkout attempt | Request robustness — valid JSON body sent without a `Content-Type: application/json` header | UNSPECIFIED — neither source states server behavior for this case; record actual status/body, do not assume rejection or acceptance | api_specification.md 4.3 (silent) |
 | SC-12 | Cross-comparison of two distinct validation-error responses (e.g. invalid `shipping_address` vs. empty-cart rejection) | Error envelope internal consistency | UNSPECIFIED whether both error responses share the same top-level key set; recorded as an internal-consistency check, not an assertion of a specific envelope shape, since no envelope is documented (SC-07) | api_specification.md (document-wide gap); mirrors FR-02 precedent (`fr-02-login/master-test-cases.md` TC-28) for envelope-consistency checks under undocumented error shapes |
@@ -39,3 +39,19 @@ gap (api_specification.md 4.3 gives a request example only), not a partial-cover
 shortfall. All twelve `SC-*` rows exist to make that gap explicit and to pin down the
 handful of facts that *are* derivable from FR-08/FR-10 text, rather than to assert an
 invented contract.
+
+---
+
+## Corrections applied (Pass 2 audit, `audit/audit-log-v2.md`)
+
+- `api_specification.md` **line 141 -> line 131**. Line 141 is a blank line inside the
+  section 4.2 body block; the section 4 header requiring `Authorization: Bearer <token>`
+  is at line 131. The original error originated in `specs/requirements.md` and propagated
+  into every catalog and into eight rows of `master-test-cases.md`.
+- `srs.md` **FR-07 line 100 re-scoped**. That line ("Giỏ hàng trống phải có hình minh họa
+  và thông báo rõ ràng") is a cart-screen display requirement. It does not govern
+  `POST /api/checkout` behavior and must not be cited as a Trace for API expectations.
+
+`master-test-cases.md` and the Pass 1 artifacts under `audit/` are deliberately left
+unchanged: they are the audited baseline and the evidence the Pass 2 findings point at.
+Corrected test-case text lives in `audit/audited-master-test-cases-v2.md`.

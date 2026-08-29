@@ -1,7 +1,7 @@
 # FR-08 Checkout - Requirements Extract
 
 Source: `docs/eshop-sut/api_specification.md` section 4.3 (Đặt hàng / Checkout, lines
-151-161), plus the section 4 header (line 141: `Authorization: Bearer <token>` required
+151-161), plus the section 4 header (line 131: `Authorization: Bearer <token>` required
 for all of section 4); `docs/eshop-sut/srs.md` FR-08 (lines 102-108); FR-07 (lines 93-100,
 cart context); FR-10 (lines 141-162, order state machine, for the post-checkout order
 state).
@@ -13,7 +13,7 @@ state).
   (api_specification.md 4.3, lines 156-161).
 - Only a logged-in user may check out (srs.md FR-08, line 104). The endpoint is also
   covered by the section-4 blanket rule requiring `Authorization: Bearer <token>`
-  (api_specification.md line 141).
+  (api_specification.md line 131).
 - The payment total is computed automatically from the cart and is not directly
   editable by the user in the UI (srs.md FR-08, line 105).
 - The UI must display the full list of purchased products (srs.md FR-08, line 106).
@@ -25,10 +25,17 @@ state).
   resulting order total, regardless of whether it is valid, missing, zero, negative, or
   of the wrong type.
 - After a successful checkout, the cart is cleared (srs.md FR-08, line 108).
-- FR-07 (Shopping Cart, srs.md lines 93-100) establishes that a cart holds product
-  lines with quantity, and that an empty cart must show an illustration/message
-  (line 100) — this implies "empty cart" is a distinguishable, reachable precondition
-  state for checkout, not merely a UI nicety.
+- FR-07 (Shopping Cart, srs.md lines 93-100) describes the cart *screen*: product
+  lines with quantity, the delete-confirmation dialog, the "Tổng cộng" total label, and
+  an illustration/message for the empty state (line 100). These are UI-layer
+  requirements. FR-07 does **not** state that a cart belongs to a single user, and
+  line 100 does **not** govern how `POST /api/checkout` handles an empty cart — it must
+  not be cited as a Trace for API behavior. An empty cart is still a legitimate
+  precondition, but its reachability comes from the documented cart endpoints
+  (`GET /api/cart`, api_specification.md 4.1 line 135; `POST /api/cart`, 4.2 line 139):
+  section 4 documents no cart-clear or item-delete endpoint, so a 0-item cart is
+  reachable only via a never-populated account or immediately after a successful
+  checkout. No source defines the outcome of checking out an empty cart.
 - FR-10 (srs.md lines 141-162) documents a 5-state order lifecycle
   (`pending -> confirmed -> shipping -> delivered`, with `canceled` reachable from
   `pending`/`confirmed`). The diagram's first node, `pending`, has no incoming
@@ -38,7 +45,7 @@ state).
 
 ## Business rules
 
-- Auth required to check out (srs.md FR-08 line 104; api_specification.md line 141).
+- Auth required to check out (srs.md FR-08 line 104; api_specification.md line 131).
 - `total_amount` is server-recomputed; client value is ignored for the resulting total
   (srs.md FR-08 line 107).
 - Cart is cleared after a successful checkout (srs.md FR-08 line 108).
@@ -76,3 +83,20 @@ as a **lifecycle adaptation**, not an explicit/implicit state machine, because t
 cart-to-order transition has only one directed edge documented (no cart states, guards,
 or reverse transitions are described — only a single before/after side effect). See
 `../state-model.md`.
+
+---
+
+## Corrections applied (Pass 2 audit, `audit/audit-log-v2.md`)
+
+- `api_specification.md` **line 141 -> line 131**. Line 141 is a blank line inside the
+  section 4.2 body block; the section 4 header requiring `Authorization: Bearer <token>`
+  is at line 131. The original error originated in `specs/requirements.md` and propagated
+  into `domain-partition-catalog.md`, `specs/security-requirement.md`, and eight rows of
+  `master-test-cases.md`.
+- `srs.md` **FR-07 line 100 re-scoped**. That line ("Giỏ hàng trống phải có hình minh họa
+  và thông báo rõ ràng") is a cart-screen display requirement. It does not govern
+  `POST /api/checkout` behavior and must not be cited as a Trace for API expectations.
+
+`master-test-cases.md` and the Pass 1 artifacts under `audit/` are deliberately left
+unchanged: they are the audited baseline and the evidence the Pass 2 findings point at.
+Corrected test-case text lives in `audit/audited-master-test-cases-v2.md`.
