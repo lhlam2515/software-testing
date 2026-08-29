@@ -33,4 +33,27 @@ This directory will contain the Excel test-case workbook and its Markdown summar
 - Security: SEC-02 (JWT required), SEC-03 (role must be `'admin'` in the token, not just token presence), SEC-06 (role field not client-settable), IDOR/role-escalation via a non-admin token.
 - Schema: create/update response shape; 404 shape on delete of a missing id.
 
-TODO: add the Excel workbook and per-API Markdown summary after generate (T4/T5/T6), audit (T7/F1/F2), and extend (F3/F4/F5) are complete.
+## Excel Workbook
+
+`23127216_HW06_TestCases.xlsx` is the submission workbook required by REQUIREMENTS.md
+section 14 ("The Excel test cases and test summary"). It is generated, never hand-edited:
+
+```bash
+python3 build_test_case_workbook.py          # requires openpyxl
+```
+
+`build_test_case_workbook.py` reads only existing artifacts and derives every number from
+them:
+
+| Source | Contributes |
+| ------ | ----------- |
+| `<fr>/audit/audited-master-test-cases-v2.md` | the final suite (TC ID, technique, precondition, input, expected result, oracle, trace) |
+| `<fr>/audit/extended-test-cases-v2.md` | marks the student-added cases, plus miss category and why the AI missed it |
+| `<fr>/audit/audit-log-v2.md` | VALID / INCOMPLETE / INVALID label, verdict, student fix |
+| `../newman/<fr>/test-execution.md` | execution result, assertion counts, failure evidence |
+| `../../BUG_REPORT.md` | the bug summary table |
+
+Sheets: `Test Summary` (per-API counts, audit labels, miss categories, bug list) plus one
+sheet per API (`FR-02 Login`, `FR-08 Checkout`, `FR-15 Product CRUD`). Sub-case rows such as
+`TC-38a` / `TC-38b` are aggregated to their parent test case; a parent is FAIL if any
+sub-case failed. Rebuild the workbook after any change to the source Markdown.
