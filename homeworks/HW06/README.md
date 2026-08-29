@@ -52,7 +52,7 @@
 - [ ] Postman collection, Newman HTML report, and list of Postman features used
 - [ ] CI/CD report with pipeline configuration and two sample runs: all-passing and one failing
 - [ ] Excel test cases and test summary
-- [ ] Self-drawn AI test-generator diagram and pseudocode
+- [x] Self-drawn AI test-generator diagram and pseudocode (`artifacts/test-generator/`)
 - [ ] Bug report and screenshots of bugs on the GitHub Issues page
 - [ ] AI Critique and AI Audit Report in Markdown and PDF
 - [ ] Git commit log
