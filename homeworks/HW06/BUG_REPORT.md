@@ -69,7 +69,7 @@ documented 3, because the failed-attempt counter is incremented by 2 per failure
 
 `server.js:54` sets `const newAttempts = user.login_attempts + 2;` inside the wrong-password
 branch of `POST /api/login`, then locks when `newAttempts >= 3` (`server.js:56`). Evidence:
-TC-16 sequence, `reports/newman-report.json` iteration 15; TC-36 (iteration 35) fails with
+TC-16 sequence, `artifacts/newman/fr-02-login/newman-report.json` iteration 15; TC-36 (iteration 35) fails with
 `403` where its `counter=2` precondition documents one remaining attempt.
 
 TC-44 (iteration 50, added by the Pass 2 audit) makes the defect direct: the account locks on
@@ -112,7 +112,7 @@ demo-environment window.
 #### Root Cause
 
 `server.js:57` sets `lockedUntil = new Date(Date.now() + 180000).toISOString();`. Evidence:
-TC-15, `reports/newman-report.json` iteration 14 - still `403` "Tài khoản đã bị khóa" at
+TC-15, `artifacts/newman/fr-02-login/newman-report.json` iteration 14 - still `403` "Tài khoản đã bị khóa" at
 T=31s.
 
 The same root cause cascades into every row whose precondition assumes the lock has expired
@@ -159,7 +159,7 @@ Successful login responses embed the user's plaintext password in the returned `
 
 `server.js:52` responds with `res.json({ message: "Login successful", token, user })` where
 `user` is the raw DB row, including the `password` column. Evidence: TC-01,
-`reports/newman-report.json` iteration 0. Reproduced identically on TC-07, TC-37 (admin), and
+`artifacts/newman/fr-02-login/newman-report.json` iteration 0. Reproduced identically on TC-07, TC-37 (admin), and
 TC-39.
 
 #### Expected vs Actual Result
@@ -191,10 +191,10 @@ paths instead of a structured JSON error.
 #### Steps to Reproduce
 
 1. Case A: `POST /api/login` with `Content-Type: application/json` and body
-   `{"email":"test@eshop.com","password":}` (evidence: TC-34, `reports/newman-report.json`
+   `{"email":"test@eshop.com","password":}` (evidence: TC-34, `artifacts/newman/fr-02-login/newman-report.json`
    iteration 33) -> `400` HTML page with the body-parser `SyntaxError` stack trace.
 2. Case B: `POST /api/login` with no `Content-Type` header (evidence: TC-35,
-   `reports/newman-report.json` iteration 34) -> `500` HTML page with
+   `artifacts/newman/fr-02-login/newman-report.json` iteration 34) -> `500` HTML page with
    `TypeError: Cannot destructure property 'email' of 'req.body' as it is undefined` and a
    full stack trace including local filesystem paths.
 
@@ -211,7 +211,7 @@ record `observed_stack_or_html_*`, `observed_content_type_*` and
 `observed_body_parses_as_json_*` instead of asserting on them, because `srs.md` SEC-05 names
 only the SQLi probes (TC-25/26/27) as cases where the no-stack-trace expectation is stated.
 TC-34 and TC-35 therefore show as **PASS** in the current
-`reports/newman-report.json` - that is an oracle change in the suite, not a fix.
+`artifacts/newman/fr-02-login/newman-report.json` - that is an oracle change in the suite, not a fix.
 
 The defect still reproduces unchanged in that same run:
 
@@ -221,7 +221,7 @@ The defect still reproduces unchanged in that same run:
 | TC-35 (no `Content-Type`) | 34 | `500` + `<!DOCTYPE html>…<pre>TypeError…` |
 
 The original failing-assertion evidence is preserved at
-`homeworks/HW06/artifacts/postman/fr-02-login/reports/archive/20260828T194022Z/newman-report.json`.
+`homeworks/HW06/artifacts/newman/fr-02-login/archive/20260828T194022Z/newman-report.json`.
 This entry stays **Open**: the behaviour is unchanged, only the way the suite records it.
 
 #### Expected vs Actual Result
@@ -253,7 +253,7 @@ persists an order with a blank address.
 
 1. Log in as `test@eshop.com`.
 2. `POST /api/checkout` with body `{"shipping_address":"","total_amount":<real cart total>}`
-   (evidence: TC-02, `reports/newman-report.json`).
+   (evidence: TC-02, `artifacts/newman/fr-08-checkout/newman-report.json`).
 3. Compare User A's order count immediately before/after the request.
 
 #### Root Cause
@@ -293,7 +293,7 @@ rejected.
 1. Log in as `test@eshop.com`, empty the cart.
 2. `POST /api/checkout` with body
    `{"shipping_address":"123 Le Loi, TP.HCM","total_amount":0}` (evidence: TC-14,
-   `reports/newman-report.json`).
+   `artifacts/newman/fr-08-checkout/newman-report.json`).
 3. Compare User A's order count immediately before/after the request.
 
 #### Root Cause
@@ -331,7 +331,7 @@ again (duplicate-order risk).
 
 1. Log in as `test@eshop.com` with a fresh non-empty cart (4 items).
 2. `POST /api/checkout` with the matching `shipping_address`/`total_amount` (evidence: TC-16,
-   `reports/newman-report.json` iteration 15).
+   `artifacts/newman/fr-08-checkout/newman-report.json` iteration 15).
 3. `GET /api/cart` immediately after.
 
 #### Root Cause
@@ -369,7 +369,7 @@ pattern already recorded for `POST /api/login` as BUG-FR02-04.
 #### Steps to Reproduce
 
 1. Case A: `POST /api/checkout`, `Content-Type: application/json`, body
-   `{"shipping_address":"x","total_amount":}` (evidence: TC-33, `reports/newman-report.json`
+   `{"shipping_address":"x","total_amount":}` (evidence: TC-33, `artifacts/newman/fr-08-checkout/newman-report.json`
    iteration 32) -> `400` HTML page with the body-parser `SyntaxError` stack trace.
 2. Case B: `POST /api/checkout`, `Content-Type: text/plain` (or header omitted), same JSON
    string as the body (evidence: TC-34 iteration 33 and TC-41 iteration 41) -> `500` HTML page
@@ -414,7 +414,7 @@ tampered signature are all accepted and the product is created.
 `POST http://127.0.0.1:3000/api/products` with body
 `{"name":"Áo thun nam","price":100000,"category_id":<valid category id>,"description":"Mô tả sản phẩm","imageUrl":"http://example.com/img.png"}` and:
 
-1. No `Authorization` header (TC-25, trace SEC-C-01, `reports/newman-report.json` iteration 25).
+1. No `Authorization` header (TC-25, trace SEC-C-01, `artifacts/newman/fr-15-product-crud/newman-report.json` iteration 25).
 2. `Authorization: Bearer not-a-real-jwt-string` (TC-28, SEC-C-04, iteration 28).
 3. A valid customer-role JWT (TC-30, SEC-C-06, iteration 30).
 4. A well-formed JWT claiming `role='admin'` with an invalid signature (TC-44, iteration 44).
@@ -460,7 +460,7 @@ should have succeeded.
 
 1. `PUT http://127.0.0.1:3000/api/products/<P1 id>` with no `Authorization` header and body
    `{"name":"Áo thun nam","price":100000,"category_id":<valid>,"description":"Mô tả sản phẩm","imageUrl":"http://example.com/img.png"}`
-   (TC-26, trace SEC-C-02, `reports/newman-report.json` iteration 26).
+   (TC-26, trace SEC-C-02, `artifacts/newman/fr-15-product-crud/newman-report.json` iteration 26).
 2. `GET` the same product id afterward.
 
 #### Root Cause
@@ -502,7 +502,7 @@ no `Authorization` header still deletes the target product.
 #### Steps to Reproduce
 
 1. `DELETE http://127.0.0.1:3000/api/products/<P1 id>` with no `Authorization` header
-   (TC-27, trace SEC-C-03, `reports/newman-report.json` iteration 27).
+   (TC-27, trace SEC-C-03, `artifacts/newman/fr-15-product-crud/newman-report.json` iteration 27).
 2. `GET` the same product id afterward.
 
 #### Root Cause
@@ -543,13 +543,13 @@ For a percent-type coupon the handler treats discount_value as a fraction instea
 
 #### Steps to Reproduce
 
-1. Log in as the seed user test@eshop.com and populate the cart to a total of 500000 via POST /api/cart.
+1. Log in as the seed user `test@eshop.com` and populate the cart to a total of 500000 via POST /api/cart.
 2. Send POST /api/apply-coupon with body {"code":"SAVE10","total_amount":500000,"user_id":2}.
 3. Observe the 200 OK response body. Evidence: TC-42a, iteration 43 of the FR-08 Newman run.
 
 #### Root Cause
 
-apps/backend/server.js line 397 computes the percent discount as Math.floor(total_amount * (1 - coupon.discount_value)). SAVE10 stores discount_value = 10 (a percentage, not a fraction), so the expression evaluates to 500000 * (1 - 10) = -4500000. The correct expression for a percent coupon is total_amount * discount_value / 100. final_amount is then derived from this wrong discount, producing 5000000.
+apps/backend/server.js line 397 computes the percent discount as Math.floor(total_amount *(1 - coupon.discount_value)). SAVE10 stores discount_value = 10 (a percentage, not a fraction), so the expression evaluates to 500000* (1 - 10) = -4500000. The correct expression for a percent coupon is total_amount * discount_value / 100. final_amount is then derived from this wrong discount, producing 5000000.
 
 #### Expected vs Actual Result
 
@@ -612,7 +612,7 @@ Neither the create nor the update handler validates any field before writing to 
 #### Steps to Reproduce
 
 1. Log in as `admin@eshop.com` / `Admin123!` and obtain a valid admin JWT (this run's fixture establishes one; every step below sends `Authorization: Bearer <valid admin JWT>`, so the defect is independent of BUG-FR15-01).
-2. `POST http://127.0.0.1:3000/api/products` with the `name` key omitted entirely: `{"price":100000,"description":"Mô tả sản phẩm","imageUrl":"http://example.com/img.png","category_id":1}` (TC-02, trace EC-01, `reports/newman-report.json` iteration 2).
+2. `POST http://127.0.0.1:3000/api/products` with the `name` key omitted entirely: `{"price":100000,"description":"Mô tả sản phẩm","imageUrl":"http://example.com/img.png","category_id":1}` (TC-02, trace EC-01, `artifacts/newman/fr-15-product-crud/newman-report.json` iteration 2).
 3. `POST /api/products` with a 256-character `name` (TC-06, trace BVA-03, iteration 6).
 4. `POST /api/products` with `"price":-1` (TC-09, trace BVA-04, iteration 9).
 5. `POST /api/products` with `"price":0` (TC-10, trace BVA-05, iteration 10).
@@ -653,7 +653,7 @@ The read-by-id handler answers a request for an id that matches no row with HTTP
 #### Steps to Reproduce
 
 1. `DELETE http://127.0.0.1:3000/api/products/<C id>` for fixture product C, which returns `200 {"message":"Product deleted"}`.
-2. `GET http://127.0.0.1:3000/api/products/<C id>` immediately afterward (TC-24, trace S-05, `reports/newman-report.json` iteration 24).
+2. `GET http://127.0.0.1:3000/api/products/<C id>` immediately afterward (TC-24, trace S-05, `artifacts/newman/fr-15-product-crud/newman-report.json` iteration 24).
 3. Confirmed independently outside Newman: `curl -i http://127.0.0.1:3000/api/products/999999`, an id that has never existed, returned `status=200` with body `{}`.
 4. Confirmed the row really is gone: querying `apps/backend/database.sqlite` for the deleted id returns no rows, so the 200 is a response-shape defect, not a failed delete.
 
@@ -673,4 +673,3 @@ The read-by-id handler answers a request for an id that matches no row with HTTP
 ![GitHub Issue #58](assets/issues/BUG-FR15-05-issue-58.png)
 
 ---
-
