@@ -37,11 +37,11 @@ newman run collection.postman_collection.json \
   --timeout-request 15000 \
   --timeout-script 15000 \
   --reporters cli,json,html \
-  --reporter-json-export reports/newman-report.json \
-  --reporter-html-export reports/newman-report.html
+  --reporter-json-export ../../newman/fr-08-checkout/newman-report.json \
+  --reporter-html-export ../../newman/fr-08-checkout/newman-report.html
 ```
 
-`test-execution.md` and `run-cycle.json` under `reports/` are produced by the
+`test-execution.md` and `run-cycle.json` under `../../newman/fr-08-checkout/` are produced by the
 `api-test-execute` skill from this same JSON/HTML report, not by this build step.
 
 ## Package contents
@@ -51,7 +51,7 @@ collection.postman_collection.json  — 2 items: a one-time fixture + the data-d
 environment.postman_environment.json — baseUrl + studentId placeholders (no credentials)
 test-data.csv                        — build-time snapshot of ../../test-cases/fr-08-checkout/data/test-data.csv
 RUN.md                               — this file
-reports/                             — reserved for api-test-execute's real run output
+(Newman run output lives in ../../newman/fr-08-checkout/, not here)
 ```
 
 ## Execution shape notes (for whoever runs/audits this collection)

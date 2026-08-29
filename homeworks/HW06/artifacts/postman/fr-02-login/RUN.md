@@ -28,15 +28,15 @@ newman run collection.postman_collection.json \
   --timeout-request 60000 \
   --timeout-script 60000 \
   --reporters cli,json,html \
-  --reporter-json-export reports/newman-report.json \
-  --reporter-html-export reports/newman-report.html
+  --reporter-json-export ../../newman/fr-02-login/newman-report.json \
+  --reporter-html-export ../../newman/fr-02-login/newman-report.html
 ```
 
 `--timeout-request`/`--timeout-script` are raised well above Newman's 5s default because
 several rows wait inside their pre-request script for the 30-second lock window:
 TC-13/TC-14/TC-15 wait up to ~31s, and TC-45 runs a ~31s staged sequence (lock at T=0,
 attempts at T=10s and T=15s, its own request at T=31s). `test-execution.md` and
-`run-cycle.json` under `reports/` are produced by the `api-test-execute` skill from
+`run-cycle.json` under `../../newman/fr-02-login/` are produced by the `api-test-execute` skill from
 this same JSON/HTML report, not by this build step.
 
 Expect a wall-clock run of roughly 3-4 minutes: the timed rows alone account for
@@ -49,7 +49,7 @@ collection.postman_collection.json   — 1 data-driven item, all 53 tc_id rows
 environment.postman_environment.json — baseUrl + studentId + lockUntil_test placeholders (no credentials)
 test-data.csv                        — build-time snapshot of ../../test-cases/fr-02-login/data/test-data.csv
 RUN.md                               — this file
-reports/                             — reserved for api-test-execute's real run output
+(Newman run output lives in ../../newman/fr-02-login/, not here)
 ```
 
 ## Execution shape notes (for whoever runs/audits this collection)

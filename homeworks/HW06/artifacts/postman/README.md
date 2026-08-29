@@ -21,11 +21,17 @@ collection.postman_collection.json
 environment.postman_environment.json
 test-data.csv
 RUN.md
-reports/
-├── newman-report.html
-├── newman-report.json
-├── test-execution.md
-└── run-cycle.json
+```
+
+Newman execution evidence for each FR lives outside this directory, in
+`artifacts/newman/<fr>/`:
+
+```text
+newman-report.html
+newman-report.json
+test-execution.md
+run-cycle.json
+archive/<UTC-timestamp>/   — evidence from earlier passes
 ```
 
 `artifacts/test-cases/<fr>/data/test-data.csv` and `request-template.md` remain the
@@ -51,6 +57,5 @@ artifacts.
 
 ## Current status
 
-The package directories have not been generated yet. Build each FR with
-`api-test-postman-build`, then run it with `api-test-execute`; replace this status when
-the actual artifacts exist.
+All three packages are built and executed. The runnable inputs live here; the
+execution evidence lives in `artifacts/newman/`.

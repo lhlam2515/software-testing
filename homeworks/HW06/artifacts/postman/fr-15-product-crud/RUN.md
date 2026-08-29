@@ -46,11 +46,11 @@ newman run collection.postman_collection.json \
   --timeout-request 15000 \
   --timeout-script 15000 \
   --reporters cli,json,html \
-  --reporter-json-export reports/newman-report.json \
-  --reporter-html-export reports/newman-report.html
+  --reporter-json-export ../../newman/fr-15-product-crud/newman-report.json \
+  --reporter-html-export ../../newman/fr-15-product-crud/newman-report.html
 ```
 
-`test-execution.md` and `run-cycle.json` under `reports/` are produced by the
+`test-execution.md` and `run-cycle.json` under `../../newman/fr-15-product-crud/` are produced by the
 `api-test-execute` skill from this same JSON/HTML report, not by this build step.
 
 ## Package contents
@@ -60,7 +60,7 @@ collection.postman_collection.json  — 2 items: a one-time fixture + the data-d
 environment.postman_environment.json — baseUrl + studentId placeholders and empty runtime slots (no credentials)
 test-data.csv                        — build-time snapshot of ../../test-cases/fr-15-product-crud/data/test-data.csv
 RUN.md                               — this file
-reports/                             — reserved for api-test-execute's real run output
+(Newman run output lives in ../../newman/fr-15-product-crud/, not here)
 ```
 
 ## Execution shape notes (for whoever runs/audits this collection)
@@ -196,7 +196,7 @@ paths:
   and no false oracle was recorded. This path exists because the first real execution of
   this package produced exactly that failure mode.
 
-The dry-run's request/response data was discarded; `reports/` holds nothing from it.
+The dry-run's request/response data was discarded; `../../newman/fr-15-product-crud/` holds nothing from it.
 
 **Runtime behavior against the real SUT remains unverified** — that is `api-test-execute`'s
 step.
