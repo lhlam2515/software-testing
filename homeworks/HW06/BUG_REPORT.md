@@ -3,7 +3,7 @@
 **Tester:** Le Hoang Lam (23127216)
 **SUT:** EShop, [github.com/ttbhanh/eshop-sut](https://github.com/ttbhanh/eshop-sut)
 **GitHub Issues:** [github.com/lhlam2515/software-testing/issues](https://github.com/lhlam2515/software-testing/issues)
-**Total bugs found:** 11 (9 AI-found, 2 Beyond AI — one each on FR-02 and FR-08)
+**Total bugs found:** 15 (11 AI-found, 4 Beyond AI)
 
 ---
 
@@ -35,8 +35,10 @@ inspection during triage (`Beyond AI`), per section 6 items 3 and 5.
 | BUG-FR15-03 | `DELETE /api/products/:id` | Critical | AI | Open | [#54](https://github.com/lhlam2515/software-testing/issues/54) |
 | BUG-FR08-05 | POST /api/apply-coupon | High | Beyond AI | Open | Pending |
 | BUG-FR08-06 | GET /api/orders/:id | Critical | Beyond AI | Open | Pending |
+| BUG-FR15-04 | POST /api/products, PUT /api/products/:id | High | AI | Open | Pending |
+| BUG-FR15-05 | GET /api/products/:id | Medium | AI | Open | Pending |
 
-**Severity distribution:** Critical: 4, High: 5, Medium: 2, Low: 0
+**Severity distribution:** Critical: 5, High: 7, Medium: 3, Low: 0
 
 ---
 
@@ -421,18 +423,20 @@ tampered signature are all accepted and the product is created.
 
 `server.js:167` defines `app.post("/api/products", (req, res) => {...})` with zero
 middleware, unlike the sibling admin route `app.post("/api/categories", authenticateToken, ...)`
-at `server.js:249`. Same defect additionally reproduced by TC-02/TC-06/TC-09/TC-10/TC-13
-(EP/BVA rows, iterations 2/6/9/10/13), which sent `Bearer undefined` after the collection
-fixture's own admin login failed on a stale hardcoded password (a test-artifact defect, not
-filed as an SUT bug) - the endpoint accepted that garbage token too, for the same root-cause
-reason: no middleware checks it.
+at `server.js:249`. Nothing in the handler inspects the `Authorization` header, so token
+presence, syntactic validity, signature, and role are all irrelevant to the outcome.
+
+Confirmed independently of the collection by four direct requests carrying an otherwise
+identical body, which returned `200` in every case: no `Authorization` header; `Authorization:
+Bearer not.a.jwt`; a valid customer-role JWT; and a valid admin JWT. Only the last of these
+should have succeeded.
 
 #### Expected vs Actual Result
 
 | | Result |
 | -- | ------ |
 | **Expected** | Per `srs.md` FR-12 line 177 (a valid admin JWT is required for this endpoint) and SEC-02 line 279 (role enforcement), all cases above must be rejected (`401`/`403`) with no product created. |
-| **Actual** | All requests returned `200` with body `{"message":"Product created","id":<n>}` and the product was persisted. The "no product created" catalog-count assertion failed for every case (count rose by exactly 1 each time), e.g. TC-25: count 51 vs expected 50; TC-28: 51 vs 50; TC-30: 52 vs 51; TC-44: 55 vs 54. |
+| **Actual** | All requests returned `200` with body `{"message":"Product created","id":<n>}` and the product was persisted. The "no product created" catalog-count assertion failed for every case (count rose by exactly 1 each time): TC-25: count 25 vs expected 24; TC-28: 25 vs 24; TC-30: 26 vs 25; TC-44: 29 vs 28. TC-43's aggregate check (`SC-09`, "every referenced auth/role attempt was refused") failed on the same evidence with `TC-25 was not refused: expected 200 to be at least 400`. |
 
 #### Screenshot
 
@@ -462,8 +466,13 @@ reason: no middleware checks it.
 #### Root Cause
 
 `server.js:179` defines `app.put("/api/products/:id", (req, res) => {...})` with no
-`authenticateToken` middleware. Same defect reproduced by TC-18/TC-19 (BVA rows, iterations
-18/19) via the same broken-fixture-token mechanism noted in BUG-FR15-01.
+`authenticateToken` middleware, so an unauthenticated caller reaches the `UPDATE` statement
+directly.
+
+TC-18/TC-19 were previously cross-referenced here as reproducing this same defect. That
+cross-reference was withdrawn after the collection fixture was corrected: both rows send a
+valid admin JWT, and they now fail for missing field validation, which is tracked separately
+as BUG-FR15-04. TC-26 remains the evidence for this entry.
 
 #### Expected vs Actual Result
 
@@ -499,16 +508,21 @@ no `Authorization` header still deletes the target product.
 #### Root Cause
 
 `server.js:191` defines `app.delete("/api/products/:id", (req, res) => {...})` with no
-`authenticateToken` middleware. Same defect reproduced by TC-24 (DELETE-then-GET-then-DELETE
-sequence on fixture product C, iteration 24) via the broken-fixture-token mechanism noted in
-BUG-FR15-01.
+`authenticateToken` middleware, so an unauthenticated caller reaches the `DELETE` statement
+directly. Confirmed independently of the collection: a `DELETE` with no `Authorization`
+header returned `200` and the row was gone from `apps/backend/database.sqlite` afterward.
+
+TC-24 was previously cross-referenced here as reproducing this same defect. That
+cross-reference was withdrawn after the collection fixture was corrected: TC-24 now fails
+because `GET /api/products/:id` answers `200 {}` for a missing id, tracked separately as
+BUG-FR15-05. TC-27 remains the evidence for this entry.
 
 #### Expected vs Actual Result
 
 | | Result |
 | -- | ------ |
 | **Expected** | Per `srs.md` FR-12 line 177, `DELETE` must require a valid admin JWT and reject unauthenticated requests, leaving the target product intact ("P1 still exists"). |
-| **Actual** | The request returned `200` `{"message":"Product deleted"}` and the row was removed. The follow-up `GET` on the same product id returned `{}` instead of the original product body, confirming the delete executed with zero authentication. TC-24's related "C is not retrievable after first delete" assertion additionally surfaced that `GET /api/products/:id` (`server.js:161`) hardcodes `if (!row) return res.status(200).json({})` for a missing id - so even though the unauthenticated delete succeeds, the follow-up not-found check can never observe a `>=400` status from this endpoint. |
+| **Actual** | The request returned `200` `{"message":"Product deleted"}` and the row was removed from the database, confirming the delete executed with zero authentication. The follow-up `GET` on the same product id returned `{}` rather than a not-found status; that response-shape defect is tracked separately as BUG-FR15-05. |
 
 #### Screenshot
 
@@ -577,6 +591,79 @@ apps/backend/server.js line 344 registers app.get("/api/orders/:id", (req, res) 
 | -- | ------ |
 | **Expected** | srs.md FR-11 line 166 states a user may view only their own orders; specs/security-requirement.md SEC-02-extended(a) requires cross-user order access to be rejected. User B's request for User A's order 77 must not return that order. |
 | **Actual** | The endpoint returns User A's order 77 to User B. The route carries no authenticateToken middleware at all, so the same record is also readable with no token. |
+
+#### Screenshot
+
+Pending
+### BUG-FR15-04 - POST/PUT /api/products perform no input validation, persisting products that violate every documented field constraint
+
+**API:** `POST /api/products, PUT /api/products/:id`
+**Found By:** AI
+**Severity:** High
+**GitHub Issue:** Pending
+
+#### Description
+
+Neither the create nor the update handler validates any field before writing to the database. A missing name, an over-length name, a negative or zero price, and a category_id that matches no existing category are all accepted and persisted with HTTP 200.
+
+#### Steps to Reproduce
+
+1. Log in as `admin@eshop.com` / `Admin123!` and obtain a valid admin JWT (this run's fixture establishes one; every step below sends `Authorization: Bearer <valid admin JWT>`, so the defect is independent of BUG-FR15-01).
+2. `POST http://127.0.0.1:3000/api/products` with the `name` key omitted entirely: `{"price":100000,"description":"Mô tả sản phẩm","imageUrl":"http://example.com/img.png","category_id":1}` (TC-02, trace EC-01, `reports/newman-report.json` iteration 2).
+3. `POST /api/products` with a 256-character `name` (TC-06, trace BVA-03, iteration 6).
+4. `POST /api/products` with `"price":-1` (TC-09, trace BVA-04, iteration 9).
+5. `POST /api/products` with `"price":0` (TC-10, trace BVA-05, iteration 10).
+6. `POST /api/products` with `"category_id":999999`, an id returned by no `GET /api/categories` entry (TC-13, trace EC-08, iteration 13).
+7. `POST /api/products` with `"category_id":"electronics"`, a non-numeric category (TC-14, trace EC-10, iteration 14).
+8. `PUT http://127.0.0.1:3000/api/products/9` with `"price":0` (TC-18, trace BVA-05_PUT_SCOPED, iteration 18), then `GET /api/products/9`.
+9. `PUT http://127.0.0.1:3000/api/products/9` with `"category_id":999999` (TC-19, trace EC-08_PUT_SCOPED, iteration 19), then `GET /api/products/9`.
+10. Confirmed independently outside Newman: `curl -X POST /api/products -H 'Authorization: Bearer <admin JWT>' -d '{"name":"PROBE2","price":-1,"category_id":1}'` returned `200`, and the same request with `"category_id":999999` returned `200`.
+
+#### Root Cause
+
+`server.js:167` (`app.post("/api/products", ...)`) and `server.js:179` (`app.put("/api/products/:id", ...)`) destructure `{ name, price, description, imageUrl, category_id }` straight out of `req.body` and pass them directly into the `INSERT` / `UPDATE` statement. There is no presence check on `name`, no length bound, no numeric or sign check on `price`, and no foreign-key lookup against the `categories` table before the write. The products table does not enforce these constraints either, so the invalid row is committed. This is a separate root cause from BUG-FR15-01/02/03: those cover the absent auth middleware, whereas every step above runs with a valid admin JWT and still succeeds.
+
+#### Expected vs Actual Result
+
+| | Result |
+| -- | ------ |
+| **Expected** | Per `srs.md` FR-15 line 195 (`name` is required, maximum 255 characters), line 196 (`price` must be a positive number), and line 197 (`category_id` must be an id drawn from `GET /api/categories`), each request above must be rejected with a 4xx status and no product created or modified. |
+| **Actual** | Every request returned `200`. For each POST the catalog count rose by exactly 1 against the fixture baseline - TC-02: 10 vs expected 9; TC-06: 14 vs 13; TC-09: 17 vs 16; TC-10: 18 vs 17; TC-13: 21 vs 20; TC-14: 22 vs 21. Both PUTs were applied and persisted: the follow-up `GET /api/products/9` returned the mutated body (name "Áo thun mới") instead of the pre-request body (name "Áo thun nam"). |
+
+#### Screenshot
+
+Pending
+
+---
+
+### BUG-FR15-05 - GET /api/products/:id returns 200 with an empty object for a non-existent id instead of 404
+
+**API:** `GET /api/products/:id`
+**Found By:** AI
+**Severity:** Medium
+**GitHub Issue:** Pending
+
+#### Description
+
+The read-by-id handler answers a request for an id that matches no row with HTTP 200 and an empty JSON object, so a caller cannot distinguish a deleted or never-existing product from a successful read.
+
+#### Steps to Reproduce
+
+1. `DELETE http://127.0.0.1:3000/api/products/<C id>` for fixture product C, which returns `200 {"message":"Product deleted"}`.
+2. `GET http://127.0.0.1:3000/api/products/<C id>` immediately afterward (TC-24, trace S-05, `reports/newman-report.json` iteration 24).
+3. Confirmed independently outside Newman: `curl -i http://127.0.0.1:3000/api/products/999999`, an id that has never existed, returned `status=200` with body `{}`.
+4. Confirmed the row really is gone: querying `apps/backend/database.sqlite` for the deleted id returns no rows, so the 200 is a response-shape defect, not a failed delete.
+
+#### Root Cause
+
+`server.js:161` hardcodes `if (!row) return res.status(200).json({});` inside `app.get("/api/products/:id", ...)`, returning success for a missing row rather than a not-found status. This also masks any not-found assertion built on this endpoint, which is why TC-24's "C is not retrievable after the first delete" check can never observe a `>=400` status no matter how the preceding DELETE behaves.
+
+#### Expected vs Actual Result
+
+| | Result |
+| -- | ------ |
+| **Expected** | Per `api_specification.md` section 3.3 lines 106-107, a request for an id that matches no product should return a not-found status (`404`) so the caller can distinguish absence from a successful read; TC-24's oracle requires the post-delete read to be non-retrievable. |
+| **Actual** | `GET /api/products/<deleted id>` returned `200` with body `{}`. The TC-24 assertion "C is not retrievable after the first delete" failed with `expected 200 to be at least 400`. |
 
 #### Screenshot
 

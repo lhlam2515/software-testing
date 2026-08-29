@@ -1,0 +1,108 @@
+{
+  "fr": "FR-15",
+  "startedAt": "2026-08-29T07:29:22.525Z",
+  "package": "/home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud",
+  "phases": {
+    "preflight": {
+      "status": "PASS"
+    },
+    "setup": {
+      "status": "NOT REQUESTED"
+    },
+    "newman": {
+      "status": "FAIL",
+      "exitCode": 1
+    },
+    "inspection": {
+      "status": "PASS",
+      "exitCode": 0
+    },
+    "teardown": {
+      "status": "NOT REQUESTED"
+    }
+  },
+  "cleanupRequired": [
+    "Probe products remain in apps/backend/database.sqlite (84 rows post-run; per-case teardown did not remove them).",
+    "admin@eshop.com lockout counters left set by the failed fixture logins (window expired 2026-08-29T07:32:23.652Z; login_attempts still 6).",
+    "Backend started by this session (node server.js, PID 285791) is still running."
+  ],
+  "newmanVersion": "6.2.2",
+  "command": "newman run /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/collection.postman_collection.json --environment /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/environment.postman_environment.json --iteration-data /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/test-data.csv --env-var studentId=23127216 --reporters \"cli,json,html\" --reporter-json-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/reports/newman-report.json --reporter-html-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/reports/newman-report.html --env-var \"baseUrl=[REDACTED]\" --env-var \"adminEmail=[REDACTED]\" --env-var \"adminPassword=[REDACTED]\" --env-var \"customerEmail=[REDACTED]\" --env-var \"customerPassword=[REDACTED]\"",
+  "exitCode": 1,
+  "finishedAt": "2026-08-29T07:29:27.949Z",
+  "runType": "RE-RUN",
+  "archivePath": "reports/archive/20260829T072916Z",
+  "baseline": {
+    "run": "2026-08-22T08:57:40.075Z",
+    "tracedCases": 48,
+    "assertions": {
+      "total": 138,
+      "failed": 15
+    }
+  },
+  "current": {
+    "tracedCases": 56,
+    "assertions": {
+      "total": 172,
+      "failed": 18
+    }
+  },
+  "delta": {
+    "added": [
+      "TC-49",
+      "TC-50",
+      "TC-51",
+      "TC-52",
+      "TC-53",
+      "TC-54",
+      "TC-55",
+      "TC-56"
+    ],
+    "firstTraced": [
+      "TC-48"
+    ],
+    "removed": [],
+    "newlyFailing": [
+      "TC-14",
+      "TC-43",
+      "TC-51"
+    ],
+    "newlyPassing": [
+      "TC-48",
+      "TC-49",
+      "TC-50",
+      "TC-52",
+      "TC-53",
+      "TC-54",
+      "TC-55",
+      "TC-56"
+    ],
+    "stillFailing": [
+      "TC-02",
+      "TC-06",
+      "TC-09",
+      "TC-10",
+      "TC-13",
+      "TC-18",
+      "TC-19",
+      "TC-24",
+      "TC-25",
+      "TC-26",
+      "TC-27",
+      "TC-28",
+      "TC-30",
+      "TC-44"
+    ],
+    "stillPassing": 31
+  },
+  "validity": {
+    "verdict": "ADMIN PATH NOT OBSERVED",
+    "rootCause": "Test artifact defect: fixture pre-request hard-codes admin password admin123 and ignores --env-var adminPassword; seeded value is Admin123! (apps/backend/database.js:92).",
+    "effects": [
+      "adminToken stored as null; admin_valid rows sent Authorization: Bearer null",
+      "FR-02 lockout tripped: admin@eshop.com login_attempts=6, locked_until=2026-08-29T07:32:23.652Z"
+    ],
+    "bugCandidates": [],
+    "bugReportRowsAppended": []
+  }
+}
