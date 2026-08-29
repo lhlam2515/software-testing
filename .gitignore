@@ -114,3 +114,6 @@ context/MEMORY.md
 
 # ===== GIT WORKTREES (parallel homework tracks) =====
 .worktrees/
+
+# HW06 local CI dry-run output (evidence lives in artifacts/cicd/evidence/)
+homeworks/HW06/artifacts/cicd/runs/

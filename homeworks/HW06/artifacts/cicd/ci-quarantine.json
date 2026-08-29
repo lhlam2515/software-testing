@@ -1,0 +1,258 @@
+{
+  "$comment": [
+    "Test cases excluded from the CI regression gate because they fail against the",
+    "current SUT as a result of a real, filed bug. They stay in the audited suites in",
+    "artifacts/test-cases/ and in the local Newman evidence under artifacts/newman/ —",
+    "this manifest only decides what the pipeline gates on.",
+    "A green pipeline therefore means 'no new regression', not 'no known bugs'.",
+    "Every entry must name a bug from BUG_REPORT.md and its GitHub issue.",
+    "build-ci-data.mjs additionally drops any remaining row that references a removed",
+    "case in precondition_note / tc_ref, because such a row can no longer run."
+  ],
+  "issueBase": "https://github.com/lhlam2515/software-testing/issues/",
+  "suites": {
+    "fr-02-login": {
+      "endpoint": "POST /api/login",
+      "cases": [
+        {
+          "tc_id": "TC-01",
+          "bug": "BUG-FR02-03",
+          "issue": 46,
+          "note": "successful login response leaks the plaintext password"
+        },
+        {
+          "tc_id": "TC-07",
+          "bug": "BUG-FR02-03",
+          "issue": 46,
+          "note": "same password leak on the case-insensitive email variant"
+        },
+        {
+          "tc_id": "TC-15",
+          "bug": "BUG-FR02-02",
+          "issue": 45,
+          "note": "lock still active at T=31s; window is 180s, not the documented 30s"
+        },
+        {
+          "tc_id": "TC-19",
+          "bug": "BUG-FR02-02",
+          "issue": 45,
+          "note": "blocked by the 180s lock armed by an earlier row"
+        },
+        {
+          "tc_id": "TC-21",
+          "bug": "BUG-FR02-02",
+          "issue": 45,
+          "note": "documented 30s wait is not enough to clear the lock"
+        },
+        {
+          "tc_id": "TC-23",
+          "bug": "BUG-FR02-02",
+          "issue": 45,
+          "note": "documented 30s wait is not enough to clear the lock"
+        },
+        {
+          "tc_id": "TC-36",
+          "bug": "BUG-FR02-01",
+          "issue": 44,
+          "note": "counter increments by 2, so the account is already locked at attempt 3"
+        },
+        {
+          "tc_id": "TC-37",
+          "bug": "BUG-FR02-03",
+          "issue": 46,
+          "note": "password leak reproduced on the admin account"
+        },
+        {
+          "tc_id": "TC-38a",
+          "bug": "BUG-FR02-02",
+          "issue": 45,
+          "note": "cannot obtain a token while the 180s lock is active"
+        },
+        {
+          "tc_id": "TC-38b",
+          "bug": "BUG-FR02-02",
+          "issue": 45,
+          "note": "consumes the token TC-38a could not produce"
+        },
+        {
+          "tc_id": "TC-39",
+          "bug": "BUG-FR02-03",
+          "issue": 46,
+          "note": "password leak on the cross-actor admin login"
+        },
+        {
+          "tc_id": "TC-44",
+          "bug": "BUG-FR02-01",
+          "issue": 44,
+          "note": "account locks on the 2nd failure, not the 3rd consecutive one"
+        },
+        {
+          "tc_id": "TC-45",
+          "bug": "BUG-FR02-02",
+          "issue": 45,
+          "note": "lock has not expired at T=31s"
+        }
+      ]
+    },
+    "fr-08-checkout": {
+      "endpoint": "POST /api/checkout",
+      "cases": [
+        {
+          "tc_id": "TC-16",
+          "bug": "BUG-FR08-03",
+          "issue": 50,
+          "note": "successful checkout does not clear the cart"
+        },
+        {
+          "tc_id": "TC-31",
+          "bug": "BUG-FR08-02",
+          "issue": 49,
+          "note": "empty-cart checkout still creates a pending order"
+        },
+        {
+          "tc_id": "TC-33",
+          "bug": "BUG-FR08-04",
+          "issue": 51,
+          "note": "malformed JSON returns an HTML stack trace"
+        },
+        {
+          "tc_id": "TC-34",
+          "bug": "BUG-FR08-04",
+          "issue": 51,
+          "note": "non-JSON Content-Type returns an HTML stack trace"
+        },
+        {
+          "tc_id": "TC-37",
+          "bug": "BUG-FR08-01",
+          "issue": 48,
+          "note": "empty shipping_address still creates an order"
+        },
+        {
+          "tc_id": "TC-41",
+          "bug": "BUG-FR08-04",
+          "issue": 51,
+          "note": "raw string body returns an HTML stack trace"
+        },
+        {
+          "tc_id": "TC-42a",
+          "bug": "BUG-FR08-05",
+          "issue": 55,
+          "note": "coupon application defect observed from checkout"
+        },
+        {
+          "tc_id": "TC-45",
+          "bug": "BUG-FR08-06",
+          "issue": 56,
+          "note": "order detail is readable across users (IDOR)"
+        }
+      ]
+    },
+    "fr-15-product-crud": {
+      "endpoint": "POST/PUT/DELETE /api/products",
+      "cases": [
+        {
+          "tc_id": "TC-02",
+          "bug": "BUG-FR15-04",
+          "issue": 57,
+          "note": "invalid payload still persists a product row"
+        },
+        {
+          "tc_id": "TC-06",
+          "bug": "BUG-FR15-04",
+          "issue": 57,
+          "note": "invalid payload still persists a product row"
+        },
+        {
+          "tc_id": "TC-09",
+          "bug": "BUG-FR15-04",
+          "issue": 57,
+          "note": "invalid payload still persists a product row"
+        },
+        {
+          "tc_id": "TC-10",
+          "bug": "BUG-FR15-04",
+          "issue": 57,
+          "note": "invalid payload still persists a product row"
+        },
+        {
+          "tc_id": "TC-13",
+          "bug": "BUG-FR15-04",
+          "issue": 57,
+          "note": "invalid payload still persists a product row"
+        },
+        {
+          "tc_id": "TC-14",
+          "bug": "BUG-FR15-04",
+          "issue": 57,
+          "note": "invalid payload still persists a product row"
+        },
+        {
+          "tc_id": "TC-18",
+          "bug": "BUG-FR15-02",
+          "issue": 53,
+          "note": "PUT mutates the product despite an invalid payload"
+        },
+        {
+          "tc_id": "TC-19",
+          "bug": "BUG-FR15-02",
+          "issue": 53,
+          "note": "PUT mutates the product despite an invalid payload"
+        },
+        {
+          "tc_id": "TC-24",
+          "bug": "BUG-FR15-03",
+          "issue": 54,
+          "note": "DELETE succeeds without authentication"
+        },
+        {
+          "tc_id": "TC-25",
+          "bug": "BUG-FR15-01",
+          "issue": 52,
+          "note": "POST succeeds with no Authorization header"
+        },
+        {
+          "tc_id": "TC-26",
+          "bug": "BUG-FR15-02",
+          "issue": 53,
+          "note": "PUT succeeds with no Authorization header"
+        },
+        {
+          "tc_id": "TC-27",
+          "bug": "BUG-FR15-03",
+          "issue": 54,
+          "note": "DELETE succeeds with no Authorization header"
+        },
+        {
+          "tc_id": "TC-28",
+          "bug": "BUG-FR15-01",
+          "issue": 52,
+          "note": "POST succeeds with a non-admin token"
+        },
+        {
+          "tc_id": "TC-30",
+          "bug": "BUG-FR15-01",
+          "issue": 52,
+          "note": "POST succeeds with a malformed token"
+        },
+        {
+          "tc_id": "TC-32",
+          "bug": "BUG-FR15-03",
+          "issue": 54,
+          "note": "DELETE with a non-admin token removes the product; in the full suite this row passes only because an earlier quarantined row had already deleted the same target"
+        },
+        {
+          "tc_id": "TC-43",
+          "bug": "BUG-FR15-01",
+          "issue": 52,
+          "note": "no authorization middleware on the write endpoints"
+        },
+        {
+          "tc_id": "TC-44",
+          "bug": "BUG-FR15-01",
+          "issue": 52,
+          "note": "no authorization middleware on the write endpoints"
+        }
+      ]
+    }
+  }
+}
