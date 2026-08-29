@@ -15,8 +15,8 @@ URL: {{baseUrl}}{{endpoint}}
 TC-38b uses `POST` / `/api/login` (the default this suite was originally built
 around). TC-38b sets `method=GET`, `endpoint=/api/users/me` to exercise the
 protected endpoint with the token issued by TC-38a (see `auth_bearer_from` below).
-Analysis-only rows (TC-28, TC-29, TC-30, TC-31) leave both columns blank — they fire
-no request.
+Analysis-only rows (TC-28, TC-29, TC-30, TC-31, TC-42) leave both columns blank —
+they fire no request.
 
 When `auth_bearer_from` is non-empty, the pre-request script sets an
 `Authorization: Bearer <token>` header using the `token` value captured from the
@@ -57,15 +57,25 @@ below), or sent verbatim from `body_raw_override` when that column is non-empty
 | `password_raw_json` = `RAW_TYPE_ARRAY` | Send the `password` value as a JSON array, not a quoted string (TC-33) — parse the `password` column as a JSON array literal. |
 | `body_raw_override` non-empty | Send this literal string as the raw request body instead of building JSON from `email`/`password` (TC-34: deliberately malformed JSON). |
 | `auth_bearer_from` | Not sent as a body field — when non-empty, the pre-request script sets `Authorization: Bearer <token>` from the referenced `tc_id`'s captured response (TC-38b only). |
-| `precondition_note` | Not sent on the wire — instructs the runner what state/timing setup (lock cycles, elapsed seconds, prior requests, concurrent firing) must exist before firing this row. Rows referencing another `tc_id`'s result (TC-28, TC-29, TC-30, TC-31) are analysis-only rows: they do not fire a new HTTP request, they diff previously captured responses. |
+| `precondition_note` | Not sent on the wire — instructs the runner what state/timing setup (lock cycles, elapsed seconds, prior requests, concurrent firing) must exist before firing this row. Rows referencing another `tc_id`'s result (TC-28, TC-29, TC-30, TC-31, TC-42) are analysis-only rows: they do not fire a new HTTP request, they diff previously captured responses. |
 | `trace` | Not sent on the wire — carries the coverage id(s) back to `master-test-cases.md` for audit traceability. |
 
-Timing-dependent rows (TC-13, TC-14, TC-15, TC-16, TC-17, TC-18, TC-20, TC-39, TC-40)
-require the runner to sequence (or fire concurrently, for TC-40) requests per
-`precondition_note`; they cannot be parameterized as independent, order-free CSV rows
-the way the stateless rows (TC-01..TC-12, TC-21..TC-27, TC-32..TC-35, TC-37, TC-41)
-can. TC-38a/TC-38b are a fixed two-step sequence (login, then use the captured token)
-rather than a timing dependency — TC-38b must run immediately after TC-38a.
+Timing-dependent rows (TC-13, TC-14, TC-15, TC-16, TC-17, TC-18, TC-20, TC-39,
+TC-40, TC-43a..TC-43g, TC-44, TC-45, TC-46) require the runner to sequence (or fire
+concurrently, for TC-40) requests per `precondition_note`; they cannot be
+parameterized as independent, order-free CSV rows the way the stateless rows
+(TC-01, TC-03..TC-06, TC-08..TC-10, TC-12, TC-22, TC-24, TC-25, TC-27, TC-32..TC-35,
+TC-37, TC-41) can. TC-38a/TC-38b are a fixed two-step sequence (login, then use the
+captured token) rather than a timing dependency — TC-38b must run immediately after
+TC-38a. TC-42 is analysis-only, like TC-28..TC-31: it fires no request and only
+diffs already-captured responses.
+
+Per `audit-log-v2.md`'s downstream-cost disclosure, TC-02, TC-07, TC-11, TC-21,
+TC-23, and TC-26 were previously listed above as stateless/order-free; each now
+carries an explicit unlocked/counter=0 reset precondition (TC-21/TC-23 corrected in
+Pass 1, the rest in Pass 2) and is removed from that list. They remain
+independent, single-request rows — the constraint is a required account-reset
+precondition, not an execution-order dependency on another CSV row.
 
 ## 3. Generic assertions (read from the current data row)
 
@@ -99,38 +109,60 @@ pm.test("response never leaks a password field (all rows)", () => {
   pm.expect(raw.toLowerCase()).to.not.include('"passwordhash"');
 });
 
-pm.test("non-2xx rows never return a raw stack trace / HTML error page", () => {
+pm.test("non-2xx rows: stack trace / HTML error page presence", () => {
   if (pm.response.code >= 400) {
     const raw = pm.response.text();
-    pm.expect(raw).to.not.match(/<html/i);
-    pm.expect(raw).to.not.match(/at\s+\S+\s+\(.*:\d+:\d+\)/); // stack-trace-like line
+    const looksLikeStackOrHtml = /<html/i.test(raw) || /at\s+\S+\s+\(.*:\d+:\d+\)/.test(raw);
+    // SEC-05 (srs.md line 282) is the only source that asserts "no raw SQL error /
+    // stack trace" for a non-2xx body, and it names TC-25/TC-26/TC-27 (SQLi probes) as
+    // its cases. Every other non-2xx row, including TC-32/TC-33/TC-34/TC-41 (downgraded
+    // to record-only in audit-log-v2.md's Pass 2 re-audit), is silent on this facet.
+    const sqliRows = ["TC-25", "TC-26", "TC-27"];
+    if (sqliRows.includes(data.tc_id)) {
+      pm.expect(looksLikeStackOrHtml).to.be.false;
+    } else {
+      pm.environment.set(`observed_stack_or_html_${data.tc_id}`, looksLikeStackOrHtml);
+    }
   }
 });
 
-pm.test("2xx responses declare Content-Type: application/json", () => {
+pm.test("2xx responses record observed Content-Type (not asserted)", () => {
   if (pm.response.code >= 200 && pm.response.code < 300) {
-    pm.expect(pm.response.headers.get("Content-Type") || "").to.include("application/json");
+    pm.environment.set(`observed_content_type_${data.tc_id}`, pm.response.headers.get("Content-Type") || "");
   }
 });
 ```
 
-The Content-Type check closes the audited gap on TC-01 (`audit-log.md`: trace cited
-`SC-02` but the original oracle text never asserted it). It is written as a blanket
-2xx rule rather than a TC-01-only column because every documented-success row
-(TC-01, TC-15, TC-19, TC-21, TC-23, TC-36, TC-37, TC-38a, TC-39) shares the same
-`Content-Type: application/json` expectation from `api_specification.md` 1.2 — a
-per-row column would duplicate a constant value on every success row for no added
-meaning.
+Per `audit-log-v2.md` (Pass 2 re-audit of TC-01), a hard `Content-Type: application/json`
+assertion on every 2xx row is itself the defect: `api_specification.md` 1.2 never states
+a response `Content-Type`, so asserting it turns spec silence into an invented contract —
+the same class of error the Pass 2 audit struck from TC-32/TC-33/TC-34/TC-41. This block
+was previously a hard assertion (closing what Pass 1 believed was a TC-01 gap); Pass 2
+overturned that fix, so this is now record-only, matching TC-01's audited Oracle text
+("record the observed `Content-Type` (SC-02 — inferred, not asserted)"). It stays a
+blanket 2xx rule rather than a TC-01-only column because every documented-success row
+(TC-01, TC-15, TC-19, TC-21, TC-23, TC-36, TC-37, TC-38a, TC-44, TC-45) shares the
+same undocumented-Content-Type situation — a per-row column would duplicate the same
+observation on every success row for no added meaning. TC-39 and TC-43f/TC-43g are
+excluded from this list: their success/failure outcome is itself UNSPECIFIED
+(counter/lock scope), so they carry no documented 2xx expectation to begin with.
 
 `safeJson()` wraps `pm.response.json()` in a try/catch so a non-JSON body (TC-34) fails
 the specific facet assertion for that row instead of throwing and aborting the run.
 
-Rows TC-28, TC-29, TC-30, TC-31 (cross-response comparison / consistency checks) are
-not sent as new requests by this template — they are a post-run analysis step over
-the responses already captured for the `tc_id`s they reference, executed once the
-full data file has run.
+Rows TC-28, TC-29, TC-30, TC-31, TC-42 (cross-response comparison / consistency
+checks) are not sent as new requests by this template — they are a post-run
+analysis step over the responses already captured for the `tc_id`s they reference,
+executed once the full data file has run.
 
 TC-40's precondition_note instructs the runner to fire 3 requests concurrently from
 this single row (same convention as TC-16's 3-consecutive-attempt sequencing, applied
 without the wait) and then send one additional correct-credential verification
 request; the generic assertions above apply to each fired attempt individually.
+
+TC-43a..TC-43g together implement TC-43's interleaved sequence: unlike TC-16/TC-20's
+single-row repetition, this sequence alternates between two accounts (`test@eshop.com`,
+`admin@eshop.com`) and the exact interleave order is the property under test, so each
+step is its own CSV row rather than one row with a firing count. The runner must fire
+them in CSV row order (TC-43a through TC-43g, unbroken) with no other request
+interleaved from outside this group.
