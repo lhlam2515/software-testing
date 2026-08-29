@@ -1,6 +1,6 @@
 {
   "fr": "FR-02",
-  "startedAt": "2026-08-22T08:27:13.270Z",
+  "startedAt": "2026-08-28T19:40:34.158Z",
   "package": "/home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login",
   "phases": {
     "preflight": {
@@ -21,9 +21,103 @@
       "status": "NOT REQUESTED"
     }
   },
-  "cleanupRequired": null,
+  "cleanupRequired": "Backend started by this run (cd apps/backend && node server.js, PID 122956) is still running; stop it when no longer needed. test@eshop.com and admin@eshop.com are left with a non-zero login_attempts counter and possibly an active 180s lock from the suite.",
   "newmanVersion": "6.2.2",
-  "command": "newman run /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/collection.postman_collection.json --environment /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/environment.postman_environment.json --iteration-data /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/test-data.csv --env-var studentId=23127216 --reporters \"cli,json,html\" --reporter-json-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/reports/newman-report.json --reporter-html-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/reports/newman-report.html --env-var \"userEmail=[REDACTED]\" --env-var \"userPassword=[REDACTED]\" --env-var \"adminEmail=[REDACTED]\" --env-var \"adminPassword=[REDACTED]\"",
+  "command": "newman run /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/collection.postman_collection.json --environment /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/environment.postman_environment.json --iteration-data /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/test-data.csv --env-var studentId=23127216 --reporters \"cli,json,html\" --reporter-json-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/reports/newman-report.json --reporter-html-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-02-login/reports/newman-report.html --env-var \"baseUrl=[REDACTED]\" --timeout-request 60000 --timeout-script 60000",
   "exitCode": 1,
-  "finishedAt": "2026-08-22T08:29:46.642Z"
+  "finishedAt": "2026-08-28T19:45:10.573Z",
+  "rerun": {
+    "isRerun": true,
+    "archivePath": "reports/archive/20260828T194022Z",
+    "baseline": {
+      "tcIds": 42,
+      "assertionsTotal": 207,
+      "assertionsFailed": 22
+    },
+    "current": {
+      "tcIds": 53,
+      "assertionsTotal": 267,
+      "assertionsFailed": 20
+    },
+    "delta": {
+      "added": [
+        "TC-42",
+        "TC-43a",
+        "TC-43b",
+        "TC-43c",
+        "TC-43d",
+        "TC-43e",
+        "TC-43f",
+        "TC-43g",
+        "TC-44",
+        "TC-45",
+        "TC-46"
+      ],
+      "removed": [],
+      "renamed": [],
+      "newlyFailing": [],
+      "newlyPassing": [
+        "TC-28",
+        "TC-29",
+        "TC-30",
+        "TC-31",
+        "TC-34",
+        "TC-35"
+      ],
+      "stillFailing": [
+        "TC-01",
+        "TC-07",
+        "TC-15",
+        "TC-19",
+        "TC-21",
+        "TC-23",
+        "TC-36",
+        "TC-37",
+        "TC-38a",
+        "TC-38b",
+        "TC-39"
+      ],
+      "stillPassing": 24,
+      "addedFailing": [
+        "TC-44",
+        "TC-45"
+      ],
+      "addedPassing": [
+        "TC-42",
+        "TC-43a",
+        "TC-43b",
+        "TC-43c",
+        "TC-43d",
+        "TC-43e",
+        "TC-43f",
+        "TC-43g",
+        "TC-46"
+      ]
+    },
+    "bugReportSync": {
+      "appended": [],
+      "skippedAsDuplicate": [],
+      "existingRootCausesReconfirmed": [
+        "BUG-FR02-01",
+        "BUG-FR02-02",
+        "BUG-FR02-03"
+      ],
+      "newRootCauses": 0,
+      "reproducedButNotAsserted": [
+        {
+          "id": "BUG-FR02-04",
+          "note": "TC-34 (iter 33) 400 + SyntaxError HTML, TC-35 (iter 34) 500 + TypeError HTML; Pass 2 audit demoted TC-32/33/34/41 to characterization rows, so no failing assertion. Entry stays Open."
+        }
+      ],
+      "evidenceRepointed": [
+        "BUG-FR02-04"
+      ],
+      "entriesHandEdited": [
+        "BUG-FR02-01 (added TC-44 + TC-36 evidence)",
+        "BUG-FR02-02 (cascade list corrected: TC-36 removed, TC-38b + TC-45 added)",
+        "BUG-FR02-04 (evidence re-pointed to archive)"
+      ],
+      "attributionCorrected": "TC-19 and TC-38a moved from BUG-FR02-01 to BUG-FR02-02; TC-36 removed from BUG-FR02-02 cascade list."
+    }
+  }
 }

@@ -57,12 +57,21 @@ documented 3, because the failed-attempt counter is incremented by 2 per failure
 1. Reset `test@eshop.com` to `login_attempts=0` / unlocked.
 2. `POST /api/login` with a wrong password, twice in a row.
 3. Observe `login_attempts` and whether the account locks after only 2 failures.
+4. Stronger variant (TC-44): send wrong, wrong, **correct**, wrong, wrong, then a 6th
+   request with correct credentials. Per `srs.md` line 42 the successful 3rd request breaks
+   the "liên tiếp" (consecutive) chain, so no lock should ever trigger.
 
 #### Root Cause
 
 `server.js:54` sets `const newAttempts = user.login_attempts + 2;` inside the wrong-password
 branch of `POST /api/login`, then locks when `newAttempts >= 3` (`server.js:56`). Evidence:
-TC-16 sequence, `reports/newman-report.json` iteration 15.
+TC-16 sequence, `reports/newman-report.json` iteration 15; TC-36 (iteration 35) fails with
+`403` where its `counter=2` precondition documents one remaining attempt.
+
+TC-44 (iteration 50, added by the Pass 2 audit) makes the defect direct: the account locks on
+the 2nd wrong password, so the sequence never reaches the successful 3rd request that would
+have tested the "consecutive" semantics at all. The `srs.md` line 41 requirement that the
+counter increment by "đúng 1 đơn vị" is violated independently of the lock threshold.
 
 #### Expected vs Actual Result
 
@@ -100,8 +109,18 @@ demo-environment window.
 
 `server.js:57` sets `lockedUntil = new Date(Date.now() + 180000).toISOString();`. Evidence:
 TC-15, `reports/newman-report.json` iteration 14 - still `403` "Tài khoản đã bị khóa" at
-T=31s. The same root cause cascades into TC-19, TC-21, TC-23, TC-36, TC-38a, all failing with
-the account still locked well past their documented 30s wait.
+T=31s.
+
+The same root cause cascades into every row whose precondition assumes the lock has expired
+after the documented 30-second wait: TC-19 (`counter=1`, no lock of its own), TC-21 and TC-23
+(both documented as "wait out TC-20's 30s lock"), TC-38a (`counter=0`, unlocked) and, through
+it, TC-38b, which receives no token and gets `401` from the protected endpoint. TC-45
+(iteration 51, added by the Pass 2 audit) isolates the timing directly: it locks the account
+at T=0, makes wrong-password attempts inside the window at T=10s and T=15s, then retries with
+correct credentials at T=31s and still receives `403`.
+
+TC-36 is **not** attributable to this defect - its `counter=2` precondition means the account
+is already locked by BUG-FR02-01's `+2` increment before any wait applies.
 
 #### Expected vs Actual Result
 
@@ -180,6 +199,26 @@ paths instead of a structured JSON error.
 No error-handling middleware wraps body-parser (which throws `SyntaxError` on malformed
 JSON) or the `const { email, password } = req.body` destructuring in `server.js:33` (which
 throws `TypeError` when `req.body` is undefined).
+
+#### Evidence location after the Pass 2 re-run
+
+The Pass 2 audit demoted TC-32, TC-33, TC-34 and TC-41 to characterization rows: they now
+record `observed_stack_or_html_*`, `observed_content_type_*` and
+`observed_body_parses_as_json_*` instead of asserting on them, because `srs.md` SEC-05 names
+only the SQLi probes (TC-25/26/27) as cases where the no-stack-trace expectation is stated.
+TC-34 and TC-35 therefore show as **PASS** in the current
+`reports/newman-report.json` - that is an oracle change in the suite, not a fix.
+
+The defect still reproduces unchanged in that same run:
+
+| Case | Iteration | Observed |
+| ---- | --------- | -------- |
+| TC-34 (malformed JSON) | 33 | `400` + `<!DOCTYPE html>…<pre>SyntaxError…` |
+| TC-35 (no `Content-Type`) | 34 | `500` + `<!DOCTYPE html>…<pre>TypeError…` |
+
+The original failing-assertion evidence is preserved at
+`homeworks/HW06/artifacts/postman/fr-02-login/reports/archive/20260828T194022Z/newman-report.json`.
+This entry stays **Open**: the behaviour is unchanged, only the way the suite records it.
 
 #### Expected vs Actual Result
 
