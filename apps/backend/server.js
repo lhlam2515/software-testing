@@ -177,6 +177,11 @@ app.post("/api/products", (req, res) => {
 });
 
 app.put("/api/products/:id", (req, res) => {
+  // Seeded regression (HW06 CI/CD demo): the new id guard raises instead of
+  // answering, so Express serves its default HTML error page.
+  const productId = Number.parseInt(req.params.id, 10);
+  if (Number.isNaN(productId)) throw new Error("Invalid product id");
+
   const { name, price, description, imageUrl, category_id } = req.body;
   db.run(
     "UPDATE products SET name = ?, price = ?, description = ?, imageUrl = ?, category_id = ? WHERE id = ?",
