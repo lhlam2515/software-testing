@@ -33,6 +33,8 @@ inspection during triage (`Beyond AI`), per section 6 items 3 and 5.
 | BUG-FR15-01 | `POST /api/products` | Critical | AI | Open | [#52](https://github.com/lhlam2515/software-testing/issues/52) |
 | BUG-FR15-02 | `PUT /api/products/:id` | Critical | AI | Open | [#53](https://github.com/lhlam2515/software-testing/issues/53) |
 | BUG-FR15-03 | `DELETE /api/products/:id` | Critical | AI | Open | [#54](https://github.com/lhlam2515/software-testing/issues/54) |
+| BUG-FR08-05 | POST /api/apply-coupon | High | Beyond AI | Open | Pending |
+| BUG-FR08-06 | GET /api/orders/:id | Critical | Beyond AI | Open | Pending |
 
 **Severity distribution:** Critical: 4, High: 5, Medium: 2, Low: 0
 
@@ -514,5 +516,71 @@ BUG-FR15-01.
 
 ---
 
-All 11 rows above have a GitHub Issue opened (issues #44-#54) with a full-page screenshot of
-the issue page attached, per REQUIREMENTS.md section 6 item 5.
+### BUG-FR08-05 - Percent coupon discount is computed with the wrong formula, returning a negative discount and a final amount ten times the cart total
+
+**API:** `POST /api/apply-coupon`
+**Found By:** Beyond AI
+**Severity:** High
+**GitHub Issue:** Pending
+
+#### Description
+
+For a percent-type coupon the handler treats discount_value as a fraction instead of a percentage, so the discount comes back negative and the final amount is larger than the original total.
+
+#### Steps to Reproduce
+
+1. Log in as the seed user test@eshop.com and populate the cart to a total of 500000 via POST /api/cart.
+2. Send POST /api/apply-coupon with body {"code":"SAVE10","total_amount":500000,"user_id":2}.
+3. Observe the 200 OK response body. Evidence: TC-42a, iteration 43 of the FR-08 Newman run.
+
+#### Root Cause
+
+apps/backend/server.js line 397 computes the percent discount as Math.floor(total_amount * (1 - coupon.discount_value)). SAVE10 stores discount_value = 10 (a percentage, not a fraction), so the expression evaluates to 500000 * (1 - 10) = -4500000. The correct expression for a percent coupon is total_amount * discount_value / 100. final_amount is then derived from this wrong discount, producing 5000000.
+
+#### Expected vs Actual Result
+
+| | Result |
+| -- | ------ |
+| **Expected** | srs.md FR-09 lines 124 and 126 specify a 10% discount on a 500000 total: discount_amount 50000 and final_amount 450000. |
+| **Actual** | HTTP 200 with {"success":true,"coupon_id":1,"discount_amount":-4500000,"final_amount":5000000,"message":"Ap dung thanh cong! Giam 10%"} - the discount is negative and the final amount is ten times the cart total. |
+
+#### Screenshot
+
+Pending
+
+---
+
+### BUG-FR08-06 - GET /api/orders/:id has no authentication or ownership check, exposing any user's order to anyone
+
+**API:** `GET /api/orders/:id`
+**Found By:** Beyond AI
+**Severity:** Critical
+**GitHub Issue:** Pending
+
+#### Description
+
+The order-detail endpoint is registered without the authenticateToken middleware and performs no ownership comparison, so any caller can read any order by guessing or enumerating its id.
+
+#### Steps to Reproduce
+
+1. Log in as User A and complete a checkout, producing order id 77 (visible in GET /api/orders/my-orders as User A).
+2. Log in as a different user, User B, whose own GET /api/orders/my-orders returns [] and therefore does not contain order 77.
+3. Send GET /api/orders/77 using User B's token. Evidence: TC-45, iteration 47 of the FR-08 Newman run.
+
+#### Root Cause
+
+apps/backend/server.js line 344 registers app.get("/api/orders/:id", (req, res) => ...) with no authenticateToken middleware in the chain, unlike the neighbouring /api/orders/my-orders (line 311) and /api/orders/:id/cancel (line 321). The handler selects the row by req.params.id alone and never compares order.user_id against the caller, so neither authentication nor ownership is enforced.
+
+#### Expected vs Actual Result
+
+| | Result |
+| -- | ------ |
+| **Expected** | srs.md FR-11 line 166 states a user may view only their own orders; specs/security-requirement.md SEC-02-extended(a) requires cross-user order access to be rejected. User B's request for User A's order 77 must not return that order. |
+| **Actual** | The endpoint returns User A's order 77 to User B. The route carries no authenticateToken middleware at all, so the same record is also readable with no token. |
+
+#### Screenshot
+
+Pending
+
+---
+

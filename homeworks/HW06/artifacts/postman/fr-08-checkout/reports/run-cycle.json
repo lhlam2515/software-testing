@@ -1,6 +1,6 @@
 {
   "fr": "FR-08",
-  "startedAt": "2026-08-22T08:42:43.086Z",
+  "startedAt": "2026-08-29T04:27:05.968Z",
   "package": "/home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-08-checkout",
   "phases": {
     "preflight": {
@@ -23,7 +23,33 @@
   },
   "cleanupRequired": null,
   "newmanVersion": "6.2.2",
-  "command": "newman run /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-08-checkout/collection.postman_collection.json --environment /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-08-checkout/environment.postman_environment.json --iteration-data /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-08-checkout/test-data.csv --env-var studentId=23127216 --reporters \"cli,json,html\" --reporter-json-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-08-checkout/reports/newman-report.json --reporter-html-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-08-checkout/reports/newman-report.html --env-var \"baseUrl=[REDACTED]\"",
+  "command": "newman run /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-08-checkout/collection.postman_collection.json --environment /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-08-checkout/environment.postman_environment.json --iteration-data /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-08-checkout/test-data.csv --env-var studentId=23127216 --reporters \"cli,json,html\" --reporter-json-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-08-checkout/reports/newman-report.json --reporter-html-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-08-checkout/reports/newman-report.html --env-var \"user_email=[REDACTED]\" --env-var \"user_password=[REDACTED]\"",
   "exitCode": 1,
-  "finishedAt": "2026-08-22T08:42:47.272Z"
+  "finishedAt": "2026-08-29T04:27:11.956Z",
+  "rerun": {
+    "archivePath": "reports/archive/20260829T042700Z",
+    "baselineExitCode": 1,
+    "tcAdded": [
+      "TC-42a",
+      "TC-42b",
+      "TC-43",
+      "TC-44",
+      "TC-45",
+      "TC-46",
+      "TC-47a",
+      "TC-47b"
+    ],
+    "tcRemoved": [],
+    "newlyFailing": [],
+    "newlyPassing": [],
+    "stillFailing": [
+      "TC-16",
+      "TC-31",
+      "TC-33",
+      "TC-34",
+      "TC-37",
+      "TC-41"
+    ],
+    "stillPassingCount": 37
+  }
 }
