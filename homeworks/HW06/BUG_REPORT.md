@@ -33,10 +33,10 @@ inspection during triage (`Beyond AI`), per section 6 items 3 and 5.
 | BUG-FR15-01 | `POST /api/products` | Critical | AI | Open | [#52](https://github.com/lhlam2515/software-testing/issues/52) |
 | BUG-FR15-02 | `PUT /api/products/:id` | Critical | AI | Open | [#53](https://github.com/lhlam2515/software-testing/issues/53) |
 | BUG-FR15-03 | `DELETE /api/products/:id` | Critical | AI | Open | [#54](https://github.com/lhlam2515/software-testing/issues/54) |
-| BUG-FR08-05 | POST /api/apply-coupon | High | Beyond AI | Open | Pending |
-| BUG-FR08-06 | GET /api/orders/:id | Critical | Beyond AI | Open | Pending |
-| BUG-FR15-04 | POST /api/products, PUT /api/products/:id | High | AI | Open | Pending |
-| BUG-FR15-05 | GET /api/products/:id | Medium | AI | Open | Pending |
+| BUG-FR08-05 | POST /api/apply-coupon | High | Beyond AI | Open | [#55](https://github.com/lhlam2515/software-testing/issues/55) |
+| BUG-FR08-06 | GET /api/orders/:id | Critical | Beyond AI | Open | [#56](https://github.com/lhlam2515/software-testing/issues/56) |
+| BUG-FR15-04 | POST /api/products, PUT /api/products/:id | High | AI | Open | [#57](https://github.com/lhlam2515/software-testing/issues/57) |
+| BUG-FR15-05 | GET /api/products/:id | Medium | AI | Open | [#58](https://github.com/lhlam2515/software-testing/issues/58) |
 
 **Severity distribution:** Critical: 5, High: 7, Medium: 3, Low: 0
 
@@ -535,7 +535,7 @@ BUG-FR15-05. TC-27 remains the evidence for this entry.
 **API:** `POST /api/apply-coupon`
 **Found By:** Beyond AI
 **Severity:** High
-**GitHub Issue:** Pending
+**GitHub Issue:** [#55](https://github.com/lhlam2515/software-testing/issues/55)
 
 #### Description
 
@@ -560,7 +560,7 @@ apps/backend/server.js line 397 computes the percent discount as Math.floor(tota
 
 #### Screenshot
 
-Pending
+![GitHub Issue #55](assets/issues/BUG-FR08-05-issue-55.png)
 
 ---
 
@@ -569,7 +569,7 @@ Pending
 **API:** `GET /api/orders/:id`
 **Found By:** Beyond AI
 **Severity:** Critical
-**GitHub Issue:** Pending
+**GitHub Issue:** [#56](https://github.com/lhlam2515/software-testing/issues/56)
 
 #### Description
 
@@ -594,13 +594,16 @@ apps/backend/server.js line 344 registers app.get("/api/orders/:id", (req, res) 
 
 #### Screenshot
 
-Pending
+![GitHub Issue #56](assets/issues/BUG-FR08-06-issue-56.png)
+
+---
+
 ### BUG-FR15-04 - POST/PUT /api/products perform no input validation, persisting products that violate every documented field constraint
 
 **API:** `POST /api/products, PUT /api/products/:id`
 **Found By:** AI
 **Severity:** High
-**GitHub Issue:** Pending
+**GitHub Issue:** [#57](https://github.com/lhlam2515/software-testing/issues/57)
 
 #### Description
 
@@ -632,7 +635,7 @@ Neither the create nor the update handler validates any field before writing to 
 
 #### Screenshot
 
-Pending
+![GitHub Issue #57](assets/issues/BUG-FR15-04-issue-57.png)
 
 ---
 
@@ -641,7 +644,7 @@ Pending
 **API:** `GET /api/products/:id`
 **Found By:** AI
 **Severity:** Medium
-**GitHub Issue:** Pending
+**GitHub Issue:** [#58](https://github.com/lhlam2515/software-testing/issues/58)
 
 #### Description
 
@@ -667,7 +670,7 @@ The read-by-id handler answers a request for an id that matches no row with HTTP
 
 #### Screenshot
 
-Pending
+![GitHub Issue #58](assets/issues/BUG-FR15-05-issue-58.png)
 
 ---
 
