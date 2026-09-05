@@ -1,0 +1,50 @@
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#eef4fb", "primaryBorderColor": "#4a90d9", "lineColor": "#5b6470", "edgeLabelBackground": "#ffffff"}}}%%
+flowchart TD
+    IN["Input: FR id, HTTP method, endpoint path<br/>+ case target (default 35)"]
+    S1["S1 Extract contract<br/>specs/openapi.yaml, requirements.md,<br/>security-requirement.md"]
+    GATE{"Is the behaviour<br/>documented?"}
+    UNSPEC["Record as UNSPECIFIED<br/>probe only, assert nothing"]
+    S6["S6 Consolidate<br/>master-test-cases.md, one TC id sequence,<br/>every row traced to a source line"]
+    CHECK{"Coverage check: uncovered parameter,<br/>SEC id, transition or response variant?"}
+    DEEPEN["Deepen the thin branch<br/>re-enter S2 to S5, max 2 rounds<br/>never pad with reworded rows"]
+    S7["S7 Emit execution inputs<br/>data/test-data.csv<br/>data/request-template.md"]
+    OUT["Handoff to api-test-auditor<br/>run on a different model"]
+
+    subgraph Oracles["Oracle set - read-only, authoritative"]
+        SRS["srs.md<br/>behaviour, business rules"]
+        SPEC["api_specification.md<br/>request and response contract"]
+        SECREQ["SEC-01 to SEC-07<br/>security requirements"]
+    end
+
+    subgraph BR["S2 to S5 - four independent design branches"]
+        S2["S2 Domain partitions<br/>EP classes + BVA points,<br/>one obligation per row"]
+        S3["S3 State or lifecycle<br/>classify explicit / implicit / none,<br/>then derive transitions"]
+        S4["S4 Security cases<br/>applicable SEC ids only,<br/>payload + asset + oracle"]
+        S5["S5 Schema cases<br/>documented status codes,<br/>required and forbidden fields"]
+    end
+
+    IN --> S1
+    SRS --> S1
+    SPEC --> S1
+    SECREQ --> S1
+    S1 --> GATE
+    GATE -- "no" --> UNSPEC
+    GATE -- "yes" --> S2
+    GATE -- "yes" --> S3
+    GATE -- "yes" --> S4
+    GATE -- "yes" --> S5
+    S2 --> S6
+    S3 --> S6
+    S4 --> S6
+    S5 --> S6
+    UNSPEC --> S6
+    S6 --> CHECK
+    CHECK -- "yes" --> DEEPEN
+    CHECK -- "no" --> S7
+    S7 --> OUT
+
+    style GATE fill:#fdf0e4,stroke:#d98c4a
+    style CHECK fill:#fdf0e4,stroke:#d98c4a
+    style DEEPEN fill:#fdf0e4,stroke:#d98c4a
+    style UNSPEC fill:#f6f1fa,stroke:#8b6bb1
+    style OUT fill:#e9f6ee,stroke:#4aa96c

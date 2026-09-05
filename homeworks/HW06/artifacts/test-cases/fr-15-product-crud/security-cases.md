@@ -1,0 +1,30 @@
+# FR-15 Product CRUD — Security Cases
+
+Only SEC-02, SEC-03, SEC-05, and SEC-06 (extended) are applicable per
+`specs/security-requirement.md`. SEC-01, SEC-04, SEC-07 have no case here (No rows,
+reasons in the specs file).
+
+| Row ID | SEC-ID | Asset / invariant | Principal | Vector | Payload / condition | Expected control and observable oracle | Trace |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| SEC-C-01 | SEC-02 | Product catalog write access | Anonymous (no credential) | `POST /api/products`, no `Authorization` header | Otherwise-valid product body, header omitted entirely | Rejected before any product is created (auth check fails closed) — UNSPECIFIED exact status code (401/403 not confirmed by source); oracle: subsequent `GET /api/products` list count is unchanged | srs.md FR-12 line 177 |
+| SEC-C-02 | SEC-02 | Product catalog write access | Anonymous (no credential) | `PUT /api/products/:id`, no `Authorization` header | Otherwise-valid update body against an existing product's id | Rejected; oracle: `GET /api/products/:id` afterward shows the target product's fields unchanged | srs.md FR-12 line 177 |
+| SEC-C-03 | SEC-02 | Product catalog write access | Anonymous (no credential) | `DELETE /api/products/:id`, no `Authorization` header | Existing product's id | Rejected; oracle: `GET /api/products/:id` afterward still returns the product (not deleted) | srs.md FR-12 line 177 |
+| SEC-C-04 | SEC-02 | Product catalog write access | Attacker holding a syntactically invalid credential | `POST /api/products`, malformed `Authorization` header | `Authorization: Bearer not-a-real-jwt-string` | Rejected the same as a missing token (fail closed); oracle: no product created | srs.md FR-12 line 177; SEC-02 (srs.md line 279) |
+| SEC-C-05 | SEC-02 | Product catalog write access | Attacker holding an expired-shaped credential | `PUT /api/products/:id`, expired `Authorization` header | A JWT whose `exp` claim is in the past (structurally valid, otherwise well-formed admin token) | Rejected; oracle: target product's fields unchanged | srs.md FR-12 line 177; SEC-02 (srs.md line 279) |
+| SEC-C-06 | SEC-03 | Admin-only write privilege | Authenticated non-admin (customer) user | `POST /api/products`, valid non-admin JWT | Valid, well-formed customer JWT (`role != 'admin'`), otherwise-valid product body | Rejected — role check must fail even though the token itself is valid (srs.md line 179: "không chỉ kiểm tra sự tồn tại của Token"); oracle: no product created | srs.md FR-12 lines 177-179 |
+| SEC-C-07 | SEC-03 | Admin-only write privilege; target resource integrity | Authenticated non-admin (customer) user | `PUT /api/products/:id`, valid non-admin JWT | Valid customer JWT, update body targeting an existing product owned by no one in particular (products are not user-scoped) | Rejected; oracle: `GET /api/products/:id` afterward shows the target product's fields byte-identical to before the attempt (role-escalation / broken-function-level-authorization check) | srs.md FR-12 lines 177-179 |
+| SEC-C-08 | SEC-03 | Admin-only write privilege; target resource integrity | Authenticated non-admin (customer) user | `DELETE /api/products/:id`, valid non-admin JWT | Valid customer JWT, existing product id | Rejected; oracle: `GET /api/products/:id` afterward still returns the product | srs.md FR-12 lines 177-179 |
+| SEC-C-09 | SEC-05 | Database integrity / query safety | Authenticated admin (the injection is in a persisted field value, not the credential) | `POST /api/products`, injection payload in `name` | `name = "Ao'; DROP TABLE products;--"` | No SQL error surfaced, no schema/data destruction; oracle: `GET /api/products` still lists all previously-existing products afterward (parameterized query, not string concatenation) | srs.md SEC-05 (line 282); FR-15 create persists `name` |
+| SEC-C-10 | SEC-05 | Database integrity / query safety | Authenticated admin | `PUT /api/products/:id`, injection payload in `description` | `description = "' OR '1'='1"` | No SQL error surfaced, no unintended rows affected; oracle: only the targeted product's `description` changes (or the value is safely stored as literal text) — no other product is altered, cross-checked with `S-02`'s isolation oracle | srs.md SEC-05 (line 282); api_spec line 114 |
+| SEC-C-11 | SEC-06 (extended) | Caller's own privilege level / role integrity | Authenticated admin submitting an undocumented field | `POST /api/products` with an extra `role` field in the body | `{"name": "...", "price": 1, "category_id": <valid>, "role": "admin"}` | The created product has no persisted `role` semantics and the request does not grant/alter any user's privilege; oracle: response/created record does not carry a functioning `role` field, and a subsequent non-admin-token attempt (SEC-C-06-style) is still rejected — the injected field had no privilege effect | Extended reading of SEC-06 (srs.md line 283); no `role` field documented in FR-15's request body (api_spec lines 108-118) |
+| SEC-C-12 | SEC-06 (extended) | Caller's own privilege level / role integrity | Authenticated admin submitting an undocumented field | `PUT /api/products/:id` with an extra `isAdmin` field in the body | `{"name": "...", "price": 1, "category_id": <valid>, "isAdmin": true}` | Same expected control as SEC-C-11 on the update path; oracle: no observable privilege change for any account, and the product record has no `isAdmin` field | Extended reading of SEC-06 (srs.md line 283) |
+
+## Coverage summary
+
+- SEC-02: 5 cases (missing token × 3 operations, malformed token, expired-shaped token).
+- SEC-03: 3 cases (non-admin token × 3 operations), including the IDOR/role-escalation
+  obligation from the task's explicit scope — grouped here per
+  `specs/security-requirement.md`'s "Additional access-control coverage" note.
+- SEC-05: 2 cases (`name` on create, `description` on update).
+- SEC-06 (extended): 2 cases (mass-assignment attempt on create and update).
+- Total: 12 security cases against 4 applicable SEC ids.

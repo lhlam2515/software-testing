@@ -1,0 +1,39 @@
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#eef4fb", "primaryBorderColor": "#4a90d9", "lineColor": "#5b6470", "edgeLabelBackground": "#ffffff"}}}%%
+flowchart TD
+    subgraph Design["Design - reasoning heavy"]
+        GEN["api-test-generator<br/>Sonnet 5, high"]
+        AUD["api-test-auditor<br/>Opus 5, high"]
+    end
+    subgraph Mechanical["Encode, build, run - execution accuracy"]
+        SYNC["api-test-sync<br/>Opus 5, low"]
+        BUILD["api-test-postman-build<br/>Opus 5, medium"]
+        EXEC["api-test-execute<br/>Opus 5, low"]
+    end
+    BUG["BUG_REPORT.md<br/>+ GitHub Issues"]
+
+    NOAUD["Must not audit<br/>its own output"]
+    NORUN["Must not send a request<br/>observed behaviour is not an oracle"]
+    NOEDIT["Must not edit<br/>expected results"]
+    H1(["Human gate: labels agreed<br/>before any file is rewritten"])
+    H2(["Human gate: sentinel values<br/>in the CSV"])
+    H3(["Human gate: commit per stage,<br/>per FR"])
+
+    NOAUD -.-> GEN
+    GEN -- "master cases + CSV" --> AUD
+    H1 -.-> AUD
+    NORUN -.-> AUD
+    AUD -- "VALID / INVALID / INCOMPLETE<br/>+ added cases" --> SYNC
+    H2 -.-> SYNC
+    SYNC -- "resynced CSV and template" --> BUILD
+    BUILD -- "validated local package" --> EXEC
+    H3 -.-> EXEC
+    NOEDIT -.-> EXEC
+    EXEC -- "failures traced to TC ids" --> BUG
+
+    style NOAUD fill:#fbecec,stroke:#c96a6a
+    style NORUN fill:#fbecec,stroke:#c96a6a
+    style NOEDIT fill:#fbecec,stroke:#c96a6a
+    style H1 fill:#fdf0e4,stroke:#d98c4a
+    style H2 fill:#fdf0e4,stroke:#d98c4a
+    style H3 fill:#fdf0e4,stroke:#d98c4a
+    style BUG fill:#e9f6ee,stroke:#4aa96c

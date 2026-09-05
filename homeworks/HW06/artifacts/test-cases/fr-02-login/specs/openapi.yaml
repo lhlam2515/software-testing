@@ -1,0 +1,71 @@
+# AI-generated from docs/eshop-sut/api_specification.md; human audit required.
+openapi: 3.0.3
+info:
+  title: eShop Auth API — Login
+  version: "1.0.0"
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/login:
+    post:
+      summary: Đăng nhập (SRS FR-02)
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  # api_specification.md 1.2 shows format user@domain.com; SRS FR-02
+                  # only states client-side type="email" HTML5 validation. Server-side
+                  # format enforcement is NOT documented -> unspecified.
+                  example: test@domain.com
+                password:
+                  type: string
+                  # Password complexity (FR-01) applies at registration time only.
+                  # No documented complexity check on the login endpoint itself.
+                  example: Password123!
+      responses:
+        "200":
+          description: Đăng nhập thành công (documented in api_specification.md 1.2)
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - token
+                  - user
+                properties:
+                  token:
+                    type: string
+                    description: JWT token (format/expiry not documented -> unspecified)
+                  user:
+                    type: object
+                    description: >
+                      Shape not documented. SEC-01 requires password/hash must not
+                      appear anywhere in this object.
+        # The following statuses are NOT documented with explicit codes in
+        # api_specification.md or srs.md. SRS FR-02 only states that on invalid
+        # credentials and on account lockout the system "returns an appropriate
+        # error message; must not leak the underlying cause." No status code,
+        # error schema, or field name is specified. Included here as placeholders
+        # required for schema/security test design; each is flagged unspecified.
+        "400":
+          description: >
+            UNSPECIFIED — placeholder for malformed/missing request body
+            (e.g. missing email or password). No documented schema.
+        "401":
+          description: >
+            UNSPECIFIED — placeholder for invalid email/password combination.
+            No documented status code or error schema.
+        "423":
+          description: >
+            UNSPECIFIED — placeholder for locked-account response (SRS FR-02:
+            3 consecutive failures -> 30s lock). No documented status code,
+            error schema, or Retry-After semantics.

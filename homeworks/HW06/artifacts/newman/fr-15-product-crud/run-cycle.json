@@ -1,0 +1,107 @@
+{
+  "fr": "FR-15",
+  "startedAt": "2026-08-29T08:00:55.228Z",
+  "package": "/home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud",
+  "phases": {
+    "preflight": {
+      "status": "PASS"
+    },
+    "setup": {
+      "status": "NOT REQUESTED"
+    },
+    "newman": {
+      "status": "FAIL",
+      "exitCode": 1
+    },
+    "inspection": {
+      "status": "PASS",
+      "exitCode": 0
+    },
+    "teardown": {
+      "status": "NOT REQUESTED"
+    }
+  },
+  "cleanupRequired": [
+    "Products created by the suite remain in apps/backend/database.sqlite (32 rows vs 5 seeded); per-case teardown does not remove them.",
+    "Backend started by this session (node server.js, PID 313229) is still running.",
+    "BUG-FR15-04 and BUG-FR15-05 need a GitHub Issue and screenshot (gh issue create not run; awaiting explicit go-ahead)."
+  ],
+  "newmanVersion": "6.2.2",
+  "command": "newman run /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/collection.postman_collection.json --environment /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/environment.postman_environment.json --iteration-data /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/test-data.csv --env-var studentId=23127216 --reporters \"cli,json,html\" --reporter-json-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/reports/newman-report.json --reporter-html-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/reports/newman-report.html --env-var \"baseUrl=[REDACTED]\" --env-var \"adminEmail=[REDACTED]\" --env-var \"adminPassword=[REDACTED]\" --env-var \"customerEmail=[REDACTED]\" --env-var \"customerPassword=[REDACTED]\"",
+  "exitCode": 1,
+  "finishedAt": "2026-08-29T08:01:00.165Z",
+  "runType": "RE-RUN",
+  "archivePath": "reports/archive/20260829T080048Z",
+  "priorArchives": [
+    "reports/archive/20260829T072916Z",
+    "reports/archive/20260829T080048Z"
+  ],
+  "dbState": "Reseeded from apps/backend/database.js immediately before this run (5 products, 3 categories, both accounts unlocked), per the RUN.md clean-DB caveat.",
+  "baseline": {
+    "run": "2026-08-29T07:29:22.525Z",
+    "tracedCases": 56,
+    "assertions": {
+      "total": 172,
+      "failed": 18
+    },
+    "note": "Confounded: fixture obtained no admin token."
+  },
+  "current": {
+    "tracedCases": 56,
+    "assertions": {
+      "total": 173,
+      "failed": 16
+    }
+  },
+  "delta": {
+    "added": [],
+    "removed": [],
+    "newlyFailing": [],
+    "newlyPassing": [
+      "TC-51"
+    ],
+    "stillFailing": [
+      "TC-02",
+      "TC-06",
+      "TC-09",
+      "TC-10",
+      "TC-13",
+      "TC-14",
+      "TC-18",
+      "TC-19",
+      "TC-24",
+      "TC-25",
+      "TC-26",
+      "TC-27",
+      "TC-28",
+      "TC-30",
+      "TC-43",
+      "TC-44"
+    ],
+    "stillPassing": 39,
+    "fixture": "FAIL (0/8) -> PASS (16/0)"
+  },
+  "validity": {
+    "verdict": "VALID",
+    "note": "Admin token established; every admin_valid row carried a real admin JWT."
+  },
+  "bugReport": {
+    "appended": [
+      "BUG-FR15-04",
+      "BUG-FR15-05"
+    ],
+    "skippedAsDuplicate": [],
+    "handEdited": [
+      "BUG-FR15-01",
+      "BUG-FR15-02",
+      "BUG-FR15-03"
+    ],
+    "needGithubIssueAndScreenshot": [
+      "BUG-FR15-04",
+      "BUG-FR15-05"
+    ],
+    "notFiled": [
+      "server.js:162 serializes price as a string for even product ids; no assertion failed on it"
+    ]
+  }
+}

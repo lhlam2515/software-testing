@@ -1,0 +1,29 @@
+{
+  "fr": "FR-15",
+  "startedAt": "2026-08-22T08:57:40.075Z",
+  "package": "/home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud",
+  "phases": {
+    "preflight": {
+      "status": "PASS"
+    },
+    "setup": {
+      "status": "NOT REQUESTED"
+    },
+    "newman": {
+      "status": "FAIL",
+      "exitCode": 1
+    },
+    "inspection": {
+      "status": "PASS",
+      "exitCode": 0
+    },
+    "teardown": {
+      "status": "NOT REQUESTED"
+    }
+  },
+  "cleanupRequired": null,
+  "newmanVersion": "6.2.2",
+  "command": "newman run /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/collection.postman_collection.json --environment /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/environment.postman_environment.json --iteration-data /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/test-data.csv --env-var studentId=23127216 --reporters \"cli,json,html\" --reporter-json-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/reports/newman-report.json --reporter-html-export /home/sojdev/AI-OS/projects/academic/csc13003-software-testing/homeworks/HW06/artifacts/postman/fr-15-product-crud/reports/newman-report.html --env-var \"adminEmail=[REDACTED]\" --env-var \"adminPassword=[REDACTED]\" --env-var \"customerEmail=[REDACTED]\" --env-var \"customerPassword=[REDACTED]\" --env-var \"baseUrl=[REDACTED]\"",
+  "exitCode": 1,
+  "finishedAt": "2026-08-22T08:57:43.698Z"
+}

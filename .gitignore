@@ -78,6 +78,12 @@ k6-results/
 stryker-tmp/
 reports/
 
+# Postman/Newman execution evidence is a graded deliverable (see
+# homeworks/HW06/artifacts/postman/README.md) — un-ignore it specifically
+# without loosening the generic reports/ rule above.
+!homeworks/HW06/artifacts/postman/*/reports/
+!homeworks/HW06/artifacts/postman/*/reports/**
+
 # ===== CACHE =====
 .npm/
 .eslintcache
@@ -93,6 +99,8 @@ homeworks/HW05/ref/
 homeworks/HW05/EXECUTION_PLAN.md
 homeworks/HW05/group/endpoint-split-note.md
 homeworks/HW05/*.prompt.md
+homeworks/HW06/EXECUTION_PLAN.md
+homeworks/HW06/*.prompt.md
 
 # ===== PYTHON CACHE =====
 __pycache__/
@@ -106,3 +114,6 @@ context/MEMORY.md
 
 # ===== GIT WORKTREES (parallel homework tracks) =====
 .worktrees/
+
+# HW06 local CI dry-run output (evidence lives in artifacts/cicd/evidence/)
+homeworks/HW06/artifacts/cicd/runs/

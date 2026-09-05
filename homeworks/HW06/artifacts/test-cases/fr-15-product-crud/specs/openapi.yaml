@@ -1,0 +1,145 @@
+# AI-generated from docs/eshop-sut/api_specification.md; human audit required.
+openapi: 3.0.3
+info:
+  title: EShop Product CRUD (fragment)
+  version: "1.0"
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/products:
+    post:
+      summary: Thêm sản phẩm (Admin)
+      description: >
+        api_specification.md section 3.3 (lines 103-118). srs.md FR-12 (lines 174-179)
+        states all POST/PUT/DELETE /api/products calls require a valid JWT AND
+        role = 'admin' in the token. srs.md FR-15 (lines 191-198) states the input
+        constraints on name/price/category_id.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, price, category_id]
+              description: >
+                srs.md FR-15 line 195-197 marks name, price (giá), and category (danh
+                mục) as "bắt buộc" (required). description, imageUrl are documented in
+                the example body (api_specification.md line 108-118) but srs.md does not
+                state they are required — recorded as UNSPECIFIED whether required.
+              properties:
+                name:
+                  type: string
+                  description: >
+                    srs.md FR-15 line 195: required, max 255 characters. Exact behavior
+                    at/above the boundary (255 accepted, 256 rejected — reject with which
+                    status code) is UNSPECIFIED.
+                price:
+                  type: number
+                  description: >
+                    srs.md FR-15 line 196: required, must be a positive number (> 0).
+                    Whether integer-only or decimal precision is enforced is UNSPECIFIED.
+                    Non-numeric type handling (string, null, boolean) is UNSPECIFIED.
+                description:
+                  type: string
+                  description: UNSPECIFIED whether required; no constraint documented.
+                imageUrl:
+                  type: string
+                  description: UNSPECIFIED whether required or URL-format-validated.
+                category_id:
+                  type: integer
+                  description: >
+                    srs.md FR-15 line 197: required, "phải chọn từ danh sách có sẵn"
+                    (must be selected from the existing list) — implies referential
+                    validity against GET /api/categories (api_specification.md 3.4) is
+                    enforced. Exact rejection status/body for a non-existent id is
+                    UNSPECIFIED.
+              example:
+                name: "Tên sản phẩm"
+                price: 100000
+                description: "Mô tả"
+                imageUrl: "http://..."
+                category_id: 1
+      responses:
+        "200":
+          description: >
+            UNSPECIFIED response body shape. No success example is documented for this
+            operation. Only inferable: the created product presumably echoes the
+            submitted fields plus a generated id, by analogy with 1.1 register
+            (`{"message": ..., "id": ...}`) — not asserted by any source, flagged as an
+            assumption to verify, not invented as fact.
+        "4xx":
+          description: >
+            UNSPECIFIED status code and body shape for: missing/invalid/malformed auth,
+            non-admin role, validation failure (name/price/category_id). No error
+            envelope is documented anywhere in api_specification.md.
+  /api/products/{id}:
+    put:
+      summary: Cập nhật sản phẩm (Admin)
+      description: >
+        api_specification.md section 3.3 (lines 103-118), same request body shape as
+        POST. srs.md FR-15 line 198: "Khi Sửa một sản phẩm, chỉ sản phẩm đó bị thay đổi
+        — các sản phẩm khác giữ nguyên" (editing one product must not mutate any other
+        product) — isolation invariant, modeled in ../state-model.md.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: >
+            Type UNSPECIFIED (integer vs numeric string) — api_specification.md gives no
+            example value for `:id`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/paths/~1api~1products/post/requestBody/content/application~1json/schema"
+      responses:
+        "200":
+          description: UNSPECIFIED response body shape; same gap as POST /api/products.
+        "404":
+          description: >
+            UNSPECIFIED status code/body for editing a non-existent id. No source
+            documents 404 behavior for this operation; recorded as an assumption to
+            verify (404 is the conventional REST status but not confirmed by either
+            source).
+        "4xx":
+          description: >
+            UNSPECIFIED status/body for missing/invalid auth, non-admin role, and
+            validation failure, same gaps as POST.
+    delete:
+      summary: Xóa sản phẩm (Admin)
+      description: >
+        api_specification.md section 3.3 (lines 103-118, "Xóa: DELETE
+        /api/products/:id"). No request body documented.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Same UNSPECIFIED type note as PUT.
+      responses:
+        "200":
+          description: UNSPECIFIED response body shape for a successful delete.
+        "404":
+          description: >
+            UNSPECIFIED status code/body for deleting a non-existent id. Not documented
+            by either source; recorded as an assumption to verify.
+        "4xx":
+          description: >
+            UNSPECIFIED status/body for missing/invalid auth and non-admin role, same
+            gaps as POST/PUT.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
